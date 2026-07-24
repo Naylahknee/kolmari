@@ -4,6 +4,14 @@
 
 export type ContentStatus = 'placeholder' | 'editorially_reviewed' | 'official_source_verified' | 'stale'
 
+export type SectionDisclosure = {
+  /** ISO date (YYYY-MM-DD) the section was last reviewed */
+  lastVerified: string
+  /** Plain-language source summary, e.g. "INE · World Bank · editorial review" */
+  sourceNote: string
+  status: ContentStatus
+}
+
 export type SourcedFact = {
   value: string
   source: string
@@ -22,6 +30,7 @@ export type HousingContent = {
   popularAreas: string[]
   portals: { name: string; url: string }[]
   notes: string
+  disclosure?: SectionDisclosure
 }
 
 export type EmploymentContent = {
@@ -34,6 +43,7 @@ export type EmploymentContent = {
   remoteEnvironment: string
   networkingGroups: string
   disclaimer: string
+  disclosure?: SectionDisclosure
 }
 
 export type HealthcareContent = {
@@ -48,6 +58,7 @@ export type HealthcareContent = {
   estimatedInsuranceRange: string
   accessibilityNotes: string
   disclaimer: string
+  disclosure?: SectionDisclosure
 }
 
 export type EducationContent = {
@@ -62,6 +73,7 @@ export type EducationContent = {
   studyPathways: string
   tuitionRange: string
   disclaimer: string
+  disclosure?: SectionDisclosure
 }
 
 export type TransportationContent = {
@@ -75,6 +87,7 @@ export type TransportationContent = {
   rideshare: string
   cycling: string
   accessibility: string
+  disclosure?: SectionDisclosure
 }
 
 export type LegalTaxesContent = {
@@ -89,6 +102,7 @@ export type LegalTaxesContent = {
   propertyOwnership: string
   businessRegistration: string
   disclaimer: string
+  disclosure?: SectionDisclosure
 }
 
 export type DailyLifeContent = {
@@ -102,6 +116,7 @@ export type DailyLifeContent = {
   safety: string
   paceOfLife: string
   recreation: string
+  disclosure?: SectionDisclosure
 }
 
 export type FamilyPetsContent = {
@@ -114,6 +129,7 @@ export type FamilyPetsContent = {
   vetCare: string
   petFriendlyHousing: string
   multigenerational: string
+  disclosure?: SectionDisclosure
 }
 
 export type GreenbookSection = {
@@ -170,6 +186,7 @@ export type CostOfLivingContent = {
   topCity: string
   budgetCities: string[]
   disclaimer: string
+  disclosure?: SectionDisclosure
 }
 
 export type CountryContent = {
@@ -222,6 +239,7 @@ const portugal: CountryContent = {
     topCity: 'Lisbon',
     budgetCities: ['Porto', 'Braga', 'Coimbra', 'Alentejo towns', 'Interior Algarve'],
     disclaimer: 'Cost estimates are editorial planning ranges based on available data and community reports as of 2024–2025. Actual costs vary widely by city, neighbourhood, lifestyle, and household size. Not a financial forecast.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'Idealista · Numbeo · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   housing: {
     rentalRanges: [
@@ -242,6 +260,7 @@ const portugal: CountryContent = {
       { name: 'Uniplaces (furnished / short-term)', url: 'https://www.uniplaces.com/accommodation/lisbon' },
     ],
     notes: 'Rental prices in Lisbon and Porto have risen significantly since 2021. The government has introduced rental control measures — verify current rules. Many expats initially use furnished short-term rentals for 1–3 months while searching for long-term housing.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'Idealista · INE · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   employment: {
     topSectors: ['Technology', 'Tourism & hospitality', 'Financial services', 'Healthcare', 'Education', 'Engineering & construction'],
@@ -258,6 +277,7 @@ const portugal: CountryContent = {
     remoteEnvironment: 'Portugal is one of Europe\'s most active digital-nomad hubs. Co-working spaces are widespread in Lisbon, Porto, and the Algarve. Internet infrastructure is strong in cities.',
     networkingGroups: 'Portugal Tech, Startup Lisboa, Lisbon Digital Nomads (Facebook/Meetup), Women in Tech Portugal, Internations Lisbon.',
     disclaimer: 'Employment information is for research. Salary ranges vary widely by sector, experience, and employer. Requirements change. Confirm all details with the relevant employer or authority.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'INE · IEFP · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   healthcare: {
     publicSystem: 'The SNS (Serviço Nacional de Saúde) provides universal coverage. Legal residents are entitled to access. Wait times for non-emergency specialist care can be long — 3 to 12 months is not unusual.',
@@ -271,6 +291,7 @@ const portugal: CountryContent = {
     estimatedInsuranceRange: '€50–€180/month for an individual adult, depending on age, coverage level, and provider. Family plans vary significantly.',
     accessibilityNotes: 'Accessibility varies by city and building age. Lisbon\'s hilly terrain and old buildings can present challenges. Modern areas and new construction are generally more accessible.',
     disclaimer: 'Healthcare information is for research planning. Confirm eligibility, costs, and procedures with the SNS, your insurer, and official Portuguese health authorities.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'SNS · DGS · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   education: {
     publicSchools: 'Free for legal residents. Instruction is in Portuguese. Curriculum follows the national framework. Quality varies by region — urban schools generally have stronger resources.',
@@ -284,6 +305,7 @@ const portugal: CountryContent = {
     studyPathways: 'Student visa available for non-EU students. EU students can apply on the same terms as national students. Erasmus exchanges are active.',
     tuitionRange: 'Public universities: €697–€1,063/year for EU students. International fees for non-EU vary by institution. Private universities charge €4,000–€9,000/year.',
     disclaimer: 'Education information is for research. Confirm enrollment requirements, fees, and curriculum with individual schools and the Ministry of Education.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'DGES · Ministry of Education · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   transportation: {
     publicTransit: 'Lisbon and Porto have extensive metro, tram, bus, and ferry networks. Andante card (Porto) and Navegante card (Lisbon) offer multi-modal monthly passes from ~€30–€40/month.',
@@ -296,6 +318,7 @@ const portugal: CountryContent = {
     rideshare: 'Uber, Bolt, and FreeNow operate in Lisbon and Porto. Taxis are regulated and generally reliable.',
     cycling: 'GIRA bike-sharing in Lisbon. Cycling infrastructure is improving but remains limited outside urban centres. Hills can be challenging.',
     accessibility: 'Lisbon\'s older areas have accessibility challenges due to steep streets and historic buildings. New builds and major stations are more accessible. Metro stations have lifts in most cases.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'CP · Carris · Metro Lisboa · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   legalTaxes: {
     taxResidency: 'You become a Portuguese tax resident if you spend more than 183 days/year in Portugal or maintain a habitual residence there. Tax residency triggers worldwide income reporting obligations.',
@@ -309,6 +332,7 @@ const portugal: CountryContent = {
     propertyOwnership: 'Foreigners can purchase property without restriction. Notarised deed (escritura) is required. Stamp duty (IMT), annual municipal property tax (IMI), and VAT on new builds apply. Verify current rates.',
     businessRegistration: 'Company formation is possible at Empresa na Hora or through a notary. EORI number needed for customs activity. Confirm tax obligations for your business structure.',
     disclaimer: 'This information supports research and planning. It is not legal or tax advice. Confirm all details with a Portuguese lawyer or certified accountant (TOC) before acting.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'Portal das Finanças · AIMA · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   dailyLife: {
     groceryShopping: 'Pingo Doce, Continente, Lidl, and Aldi are the main chains. Mercados (local markets) offer fresh produce. A couple can eat well on €300–€500/month in groceries depending on lifestyle.',
@@ -321,6 +345,7 @@ const portugal: CountryContent = {
     safety: 'Portugal consistently ranks among Europe\'s safest countries (Global Peace Index top 7). Petty theft (pickpocketing) in tourist areas is the main concern. Violent crime is rare.',
     paceOfLife: 'Life moves at a relaxed pace outside major corporate environments. Work–life balance is valued. Long lunches and lingering over meals are normal and enjoyable.',
     recreation: 'Beaches, surfing, hiking (Sintra, Gerês, Alentejo), football (extremely popular), cultural festivals, wine tourism, and fado are central to Portuguese life. Outdoor recreation is accessible year-round.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'Editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   familyPets: {
     childcare: 'Crèches (ages 0–3) and jardins de infância (ages 3–5) are available publicly (subsidised) and privately. Public places are means-tested. Private options in cities: €400–€900/month.',
@@ -332,6 +357,7 @@ const portugal: CountryContent = {
     vetCare: 'Veterinary services are good quality and affordable by Northern European standards. Urban areas have 24-hour emergency vet services. Pet insurance is available.',
     petFriendlyHousing: 'Many Portuguese landlords accept pets, but confirm in the lease. Dog-friendly beaches and parks exist, especially in the Algarve. Some urban beaches restrict pets seasonally.',
     multigenerational: 'Family is central to Portuguese culture. Multigenerational living is common. Extended-family households often share costs. Elder care is a growing sector — public ERPI (residential care) and private options exist.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'DGAV · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   greenbook: {
     communityFit: 'Portugal has a long history of multiculturalism tied to its colonial past and diaspora connections. The international community has grown substantially since 2015. Lisbon and Porto are cosmopolitan; smaller towns are less diverse.',
@@ -401,6 +427,7 @@ const spain: CountryContent = {
     topCity: 'Barcelona',
     budgetCities: ['Valencia', 'Seville', 'Málaga', 'Alicante', 'Murcia'],
     disclaimer: 'Cost estimates are editorial planning ranges. Actual costs vary by city, neighbourhood, and lifestyle. Not a financial forecast.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'Idealista · Numbeo · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   housing: {
     rentalRanges: [
@@ -421,6 +448,7 @@ const spain: CountryContent = {
       { name: 'Habitaclia', url: 'https://www.habitaclia.com' },
     ],
     notes: 'Rental markets in Barcelona and Madrid are under significant pressure. The government has introduced rent-control measures in declared Stressed Residential Market Areas. Verify applicability to your target city.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'Idealista · INE · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   employment: {
     topSectors: ['Technology', 'Tourism & hospitality', 'Financial services', 'Healthcare', 'Education', 'Engineering'],
@@ -437,6 +465,7 @@ const spain: CountryContent = {
     remoteEnvironment: 'Spain introduced a Digital Nomad Visa in 2023 for non-EU remote workers. Madrid and Barcelona have strong co-working ecosystems. The Canary Islands and Valencia are popular alternatives.',
     networkingGroups: 'Startup Grind Spain, Internations Madrid/Barcelona, Women in Tech Spain, Mad Collective, Barcelona Tech City.',
     disclaimer: 'Employment information is for research. Confirm requirements and details with the relevant employer, SEPE, or Ministry of Labour.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'INE · SEPE · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   healthcare: {
     publicSystem: 'The SNS (Sistema Nacional de Salud) provides universal coverage to residents. Free at point of use for registered residents. Wait times for specialists can be lengthy.',
@@ -450,6 +479,7 @@ const spain: CountryContent = {
     estimatedInsuranceRange: '€60–€200/month for an adult depending on age, coverage, and provider.',
     accessibilityNotes: 'Modern cities have good accessibility infrastructure. Older neighbourhoods vary. Major transport hubs are generally accessible.',
     disclaimer: 'Confirm eligibility, costs, and procedures with your local health centre and official Spanish health authorities.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'SNS · Sanidad · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   education: {
     publicSchools: 'Free and compulsory for residents aged 6–16. Instruction is in Spanish (and regional languages where applicable). Quality varies by region.',
@@ -463,6 +493,7 @@ const spain: CountryContent = {
     studyPathways: 'Student visa for non-EU students. EU students can apply as nationals.',
     tuitionRange: 'Public universities: €680–€1,300/year for EU students. International fees vary. Private/international universities: €5,000–€20,000+/year.',
     disclaimer: 'Confirm enrollment, fees, and curricula with individual schools and the Ministry of Education.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'Ministry of Education · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   transportation: {
     publicTransit: 'Madrid and Barcelona have excellent metro, bus, and commuter rail networks. Monthly pass: ~€54.60 (Madrid Zone A), ~€40–€80 (Barcelona). Provincial cities are more car-dependent.',
@@ -475,6 +506,7 @@ const spain: CountryContent = {
     rideshare: 'Cabify, Uber, and FreeNow operate in major cities. Taxis are regulated.',
     cycling: 'BiciMAD (Madrid) and Bicing (Barcelona) bike-sharing schemes. Cycling infrastructure improving in major cities. Valencia is one of Spain\'s most cycle-friendly cities.',
     accessibility: 'Modern metro and train stations generally accessible. Older buildings and streets vary.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'RENFE · Metro · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   legalTaxes: {
     taxResidency: 'Spanish resident if you spend more than 183 days in Spain per calendar year, or have your primary economic interests there.',
@@ -488,6 +520,7 @@ const spain: CountryContent = {
     propertyOwnership: 'Foreigners can buy property. Requires NIE. Transfer tax (ITP) 6–11% on resales; VAT on new builds. Annual IBI (property tax) applies.',
     businessRegistration: 'Autónomo (sole trader) registration through RETA (Seguridad Social) and AEAT. Company formation via Registro Mercantil.',
     disclaimer: 'Not legal or tax advice. Confirm all details with a Spanish gestor, abogado, or asesor fiscal.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'Agencia Tributaria · Extranjería · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   dailyLife: {
     groceryShopping: 'Mercadona, Lidl, Aldi, Carrefour, El Corte Inglés are the main chains. Local markets (Mercado de la Boqueria, Mercado de San Miguel) for fresh produce. Food costs are reasonable.',
@@ -500,6 +533,7 @@ const spain: CountryContent = {
     safety: 'Generally safe. Petty theft in tourist areas (Barcelona La Rambla) is the main concern. Violent crime rates are low.',
     paceOfLife: 'Varies significantly. Madrid and Barcelona are fast-paced. Smaller cities and towns are more relaxed. Siesta culture survives in some areas.',
     recreation: 'Football (dominant), beach culture, hiking (Sierra Nevada, Pyrenees), flamenco, wine and gastronomy, festivals (La Tomatina, Las Fallas, Semana Santa).',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'Editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   familyPets: {
     childcare: 'Escuelas infantiles (0–3) — public (subsidised, long waiting lists) and private (€300–€800/month). Pre-school (3–6) free in public system.',
@@ -511,6 +545,7 @@ const spain: CountryContent = {
     vetCare: 'Good quality, affordable veterinary services. Urban centres have 24-hour emergency clinics.',
     petFriendlyHousing: 'Landlord consent required. Dog-friendly parks and beaches exist. Seasonal beach restrictions apply.',
     multigenerational: 'Family ties are strong in Spain. Multigenerational living is culturally normal, especially outside major cities.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'DGAV · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   greenbook: {
     communityFit: 'Spain is a diverse, EU member state with a large foreign-born population. Major cities are cosmopolitan and multicultural. Smaller cities are more homogeneous.',

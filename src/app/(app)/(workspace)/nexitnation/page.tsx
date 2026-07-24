@@ -16,7 +16,7 @@ export default async function NexitnationPage() {
   return (
     <div>
       <header className="mb-6">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gold-deep">Global discovery</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Global discovery</p>
         <h1 id="nexitnation-map-title" className="mt-2 font-display text-4xl font-bold text-navy sm:text-5xl">
           {NEXIT_LEXICON.mapTitle}
         </h1>

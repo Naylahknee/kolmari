@@ -1,5 +1,6 @@
 import { ExternalLink } from 'lucide-react'
 import type { HousingContent } from '@/lib/country-workspace/country-content'
+import { SourceFooter } from './SourceFooter'
 
 export function HousingTab({ content, countryName }: { content: HousingContent | null; countryName: string }) {
   if (!content) return <ResearchInProgress countryName={countryName} />
@@ -64,6 +65,7 @@ export function HousingTab({ content, countryName }: { content: HousingContent |
         </ul>
         {content.notes ? <p className="mt-4 rounded-xl bg-canvas p-3 text-xs leading-5 text-muted">{content.notes}</p> : null}
       </section>
+      <SourceFooter disclosure={content.disclosure} />
     </div>
   )
 }

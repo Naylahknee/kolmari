@@ -1,4 +1,5 @@
 import type { DailyLifeContent } from '@/lib/country-workspace/country-content'
+import { SourceFooter } from './SourceFooter'
 
 export function DailyLifeTab({ content, countryName }: { content: DailyLifeContent | null; countryName: string }) {
   if (!content) return <ResearchInProgress countryName={countryName} />
@@ -30,6 +31,7 @@ export function DailyLifeTab({ content, countryName }: { content: DailyLifeConte
           </div>
         ))}
       </div>
+      <SourceFooter disclosure={content.disclosure} />
     </div>
   )
 }

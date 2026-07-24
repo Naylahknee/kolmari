@@ -2,67 +2,120 @@
 
 ## Last Updated
 
-Phase 4 — Consistent page header typography across workspace pages
+Phase 6 — Nexitnation map accessibility, region workspace fix, source disclosure
 
 ---
 
-## Phase 1 Summary (completed prior)
+## Phase 1 Summary (completed)
 
-See git history. Key changes:
 - Approved brand assets (`NexitWordMark.svg`, `faviconNexit.svg`) integrated
 - Global design token system consolidated in `src/app/globals.css`
 - App shell rewritten with approved nav labels, sidebar row geometry, and slide-in mobile drawer
 
 ---
 
-## Phase 2 Summary (completed prior)
+## Phase 2 Summary (completed)
 
 | File | Change |
 |---|---|
 | `src/components/nexit/pathways-results.tsx` | Accordion disclosure, page header, top-3 summary cards, category filters, sources footer. Converted to client component. |
-| `src/app/(app)/(workspace)/dashboard/page.tsx` | 4-section dashboard template, stat cards, nextinations list, plan + budget two-column, Pathways signal. |
+| `src/app/(app)/(workspace)/dashboard/page.tsx` | 4-section dashboard template. |
 | `src/components/country-workspace/CountryWorkspace.tsx` | Persistent CountryHero, vertical section nav (desktop) + dropdown selector (mobile). |
 
 ---
 
-## Phase 3 Changes
-
-### Files Changed
+## Phase 3 Summary (completed)
 
 | File | Change |
 |---|---|
-| `src/app/globals.css` | `card-surface`, `gold-button`, and `field` CSS classes updated to use `var()` token references instead of hardcoded pixel/color values. |
-| `src/components/nexit/saved-nextinations.tsx` | Fixed `/countries/[slug]` link → `/nextinations/[slug]`. CTA copy updated to "Explore This Nextination". |
-| `src/app/(app)/(workspace)/greenbook/page.tsx` | Provenance legend, per-card provenance labels, honest "community-reported" empty state. |
-| `src/app/(app)/(workspace)/community/page.tsx` | Honest "in development" empty state, correct Nexiters Community heading, accessible layout. |
-| `src/components/nexit/documents-manager.tsx` | Proper page header, honest session-only privacy notice, accessible empty state, "document groups unavailable" notice. |
-| `src/components/nexit/nexit-plan-workspace.tsx` | Planning workspace template: structured header with progress, labeled sections, `aria-pressed` timeline buttons, consistent tokens. |
-| `src/components/nexit/cost-calculator.tsx` | Calculator tool template: summary-first layout, inputs, donut or honest empty state, methodology note footer. |
+| `src/app/globals.css` | `card-surface`, `gold-button`, `field` classes use `var()` tokens. |
+| `src/components/nexit/saved-nextinations.tsx` | Link fix; CTA copy update. |
+| `src/app/(app)/(workspace)/greenbook/page.tsx` | Provenance legend + per-card labels. |
+| `src/app/(app)/(workspace)/community/page.tsx` | Honest in-development empty state. |
+| `src/components/nexit/documents-manager.tsx` | Page header, privacy notice, empty state. |
+| `src/components/nexit/nexit-plan-workspace.tsx` | Planning workspace template. |
+| `src/components/nexit/cost-calculator.tsx` | Calculator template, summary-first layout. |
 
 ---
 
-## Phase 4 Changes
+## Phase 4 Summary (completed)
 
-### Problem
-Four workspace `<h1>` elements used `font-display text-4xl` — the editorial/Playfair Display style appropriate for marketing pages and hero sections, but not for dense workspace page headers (Dashboard, Checklist, Countries browser, Settings). This was inconsistent with the approved workspace heading pattern: `text-2xl sm:text-3xl font-bold text-navy`.
+Workspace `<h1>` headings in `saved/page.tsx`, `countries-browser.tsx`, `settings-form.tsx`, `checklist.tsx` updated from `font-display text-4xl` to `text-2xl font-bold text-navy sm:text-3xl`. Page labels updated to `text-xs font-bold uppercase tracking-widest`.
+
+---
+
+## Phase 5 Changes
+
+### Source Disclosure — Country Workspace Tabs
+
+**Problem:** Per spec (`08-CONTENT-STANDARDS.md`), every country workspace section must show a "source period, last-verified date, or stale status" that is never hidden behind an accordion.
+
+**Solution:** Added optional `disclosure?: SectionDisclosure` field to each content type. Created a shared `SourceFooter` component. Applied to all nine data tabs.
+
+### New Type
+
+```ts
+// src/lib/country-workspace/country-content.ts
+export type SectionDisclosure = {
+  lastVerified: string   // ISO date
+  sourceNote: string     // plain-language source summary
+  status: ContentStatus
+}
+```
+
+### New Component
+
+`src/components/country-workspace/tabs/SourceFooter.tsx` — renders "Last verified: [date] · [sourceNote]" plus a color-coded status badge (`Official source verified` / `Editorially reviewed` / `Placeholder` / `May be out of date`). Returns `null` when `disclosure` is undefined (Research in Progress state).
 
 ### Files Changed
 
 | File | Change |
 |---|---|
-| `src/app/(app)/(workspace)/saved/page.tsx` | `font-display text-4xl font-bold` → `text-2xl font-bold text-navy sm:text-3xl`. Label `text-sm font-bold` → `text-xs font-bold uppercase tracking-widest`. |
-| `src/components/nexit/countries-browser.tsx` | Same heading fix. Label updated to `text-xs font-bold uppercase tracking-widest`. |
-| `src/components/nexit/settings-form.tsx` | Same heading fix. Label updated to `text-xs font-bold uppercase tracking-widest`. |
-| `src/components/nexit/checklist.tsx` | Same heading fix. Label updated to `text-xs font-bold uppercase tracking-widest`. |
+| `src/lib/country-workspace/country-content.ts` | Added `SectionDisclosure` type. Added `disclosure?` field to: `HousingContent`, `EmploymentContent`, `HealthcareContent`, `EducationContent`, `TransportationContent`, `LegalTaxesContent`, `DailyLifeContent`, `FamilyPetsContent`, `CostOfLivingContent`. Added disclosure data to Portugal (9 sections) and Spain (9 sections). |
+| `src/components/country-workspace/tabs/SourceFooter.tsx` | New shared component. |
+| `src/components/country-workspace/tabs/LegalTaxesTab.tsx` | Added `<SourceFooter />`. |
+| `src/components/country-workspace/tabs/HealthcareTab.tsx` | Added `<SourceFooter />`. |
+| `src/components/country-workspace/tabs/EmploymentTab.tsx` | Added `<SourceFooter />`. |
+| `src/components/country-workspace/tabs/HousingTab.tsx` | Added `<SourceFooter />`. |
+| `src/components/country-workspace/tabs/TransportationTab.tsx` | Added `<SourceFooter />`. |
+| `src/components/country-workspace/tabs/DailyLifeTab.tsx` | Added `<SourceFooter />`. |
+| `src/components/country-workspace/tabs/FamilyPetsTab.tsx` | Added `<SourceFooter />`. |
+| `src/components/country-workspace/tabs/EducationTab.tsx` | Added `<SourceFooter />`. |
+| `src/components/country-workspace/tabs/CostOfLivingTab.tsx` | Added `<SourceFooter />`. |
 
 ### What was NOT changed
-- Marketing pages (`src/app/(marketing)/`) — `font-display` is correct on hero and editorial headings
-- Auth pages (login, signup) — `font-display` is correct for entry screens
-- Welcome page — `font-display` is appropriate for the large welcome heading
-- Nexitnation map and region workspace — `font-display` is correct for map hero headings
-- Country workspace tabs — `font-display text-2xl` is appropriate for section article headings
-- `profile-wizard.tsx` — `font-display text-3xl` is correct for wizard step headings
-- All route files, auth, DB, API contracts
+- `EconomicProfileTab` — already shows per-metric `source · period · Verified [date]` on each metric card. Section-level SourceFooter not added (would duplicate). Future improvement: add section-level summary with `EconomicProfileContent.disclosure?`.
+- `GreenbookTab` — has its own inline disclaimer. Source disclosure treatment is different (community-reported vs verified resource labeling per `08-CONTENT-STANDARDS.md`).
+- `ResourcesTab` — already shows `lastChecked` on every individual resource link.
+- Greece and Mexico country data — disclosure fields not yet added (data is structurally compatible; will show no footer until added, which is the correct behavior for unlabeled content).
+
+---
+
+## Phase 6 Changes
+
+### Nexitnation Map Accessibility
+
+**Problem:** `NexitnationMapbox` only showed the accessible region grid when the map token was absent or errored. When the map loaded successfully, keyboard-only users and screen reader users had no way to reach regions without using pointer interaction on the map canvas.
+
+**Fix:** Added a `RegionGrid` sub-component (always rendered below the map). When the map loads successfully, an "All regions" heading and the region grid appear below the canvas. When the map fails or token is absent, the existing dark-surface region grid is shown instead.
+
+### Region Workspace — Match Score Fix
+
+**Problem:** Country cards in the region workspace displayed `matches[slug]%` labeled "Regional Nexit Match" for every individual country card in the grid. This used the same regional-level score for every country, implying false per-country precision.
+
+**Fix:** The regional match percentage is already shown accurately in the hero band (`rounded-pill` badge with "Nexit Match X%"). The per-country card display of the same number was removed — it conveyed nothing additional and violated the no-fabrication rule by implying per-country analysis that doesn't exist. Country cards now show a small "Complete your Nexit Profile for personalized match data." prompt only when the profile is incomplete.
+
+### Label Style Consistency
+
+Section labels in `nexitnation/page.tsx` and `nexitnation/[region]/page.tsx` updated from `text-sm font-semibold` to `text-xs font-bold uppercase tracking-widest` to match the established workspace label pattern.
+
+### Files Changed
+
+| File | Change |
+|---|---|
+| `src/components/nexit/NexitnationMapbox.tsx` | Extracted `RegionGrid` component. Added accessible region list below map canvas when map loads. Fixed no-token/error state copy. Consistent `aria-hidden` on decorative icons. |
+| `src/app/(app)/(workspace)/nexitnation/page.tsx` | Label style: `text-sm font-semibold` → `text-xs font-bold uppercase tracking-widest`. |
+| `src/app/(app)/(workspace)/nexitnation/[region]/page.tsx` | Removed per-country fabricated match display from country cards. Section label styles updated to `text-xs font-bold uppercase tracking-widest`. |
 
 ---
 
@@ -84,7 +137,7 @@ Four workspace `<h1>` elements used `font-display text-4xl` — the editorial/Pl
 
 | Context | Font | Size | Weight |
 |---|---|---|---|
-| Workspace page `<h1>` | Geist Sans (`font-sans`) | `text-2xl sm:text-3xl` | `font-bold` |
+| Workspace page `<h1>` | Geist Sans | `text-2xl sm:text-3xl` | `font-bold` |
 | Workspace section `<h2>` | Geist Sans or Playfair | `text-xl` | `font-bold` or `font-extrabold` |
 | Country workspace tab `<h2>` | Playfair (`font-display`) | `text-2xl` | `font-bold` |
 | Marketing / hero `<h1>` | Playfair (`font-display`) | `text-4xl+` | `font-extrabold` |
@@ -103,29 +156,31 @@ Authentication, database schema, API contracts, Mapbox behavior, and Cloudflare 
 
 ---
 
-## Tests Run (Phase 4)
+## Tests Run (Phase 5 + 6)
 
 | Check | Result |
 |---|---|
 | TypeScript (via `next build`) | ✅ Pass — 0 errors |
 | ESLint (`npm run lint`) | ✅ Pass — 0 errors, 0 warnings |
-| Production build (`npm run build`) | ✅ Pass — 48 pages, compiled in 14.3s |
+| Production build (`npm run build`) | ✅ Pass — 48 pages, compiled in 14.1s |
 
 ---
 
 ## Known Issues / Unresolved
 
-- The `countries/[slug]` route still exists at the legacy URL (e.g. `/countries/portugal`). This is a separate page from the new `/nextinations/[countrySlug]` workspace. Both remain for compatibility per the route preservation rule.
-- The mobile section dropdown in CountryWorkspace opens on top of content. On very small screens (< 375px) this may cover the hero. A future pass should anchor the mobile section selector below the hero with a sticky behavior.
+- The `countries/[slug]` route still exists at the legacy URL (e.g. `/countries/portugal`). Both remain for compatibility per the route preservation rule.
+- The mobile section dropdown in CountryWorkspace can overlap the hero on very small screens (< 375px). A future pass should anchor the mobile section selector below the hero.
+- Greece and Mexico `country-content.ts` sections do not yet have `disclosure` fields. The `SourceFooter` silently omits on those — correct behavior.
+- `EconomicProfileContent` has no section-level `disclosure?` field yet (per-metric sources are already shown). This is consistent but can be unified in a future pass.
 
 ---
 
 ## Next Recommended Implementation Phase
 
-**Phase 5 — Country workspace source disclosure + verified data patterns**
+**Phase 7 — `EconomicProfileTab` section disclosure + Greece/Mexico disclosure fields**
 
-1. Add `verificationDate` and `sourceLabel` fields to each country workspace tab's data objects.
-2. Display a small "Last verified: [date] · [source]" footer beneath each tab's data section.
-3. Apply the pattern to: `EconomicProfileTab`, `CostOfLivingTab`, `LegalTaxesTab`, `HealthcareTab`, `EmploymentTab`, `HousingTab`, `EducationTab`, `DailyLifeTab`, `TransportationTab`.
-4. Do not fabricate verification dates — use honest "Not verified" or "Community-reported" labels where real dates are unavailable.
-5. After source disclosure, consider the Nexitnation Map page and region workspace enhancements (Phase 6).
+1. Add `disclosure?: SectionDisclosure` to `EconomicProfileContent` type.
+2. Add `disclosure` fields to Greece and Mexico content in `country-content.ts`.
+3. Add `<SourceFooter disclosure={content.disclosure} />` to `EconomicProfileTab`.
+4. Consider adding the `CompareTab` source disclosure for comparison data.
+5. After data completeness: review the `countries/[slug]` legacy page for consistency with the new workspace (or deprecate in favor of `/nextinations/[countrySlug]`).

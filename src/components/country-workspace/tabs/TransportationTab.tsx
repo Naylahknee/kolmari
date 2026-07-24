@@ -1,4 +1,5 @@
 import type { TransportationContent } from '@/lib/country-workspace/country-content'
+import { SourceFooter } from './SourceFooter'
 
 export function TransportationTab({ content, countryName }: { content: TransportationContent | null; countryName: string }) {
   if (!content) return <ResearchInProgress countryName={countryName} />
@@ -30,6 +31,7 @@ export function TransportationTab({ content, countryName }: { content: Transport
           </div>
         ))}
       </div>
+      <SourceFooter disclosure={content.disclosure} />
     </div>
   )
 }

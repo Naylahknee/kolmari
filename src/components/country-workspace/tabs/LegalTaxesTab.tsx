@@ -1,4 +1,5 @@
 import type { LegalTaxesContent } from '@/lib/country-workspace/country-content'
+import { SourceFooter } from './SourceFooter'
 
 export function LegalTaxesTab({ content, countryName }: { content: LegalTaxesContent | null; countryName: string }) {
   if (!content) return <ResearchInProgress countryName={countryName} />
@@ -37,6 +38,7 @@ export function LegalTaxesTab({ content, countryName }: { content: LegalTaxesCon
       </div>
 
       <p className="rounded-xl border border-line bg-canvas px-4 py-3 text-xs text-muted">{content.disclaimer}</p>
+      <SourceFooter disclosure={content.disclosure} />
     </div>
   )
 }

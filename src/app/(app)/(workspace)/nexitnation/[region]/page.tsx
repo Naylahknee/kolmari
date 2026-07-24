@@ -76,7 +76,7 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
       <section className="py-10">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold text-gold-deep">{matches ? 'Personalized from your Nexit Profile' : 'General region research'}</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">{matches ? 'Personalized from your Nexit Profile' : 'General region research'}</p>
             <h2 className="mt-1 font-display text-3xl font-bold text-navy">Nextinations in {region.name}</h2>
           </div>
           <Link href="/countries" className="text-sm font-semibold text-navy transition hover:text-gold-deep">View all Nextinations</Link>
@@ -92,7 +92,7 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
                 <div className="p-5">
                   <h3 className="text-lg font-extrabold text-navy">{country.name}</h3>
                   <p className="text-sm text-muted">{country.city}</p>
-                  {matches ? <p className="mt-4 text-xl font-bold text-ok">Regional {NEXIT_LEXICON.matchScore}: {matches[slug]}%</p> : <p className="mt-4 text-sm font-bold text-muted">Complete your Nexit Profile to see personalized matches.</p>}
+                  {!matches && <p className="mt-3 text-xs text-muted">Complete your Nexit Profile for personalized match data.</p>}
                   <dl className="mt-4 space-y-2 text-sm">
                     <div><dt className="text-muted">{NEXIT_LEXICON.pathways}</dt><dd className="font-semibold text-navy">{country.pathway}</dd></div>
                     <div className="flex justify-between gap-3"><dt className="text-muted">{NEXIT_LEXICON.communityFit}</dt><dd className="font-semibold text-navy">{country.communityFit}</dd></div>
@@ -113,14 +113,14 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
 
       <section className="grid gap-6 pb-10 lg:grid-cols-2">
         <article className="rounded-card border border-line bg-white p-6 shadow-card">
-          <p className="text-sm font-semibold text-gold-deep">{NEXIT_LEXICON.pathways}</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">{NEXIT_LEXICON.pathways}</p>
           <h2 className="mt-1 font-display text-2xl font-bold text-navy">Residency options matched to you</h2>
           <p className="mt-3 text-muted">Review visa, residency, work, retirement, and study Pathways based on your Nexit Profile.</p>
           <Link href={matches ? '/pathways' : '/profile-wizard'} className="mt-5 inline-flex rounded-field bg-navy px-5 py-3 text-sm font-semibold text-white transition hover:bg-navy-deep">{matches ? 'Review my Pathways' : 'Start Nexit Profile Wizard'}</Link>
         </article>
 
         <article className="rounded-card border border-line bg-white p-6 shadow-card">
-          <p className="text-sm font-semibold text-teal-deep">{NEXIT_LEXICON.greenbookInsights}</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-teal-deep">{NEXIT_LEXICON.greenbookInsights}</p>
           <h2 className="mt-1 font-display text-2xl font-bold text-navy">Community context to research</h2>
           <p className="mt-3 text-muted">Review belonging signals, neighborhood questions, and practical context without treating editorial guidance as a safety guarantee.</p>
           <Link href="/countries" className="mt-5 inline-flex rounded-field border border-navy px-5 py-3 text-sm font-semibold text-navy transition hover:bg-canvas">Compare Community Fit</Link>
@@ -134,7 +134,7 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
       <section className="pb-6">
         <div className="rounded-card bg-navy-deep p-7 text-white sm:flex sm:items-center sm:justify-between sm:gap-8">
           <div>
-            <p className="text-sm font-semibold text-gold">Your {NEXIT_LEXICON.plan}</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-gold">Your {NEXIT_LEXICON.plan}</p>
             <h2 className="mt-1 font-display text-3xl font-bold">Save, compare, and build your relocation plan.</h2>
           </div>
           <Link href="/nexit-plan" className="gold-button mt-5 sm:mt-0">{NEXIT_LEXICON.executionCta} <ArrowRight size={16} /></Link>

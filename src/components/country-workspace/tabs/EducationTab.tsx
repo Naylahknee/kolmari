@@ -1,4 +1,5 @@
 import type { EducationContent } from '@/lib/country-workspace/country-content'
+import { SourceFooter } from './SourceFooter'
 
 type EducationTabProps = {
   content: EducationContent | null
@@ -50,6 +51,7 @@ export function EducationTab({ content, countryName, hasChildren, studyInterest 
       )}
 
       <p className="rounded-xl border border-line bg-canvas px-4 py-3 text-xs text-muted">{content.disclaimer}</p>
+      <SourceFooter disclosure={content.disclosure} />
     </div>
   )
 }

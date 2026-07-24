@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import type { CostOfLivingContent } from '@/lib/country-workspace/country-content'
+import { SourceFooter } from './SourceFooter'
 
 type Props = {
   content: CostOfLivingContent | null
@@ -104,6 +105,7 @@ export function CostOfLivingTab({ content, countryName, monthlyIncome, isFamily 
         </Link>
         <p className="text-xs text-muted">{content.disclaimer}</p>
       </div>
+      <SourceFooter disclosure={content.disclosure} />
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import type { FamilyPetsContent } from '@/lib/country-workspace/country-content'
+import { SourceFooter } from './SourceFooter'
 
 export function FamilyPetsTab({ content, countryName }: { content: FamilyPetsContent | null; countryName: string }) {
   if (!content) return <ResearchInProgress countryName={countryName} />
@@ -48,6 +49,7 @@ export function FamilyPetsTab({ content, countryName }: { content: FamilyPetsCon
           ))}
         </div>
       </section>
+      <SourceFooter disclosure={content.disclosure} />
     </div>
   )
 }

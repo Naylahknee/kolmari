@@ -1,5 +1,6 @@
 import { ExternalLink } from 'lucide-react'
 import type { EmploymentContent } from '@/lib/country-workspace/country-content'
+import { SourceFooter } from './SourceFooter'
 
 export function EmploymentTab({ content, countryName }: { content: EmploymentContent | null; countryName: string }) {
   if (!content) return <ResearchInProgress countryName={countryName} />
@@ -44,6 +45,7 @@ export function EmploymentTab({ content, countryName }: { content: EmploymentCon
       </div>
 
       <p className="rounded-xl border border-line bg-canvas px-4 py-3 text-xs text-muted">{content.disclaimer}</p>
+      <SourceFooter disclosure={content.disclosure} />
     </div>
   )
 }

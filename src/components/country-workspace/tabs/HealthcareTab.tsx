@@ -1,4 +1,5 @@
 import type { HealthcareContent } from '@/lib/country-workspace/country-content'
+import { SourceFooter } from './SourceFooter'
 
 export function HealthcareTab({ content, countryName }: { content: HealthcareContent | null; countryName: string }) {
   if (!content) return <ResearchInProgress countryName={countryName} />
@@ -31,6 +32,7 @@ export function HealthcareTab({ content, countryName }: { content: HealthcareCon
       </section>
 
       <p className="rounded-xl border border-line bg-canvas px-4 py-3 text-xs text-muted">{content.disclaimer}</p>
+      <SourceFooter disclosure={content.disclosure} />
     </div>
   )
 }
