@@ -92,7 +92,7 @@ export function SavedNextinations() {
           </div>
           <p className="mt-4 text-sm leading-6 text-muted">{country.summary}</p>
           <div className="mt-5 grid gap-2">
-            <Link href={`/countries/${country.slug}`} className="gold-button w-full">View Nextination <ArrowRight size={16} /></Link>
+            <Link href={`/nextinations/${country.slug}`} className="gold-button w-full">Explore This Nextination <ArrowRight size={16} /></Link>
             <SaveNextinationButton slug={country.slug} className="w-full" />
           </div>
         </article>

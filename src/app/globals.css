@@ -116,42 +116,42 @@ textarea:focus-visible {
 }
 
 .card-surface {
-  border: 1px solid #e7ebf1;
-  border-radius: 16px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
   background: white;
-  box-shadow: 0 10px 30px -24px rgba(16, 34, 68, 0.5);
+  box-shadow: var(--shadow-card);
 }
 
 .field {
   width: 100%;
-  min-height: 46px;
-  border: 1px solid #dbe1ea;
-  border-radius: 12px;
+  min-height: 44px;
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-field);
   background: white;
   padding: 0 14px;
-  color: #17305b;
+  color: var(--color-navy);
 }
 
 .field:focus {
-  border-color: #c99a00;
+  border-color: var(--color-gold-deep);
   outline: 3px solid rgba(243, 197, 22, 0.18);
 }
 
 .gold-button {
   display: inline-flex;
-  min-height: 46px;
+  min-height: 44px;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border-radius: 12px;
+  border-radius: var(--radius-btn);
   border: 0;
-  background: #f3c516;
-  padding: 0 22px;
-  color: #17305b;
-  font-weight: 750;
-  box-shadow: 0 10px 22px -10px rgba(216, 169, 4, 0.7);
+  background: var(--color-gold);
+  padding: 0 20px;
+  color: var(--color-navy);
+  font-weight: 700;
+  box-shadow: var(--shadow-gold);
   cursor: pointer;
-  transition: transform 160ms ease, background-color 160ms ease;
+  transition: transform var(--duration-fast) ease, background-color var(--duration-fast) ease;
 }
 
 .gold-button:hover {
