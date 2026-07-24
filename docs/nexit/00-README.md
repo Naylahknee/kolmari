@@ -30,6 +30,7 @@ When two documents appear to conflict, preserve the highest Seven Layer Dip laye
 | `10-LLM-RULES.md` | Mandatory instructions for AI contributors |
 | `11-NEXITNATION-MAP.md` | Map behavior, Mapbox architecture, country interactions, personalization, responsive states, and validation |
 | `12-INTERACTION-DESIGN.md` | Interaction behavior, map-to-region-to-country transitions, motion, state stability, responsive behavior, accessibility, and validation |
+| `13-ACCOUNT-ADMINISTRATION.md` | User privacy controls, data export, deletion workflows, role permissions, admin tools, audit records, and AI limitations |
 
 ## Core product rule
 
