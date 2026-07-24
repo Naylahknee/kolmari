@@ -28,10 +28,10 @@ import type { WizardStatus } from '@/lib/profile'
 
 const navigation = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/nexitnation', label: 'Nexitnation', icon: MapPinned },
+  { href: '/nexitnation', label: 'Nexitnation Map', icon: MapPinned },
   { href: '/nextinations', label: 'My Nextination', icon: Compass },
   { href: '/pathways', label: 'Nexit Pathways', icon: Route },
-  { href: '/countries', label: 'Countries', icon: Globe2 },
+  { href: '/countries', label: 'All Countries', icon: Globe2 },
   { href: '/cost-calculator', label: 'Cost Calculator', icon: Calculator },
   { href: '/nexit-plan', label: 'Nexit Plan', icon: NotebookTabs },
   { href: '/greenbook', label: 'Greenbook', icon: BookOpen },

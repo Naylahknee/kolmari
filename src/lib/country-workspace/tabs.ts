@@ -19,6 +19,7 @@ export type CountryTabId =
   | 'family-pets'
   | 'greenbook'
   | 'resources'
+  | 'compare'
 
 export type TabGroup = 'Reality' | 'Entry & Work' | 'Life & Services' | 'Belonging & Support'
 
@@ -115,5 +116,9 @@ export function rankTabs(context: TabRankingContext, personalized = true): TabMe
 
 export const ALL_TABS_ORDERED: TabMeta[] = TAB_DEFS.map((t) => ({ id: t.id, label: t.label, shortLabel: t.shortLabel, group: t.group, alwaysVisible: t.alwaysVisible }))
 
-// Tabs with real content in the first release; the rest render "Research in progress".
-export const IMPLEMENTED_TABS: CountryTabId[] = ['overview', 'why-you', 'cost-of-living', 'pathways', 'economic-profile', 'healthcare', 'greenbook', 'resources']
+// All tabs have real content components.
+export const IMPLEMENTED_TABS: CountryTabId[] = [
+  'overview', 'why-you', 'economic-profile', 'cost-of-living', 'pathways',
+  'housing', 'employment', 'healthcare', 'education', 'transportation',
+  'legal-taxes', 'daily-life', 'family-pets', 'greenbook', 'resources', 'compare',
+]

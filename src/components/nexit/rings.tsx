@@ -45,15 +45,17 @@ export function ScoreRing({
 export type BudgetSlice = { label: string; amount: number; color: string }
 
 export function BudgetDonut({ slices, total, size = 132 }: { slices: BudgetSlice[]; total: number; size?: number }) {
-  let acc = 0
   const stops = slices
-    .map((s) => {
-      const start = (acc / total) * 100
-      acc += s.amount
-      const end = (acc / total) * 100
-      return `${s.color} ${start}% ${end}%`
-    })
-    .join(',')
+    .reduce<{ stops: string[]; acc: number }>(
+      ({ stops: prev, acc }, s) => {
+        const start = (acc / total) * 100
+        const next = acc + s.amount
+        const end = (next / total) * 100
+        return { stops: [...prev, `${s.color} ${start}% ${end}%`], acc: next }
+      },
+      { stops: [], acc: 0 },
+    )
+    .stops.join(',')
   return (
     <div className="flex items-center gap-[22px]">
       <div className="relative shrink-0 rounded-full" style={{ width: size, height: size, background: `conic-gradient(${stops})` }}>
