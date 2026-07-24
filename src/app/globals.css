@@ -1,21 +1,28 @@
 @import "tailwindcss";
 
 @theme inline {
+  /* ─── Brand palette ─────────────────────────────────── */
   --color-navy: #17305b;
   --color-navy-deep: #0d1b39;
   --color-navy-card: #122a52;
   --color-gold: #f3c516;
   --color-gold-deep: #c99a00;
   --color-gold-soft: #fbeeb6;
+
+  /* ─── Community palette ─────────────────────────────── */
   --color-teal: #1f9d94;
   --color-teal-deep: #147a74;
   --color-teal-soft: #dff5f2;
+
+  /* ─── Surface palette ───────────────────────────────── */
   --color-canvas: #f4f6f9;
   --color-line: #e7ebf1;
   --color-line-strong: #dbe1ea;
   --color-ink: #17305b;
   --color-muted: #6b7a92;
   --color-muted-soft: #8090a8;
+
+  /* ─── Status palette ────────────────────────────────── */
   --color-ok: #1f7a4d;
   --color-ok-soft: #d6f3e4;
   --color-warn: #b8890a;
@@ -23,16 +30,42 @@
   --color-danger: #f0637a;
   --color-info: #3a5a94;
   --color-info-soft: #e3ebf7;
-  --radius-card: 16px;
-  --radius-tile: 14px;
-  --radius-pill: 20px;
-  --radius-field: 12px;
-  --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Playfair Display", Georgia, serif;
-  --shadow-card: 0 10px 30px -24px rgba(16, 34, 68, 0.5);
-  --shadow-tile: 0 10px 30px -26px rgba(16, 34, 68, 0.5);
-  --shadow-gold: 0 10px 22px -10px rgba(216, 169, 4, 0.7);
-  --shadow-shell: 0 40px 90px -40px rgba(16, 34, 68, 0.55);
+
+  /* ─── Semantic surface tokens ───────────────────────── */
+  /* Sidebar */
+  --color-sidebar: #0d1b39;
+  --color-sidebar-item: rgba(255, 255, 255, 0);
+  --color-sidebar-item-hover: rgba(255, 255, 255, 0.05);
+  --color-sidebar-item-text: #9fb0cc;
+  --color-sidebar-item-text-hover: #ffffff;
+  --color-sidebar-active: #f3c516;
+  --color-sidebar-active-text: #0d1b39;
+
+  /* ─── Geometry ──────────────────────────────────────── */
+  --radius-card: 12px;
+  --radius-tile: 12px;
+  --radius-pill: 9999px;
+  --radius-field: 8px;
+  --radius-btn: 8px;
+  --radius-sidebar-row: 6px;
+
+  /* ─── Typography ────────────────────────────────────── */
+  --font-sans: var(--font-geist-sans), "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), "Geist Mono", ui-monospace, monospace;
+  --font-display: var(--font-playfair), "Playfair Display", Georgia, serif;
+
+  /* ─── Shadows ───────────────────────────────────────── */
+  --shadow-card: 0 1px 3px 0 rgba(16, 34, 68, 0.08), 0 1px 2px -1px rgba(16, 34, 68, 0.06);
+  --shadow-tile: 0 1px 3px 0 rgba(16, 34, 68, 0.08);
+  --shadow-gold: 0 8px 20px -8px rgba(216, 169, 4, 0.6);
+  --shadow-shell: 0 4px 24px -8px rgba(16, 34, 68, 0.18);
+  --shadow-drawer: 0 8px 40px -8px rgba(13, 27, 57, 0.35);
+
+  /* ─── Motion ────────────────────────────────────────── */
+  --duration-fast: 120ms;
+  --duration-standard: 180ms;
+  --duration-panel: 220ms;
+  --ease-panel: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 :root {

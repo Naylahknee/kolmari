@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2, Globe2, ListChecks, NotebookTabs, Route, UserRound, Wallet } from 'lucide-react'
 import { requireCurrentUser } from '@/lib/auth'
@@ -33,58 +32,226 @@ export default async function DashboardPage() {
   const slices = plan ? budgetSlices(plan.budget) : []
   const budgetTotal = slices.reduce((sum, slice) => sum + slice.amount, 0)
 
-  return <div>
-    <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-sm font-bold text-gold-deep">Your Nexit workspace</p><h1 className="mt-1 font-display text-3xl font-bold sm:text-4xl">Welcome back, {firstName}.</h1></div><Link href={complete ? '/nexit-plan' : '/profile-wizard'} className="gold-button">{complete ? 'Enter Nexicution Mode' : 'Start Nexit Profile Wizard'} <ArrowRight size={17} /></Link></div>
+  return (
+    <div className="space-y-6">
 
-    {!complete ? <section className="mt-7 rounded-card border border-gold/30 bg-gold-soft/50 p-6 sm:flex sm:items-center sm:justify-between sm:gap-6"><div><p className="font-extrabold text-navy">Complete your Nexit Profile to see personalized matches.</p><p className="mt-1 text-sm text-muted">Until then, no budget, work setup, household type, Match Score, or readiness score is assumed.</p></div><Link href="/profile-wizard" className="gold-button mt-4 shrink-0 sm:mt-0">Start Wizard</Link></section> : null}
-
-    <div className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <Stat icon={UserRound} label="Nexit Profile" value={complete ? 'Complete' : 'Not Started'} href="/profile-wizard" action={complete ? 'Edit profile' : 'Start wizard'} />
-      <Stat icon={Route} label="Strong Pathway signals" value={complete ? String(strong.length) : '—'} href="/pathways" action="Review Pathways" />
-      <Stat icon={NotebookTabs} label="Nexit Plan stage" value={plan?.timeline_stage ?? 'Not Started'} href="/nexit-plan" action="Open plan" />
-      <Stat icon={CheckCircle2} label="Saved plan tasks" value={plan ? String(plan.checklist.length) : '0'} href="/nexit-plan#checklist" action="Open checklist" />
-    </div>
-
-    <div className="mt-5 grid gap-5 xl:grid-cols-[.8fr_1.2fr]">
-      <section className="card-surface p-6"><p className="text-xs font-bold uppercase tracking-[.16em] text-gold-deep">Nexit Pathways</p><h2 className="mt-1 text-xl font-extrabold">Recommendation output from your profile</h2>{complete ? <><p className="mt-4 text-sm text-muted">Your saved goals currently produce {strong.length} strong research signal{strong.length === 1 ? '' : 's'}. Official requirements still control eligibility.</p><div className="mt-5 space-y-3">{strong.slice(0, 3).map((item) => <div key={item.id} className="rounded-xl bg-canvas p-4"><p className="font-bold">{item.country} — {item.name}</p><p className="mt-1 text-xs text-ok">{item.status}</p></div>)}{!strong.length ? <p className="rounded-xl bg-canvas p-4 text-sm text-muted">No strong signal yet. Review Possible Matches and missing requirements.</p> : null}</div></> : <p className="mt-4 text-sm text-muted">Finish the Nexit Profile Wizard before recommendations are calculated.</p>}<Link href={complete ? '/pathways' : '/profile-wizard'} className="gold-button mt-6 w-full">{complete ? 'Open Nexit Pathways' : 'Start Wizard'}</Link></section>
-      <section className="card-surface p-6"><div className="flex items-center justify-between"><div><p className="text-xs font-bold uppercase tracking-[.16em] text-gold-deep">General research</p><h2 className="mt-1 text-xl font-extrabold">Browse Nextinations</h2></div><Link href="/countries" className="text-xs font-extrabold text-gold-deep">View all</Link></div><div className="mt-5 grid gap-3 sm:grid-cols-3">{COUNTRIES.slice(0, 3).map((country) => <Link key={country.slug} href={`/nextinations/${country.slug}`} className="rounded-card border border-line p-4 transition hover:-translate-y-0.5 hover:shadow-md"><span className="text-3xl" aria-hidden>{countryFlag(country.code)}</span><p className="mt-3 font-extrabold">{country.name}</p><p className="text-xs text-muted">{country.city}</p><p className="mt-4 text-xs text-muted">Open the full Nextination workspace.</p></Link>)}</div></section>
-    </div>
-
-    <div className="mt-5 grid gap-5 lg:grid-cols-2">
-      <section className="card-surface p-6">
-        <div className="flex items-center justify-between">
-          <div><p className="text-xs font-bold uppercase tracking-[.16em] text-gold-deep">Nexit Tracker</p><h2 className="mt-1 text-xl font-extrabold">Nexit Timeline progress</h2></div>
-          <span className="grid size-10 place-items-center rounded-xl bg-gold-soft"><ListChecks size={18} /></span>
+      {/* ── Page header ──────────────────────────────────────────────────── */}
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Your Nexit workspace</p>
+          <h1 className="mt-1 text-2xl font-bold text-navy sm:text-3xl">
+            Welcome back, {firstName}.
+          </h1>
+          <p className="mt-1 text-sm text-muted">Continue planning your Nexit.</p>
         </div>
-        {plan ? (
-          <div className="mt-5 flex items-center gap-6">
-            <ScoreRing value={timelineProgress} label="Timeline" />
-            <div className="min-w-0">
-              <p className="text-sm text-muted">Current stage</p>
-              <p className="font-display text-2xl font-bold text-navy">{plan.timeline_stage}</p>
-              <p className="mt-1 text-xs text-muted">{plan.checklist.length} saved plan task{plan.checklist.length === 1 ? '' : 's'}</p>
-              <Link href="/nexit-plan#checklist" className="mt-4 inline-flex items-center gap-1 text-xs font-extrabold text-gold-deep">Open Nexit Tracker<ArrowRight size={13} /></Link>
-            </div>
+        <Link
+          href={complete ? '/nexit-plan' : '/profile-wizard'}
+          className="gold-button"
+        >
+          {complete ? 'Enter Nexicution Mode' : 'Start Nexit Profile'} <ArrowRight size={16} />
+        </Link>
+      </div>
+
+      {/* Profile incomplete notice */}
+      {!complete && (
+        <section className="rounded-[var(--radius-card)] border border-gold/30 bg-gold-soft/50 p-5 sm:flex sm:items-center sm:justify-between sm:gap-6">
+          <div>
+            <p className="font-semibold text-navy">Complete your Nexit Profile to see personalized matches.</p>
+            <p className="mt-1 text-sm text-muted">
+              Until then, no budget, work setup, household type, Match Score, or readiness score is assumed.
+            </p>
           </div>
-        ) : (
-          <div className="mt-5 rounded-xl bg-canvas p-5 text-sm text-muted">Start your Nexit Plan to track your relocation timeline.<Link href="/nexit-plan" className="mt-3 inline-flex items-center gap-1 font-extrabold text-gold-deep">Open Nexit Plan<ArrowRight size={13} /></Link></div>
-        )}
-      </section>
-      <section className="card-surface p-6">
-        <div className="flex items-center justify-between">
-          <div><p className="text-xs font-bold uppercase tracking-[.16em] text-gold-deep">Nexit Budget</p><h2 className="mt-1 text-xl font-extrabold">Monthly Cost Snapshot</h2></div>
-          <span className="grid size-10 place-items-center rounded-xl bg-gold-soft"><Wallet size={18} /></span>
+          <Link href="/profile-wizard" className="gold-button mt-4 shrink-0 sm:mt-0">
+            Start Wizard
+          </Link>
+        </section>
+      )}
+
+      {/* ── Section 1 — Continue where you left off ──────────────────────── */}
+      <section aria-labelledby="continue-heading">
+        <h2 id="continue-heading" className="mb-3 text-xs font-bold uppercase tracking-widest text-muted">
+          Continue where you left off
+        </h2>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard icon={UserRound}   label="Nexit Profile"          value={complete ? 'Complete' : 'Not started'} href="/profile-wizard" action={complete ? 'Edit profile' : 'Start Wizard'} />
+          <StatCard icon={Route}       label="Strong Pathway signals"  value={complete ? String(strong.length) : '—'}     href="/pathways"      action="Review Pathways" />
+          <StatCard icon={NotebookTabs} label="Nexit Plan stage"       value={plan?.timeline_stage ?? 'Not started'} href="/nexit-plan"     action="Open plan" />
+          <StatCard icon={CheckCircle2} label="Saved plan tasks"       value={plan ? String(plan.checklist.length) : '0'} href="/nexit-plan#checklist" action="Open checklist" />
         </div>
-        {budgetTotal > 0 ? (
-          <div className="mt-6"><BudgetDonut slices={slices} total={budgetTotal} /></div>
+      </section>
+
+      {/* ── Section 2 — Your Nextinations ────────────────────────────────── */}
+      <section aria-labelledby="nextinations-heading">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 id="nextinations-heading" className="text-xs font-bold uppercase tracking-widest text-muted">
+            Nextinations to explore
+          </h2>
+          <Link href="/countries" className="text-xs font-bold text-gold-deep hover:text-navy">
+            View all
+          </Link>
+        </div>
+        <div className="card-surface divide-y divide-line">
+          {COUNTRIES.slice(0, 3).map((country) => (
+            <Link
+              key={country.slug}
+              href={`/nextinations/${country.slug}`}
+              className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-canvas"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-2xl" aria-hidden="true">{countryFlag(country.code)}</span>
+                <div>
+                  <p className="font-semibold text-navy">{country.name}</p>
+                  <p className="text-xs text-muted">{country.city} · {country.region}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 text-right">
+                <div className="hidden sm:block">
+                  <p className="text-xs text-muted">Common route</p>
+                  <p className="text-xs font-semibold text-navy">{country.visaType}</p>
+                </div>
+                <ArrowRight size={15} className="text-muted" aria-hidden="true" />
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Section 3 — Your Nexit Plan ──────────────────────────────────── */}
+      <div className="grid gap-5 lg:grid-cols-2">
+        <section className="card-surface p-6" aria-labelledby="plan-heading">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Nexit Tracker</p>
+              <h2 id="plan-heading" className="mt-1 text-lg font-bold text-navy">Nexit Timeline progress</h2>
+            </div>
+            <span className="grid size-10 place-items-center rounded-[var(--radius-field)] bg-gold-soft" aria-hidden="true">
+              <ListChecks size={17} />
+            </span>
+          </div>
+          {plan ? (
+            <div className="mt-5 flex items-center gap-5">
+              <ScoreRing value={timelineProgress} label="Timeline" />
+              <div className="min-w-0">
+                <p className="text-xs text-muted">Current stage</p>
+                <p className="font-bold text-navy">{plan.timeline_stage}</p>
+                <p className="mt-0.5 text-xs text-muted">{plan.checklist.length} saved task{plan.checklist.length === 1 ? '' : 's'}</p>
+                <Link href="/nexit-plan#checklist" className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-gold-deep">
+                  Open Nexit Tracker <ArrowRight size={12} />
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-4 rounded-[var(--radius-field)] bg-canvas p-4 text-sm text-muted">
+              Start your Nexit Plan to track your relocation timeline.
+              <Link href="/nexit-plan" className="mt-2 flex items-center gap-1 text-xs font-bold text-gold-deep">
+                Open Nexit Plan <ArrowRight size={12} />
+              </Link>
+            </div>
+          )}
+        </section>
+
+        <section className="card-surface p-6" aria-labelledby="budget-heading">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Nexit Budget</p>
+              <h2 id="budget-heading" className="mt-1 text-lg font-bold text-navy">Monthly cost snapshot</h2>
+            </div>
+            <span className="grid size-10 place-items-center rounded-[var(--radius-field)] bg-gold-soft" aria-hidden="true">
+              <Wallet size={17} />
+            </span>
+          </div>
+          {budgetTotal > 0 ? (
+            <div className="mt-5">
+              <BudgetDonut slices={slices} total={budgetTotal} />
+            </div>
+          ) : (
+            <div className="mt-4 rounded-[var(--radius-field)] bg-canvas p-4 text-sm text-muted">
+              Add your monthly budget in the Cost Calculator to see your Nexit Budget breakdown.
+              <Link href="/cost-calculator" className="mt-2 flex items-center gap-1 text-xs font-bold text-gold-deep">
+                Open Cost Calculator <ArrowRight size={12} />
+              </Link>
+            </div>
+          )}
+        </section>
+      </div>
+
+      {/* ── Section 4 — Recent activity / Pathways signal ────────────────── */}
+      <section className="card-surface p-6" aria-labelledby="pathways-heading">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Nexit Pathways</p>
+            <h2 id="pathways-heading" className="mt-1 text-lg font-bold text-navy">
+              Recommendation output from your profile
+            </h2>
+          </div>
+          <Globe2 size={20} className="mt-1 shrink-0 text-muted" aria-hidden="true" />
+        </div>
+        {complete ? (
+          <>
+            <p className="mt-3 text-sm text-muted">
+              Your saved goals currently produce {strong.length} strong research signal{strong.length === 1 ? '' : 's'}. Official requirements still control eligibility.
+            </p>
+            {strong.length > 0 ? (
+              <div className="mt-4 space-y-2">
+                {strong.slice(0, 3).map((item) => (
+                  <div key={item.id} className="flex items-center justify-between rounded-[var(--radius-field)] bg-canvas px-4 py-3">
+                    <div>
+                      <p className="text-sm font-semibold text-navy">{item.country} — {item.name}</p>
+                      <p className="text-xs text-ok">{item.status}</p>
+                    </div>
+                    <ArrowRight size={14} className="text-muted" aria-hidden="true" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-4 rounded-[var(--radius-field)] bg-canvas px-4 py-3 text-sm text-muted">
+                No strong signals yet. Review Possible Matches and missing requirements in Nexit Pathways.
+              </div>
+            )}
+          </>
         ) : (
-          <div className="mt-5 rounded-xl bg-canvas p-5 text-sm text-muted">Add your monthly budget in the Cost Calculator to see your Nexit Budget breakdown.<Link href="/cost-calculator" className="mt-3 inline-flex items-center gap-1 font-extrabold text-gold-deep">Open Cost Calculator<ArrowRight size={13} /></Link></div>
+          <p className="mt-3 text-sm text-muted">
+            Finish the Nexit Profile Wizard before Pathway signals are calculated.
+          </p>
         )}
+        <Link
+          href={complete ? '/pathways' : '/profile-wizard'}
+          className="gold-button mt-5 inline-flex items-center gap-2"
+        >
+          {complete ? 'Open Nexit Pathways' : 'Start Wizard'} <ArrowRight size={15} />
+        </Link>
       </section>
     </div>
-
-    <section className="relative mt-5 min-h-56 overflow-hidden rounded-[20px] bg-navy text-white"><Image src="/images/dashboard-beach-banner.png" alt="Coastline at golden hour" fill sizes="(min-width: 768px) 80vw, 100vw" className="object-cover opacity-70" /><div className="absolute inset-0 bg-gradient-to-r from-navy-deep via-navy-deep/70 to-transparent" /><div className="relative max-w-xl p-8 sm:p-10"><Globe2 className="text-gold" /><h2 className="mt-3 font-display text-3xl font-bold">Turn research into a plan you can act on.</h2><p className="mt-2 text-sm text-white/70">Choose a Nextination, verify a Pathway, and save only your real planning details.</p><Link href="/nexit-plan" className="gold-button mt-5">Open Nexit Plan<ArrowRight size={17} /></Link></div></section>
-  </div>
+  )
 }
 
-function Stat({ icon: Icon, label, value, href, action }: { icon: typeof Globe2; label: string; value: string; href: string; action: string }) { return <article className="card-surface p-5"><div className="flex items-start gap-3"><span className="grid size-10 shrink-0 place-items-center rounded-xl bg-gold-soft"><Icon size={18} /></span><div className="min-w-0"><p className="text-xs font-bold text-muted">{label}</p><p className="mt-1 truncate text-xl font-extrabold">{value}</p></div></div><Link href={href} className="mt-5 inline-flex items-center gap-1 text-xs font-extrabold text-gold-deep">{action}<ArrowRight size={13} /></Link></article> }
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+  href,
+  action,
+}: {
+  icon: typeof Globe2
+  label: string
+  value: string
+  href: string
+  action: string
+}) {
+  return (
+    <article className="card-surface p-5">
+      <div className="flex items-start gap-3">
+        <span className="grid size-9 shrink-0 place-items-center rounded-[var(--radius-field)] bg-gold-soft" aria-hidden="true">
+          <Icon size={16} />
+        </span>
+        <div className="min-w-0">
+          <p className="text-xs text-muted">{label}</p>
+          <p className="mt-0.5 truncate font-bold text-navy">{value}</p>
+        </div>
+      </div>
+      <Link href={href} className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-gold-deep">
+        {action} <ArrowRight size={12} />
+      </Link>
+    </article>
+  )
+}

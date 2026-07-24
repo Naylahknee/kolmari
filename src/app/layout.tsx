@@ -18,6 +18,17 @@ export const metadata: Metadata = {
   applicationName: 'Nexit',
   title,
   description,
+  icons: {
+    icon: [
+      { url: '/brand/faviconNexit.svg', type: 'image/svg+xml' },
+      { url: '/brand/favicon-32.png', type: 'image/png', sizes: '32x32' },
+      { url: '/brand/favicon-16.png', type: 'image/png', sizes: '16x16' },
+      { url: '/brand/favicon.ico' },
+    ],
+    apple: [
+      { url: '/brand/app-icon-180.png', type: 'image/png', sizes: '180x180' },
+    ],
+  },
   openGraph: {
     title,
     description,

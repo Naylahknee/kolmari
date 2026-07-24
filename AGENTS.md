@@ -23,6 +23,8 @@ Before changing application code, read:
 Do not rely only on chat history or an older implementation prompt.
 For Nexitnation Map work, also read `/docs/nexit/11-NEXITNATION-MAP.md`.
 
+For interaction, navigation, transition, or motion work, also read `/docs/nexit/12-INTERACTION-DESIGN.md`.
+
 ## Source-of-truth order
 
 When instructions conflict, follow this order:
