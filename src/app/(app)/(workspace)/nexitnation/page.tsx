@@ -1,31 +1,41 @@
 import type { Metadata } from 'next'
 import { requireCurrentUser } from '@/lib/auth'
-import { NEXIT_LEXICON } from '@/lib/lexicon'
 import { loadNexitnationProfile } from '@/lib/userProfile'
-import { NexitnationMapLoader } from '@/components/nexit/NexitnationMapLoader'
+import { NexitWorldWorkspace } from '@/components/nexit/nexit-world'
 
 export const metadata: Metadata = {
-  title: 'Nexitnation Map | Nexit',
-  description: 'Compare regions, review relocation Pathways, and choose a Nextination that fits your Nexit Profile.',
+  title: 'Nexit World | Nexit',
+  description: 'Explore regions, research countries, and save possible Nextinations.',
 }
 
-export default async function NexitnationPage() {
+type SearchParams = Promise<{ view?: string | string[]; q?: string | string[] }>
+
+export default async function NexitWorldPage({ searchParams }: { searchParams: SearchParams }) {
+  const { view, q = '' } = await searchParams
   const user = await requireCurrentUser()
   const profile = await loadNexitnationProfile(user.id, user.email)
+
+  const initialView = view === 'countries' ? 'countries' : 'map'
+  const initialQuery = Array.isArray(q) ? (q[0] ?? '') : q
 
   return (
     <div>
       <header className="mb-6">
         <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Global discovery</p>
-        <h1 id="nexitnation-map-title" className="mt-2 font-display text-4xl font-bold text-navy sm:text-5xl">
-          {NEXIT_LEXICON.mapTitle}
+        <h1 className="mt-2 font-display text-4xl font-bold text-navy sm:text-5xl">
+          Nexit World
         </h1>
         <p className="mt-2 max-w-2xl text-muted">
-          Select a region on the map to open its Nextination guide.
+          Explore regions, research countries, and save possible Nextinations.
         </p>
       </header>
 
-      <NexitnationMapLoader profile={{ complete: profile !== null, matches: profile?.regionMatches ?? null }} />
+      <NexitWorldWorkspace
+        profileComplete={profile !== null}
+        regionMatches={profile?.regionMatches ?? null}
+        initialView={initialView}
+        initialQuery={initialQuery}
+      />
     </div>
   )
 }

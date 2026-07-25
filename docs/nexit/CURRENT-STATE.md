@@ -388,11 +388,82 @@ The `Wordmark` component pointed to `/brand/nexit-wordmark-master-light.png` for
 
 ---
 
+## Phase 11 Summary (completed)
+
+**Nexit World — unified discovery page**
+
+### What changed
+
+The two separate discovery pages (`/nexitnation` Nexitnation Map and `/countries` Nextinations directory) were unified into a single **Nexit World** page at `/nexitnation` with a `Map` / `Countries` view switcher. Selected view is persisted in the URL (`?view=map` or `?view=countries`).
+
+#### `src/app/(app)/(workspace)/nexitnation/page.tsx` (updated)
+
+- Title: `Nexit World | Nexit`
+- Tagline: `Explore regions, research countries, and save possible Nextinations.`
+- Reads `?view` and `?q` from `searchParams`; passes `initialView` and `initialQuery` to `NexitWorldWorkspace`
+- Removed `NexitnationMapLoader` import; removed `NEXIT_LEXICON` import
+
+#### `src/components/nexit/nexit-world.tsx` (new)
+
+Client component `NexitWorldWorkspace` containing:
+- **`MapPanel`** — Mapbox canvas with region badge markers; falls back to dark-surface region list when token absent or errored. Badge shows `Nexit Match X%` only when `profileComplete && matchValue !== undefined` (no fabricated scores).
+- **`RegionGrid`** — Always-visible accessible region grid below the map; same match-only-when-real guard.
+- **`CountriesView`** (imported from `countries-browser`) — Country directory panel; no page header.
+- **View switcher** — `role="tablist"` segmented control (`Map` / `Countries`); syncs URL via `router.replace` on switch.
+
+#### `src/components/nexit/countries-browser.tsx` (updated)
+
+Extracted `CountriesView` export (country-directory panel without page header) from the existing `CountriesBrowser` component. `CountriesBrowser` is kept for backward compatibility only (no longer used in any active route).
+
+#### `src/app/(app)/(workspace)/countries/page.tsx` (updated)
+
+Now calls `redirect()` to `/nexitnation?view=countries` (with `?q` forwarded if present). `/countries` route is preserved for backward compatibility; all traffic redirects to the unified page.
+
+#### `src/components/nexit/app-shell.tsx` (updated)
+
+- Removed `Nexitnation` (MapPinned icon) and `Nextinations` (Globe2 icon) from `NAV_DISCOVER`
+- Added single `Nexit World` entry pointing to `/nexitnation` (Globe2 icon)
+- Removed unused `MapPinned` import from lucide-react
+- Mobile bottom nav updated: `Nexitnation` → `Nexit World` (Globe2)
+- Header search box now navigates to `/nexitnation?view=countries&q=…` instead of `/countries?q=…`
+
+### Files Changed
+
+| File | Change |
+|---|---|
+| `src/app/(app)/(workspace)/nexitnation/page.tsx` | Updated — Nexit World page; reads `?view`/`?q`; renders `NexitWorldWorkspace` |
+| `src/components/nexit/nexit-world.tsx` | New — `NexitWorldWorkspace`, `MapPanel`, `RegionGrid` |
+| `src/components/nexit/countries-browser.tsx` | Updated — `CountriesView` extracted as named export |
+| `src/app/(app)/(workspace)/countries/page.tsx` | Updated — redirect to `/nexitnation?view=countries` |
+| `src/components/nexit/app-shell.tsx` | Updated — sidebar / mobile nav / search unified to Nexit World |
+
+### Tests Run
+
+| Check | Result |
+|---|---|
+| TypeScript (via `next build`) | ✅ Pass — 0 errors |
+| Production build (`npm run build`) | ✅ Pass — 53 pages, compiled in 13.5s |
+
+### Routes
+
+- `/nexitnation` → Nexit World (Map view by default)
+- `/nexitnation?view=map` → Map view
+- `/nexitnation?view=countries` → Countries view
+- `/nexitnation?view=countries&q=…` → Countries view with pre-filled search
+- `/countries` → redirects to `/nexitnation?view=countries` (backward compat preserved)
+- `/countries?q=…` → redirects to `/nexitnation?view=countries&q=…`
+- `/nexitnation/[region]` → region workspace (unchanged)
+
+### No fabricated data
+
+Region badges and grid rows show `Nexit Match X%` only when `profileComplete === true` and a real calculated match value exists. Users with incomplete profiles see neutral copy (`32 countries`, region name only).
+
+---
+
 ## Next Recommended Implementation Phase
 
-**Phase 11 — Greenbook disclosure pattern + legacy page review**
+**Phase 12 — Greenbook disclosure pattern + adaptive section ordering**
 
 1. Review `GreenbookTab` inline provenance legend completeness.
-2. Review `countries/[slug]` legacy page for consistency or deprecation.
-3. Consider `CompareTab` source disclosure.
-4. Adaptive section ordering (06-ADAPTIVE-WORKSPACE.md) — rank-country-sections lib and sidebar PersonalizedOrder toggle.
+2. Consider `CompareTab` source disclosure.
+3. Adaptive section ordering (06-ADAPTIVE-WORKSPACE.md) — rank-country-sections lib and sidebar PersonalizedOrder toggle.

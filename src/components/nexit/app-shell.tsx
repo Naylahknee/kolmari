@@ -16,7 +16,6 @@ import {
   Globe2,
   LayoutDashboard,
   LogOut,
-  MapPinned,
   Menu,
   NotebookTabs,
   Route,
@@ -34,9 +33,8 @@ import type { WizardStatus } from '@/lib/profile'
 
 // DISCOVER group
 const NAV_DISCOVER = [
-  { href: '/dashboard',    label: 'Dashboard',    icon: LayoutDashboard },
-  { href: '/nexitnation',  label: 'Nexitnation',  icon: MapPinned },
-  { href: '/countries',    label: 'Nextinations', icon: Globe2 },
+  { href: '/dashboard',   label: 'Dashboard',   icon: LayoutDashboard },
+  { href: '/nexitnation', label: 'Nexit World',  icon: Globe2 },
 ] as const
 
 // PLANNING group
@@ -56,10 +54,10 @@ const NAV_BOTTOM = [
 
 // Flat list for mobile bottom nav
 const ALL_NAV_ITEMS = [
-  { href: '/dashboard',    label: 'Dashboard',    icon: LayoutDashboard },
-  { href: '/nexitnation',  label: 'Nexitnation',  icon: MapPinned },
-  { href: '/pathways',     label: 'Nexit Pathways', icon: Route },
-  { href: '/nexit-plan',   label: 'Nexit Plan',   icon: NotebookTabs },
+  { href: '/dashboard',   label: 'Dashboard',     icon: LayoutDashboard },
+  { href: '/nexitnation', label: 'Nexit World',   icon: Globe2 },
+  { href: '/pathways',    label: 'Nexit Pathways', icon: Route },
+  { href: '/nexit-plan',  label: 'Nexit Plan',    icon: NotebookTabs },
 ]
 const MOBILE_PRIMARY_HREFS = ['/dashboard', '/nexitnation', '/pathways', '/nexit-plan']
 
@@ -408,7 +406,7 @@ export function AppShell({
   function onSearch(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const q = String(new FormData(e.currentTarget).get('query') ?? '').trim()
-    router.push(q ? `/countries?q=${encodeURIComponent(q)}` : '/countries')
+    router.push(q ? `/nexitnation?view=countries&q=${encodeURIComponent(q)}` : '/nexitnation?view=countries')
   }
 
   async function logout() {
