@@ -173,7 +173,16 @@ export function NexitnationMapbox({ profile }: Props) {
   }, [token, mapError])
 
   if (!token || mapError) {
-    return <RegionFallback profile={profile} />
+    return (
+      <>
+        <RegionFallback profile={profile} />
+        {process.env.NODE_ENV === 'development' && !token && (
+          <p className="mt-3 rounded-lg border border-warn-soft bg-warn-soft px-4 py-3 text-xs font-semibold text-warn">
+            Dev: <code>NEXT_PUBLIC_MAPBOX_TOKEN</code> is not set — add it to <code>.env.local</code> to enable the map.
+          </p>
+        )}
+      </>
+    )
   }
 
   return (
