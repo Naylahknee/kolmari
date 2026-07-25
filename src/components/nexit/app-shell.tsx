@@ -30,43 +30,37 @@ import { useSavedNextinations } from './use-saved-nextinations'
 import { countryFlag } from '@/lib/countries'
 import type { WizardStatus } from '@/lib/profile'
 
-// ─── Sidebar section groups ──────────────────────────────────────────────────
+// ─── Sidebar structure ───────────────────────────────────────────────────────
 
-type NavSection = {
-  label: string
-  items: { href: string; label: string; icon: typeof Globe2 }[]
-}
+// DISCOVER group
+const NAV_DISCOVER = [
+  { href: '/dashboard',    label: 'Dashboard',    icon: LayoutDashboard },
+  { href: '/nexitnation',  label: 'Nexitnation',  icon: MapPinned },
+  { href: '/countries',    label: 'Nextinations', icon: Globe2 },
+] as const
 
-const NAV_SECTIONS: NavSection[] = [
-  {
-    label: 'Discover',
-    items: [
-      { href: '/dashboard',    label: 'Dashboard',     icon: LayoutDashboard },
-      { href: '/nexitnation',  label: 'Nexitnation',   icon: MapPinned },
-      { href: '/countries',    label: 'Nextinations',  icon: Globe2 },
-    ],
-  },
-  {
-    label: 'My Nexit',
-    items: [
-      { href: '/nextinations', label: 'My Nextinations', icon: Compass },
-    ],
-  },
-  {
-    label: 'Planning',
-    items: [
-      { href: '/pathways',        label: 'Nexit Pathways',  icon: Route },
-      { href: '/nexit-plan',      label: 'Nexit Plan',       icon: NotebookTabs },
-      { href: '/cost-calculator', label: 'Cost Calculator',  icon: Calculator },
-      { href: '/greenbook',       label: 'Greenbook',        icon: BookOpen },
-      { href: '/documents',       label: 'My Documents',     icon: FileText },
-      { href: '/settings',        label: 'Settings',         icon: Settings },
-    ],
-  },
+// PLANNING group
+const NAV_PLANNING = [
+  { href: '/pathways',        label: 'Nexit Pathways',  icon: Route },
+  { href: '/nexit-plan',      label: 'Nexit Plan',      icon: NotebookTabs },
+  { href: '/cost-calculator', label: 'Cost Calculator', icon: Calculator },
+  { href: '/greenbook',       label: 'Greenbook',       icon: BookOpen },
+  { href: '/documents',       label: 'Documents',       icon: FileText },
+] as const
+
+// Bottom ungrouped items
+const NAV_BOTTOM = [
+  { href: '/settings',       label: 'Settings', icon: Settings },
+  { href: '/profile-wizard', label: 'Profile',  icon: UserRound },
+] as const
+
+// Flat list for mobile bottom nav
+const ALL_NAV_ITEMS = [
+  { href: '/dashboard',    label: 'Dashboard',    icon: LayoutDashboard },
+  { href: '/nexitnation',  label: 'Nexitnation',  icon: MapPinned },
+  { href: '/pathways',     label: 'Nexit Pathways', icon: Route },
+  { href: '/nexit-plan',   label: 'Nexit Plan',   icon: NotebookTabs },
 ]
-
-// Flat list for mobile bottom nav (preserved)
-const ALL_NAV_ITEMS = NAV_SECTIONS.flatMap((s) => s.items)
 const MOBILE_PRIMARY_HREFS = ['/dashboard', '/nexitnation', '/pathways', '/nexit-plan']
 
 // Country section labels (matches tab IDs in tabs.ts)
@@ -198,18 +192,28 @@ function CountryTreeItem({
   )
 }
 
-// ─── Sidebar section label ────────────────────────────────────────────────────
+// ─── Sidebar group label ──────────────────────────────────────────────────────
 
-function SidebarSectionLabel({ label, collapsed }: { label: string; collapsed: boolean }) {
-  if (collapsed) return <div className="my-1 h-px bg-white/8" />
+function GroupLabel({ label, collapsed }: { label: string; collapsed: boolean }) {
+  if (collapsed) return <div className="my-2 h-px bg-white/8" />
   return (
-    <p className="mb-1 mt-4 px-3 text-[10px] font-bold uppercase tracking-widest text-[#4a6080] first:mt-2">
+    <p className="mb-1 mt-5 px-3 text-[10px] font-bold uppercase tracking-widest text-[#4a6080]">
       {label}
     </p>
   )
 }
 
-// ─── Sidebar nav (shared between desktop sidebar + mobile drawer) ─────────────
+// ─── Sidebar nav ──────────────────────────────────────────────────────────────
+// Implements the exact §18 IA:
+//
+//   [ungrouped] Home · Search · Updates
+//   DISCOVER    Dashboard · Nexitnation · Countries
+//   MY NEXIT    My Nextinations
+//                 ↳ Portugal (saved, collapsible)
+//                     ↳ Overview · Economic Profile · …
+//                 ↳ Spain
+//   PLANNING    Nexit Pathways · Nexit Plan · Cost Calculator · Documents
+//   [ungrouped] Settings · Profile
 
 function SidebarNav({
   pathname,
@@ -220,11 +224,14 @@ function SidebarNav({
   collapsed: boolean
   savedCountries: { slug: string; name: string; code: string }[]
 }) {
-  // Track which saved countries have their section sub-tree open
   const [openCountries, setOpenCountries] = useState<Set<string>>(() => {
-    // Auto-open the currently active country
+    const initial = new Set<string>()
+    // Auto-open My Nextinations group when user is on any /nextinations route
+    if (pathname.startsWith('/nextinations')) initial.add('__my-nextinations__')
+    // Auto-open the active country's section list
     const match = pathname.match(/^\/nextinations\/([^/]+)/)
-    return match ? new Set([match[1]]) : new Set()
+    if (match) initial.add(match[1])
+    return initial
   })
 
   function toggleCountry(slug: string) {
@@ -236,41 +243,103 @@ function SidebarNav({
     })
   }
 
+  // "My Nextinations" row is active when on any /nextinations/* path
+  const myNextinationsActive = isActive(pathname, '/nextinations')
+
   return (
-    <nav className="flex-1 space-y-0" aria-label="Main navigation">
-      {NAV_SECTIONS.map((section) => (
-        <div key={section.label}>
-          <SidebarSectionLabel label={section.label} collapsed={collapsed} />
-          <ul className="space-y-0.5">
-            {section.items.map(({ href, label, icon }) => (
-              <li key={href}>
-                <SidebarItem
-                  href={href} label={label} icon={icon}
-                  active={isActive(pathname, href)}
-                  collapsed={collapsed}
+    <nav aria-label="Main navigation" className="space-y-0.5">
+
+      {/* ── DISCOVER ──────────────────────────────────────────────────── */}
+      <GroupLabel label="Discover" collapsed={collapsed} />
+      {NAV_DISCOVER.map(({ href, label, icon }) => (
+        <SidebarItem key={href} href={href} label={label} icon={icon}
+          active={isActive(pathname, href)} collapsed={collapsed} />
+      ))}
+
+      {/* ── MY NEXIT ──────────────────────────────────────────────────── */}
+      <GroupLabel label="My Nexit" collapsed={collapsed} />
+
+      {/* My Nextinations — parent row, collapsible, shows saved tree when open */}
+      <div>
+        <button
+          type="button"
+          onClick={() => toggleCountry('__my-nextinations__')}
+          aria-expanded={openCountries.has('__my-nextinations__')}
+          title={collapsed ? 'My Nextinations' : undefined}
+          className={[
+            'flex w-full items-center gap-3 rounded-[var(--radius-sidebar-row)] px-3 py-2 text-sm font-medium transition-colors',
+            collapsed ? 'justify-center px-2' : '',
+            myNextinationsActive
+              ? 'bg-gold-soft/25 text-white font-semibold'
+              : 'text-[#9fb0cc] hover:bg-white/5 hover:text-white',
+          ].join(' ')}
+        >
+          <Compass size={16} aria-hidden="true" className="shrink-0" />
+          {!collapsed && (
+            <>
+              <span className="flex-1 text-left">My Nextinations</span>
+              {savedCountries.length > 0 && (
+                <ChevronDown
+                  size={13}
+                  aria-hidden="true"
+                  className={`shrink-0 text-[#9fb0cc] transition-transform duration-[var(--duration-standard)] ${openCountries.has('__my-nextinations__') ? 'rotate-180' : ''}`}
                 />
-                {/* Inject saved country tree under My Nextinations */}
-                {href === '/nextinations' && savedCountries.length > 0 && (
-                  <ul className="mt-0.5 space-y-0.5">
-                    {savedCountries.map((c) => (
-                      <CountryTreeItem
-                        key={c.slug}
-                        countrySlug={c.slug}
-                        countryName={c.name}
-                        countryCode={c.code}
-                        open={openCountries.has(c.slug)}
-                        onToggle={() => toggleCountry(c.slug)}
-                        pathname={pathname}
-                        collapsed={collapsed}
-                      />
-                    ))}
-                  </ul>
-                )}
+              )}
+            </>
+          )}
+        </button>
+
+        {/* Saved countries — indented one level under My Nextinations */}
+        {!collapsed && savedCountries.length > 0 && openCountries.has('__my-nextinations__') && (
+          <ul className="mt-0.5 border-l border-white/10 pl-3 ml-4 space-y-0.5">
+            {savedCountries.map((c) => (
+              <CountryTreeItem
+                key={c.slug}
+                countrySlug={c.slug}
+                countryName={c.name}
+                countryCode={c.code}
+                open={openCountries.has(c.slug)}
+                onToggle={() => toggleCountry(c.slug)}
+                pathname={pathname}
+                collapsed={false}
+              />
+            ))}
+          </ul>
+        )}
+
+        {/* When sidebar is collapsed, show country flags as icon rows */}
+        {collapsed && savedCountries.length > 0 && (
+          <ul className="mt-0.5 space-y-0.5">
+            {savedCountries.map((c) => (
+              <li key={c.slug}>
+                <Link
+                  href={`/nextinations/${c.slug}/overview`}
+                  title={c.name}
+                  className="flex justify-center rounded-[var(--radius-sidebar-row)] px-2 py-2 text-base leading-none text-[#9fb0cc] hover:bg-white/5"
+                >
+                  {countryFlag(c.code)}
+                </Link>
               </li>
             ))}
           </ul>
-        </div>
+        )}
+      </div>
+
+      {/* ── PLANNING ──────────────────────────────────────────────────── */}
+      <GroupLabel label="Planning" collapsed={collapsed} />
+      {NAV_PLANNING.map(({ href, label, icon }) => (
+        <SidebarItem key={href} href={href} label={label} icon={icon}
+          active={isActive(pathname, href)} collapsed={collapsed} />
       ))}
+
+      {/* ── BOTTOM (Settings / Profile) ───────────────────────────────── */}
+      <div className="mt-4 border-t border-white/8 pt-3 space-y-0.5">
+        {NAV_BOTTOM.map(({ href, label, icon }) => (
+          <SidebarItem key={href} href={href} label={label} icon={icon}
+            active={isActive(pathname, href)} collapsed={collapsed} />
+        ))}
+      </div>
+
     </nav>
   )
 }
