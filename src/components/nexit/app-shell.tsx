@@ -566,8 +566,8 @@ export function AppShell({
           </div>
         </header>
 
-        {/* Page content */}
-        <main className="mx-auto max-w-[960px] px-6 py-10 pb-16 md:px-14">
+        {/* Page content — full available width per 04-LAYOUTS.md §17 */}
+        <main className="px-6 pt-6 pb-[72px] md:px-7">
           {children}
         </main>
       </div>

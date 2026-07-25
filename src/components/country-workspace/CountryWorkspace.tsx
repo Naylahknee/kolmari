@@ -25,6 +25,15 @@ import { GreenbookTab } from './tabs/GreenbookTab'
 import { ResourcesTab } from './tabs/ResourcesTab'
 import { EconomicProfileTab } from './tabs/EconomicProfileTab'
 
+// Label lookup for breadcrumb display
+const SECTION_LABELS: Record<string, string> = {
+  overview: 'Overview', 'economic-profile': 'Economic Profile', 'cost-of-living': 'Cost of Living',
+  housing: 'Housing', pathways: 'Nexit Pathways', employment: 'Employment',
+  healthcare: 'Healthcare', education: 'Education', transportation: 'Transportation',
+  'legal-taxes': 'Legal & Taxes', 'daily-life': 'Daily Life', 'family-pets': 'Family & Pets',
+  greenbook: 'Greenbook', resources: 'Resources', compare: 'Compare', 'why-you': 'Why You',
+}
+
 type CountrySummary = {
   slug: string; name: string; code: string; city: string; region: string
   visaType: string; incomeRequired: number; safety: string; cost: string; summary: string
@@ -146,45 +155,17 @@ function CountryHero({
   )
 }
 
-// ─── Section navigation item ─────────────────────────────────────────────────
-
-function SectionNavItem({
-  tab, active, href,
-}: { tab: TabMeta; active: boolean; href: string }) {
-  return (
-    <Link
-      href={href}
-      aria-current={active ? 'page' : undefined}
-      className={[
-        'flex w-full items-center justify-between rounded-[var(--radius-sidebar-row)] px-3 py-2 text-left text-sm transition-colors',
-        active
-          ? 'bg-gold-soft/60 font-semibold text-navy'
-          : 'text-muted hover:bg-canvas hover:text-navy',
-      ].join(' ')}
-    >
-      <span>{tab.label}</span>
-      {active && <span className="size-1.5 shrink-0 rounded-full bg-gold-deep" aria-hidden="true" />}
-    </Link>
-  )
-}
-
 // ─── Main workspace ──────────────────────────────────────────────────────────
 
 export function CountryWorkspace({
-  country, match, readiness, tabs, allTabs,
+  country, match, readiness, allTabs,
   pathways, content, compareData, hasChildren, studyInterest, isFamily, monthlyIncome,
   fromQuiz, initialSection, pathwayCount,
-}: Props) {
+}: Omit<Props, 'tabs'> & { tabs?: TabMeta[] }) {
   const router = useRouter()
-  const [personalized, setPersonalized] = useState(true)
   const [mobileSectionOpen, setMobileSectionOpen] = useState(false)
 
-  const shown = personalized ? tabs : allTabs
-  const activeTab = shown.find((t) => t.id === initialSection) ?? shown[0]
-
-  function handlePersonalizedToggle() {
-    setPersonalized((v) => !v)
-  }
+  const activeLabel = SECTION_LABELS[initialSection] ?? initialSection
 
   function navigateTo(id: CountryTabId) {
     setMobileSectionOpen(false)
@@ -193,6 +174,15 @@ export function CountryWorkspace({
 
   return (
     <div className="space-y-5">
+      {/* Breadcrumb — per 04-LAYOUTS.md §20 */}
+      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-muted">
+        <Link href="/nextinations" className="hover:text-navy">My Nextinations</Link>
+        <span aria-hidden="true">/</span>
+        <Link href={`/nextinations/${country.slug}/overview`} className="hover:text-navy">{country.name}</Link>
+        <span aria-hidden="true">/</span>
+        <span className="font-semibold text-navy" aria-current="page">{activeLabel}</span>
+      </nav>
+
       {/* Persistent country hero — stable across all sections */}
       <CountryHero
         country={country}
@@ -202,100 +192,60 @@ export function CountryWorkspace({
         pathwayCount={pathwayCount}
       />
 
-      {/* Section navigation + content area */}
-      <div className="flex gap-5 items-start lg:grid lg:grid-cols-[200px_1fr]">
-
-        {/* Desktop vertical section nav */}
-        <aside className="hidden lg:block" aria-label="Country sections">
-          <div className="rounded-[var(--radius-card)] border border-line bg-white p-3">
-            <div className="mb-2 flex items-center justify-between px-1">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Sections</p>
-              <button
-                type="button"
-                onClick={handlePersonalizedToggle}
-                className="text-[10px] font-bold text-gold-deep hover:text-navy"
-              >
-                {personalized ? 'All' : 'Personalized'}
-              </button>
-            </div>
-            <nav className="space-y-0.5" aria-label="Country section navigation">
-              {shown.map((tab) => (
-                <SectionNavItem
+      {/* Mobile section selector — sidebar handles desktop navigation */}
+      <div className="lg:hidden">
+        <button
+          type="button"
+          onClick={() => setMobileSectionOpen((v) => !v)}
+          aria-expanded={mobileSectionOpen}
+          className="flex w-full items-center justify-between rounded-[var(--radius-card)] border border-line bg-white px-4 py-3 text-sm font-semibold text-navy"
+        >
+          <span>{activeLabel}</span>
+          <ChevronDown
+            size={16}
+            aria-hidden="true"
+            className={`text-muted transition-transform duration-[var(--duration-standard)] ${mobileSectionOpen ? 'rotate-180' : ''}`}
+          />
+        </button>
+        {mobileSectionOpen && (
+          <div className="mt-1 overflow-hidden rounded-[var(--radius-card)] border border-line bg-white p-2 shadow-[var(--shadow-shell)]">
+            <nav className="grid grid-cols-2 gap-0.5" aria-label="Country section navigation">
+              {allTabs.map((tab) => (
+                <button
                   key={tab.id}
-                  tab={tab}
-                  active={tab.id === initialSection}
-                  href={`/nextinations/${country.slug}/${tab.id}`}
-                />
+                  type="button"
+                  onClick={() => navigateTo(tab.id)}
+                  aria-current={tab.id === initialSection ? 'page' : undefined}
+                  className={[
+                    'flex w-full items-center justify-between rounded-[var(--radius-sidebar-row)] px-3 py-2 text-left text-sm transition-colors',
+                    tab.id === initialSection
+                      ? 'bg-gold-soft/60 font-semibold text-navy'
+                      : 'text-muted hover:bg-canvas hover:text-navy',
+                  ].join(' ')}
+                >
+                  <span>{tab.label}</span>
+                  {tab.id === initialSection && <span className="size-1.5 shrink-0 rounded-full bg-gold-deep" aria-hidden="true" />}
+                </button>
               ))}
             </nav>
           </div>
-        </aside>
+        )}
+      </div>
 
-        {/* Mobile section selector */}
-        <div className="w-full lg:hidden">
-          <button
-            type="button"
-            onClick={() => setMobileSectionOpen((v) => !v)}
-            aria-expanded={mobileSectionOpen}
-            className="flex w-full items-center justify-between rounded-[var(--radius-card)] border border-line bg-white px-4 py-3 text-sm font-semibold text-navy"
-          >
-            <span>{activeTab?.label ?? 'Overview'}</span>
-            <ChevronDown
-              size={16}
-              aria-hidden="true"
-              className={`text-muted transition-transform duration-[var(--duration-standard)] ${mobileSectionOpen ? 'rotate-180' : ''}`}
-            />
-          </button>
-          {mobileSectionOpen && (
-            <div className="mt-1 overflow-hidden rounded-[var(--radius-card)] border border-line bg-white p-2 shadow-[var(--shadow-shell)]">
-              <div className="mb-2 flex items-center justify-between px-2 pt-1">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Sections</p>
-                <button
-                  type="button"
-                  onClick={handlePersonalizedToggle}
-                  className="text-[10px] font-bold text-gold-deep"
-                >
-                  {personalized ? 'Show all' : 'Personalized'}
-                </button>
-              </div>
-              <nav className="grid grid-cols-2 gap-0.5" aria-label="Country section navigation">
-                {shown.map((tab) => (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => navigateTo(tab.id)}
-                    aria-current={tab.id === initialSection ? 'page' : undefined}
-                    className={[
-                      'flex w-full items-center justify-between rounded-[var(--radius-sidebar-row)] px-3 py-2 text-left text-sm transition-colors',
-                      tab.id === initialSection
-                        ? 'bg-gold-soft/60 font-semibold text-navy'
-                        : 'text-muted hover:bg-canvas hover:text-navy',
-                    ].join(' ')}
-                  >
-                    <span>{tab.label}</span>
-                    {tab.id === initialSection && <span className="size-1.5 shrink-0 rounded-full bg-gold-deep" aria-hidden="true" />}
-                  </button>
-                ))}
-              </nav>
-            </div>
-          )}
-        </div>
-
-        {/* Active section content */}
-        <div className="min-w-0 flex-1" role="region" aria-label={activeTab?.label ?? 'Overview'}>
-          <TabPanel
-            id={initialSection}
-            country={country}
-            match={match}
-            pathways={pathways}
-            content={content}
-            compareData={compareData}
-            hasChildren={hasChildren}
-            studyInterest={studyInterest}
-            isFamily={isFamily}
-            monthlyIncome={monthlyIncome}
-          />
-        </div>
+      {/* Active section content — full available width (04-LAYOUTS.md §17) */}
+      <div role="region" aria-label={activeLabel}>
+        <TabPanel
+          id={initialSection}
+          country={country}
+          match={match}
+          pathways={pathways}
+          content={content}
+          compareData={compareData}
+          hasChildren={hasChildren}
+          studyInterest={studyInterest}
+          isFamily={isFamily}
+          monthlyIncome={monthlyIncome}
+        />
       </div>
     </div>
   )

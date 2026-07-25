@@ -26,11 +26,23 @@ workspace:
     borderBottom: "1px solid {colors.border}"
 
   canvas:
-    backgroundColor: "{colors.canvas}"
-    maxReadableWidth: "960px"
-    contentPaddingDesktop: "40px 56px 96px"
-    contentPaddingTablet: "32px 32px 80px"
-    contentPaddingMobile: "24px 20px 88px"
+  backgroundColor: "{colors.canvas}"
+  maxReadableWidth: "none"
+  contentWidth: "100%"
+  contentPaddingDesktop: "24px 28px 72px"
+  contentPaddingTablet: "24px 24px 64px"
+  contentPaddingMobile: "20px 16px 72px"
+
+### Workspace canvas rules
+
+- The Country Workspace should use the available horizontal space after the sidebar.
+- Do not center the entire workspace inside a narrow fixed-width container.
+- Do not apply `max-width: 960px` to the full country workspace.
+- Use readable-width limits only for long paragraphs, legal copy, or article-style text.
+- Cards, grids, tables, and comparison content may span the full workspace width.
+- Desktop content should begin approximately 24–28px from the workspace edge.
+- Avoid large empty gutters between the sidebar and active content.
+- The main content area should visually align near the page header and country hero edges.
 
   mobileSidebar:
     behavior: "drawer"
@@ -212,6 +224,20 @@ Sources and Verification
 ↓
 Related Actions
 ```
+### Country workspace width behavior
+
+The active country workspace should fill the space available beside the sidebar.
+
+Use this structure:
+
+```text
+Application sidebar
+└── Workspace canvas
+    ├── Breadcrumbs
+    ├── Persistent Country Hero
+    ├── Active Country Chapter
+    ├── Sources and Verification
+    └── Related Actions
 
 ### Required country routes
 

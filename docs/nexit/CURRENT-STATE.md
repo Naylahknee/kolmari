@@ -272,10 +272,127 @@ URL-addressable country section route. Validates the `section` param against the
 
 ---
 
+## Phase 9 Summary (completed)
+
+**13-ACCOUNT-ADMINISTRATION.md Part 1 + 04-LAYOUTS.md §17–20 canvas + breadcrumb**
+
+### Changes
+
+#### API routes (new)
+
+| Route | Method | Purpose |
+|---|---|---|
+| `/api/account/change-password` | POST | Requires current password + new password (min 8 chars); updates hash; revokes session cookie |
+| `/api/account/sign-out-all` | POST | Revokes session cookie (stateless JWT; future session-table would invalidate all tokens) |
+| `/api/account/data-export` | POST | Returns JSON file with profile, plan, and account email; excludes password hashes |
+| `/api/account/deletion-request` | POST | Requires current password + exact typed phrase `DELETE MY NEXIT ACCOUNT`; deletes profile + user rows via cascade; revokes session |
+
+#### `src/components/nexit/privacy-account-page.tsx` (new)
+
+Client component implementing the full Privacy & Account page per `13-ACCOUNT-ADMINISTRATION.md §Page Sections`:
+
+- **Account Information:** Read-only current email; Change Password form (current password required, confirmation field, signs out on success)
+- **Change Email:** UI scaffolded with "coming soon" notice (email verification not yet implemented)
+- **Security:** Sign Out of All Devices with two-step confirmation
+- **Your Data:** Download My Data — triggers `/api/account/data-export` and triggers browser download
+- **Danger Zone:** Delete My Account — explains what is deleted, requires current password AND exact phrase `DELETE MY NEXIT ACCOUNT`, permanent and irreversible
+
+#### `src/app/(app)/(workspace)/settings/privacy/page.tsx` (new)
+
+Server component route rendering `PrivacyAccountPage`. Requires auth.
+
+#### `src/components/nexit/settings-form.tsx` (updated)
+
+- Reformatted from minified single-line JSX to readable multi-line component
+- Added **Privacy & Account** card at the bottom linking to `/settings/privacy`
+- Profile form structure preserved; all existing save behavior preserved
+
+#### `src/components/country-workspace/CountryWorkspace.tsx` (updated)
+
+- **Removed** the `<aside>` desktop vertical section nav (white SECTIONS panel) — sidebar tree handles this per `04-LAYOUTS.md §18`
+- **Removed** the personalized/all toggle from the in-page nav (sidebar handles ordering)
+- **Removed** `SectionNavItem` component (no longer needed)
+- **Added** breadcrumb navigation: `My Nextinations / [Country] / [Section]` per `04-LAYOUTS.md §20`
+- **Content** now spans full available width (no `lg:grid-cols-[200px_1fr]` constraint)
+- **Mobile** section dropdown preserved; now shows `allTabs` directly
+
+### Files Changed
+
+| File | Change |
+|---|---|
+| `src/app/api/account/change-password/route.ts` | New — change password API |
+| `src/app/api/account/sign-out-all/route.ts` | New — sign out all devices API |
+| `src/app/api/account/data-export/route.ts` | New — data export API |
+| `src/app/api/account/deletion-request/route.ts` | New — account deletion API |
+| `src/components/nexit/privacy-account-page.tsx` | New — Privacy & Account page component |
+| `src/app/(app)/(workspace)/settings/privacy/page.tsx` | New — route for Privacy & Account |
+| `src/components/nexit/settings-form.tsx` | Updated — reformatted; Privacy & Account link added |
+| `src/components/country-workspace/CountryWorkspace.tsx` | Updated — removed SECTIONS aside; added breadcrumb; full-width canvas |
+
+### Tests Run
+
+| Check | Result |
+|---|---|
+| TypeScript (via `next build`) | ✅ Pass — 0 errors |
+| ESLint (`npm run lint`) | ✅ Pass — 0 errors, 0 warnings |
+| Production build (`npm run build`) | ✅ Pass — 53 pages, compiled in 11.0s |
+
+### Known limitations / future work
+
+- **Change Email:** UI is scaffolded but shows a "coming soon" notice. Full email change requires a verification flow (send confirmation to new address before replacing). Not yet implemented.
+- **Sign Out of All Devices:** Since JWTs are stateless and stored only as cookies, this revokes the current device's cookie. A future session-table implementation would allow true multi-device revocation.
+- **Deletion audit record:** The deletion route currently deletes immediately. A formal `account_deletion_audit` table per spec is not yet created (appropriate for a future phase when user volume requires it).
+
+---
+
+## Phase 10 Summary (completed)
+
+**Logo reconnection, canvas width, and mobile nav audit**
+
+### Root cause
+
+The `Wordmark` component pointed to `/brand/nexit-wordmark-master-light.png` for light surfaces (login, signup, mobile top bar). That file **does not exist** in `public/brand/` — only `NexitWordMark.svg` is present. Every `<Wordmark />` call without `dark={true}` was rendering a broken 404 image.
+
+### Fixes
+
+| File | Change |
+|---|---|
+| `src/components/nexit/wordmark.tsx` | Both surfaces now use `/brand/NexitWordMark.svg`. The `dark` prop is kept for call-site compatibility but no longer changes the source. |
+| `src/components/nexit/app-shell.tsx` | Removed `max-w-[960px]` constraint from the main canvas. Canvas now fills the full available width per `04-LAYOUTS.md §17`. Padding set to `px-6 pt-6 pb-[72px] md:px-7` (matches spec `24px 28px 72px`). |
+| `src/components/nexit/marketing-mobile-nav.tsx` | Reformatted from minified single-line JSX. Added `NexitWordMark.svg` logo to the mobile menu drawer header. |
+| `src/app/(auth)/login/page.tsx` | Reformatted from minified single-line JSX. `<Wordmark>` now correctly renders the SVG on the light card surface. |
+| `src/app/(auth)/signup/page.tsx` | Reformatted from minified single-line JSX. `<Wordmark>` now correctly renders the SVG on the light card surface. |
+
+### Logo surface inventory (verified)
+
+| Location | File | Logo used | Status |
+|---|---|---|---|
+| Desktop sidebar (expanded) | `app-shell.tsx` line 438 | `NexitWordMark.svg` direct `<Image>` | ✅ |
+| Mobile drawer | `app-shell.tsx` line 645 | `NexitWordMark.svg` direct `<Image>` | ✅ |
+| Mobile top bar | `app-shell.tsx` line 590 | `<Wordmark compact>` → SVG | ✅ fixed |
+| Login page | `login/page.tsx` | `<Wordmark>` → SVG | ✅ fixed |
+| Signup page | `signup/page.tsx` | `<Wordmark>` → SVG | ✅ fixed |
+| Marketing hero | `(marketing)/page.tsx` | `<Wordmark dark>` → SVG | ✅ |
+| Marketing footer | `(marketing)/page.tsx` | `<Wordmark dark compact>` → SVG | ✅ |
+| SEO pages | `[seoSlug]/page.tsx` | `<Wordmark dark>` → SVG | ✅ |
+| Marketing mobile menu | `marketing-mobile-nav.tsx` | `NexitWordMark.svg` direct `<Image>` | ✅ fixed |
+| Favicon | `layout.tsx` | `faviconNexit.svg` | ✅ |
+
+### Tests Run
+
+| Check | Result |
+|---|---|
+| TypeScript (via `next build`) | ✅ Pass — 0 errors |
+| ESLint (`npm run lint`) | ✅ Pass — 0 errors, 0 warnings |
+| Production build (`npm run build`) | ✅ Pass — 53 pages, compiled in 11.2s |
+
+---
+
 ## Next Recommended Implementation Phase
 
-**Phase 9 — Greenbook disclosure pattern and legacy page review**
+**Phase 11 — Greenbook disclosure pattern + legacy page review**
 
 1. Review `GreenbookTab` inline provenance legend completeness.
 2. Review `countries/[slug]` legacy page for consistency or deprecation.
 3. Consider `CompareTab` source disclosure.
+4. Adaptive section ordering (06-ADAPTIVE-WORKSPACE.md) — rank-country-sections lib and sidebar PersonalizedOrder toggle.
