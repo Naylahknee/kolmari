@@ -5,18 +5,15 @@ import { useMemo, useState } from 'react'
 import { ArrowRight, Check, MapPin, Plus, Search, Star, Trash2, X } from 'lucide-react'
 import { CONTINENT_PATHS, WORLD_VIEWBOX } from '@/lib/world-continents'
 import { searchPlaces, flagEmoji, type WorldPlace } from '@/lib/world-places'
-import { COUNTRIES } from '@/lib/countries'
-import { STATUS_META, STATUS_ORDER, useNextinationBoard, type NextinationStatus, type SavedNextination } from '@/lib/nextination-board'
+import { countryWorkspaceSlug, STATUS_META, STATUS_ORDER, useNextinationBoard, type NextinationStatus, type SavedNextination } from '@/lib/nextination-board'
 
 // Equirectangular projection → percentage of the map box (matches world-continents viewBox).
 function toPercent(lat: number, lng: number) {
   return { left: ((lng + 180) / 360) * 100, top: ((90 - lat) / 180) * 100 }
 }
 
-const COUNTRY_SLUGS = new Set(COUNTRIES.map((c) => c.slug))
 function workspaceSlug(place: SavedNextination): string | null {
-  const slug = place.country.toLowerCase().replace(/\s+/g, '-')
-  return COUNTRY_SLUGS.has(slug) ? slug : null
+  return countryWorkspaceSlug(place.country)
 }
 
 export function NexitWorldBoard() {
