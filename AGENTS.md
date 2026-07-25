@@ -25,6 +25,9 @@ For Nexitnation Map work, also read `/docs/nexit/11-NEXITNATION-MAP.md`.
 
 For interaction, navigation, transition, or motion work, also read `/docs/nexit/12-INTERACTION-DESIGN.md`.
 
+For account, privacy, deletion, role, permission, or administrative work, also read `/docs/nexit/13-ACCOUNT-ADMINISTRATION.md`.
+
+
 ## Source-of-truth order
 
 When instructions conflict, follow this order:

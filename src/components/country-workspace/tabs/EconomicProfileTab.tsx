@@ -1,4 +1,5 @@
 import type { EconomicProfileContent, SourcedFact } from '@/lib/country-workspace/country-content'
+import { SourceFooter } from './SourceFooter'
 
 type DisplayMetric = SourcedFact & { label: string }
 
@@ -65,6 +66,7 @@ export function EconomicProfileTab({ content, countryName }: { content: Economic
       </section>
 
       <p className="rounded-xl border border-line bg-canvas px-4 py-3 text-xs text-muted">{content.disclaimer}</p>
+      <SourceFooter disclosure={content.disclosure} />
     </div>
   )
 }

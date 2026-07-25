@@ -166,6 +166,7 @@ export type EconomicProfileContent = {
   growingSectors: string[]
   personalInterpretation: string
   disclaimer: string
+  disclosure?: SectionDisclosure
 }
 
 export type CostCategory = {
@@ -220,6 +221,7 @@ const portugal: CountryContent = {
     growingSectors: ['Tech & SaaS', 'Remote-work infrastructure', 'Green energy', 'Logistics', 'Healthcare tech'],
     personalInterpretation: 'Your remote income is likely to stretch significantly outside Lisbon and Porto. Local wages are low relative to Western Europe — a remote income of $3,000–$4,000/mo places you well above the median Portuguese household, giving meaningful purchasing power for housing, food, and lifestyle. Costs in central Lisbon have risen sharply; regions like Porto, the Algarve, and the Alentejo offer better value.',
     disclaimer: 'Economic figures are research summaries from official sources and editorial review. Confirm current figures with INE, Banco de Portugal, and the Ministry of Finance before making financial decisions.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'World Bank · INE · Banco de Portugal (2023–2024)', status: 'official_source_verified' as const },
   },
   costOfLiving: {
     currency: 'EUR',
@@ -408,6 +410,7 @@ const spain: CountryContent = {
     growingSectors: ['Tech & startups', 'Renewable energy', 'Pharma & biotech', 'E-commerce & logistics'],
     personalInterpretation: 'Spain offers a higher GDP per capita than Portugal with a larger domestic economy. Remote income provides strong purchasing power outside Madrid and Barcelona. Local wages are modest — a €2,000/mo local salary is above average. Barcelona and Madrid carry higher living costs; Valencia, Málaga, and Seville offer meaningfully lower costs with excellent quality of life.',
     disclaimer: 'Economic figures are research summaries. Confirm with INE Spain, Banco de España, and the Agencia Tributaria.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'World Bank · INE Spain · Ministerio de Trabajo (2023–2024)', status: 'official_source_verified' as const },
   },
   costOfLiving: {
     currency: 'EUR',
@@ -591,6 +594,7 @@ const greece: CountryContent = {
     growingSectors: ['Tourism tech', 'Renewable energy', 'Tech startups (Athens)', 'Film production', 'Digital services'],
     personalInterpretation: 'Greece offers a lower cost of living than Western Europe, though local wages are modest. A remote income of $3,500/mo places you comfortably above median household income. Athens has become a growing tech and startup hub. Island life offers lower costs and exceptional quality of life outside peak tourist season — but services may be seasonal.',
     disclaimer: 'Figures are research summaries from official sources. Confirm with ELSTAT, Bank of Greece, and the Ministry of Finance.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'World Bank · ELSTAT · Ministry of Labour Greece (2023–2024)', status: 'official_source_verified' as const },
   },
   costOfLiving: {
     currency: 'EUR',
@@ -610,6 +614,7 @@ const greece: CountryContent = {
     topCity: 'Athens',
     budgetCities: ['Thessaloniki', 'Crete (Heraklion, Chania)', 'Patras', 'Ioannina'],
     disclaimer: 'Cost estimates are editorial planning ranges. Actual costs vary by city, island, and season. Not a financial forecast.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'Spitogatos · Numbeo · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   housing: {
     rentalRanges: [
@@ -631,6 +636,7 @@ const greece: CountryContent = {
       { name: 'Rightmove Greece', url: 'https://www.rightmove.co.uk/overseas-property/in-Greece.html' },
     ],
     notes: 'Athens rental prices have risen significantly post-2021 due to Airbnb pressure and increased demand. Short-term furnished options are abundant. Island rentals are highly seasonal — off-season prices are substantially lower.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'Spitogatos · XE.gr · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   employment: {
     topSectors: ['Tourism & hospitality', 'Shipping & maritime', 'Technology', 'Education', 'Agriculture', 'Healthcare'],
@@ -646,6 +652,7 @@ const greece: CountryContent = {
     remoteEnvironment: 'Greece introduced a Digital Nomad Visa in 2021. Athens co-working scene is growing. Island co-working exists but is limited. Internet quality is good in urban areas, patchy on smaller islands.',
     networkingGroups: 'Athens Startups, Internations Athens, Digital Nomads Greece, ELLAda (tech community).',
     disclaimer: 'Employment information is for research. Confirm requirements with DYPA and relevant employers.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'ELSTAT · DYPA · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   healthcare: {
     publicSystem: 'The ESY (National Health System) provides public healthcare. Quality varies significantly between Athens/Thessaloniki and rural/island areas. Long waits and underfunding are documented issues.',
@@ -659,6 +666,7 @@ const greece: CountryContent = {
     estimatedInsuranceRange: '€60–€200/month for an individual, depending on age and coverage.',
     accessibilityNotes: 'Urban areas are improving accessibility infrastructure. Island cobblestones and hilly terrain present challenges. New public buildings meet EU standards.',
     disclaimer: 'Confirm eligibility with EOPYY (National Organisation for Healthcare Services Provision) and your insurer.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'EOPYY · Ministry of Health Greece · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   education: {
     publicSchools: 'Free for legal residents. Instruction in Greek. Quality varies by region.',
@@ -672,6 +680,7 @@ const greece: CountryContent = {
     studyPathways: 'Student visa for non-EU students. EU students on national terms.',
     tuitionRange: 'Public: largely free for EU students. Postgrad fees vary. Private: €3,000–€10,000/year.',
     disclaimer: 'Confirm enrollment and fees with institutions and the Ministry of Education.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'Ministry of Education Greece · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   transportation: {
     publicTransit: 'Athens has metro, tram, bus, and suburban rail. Unified ticket system. Monthly pass ~€30. Thessaloniki is primarily bus-dependent.',
@@ -684,6 +693,7 @@ const greece: CountryContent = {
     rideshare: 'Uber and Beat operate in Athens. Traditional taxis are regulated.',
     cycling: 'Limited cycling infrastructure. Some shared-bike schemes in Athens. Hilly terrain in many areas.',
     accessibility: 'Improving in central Athens. Cobblestones and terrain present challenges. Metro is generally accessible.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'Hellenic Train · OASA · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   legalTaxes: {
     taxResidency: 'Tax resident if spending more than 183 days per year in Greece, or if primary household is in Greece.',
@@ -697,6 +707,7 @@ const greece: CountryContent = {
     propertyOwnership: 'No general restrictions for EU citizens. Non-EU buyers may face restrictions in border zones. Transfer tax (FMA) typically 3.09%. Annual ENFIA property tax applies.',
     businessRegistration: 'Company registration via GEMI (General Electronic Commercial Registry). Confirm tax obligations.',
     disclaimer: 'Not legal or tax advice. Confirm with a Greek accountant (logistis) or lawyer.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'AADE · Immigration Directorate · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   dailyLife: {
     groceryShopping: 'AB Vassilopoulos, Sklavenitis, Lidl, and local laiki (street markets) are the main options. Fresh produce is excellent and affordable.',
@@ -709,6 +720,7 @@ const greece: CountryContent = {
     safety: 'Generally safe. Athens petty theft in tourist areas (Monastiraki, Omonia) is the main concern. Violent crime is rare. Islands are very safe.',
     paceOfLife: 'Relaxed, especially outside Athens. Summers are festive and social. The Greek concept of kefi (joy, high spirits) shapes social interaction.',
     recreation: 'Beaches, island-hopping, hiking (Mount Olympus, Samaria Gorge), archaeology, food and wine, sailing, diving.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'Editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   familyPets: {
     childcare: 'Municipal crèches and private nurseries. Public places are subsidised but limited. Private nurseries: €200–€500/month.',
@@ -720,6 +732,7 @@ const greece: CountryContent = {
     vetCare: 'Widely available in urban areas. Quality is generally good. Emergency vet services in major cities.',
     petFriendlyHousing: 'Landlord consent required. Dog-friendly beaches exist in some areas — seasonal restrictions apply.',
     multigenerational: 'Family is central to Greek life. Multigenerational living is very common. Yiayia (grandmother) culture is strong — family networks often provide childcare.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'MINAGRIC · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   greenbook: {
     communityFit: 'Greece has a growing international community, especially in Athens and on popular islands. Outside tourist areas, communities are predominantly Greek.',
@@ -765,6 +778,7 @@ const estonia: CountryContent = {
     growingSectors: ['Cybersecurity', 'SaaS & tech startups', 'Green energy', 'E-governance & GovTech', 'Healthcare IT'],
     personalInterpretation: 'Estonia has the most advanced digital infrastructure in Europe — nearly all government services are online. Tallinn has a vibrant startup and tech ecosystem. Local wages are rising but still below Western European averages. A remote income of $4,000–$5,000/mo provides very comfortable living in Tallinn. Winters are cold and dark — a real lifestyle consideration.',
     disclaimer: 'Figures are research summaries from official sources. Confirm with Statistics Estonia, Bank of Estonia, and the Ministry of Finance.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'World Bank · Statistics Estonia · Ministry of Finance Estonia (2023–2024)', status: 'official_source_verified' as const },
   },
   costOfLiving: {
     currency: 'EUR',
@@ -784,6 +798,7 @@ const estonia: CountryContent = {
     topCity: 'Tallinn',
     budgetCities: ['Tartu', 'Pärnu', 'Narva'],
     disclaimer: 'Cost estimates are editorial planning ranges. Winter utility costs are a significant variable. Not a financial forecast.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'KV.ee · Numbeo · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   housing: {
     rentalRanges: [
@@ -802,6 +817,7 @@ const estonia: CountryContent = {
       { name: 'KV.ee', url: 'https://www.kv.ee' },
     ],
     notes: 'Tallinn rents have risen sharply since 2022. Kalamaja and Telliskivi are popular creative-class neighbourhoods. Utility costs (heating) are significant in winter — factor this into monthly budget planning.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'KV.ee · City24.ee · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   employment: {
     topSectors: ['Information technology', 'Fintech & startups', 'Manufacturing', 'Logistics', 'Education', 'Public sector'],
@@ -817,6 +833,7 @@ const estonia: CountryContent = {
     remoteEnvironment: 'Estonia pioneered the Digital Nomad Visa (launched 2020) and e-Residency. Co-working spaces are well-established in Tallinn. Excellent digital infrastructure.',
     networkingGroups: 'Startup Estonia, Tehnopol, Garage48, Internations Tallinn, Women in Tech Estonia.',
     disclaimer: 'Confirm employment requirements with EURES Estonia and relevant employers.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'Statistics Estonia · Work in Estonia · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   healthcare: {
     publicSystem: 'Universal healthcare via the Estonian Health Insurance Fund (EHIF / Haigekassa). High quality relative to cost. Wait times for specialists exist but are manageable.',
@@ -830,6 +847,7 @@ const estonia: CountryContent = {
     estimatedInsuranceRange: '€50–€150/month for an individual, depending on coverage.',
     accessibilityNotes: 'Tallinn\'s old town cobblestones present challenges. Modern areas and public transport are generally accessible.',
     disclaimer: 'Confirm eligibility with the Estonian Health Insurance Fund (Haigekassa) and your insurer.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'Haigekassa · Ministry of Social Affairs Estonia · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   education: {
     publicSchools: 'Free, high-quality public schooling. Estonia ranks among the top globally in PISA scores. Instruction in Estonian (Russian-language schools phasing out). Strong STEM focus.',
@@ -843,6 +861,7 @@ const estonia: CountryContent = {
     studyPathways: 'Student visa for non-EU students. EU students on national terms.',
     tuitionRange: 'Public: free or low-cost for EU students in Estonian-language programmes. English programmes typically €1,660–€4,000/year. Private: varies.',
     disclaimer: 'Confirm enrollment and fees with institutions and the Estonian Ministry of Education.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'Ministry of Education Estonia · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   transportation: {
     publicTransit: 'Tallinn has free public transport for registered residents (trams, buses, trolleybuses). One of the best transit-per-cost ratios in Europe.',
@@ -855,6 +874,7 @@ const estonia: CountryContent = {
     rideshare: 'Bolt (founded in Estonia) dominates. Uber also operates. Taxis regulated.',
     cycling: 'Tallinn has a growing cycling network. City bike-sharing (Tartu and Tallinn). Terrain is flat — cycling-friendly.',
     accessibility: 'Modern Tallinn infrastructure is accessible. Old Town is challenging due to cobblestones and hills.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'Elron · Tallinn city transport · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   legalTaxes: {
     taxResidency: 'Tax resident if you have a permanent home in Estonia or spend more than 183 days in a 12-month period.',
@@ -868,6 +888,7 @@ const estonia: CountryContent = {
     propertyOwnership: 'Generally available to EU citizens. Restrictions on land for non-EU buyers in some areas.',
     businessRegistration: 'Estonia\'s e-Residency allows non-residents to register and manage an EU company online. Company formation is fast (online, 1 day) via the Business Register.',
     disclaimer: 'Not legal or tax advice. Confirm with a licensed Estonian accountant or lawyer. E-Residency tax obligations depend on substance rules — get specific advice.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'EMTA · PPA · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   dailyLife: {
     groceryShopping: 'Rimi, Maxima, Prisma, Selver are the main chains. Locally grown food is available at farmers markets. Food costs are moderate by European standards.',
@@ -880,6 +901,7 @@ const estonia: CountryContent = {
     safety: 'One of the safest countries in Europe. Low violent crime. Tallinn old town has pickpocket risk in tourist season.',
     paceOfLife: 'Efficient and digital-first. Bureaucracy is almost entirely online. Work-life balance matters. Nature is very accessible — forests, coastline, and islands within short drives.',
     recreation: 'Hiking, cycling, sauna culture, skiing (cross-country), bog walks, island trips (Saaremaa, Hiiumaa), music festivals, and a vibrant Tallinn cultural scene.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'Editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   familyPets: {
     childcare: 'Municipal crèches — free or subsidised for residents. Waiting lists in Tallinn. Private nurseries ~€200–€450/month.',
@@ -891,6 +913,7 @@ const estonia: CountryContent = {
     vetCare: 'Good quality veterinary care in Tallinn and Tartu.',
     petFriendlyHousing: 'Landlord consent required. Dog-friendly parks and forests are abundant.',
     multigenerational: 'Nuclear family model more common than in Southern Europe. Elder care is increasingly institutionalised or through home-care services.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'Editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   greenbook: {
     communityFit: 'Tallinn has a growing international expat and digital nomad community. The tech and startup scene is multicultural. Outside Tallinn, communities are predominantly Estonian or Russian-speaking.',
@@ -937,6 +960,7 @@ const mexico: CountryContent = {
     growingSectors: ['Nearshoring (driven by US supply chain)', 'Fintech', 'Tech startups', 'Renewable energy', 'E-commerce & logistics'],
     personalInterpretation: 'Mexico offers exceptional purchasing power for foreign-income earners. A remote income of $1,500–$2,500/mo provides a comfortable to excellent lifestyle in most Mexican cities. Mexico City (CDMX), Guadalajara, Mérida, Puerto Vallarta, and Oaxaca have established expat communities. Safety varies dramatically by city and neighbourhood — research your specific destination carefully.',
     disclaimer: 'Figures are research summaries from official sources. Confirm with INEGI, Banxico, and the Secretaría de Hacienda.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'World Bank · INEGI · CONASAMI (2023–2024)', status: 'official_source_verified' as const },
   },
   costOfLiving: {
     currency: 'USD',
@@ -956,6 +980,7 @@ const mexico: CountryContent = {
     topCity: 'Mexico City',
     budgetCities: ['Mérida', 'Oaxaca', 'Guanajuato', 'San Cristóbal de las Casas', 'Puebla'],
     disclaimer: 'Cost estimates are editorial planning ranges in USD equivalents. Peso exchange rates affect real costs — USD earners benefit significantly. Safety context varies by city. Not a financial forecast.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'Numbeo · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   housing: {
     rentalRanges: [
@@ -978,6 +1003,7 @@ const mexico: CountryContent = {
       { name: 'Facebook Marketplace / local groups', url: 'https://www.facebook.com/marketplace' },
     ],
     notes: 'Rent in Mexico City\'s popular expat neighbourhoods has risen sharply due to remote-work influx. Contracts are often in pesos — USD income provides a significant advantage. Always use a notario for formal property transactions.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'Inmuebles24 · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   employment: {
     topSectors: ['Technology & nearshoring', 'Tourism & hospitality', 'Manufacturing', 'Finance', 'Education', 'Creative industries'],
@@ -993,6 +1019,7 @@ const mexico: CountryContent = {
     remoteEnvironment: 'Mexico is one of the top destinations for US and Canadian remote workers due to proximity and time zones. Fibre internet is expanding. Co-working spaces are excellent in CDMX, Guadalajara, and beach destinations.',
     networkingGroups: 'Internations Mexico City, Mexico City Tech, Expats in Mexico City (Facebook), Women in Tech Mexico.',
     disclaimer: 'Confirm employment requirements with IMSS and relevant employers. Work authorisation required for formal employment.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'INEGI · IMSS · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   healthcare: {
     publicSystem: 'IMSS (social security) and ISSSTE (public sector workers) provide public healthcare for enrolled employees. IMSS Bienestar is expanding coverage. Quality varies widely by facility and location.',
@@ -1006,6 +1033,7 @@ const mexico: CountryContent = {
     estimatedInsuranceRange: '$50–$150 USD/month for international health insurance covering Mexico and emergencies abroad. Local-only plans can be even lower.',
     accessibilityNotes: 'Accessibility infrastructure is improving in major cities. Historic centres and uneven footpaths present challenges. Private medical facilities are generally well-equipped.',
     disclaimer: 'Confirm eligibility with IMSS and your insurer. Healthcare quality varies significantly by city and facility.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'IMSS · Ministry of Health Mexico · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   education: {
     publicSchools: 'Free public schooling for residents. Instruction in Spanish. Quality varies significantly by state and area.',
@@ -1019,6 +1047,7 @@ const mexico: CountryContent = {
     studyPathways: 'Student visa for non-immigrants. Confirm process with INM (Instituto Nacional de Migración).',
     tuitionRange: 'Public universities: largely free or very low cost. Tec de Monterrey: $5,000–$15,000 USD/year. International schools: vary.',
     disclaimer: 'Confirm enrollment and fees with institutions and the SEP.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'SEP · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   transportation: {
     publicTransit: 'Mexico City has an extensive metro (one of the world\'s largest and cheapest), metrobús, and light rail. Fare: MXN $5 (about $0.30 USD). Other cities: primarily bus-dependent.',
@@ -1031,6 +1060,7 @@ const mexico: CountryContent = {
     rideshare: 'Uber is the dominant and highly trusted option. InDriver and Cabify also operate. Traditional taxis require caution — use app-based services.',
     cycling: 'Ecobici bike-sharing in CDMX. Growing cycling infrastructure in Roma, Condesa, and Polanco. Cycling is less common in most other cities.',
     accessibility: 'Uneven — improving in modern areas. CDMX metro has limited accessibility. Private cars and Uber are the most accessible transport options.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'CDMX Metro · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   legalTaxes: {
     taxResidency: 'Tax resident in Mexico if you have a home there or spend more than 183 days per year. Foreign-source income is generally taxable for residents.',
@@ -1044,6 +1074,7 @@ const mexico: CountryContent = {
     propertyOwnership: 'Possible via fideicomiso (bank trust) in restricted zones. Free ownership outside restricted zones. Use a licensed notario for all transactions.',
     businessRegistration: 'Possible for foreign residents. RFC required. Various corporate structures available. Confirm with a Mexican accountant or abogado.',
     disclaimer: 'Not legal or tax advice. Confirm all details with a Mexican contador público and lawyer. Rules change frequently.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'SAT · INM · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   dailyLife: {
     groceryShopping: 'Walmart, Soriana, Chedraui, Costco Mexico are main chains. Local mercados offer fresh produce, incredible variety, and low prices. Food budget: $300–$600 USD/month for a couple eating well.',
@@ -1056,6 +1087,7 @@ const mexico: CountryContent = {
     safety: 'Highly variable. CDMX Roma, Condesa, Polanco: generally safe. Many other cities and beach destinations: generally safe in specific areas. Travel advisories exist for some states. Research your specific destination. Use common sense: app-based transport, avoid flashing wealth.',
     paceOfLife: 'Generally relaxed and social. Emphasis on family and community. Mañana culture — flexibility with time — is real but varies by context. Life can be vibrant, festive, and deeply community-oriented.',
     recreation: 'Beaches, ruins, cenotes, markets, mezcal, music, food, football, Day of the Dead celebrations, surfing, hiking (Oaxaca, Chiapas), colonial architecture.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'Editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   familyPets: {
     childcare: 'Estancias infantiles (subsidised crèches) available. Private nurseries: MXN $3,000–$8,000/month. Au pairs and nannies are affordable relative to the US.',
@@ -1067,6 +1099,7 @@ const mexico: CountryContent = {
     vetCare: 'Good quality and very affordable veterinary care in major cities. Pet culture is strong in CDMX.',
     petFriendlyHousing: 'Landlord consent required. Dog-friendly parks exist. CDMX Condesa and Roma have many dog-friendly spaces.',
     multigenerational: 'Family is the centre of Mexican life. Multigenerational living is the norm in most Mexican households. Extended family networks provide significant practical support.',
+    disclosure: { lastVerified: '2026-01-01', sourceNote: 'SENASICA · editorial review (2024–2025)', status: 'editorially_reviewed' as const },
   },
   greenbook: {
     communityFit: 'Mexico has a large, established expat community — particularly from the US, Canada, and increasingly Europe. Popular destinations include CDMX, Puerto Vallarta, San Miguel de Allende, Mérida, and Oaxaca.',

@@ -2,7 +2,7 @@
 
 ## Last Updated
 
-Phase 6 — Nexitnation map accessibility, region workspace fix, source disclosure
+Phase 7 — EconomicProfileTab disclosure audit; greenbook type fix
 
 ---
 
@@ -175,12 +175,43 @@ Authentication, database schema, API contracts, Mapbox behavior, and Cloudflare 
 
 ---
 
+## Phase 7 Summary (completed)
+
+**Audit findings and fix.**
+
+### What was already done (found in audit)
+
+- `EconomicProfileContent` type already had `disclosure?: SectionDisclosure` — no change needed.
+- `EconomicProfileTab` already called `<SourceFooter disclosure={content.disclosure} />` — no change needed.
+- All five countries (Portugal, Spain, Greece, Estonia, Mexico) already had `disclosure` populated on their `economic` section — no change needed.
+- Greece and Mexico already had `disclosure` populated on all non-greenbook sections — no change needed.
+
+### What was broken (found in audit)
+
+**TypeScript build error:** Greece (`greenbook.disclosure`) and Estonia (`greenbook.disclosure`) had orphaned `disclosure` fields inside their `greenbook` objects. `GreenbookSection` does not declare `disclosure?`. This caused a `Type error: Object literal may only specify known properties` failure in the production build.
+
+**Why these were removed, not type-extended:** Per Phase 5 notes and `08-CONTENT-STANDARDS.md`, the Greenbook section has its own inline disclaimer and provenance treatment (community-reported vs verified resource labeling). Adding `disclosure?: SectionDisclosure` to `GreenbookSection` would incorrectly imply a standard source-footer should appear on Greenbook, conflating two different trust patterns. The orphaned fields were removed.
+
+### Files Changed
+
+| File | Change |
+|---|---|
+| `src/lib/country-workspace/country-content.ts` | Removed `disclosure` from `greece.greenbook` and `estonia.greenbook` (orphaned fields — type error). |
+
+### Tests Run
+
+| Check | Result |
+|---|---|
+| TypeScript (via `next build`) | ✅ Pass — 0 errors |
+| ESLint (`npm run lint`) | ✅ Pass — 0 errors, 0 warnings |
+| Production build (`npm run build`) | ✅ Pass — 48 pages, compiled in 13.0s |
+
+---
+
 ## Next Recommended Implementation Phase
 
-**Phase 7 — `EconomicProfileTab` section disclosure + Greece/Mexico disclosure fields**
+**Phase 8 — Greenbook disclosure pattern and Compare tab**
 
-1. Add `disclosure?: SectionDisclosure` to `EconomicProfileContent` type.
-2. Add `disclosure` fields to Greece and Mexico content in `country-content.ts`.
-3. Add `<SourceFooter disclosure={content.disclosure} />` to `EconomicProfileTab`.
-4. Consider adding the `CompareTab` source disclosure for comparison data.
-5. After data completeness: review the `countries/[slug]` legacy page for consistency with the new workspace (or deprecate in favor of `/nextinations/[countrySlug]`).
+1. Review `GreenbookTab` to ensure its inline provenance legend is complete and clearly distinguishes verified resources, editorial context, and community reports.
+2. Consider adding `CompareTab` source disclosure for comparison data.
+3. After data completeness: review the `countries/[slug]` legacy page for consistency with the new workspace (or deprecate in favor of `/nextinations/[countrySlug]`).
