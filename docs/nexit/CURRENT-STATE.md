@@ -460,9 +460,72 @@ Region badges and grid rows show `Nexit Match X%` only when `profileComplete ===
 
 ---
 
+## Phase 12 Summary (completed)
+
+**Landing page mini experiences**
+
+### What changed
+
+Three interactive mini experiences added to the landing page — one per existing panel card. Each experience opens in a modal dialog triggered by the panel CTA. No routes, database writes, auth changes, or new design-system tokens were introduced.
+
+#### `src/components/nexit/landing-mini-experiences.tsx` (new)
+
+Single client component file containing:
+
+- **`LandingMiniExperienceResult` type** — typed result object for potential future onboarding handoff (`experience`, `answers`, `teaserTitle`, `teaserItems`, `completedAt`)
+- **Experience 1 — Find Your Starting Places** — 4 questions; deterministic regional starter suggestions by `region` + `priority` answer; cautious copy (`You may want to start with:`); no Match Score, no eligibility claims
+- **Experience 2 — Explore Your Pathways** — 4 questions; deterministic pathway-category list from `situation` + `ties` + `willingness` answers; required disclosure (`This is a starting point for research, not a legal eligibility determination.`)
+- **Experience 3 — Discover Your Nexit Stage** — 4 questions; deterministic three-stage assignment (`Discovery Stage` / `Research Stage` / `Planning Stage`) from `countryInMind` + `idealTimeline` + `obstacle` answers; no percentage or readiness score
+- **`ProgressBar`** — accessible `role="progressbar"` with `aria-valuenow/min/max`; gold filled segments; `X of 4` text
+- **`QuestionStep`** — options rendered as `role="radio"` buttons with `aria-checked`; navy-filled selected state; `Check` icon inside circular indicator; visible focus ring
+- **`TeaserScreen`** — result shown immediately after question 4; no account creation required before this screen; disclosure note shown for Pathways experience
+- **`FinalScreen`** — shared across all three experiences; links to `/signup?next=%2Fnexitnation` (existing route); secondary "Continue exploring" closes modal; `Already have an account? Sign in` links to `/login`
+- **`MiniExperienceModal`** — `role="dialog" aria-modal="true"`; focus trap with Tab/Shift-Tab; Escape closes; background scroll locked; progress phases: `questions` → `teaser` → `final`; back button navigates all phases; answers preserved in local state while modal is open; `backdrop-blur` overlay
+- **`MiniExperienceTrigger`** — drop-in `<button>` replacement for each panel CTA; receives `experience` ID and `label`
+
+#### `src/app/(marketing)/page.tsx` (updated)
+
+- Added `MiniExperienceTrigger` import
+- `nexitSteps` entries given `experience` field (`'starting-places'`, `'pathways'`, `'nexit-stage'`)
+- Action labels updated: `Choose your Nexitnation` → `Find Your Starting Places`; `Get matched` → `Explore Your Pathways`; `Start Your Nexit` → `Discover Your Nexit Stage`
+- Panel CTA `<Link>` replaced with `<MiniExperienceTrigger>` for all three cards; outer page remains a server component (client boundary is inside `MiniExperienceTrigger`)
+
+### What was preserved
+
+- Panel card images, titles, copy, layout, and card geometry — unchanged
+- All existing landing-page sections (hero, features bar, testimonial, stats, community, footer) — unchanged
+- `/signup?next=%2Fnexitnation` and `/login` routes — unchanged (no duplicate routes created)
+- Auth, database, API contracts, session handling — unchanged
+- Design system tokens — no new tokens added
+
+### Data integrity
+
+- No Match Scores displayed
+- No eligibility or legal conclusions
+- No fabricated country statistics
+- Teaser results are deterministic based on user-selected answers
+- All country suggestions use cautious language (`commonly researched for`, `often explored for`, `worth comparing for`)
+- Answers held in component state only; not written to localStorage or database
+
+### Files Changed
+
+| File | Change |
+|---|---|
+| `src/components/nexit/landing-mini-experiences.tsx` | New — all three mini experiences, modal shell, progress bar, teaser screens, final screen |
+| `src/app/(marketing)/page.tsx` | Updated — panel CTAs wired to `MiniExperienceTrigger` |
+
+### Tests Run
+
+| Check | Result |
+|---|---|
+| TypeScript (via `next build`) | ✅ Pass — 0 errors |
+| Production build (`npm run build`) | ✅ Pass — 53 pages, compiled in 15.8s |
+
+---
+
 ## Next Recommended Implementation Phase
 
-**Phase 12 — Greenbook disclosure pattern + adaptive section ordering**
+**Phase 13 — Greenbook disclosure pattern + adaptive section ordering**
 
 1. Review `GreenbookTab` inline provenance legend completeness.
 2. Consider `CompareTab` source disclosure.
