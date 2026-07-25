@@ -1,37 +1,31 @@
+import Image from 'next/image'
 import Link from 'next/link'
-import {
-  CalendarCheck,
-  GraduationCap,
-  HeartHandshake,
-  Landmark,
-  PlaneTakeoff,
-  WalletCards,
-} from 'lucide-react'
+import { PlaneTakeoff } from 'lucide-react'
 
 const questions = [
   {
     question: 'Could my family actually afford this?',
-    icon: WalletCards,
+    icon: '/icons/questions/family-affordability.png',
   },
   {
     question: 'Where would we feel safe and welcomed?',
-    icon: HeartHandshake,
+    icon: '/icons/questions/safety-welcome.png',
   },
   {
     question: 'Are there visas I already qualify for?',
-    icon: Landmark,
+    icon: '/icons/questions/visa-pathways.png',
   },
   {
     question: 'What happens to healthcare and schools?',
-    icon: GraduationCap,
+    icon: '/icons/questions/healthcare-schools.png',
   },
   {
     question: 'Can I move without being rich?',
-    icon: PlaneTakeoff,
+    icon: '/icons/questions/moving-budget.png',
   },
   {
     question: 'How do I turn “someday” into an actual plan?',
-    icon: CalendarCheck,
+    icon: '/icons/questions/action-plan.png',
   },
 ]
 
@@ -66,23 +60,22 @@ export function QuestionsSection() {
         </div>
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {questions.map(({ question, icon: Icon }, index) => (
+          {questions.map(({ question, icon }) => (
             <article
               key={question}
               className="group relative min-h-[230px] overflow-hidden rounded-2xl border border-white/60 bg-[#F8F8F6] px-7 py-8 text-[#17305B] transition duration-300 hover:-translate-y-1 hover:border-[#F3C516] hover:shadow-[0_18px_45px_rgba(0,0,0,0.18)]"
             >
               <div className="flex h-full flex-col">
-                <div className="mb-8 flex items-start justify-between gap-4">
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#17305B]/[0.06]">
-                    <Icon
-                      aria-hidden="true"
-                      className="h-8 w-8 stroke-[1.6] text-[#17305B]"
+                <div className="mb-8">
+                  <div className="relative h-20 w-20 shrink-0">
+                    <Image
+                      src={icon}
+                      alt=""
+                      fill
+                      sizes="80px"
+                      className="object-contain"
                     />
                   </div>
-
-                  <span className="text-sm font-medium text-[#17305B]/35">
-                    0{index + 1}
-                  </span>
                 </div>
 
                 <h3 className="max-w-[19rem] font-display text-2xl leading-snug tracking-tight sm:text-[1.7rem]">
