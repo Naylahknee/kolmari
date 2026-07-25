@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
-import { NexitnationMapbox } from '@/components/nexit/NexitnationMapbox'
 import { requireCurrentUser } from '@/lib/auth'
 import { NEXIT_LEXICON } from '@/lib/lexicon'
 import { loadNexitnationProfile } from '@/lib/userProfile'
+import { NexitnationMapLoader } from '@/components/nexit/NexitnationMapLoader'
 
 export const metadata: Metadata = {
   title: 'Nexitnation Map | Nexit',
@@ -21,11 +21,11 @@ export default async function NexitnationPage() {
           {NEXIT_LEXICON.mapTitle}
         </h1>
         <p className="mt-2 max-w-2xl text-muted">
-          Select a region on the live map to open its Nextination page.
+          Select a region on the map to open its Nextination guide.
         </p>
       </header>
 
-      <NexitnationMapbox profile={{ complete: profile !== null, matches: profile?.regionMatches ?? null }} />
+      <NexitnationMapLoader profile={{ complete: profile !== null, matches: profile?.regionMatches ?? null }} />
     </div>
   )
 }
