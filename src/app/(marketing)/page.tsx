@@ -15,6 +15,7 @@ import {
 import { MarketingMobileNav } from '@/components/nexit/marketing-mobile-nav'
 import { Wordmark } from '@/components/nexit/wordmark'
 import { MiniExperienceTrigger } from '@/components/nexit/landing-mini-experiences'
+import { QuestionsSection } from '@/components/nexit/questions-section'
 
 const nexitSteps = [
   {
@@ -134,20 +135,9 @@ export default function LandingPage() {
             ))}
           </div>
         </section>
-
-        <section className="pb-16">
-          <div className="relative grid min-h-44 items-center overflow-hidden rounded-[26px] bg-navy px-7 py-8 text-white sm:grid-cols-[120px_1fr_210px] sm:px-10">
-            <div className="hidden size-24 rounded-full border-[3px] border-gold/60 sm:block" aria-hidden />
-            <div className="relative z-10">
-              <blockquote className="font-display text-2xl font-bold italic leading-relaxed sm:text-[1.65rem]">
-                “Nexit gave me a clear plan and the confidence to finally make my move. Best decision ever!”
-              </blockquote>
-              <p className="mt-4 text-sm font-extrabold text-gold">— Maya R., Bali, Indonesia</p>
-            </div>
-            <Image src="/images/airplane.png" alt="" width={440} height={278} className="pointer-events-none absolute -right-5 bottom-0 w-64 opacity-65 brightness-0 invert sm:relative sm:right-auto sm:w-[210px]" />
-          </div>
-        </section>
       </div>
+
+      <QuestionsSection />
 
       <section className="w-full bg-navy-deep py-10 text-white" aria-label="Nexit at a glance">
         <div className="mx-auto grid max-w-[1180px] grid-cols-2 gap-y-9 px-5 text-center md:grid-cols-4 lg:px-0">
