@@ -1,11 +1,9 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import dynamic from 'next/dynamic'
+import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import mapboxgl from 'mapbox-gl'
-import { ArrowRight, Globe2, LayoutGrid, MapPinned } from 'lucide-react'
-import 'mapbox-gl/dist/mapbox-gl.css'
-import './nexitnation-map.css'
+import { ArrowRight, Globe2, LayoutGrid } from 'lucide-react'
 import { regionList, type RegionSlug } from '@/lib/nexitnation-data'
 import { CountriesView } from './countries-browser'
 
@@ -18,122 +16,31 @@ type Props = {
   initialQuery: string
 }
 
-// ─── Region badge helpers ────────────────────────────────────────────────────
+// ─── Lazy-loaded Mapbox canvas ────────────────────────────────────────────────
+// Imported with ssr:false so the heavy Mapbox GL bundle is code-split and the
+// component is only evaluated in the browser. The dynamic import also means
+// the map never touches a hidden container (zero-dimension on first mount
+// when `hidden` attr is present).
 
-function createBadgeElement(
-  region: { slug: RegionSlug; name: string; countryCount: number },
-  matchValue: number | undefined,
-  profileComplete: boolean,
-  onNavigate: (slug: RegionSlug) => void,
-): HTMLButtonElement {
-  const el = document.createElement('button')
-  el.className = 'custom-region-badge'
-  el.setAttribute('aria-label', `${region.name}, ${region.countryCount} countries`)
-  el.type = 'button'
-
-  const nameEl = document.createElement('span')
-  nameEl.className = 'custom-region-badge__name'
-  nameEl.textContent = region.name
-
-  const countEl = document.createElement('span')
-  countEl.className = 'custom-region-badge__count'
-  countEl.textContent = `${region.countryCount} countries`
-
-  el.appendChild(nameEl)
-  el.appendChild(countEl)
-
-  // Only show Nexit Match when profile is complete and value is real
-  if (profileComplete && matchValue !== undefined) {
-    const matchEl = document.createElement('span')
-    matchEl.className = 'custom-region-badge__match'
-    matchEl.textContent = `Nexit Match ${matchValue}%`
-    el.appendChild(matchEl)
-  }
-
-  el.addEventListener('click', () => onNavigate(region.slug))
-  return el
-}
-
-// ─── Map panel ───────────────────────────────────────────────────────────────
-
-function MapPanel({ profileComplete, regionMatches }: { profileComplete: boolean; regionMatches: Record<RegionSlug, number> | null }) {
-  const router = useRouter()
-  const containerRef = useRef<HTMLDivElement>(null)
-  const mapRef = useRef<mapboxgl.Map | null>(null)
-  const markersRef = useRef<mapboxgl.Marker[]>([])
-  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
-  const [mapError, setMapError] = useState(false)
-
-  const navigateToRegion = useCallback((slug: RegionSlug) => {
-    router.push(`/nexitnation/${slug}`)
-  }, [router])
-
-  useEffect(() => {
-    if (!token || mapError || !containerRef.current || mapRef.current) return
-
-    const map = new mapboxgl.Map({
-      accessToken: token,
-      container: containerRef.current,
-      style: 'mapbox://styles/mapbox/light-v11',
-      center: [0, 20],
-      zoom: 1.5,
-      projection: 'mercator',
-      attributionControl: false,
-    })
-    mapRef.current = map
-
-    map.on('load', () => {
-      map.resize()
-      for (const region of regionList) {
-        const matchValue = regionMatches?.[region.slug]
-        const el = createBadgeElement(region, matchValue, profileComplete, navigateToRegion)
-        const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
-          .setLngLat(region.center)
-          .addTo(map)
-        markersRef.current.push(marker)
-      }
-    })
-
-    map.on('error', (event) => {
-      const message = (event.error as Error | undefined)?.message ?? ''
-      if (/access token|unauthorized|401/i.test(message)) setMapError(true)
-    })
-
-    return () => {
-      markersRef.current.forEach((m) => m.remove())
-      markersRef.current = []
-      map.remove()
-      mapRef.current = null
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, mapError])
-
-  if (!token || mapError) {
-    return (
-      <section className="rounded-[24px] bg-navy-deep p-6 text-white sm:p-8" aria-label="Nexitnation regions">
-        <div className="flex items-start gap-4">
-          <span className="mt-0.5 grid size-10 shrink-0 place-items-center rounded-xl bg-gold text-navy" aria-hidden="true">
-            <MapPinned size={18} />
-          </span>
-          <div>
-            <p className="font-bold">Interactive map unavailable.</p>
-            <p className="mt-1 text-sm text-white/65">
-              Set{' '}
-              <code className="rounded bg-white/10 px-1 py-0.5 text-xs">NEXT_PUBLIC_MAPBOX_TOKEN</code>
-              {' '}to enable the live map. All regions are still accessible below.
-            </p>
-          </div>
+const MapboxCanvas = dynamic(
+  () => import('./NexitnationMapbox').then((m) => m.NexitnationMapbox),
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        className="flex items-center justify-center rounded-[24px] border border-gold/20 bg-navy-deep"
+        style={{ height: 560 }}
+        role="status"
+        aria-label="Map loading"
+      >
+        <div className="flex flex-col items-center gap-3 text-white/60">
+          <div className="size-8 animate-spin rounded-full border-2 border-white/20 border-t-gold" aria-hidden="true" />
+          <span className="text-sm">Loading map…</span>
         </div>
-      </section>
-    )
-  }
-
-  return (
-    <div className="nexit-mapbox" aria-hidden="true">
-      <div ref={containerRef} className="absolute inset-0" />
-    </div>
-  )
-}
+      </div>
+    ),
+  },
+)
 
 // ─── Accessible region grid (always shown under the map) ─────────────────────
 
@@ -178,9 +85,13 @@ export function NexitWorldWorkspace({ profileComplete, regionMatches, initialVie
   const router = useRouter()
   const searchParams = useSearchParams()
   const [view, setView] = useState<View>(initialView)
+  // Once the map tab has been shown, keep it mounted so Mapbox never
+  // re-initialises against a zero-dimension container.
+  const [mapEverShown, setMapEverShown] = useState(initialView === 'map')
 
   // Keep URL state in sync with view selection
   function switchView(next: View) {
+    if (next === 'map') setMapEverShown(true)
     setView(next)
     const params = new URLSearchParams(searchParams.toString())
     params.set('view', next)
@@ -231,17 +142,21 @@ export function NexitWorldWorkspace({ profileComplete, regionMatches, initialVie
         </button>
       </div>
 
-      {/* Map view */}
-      <div
-        id="panel-map"
-        role="tabpanel"
-        aria-labelledby="tab-map"
-        hidden={view !== 'map'}
-        className="space-y-6"
-      >
-        <MapPanel profileComplete={profileComplete} regionMatches={regionMatches} />
-        <RegionGrid profileComplete={profileComplete} regionMatches={regionMatches} />
-      </div>
+      {/* Map view — use CSS visibility instead of `hidden` so the container
+          retains its dimensions after first mount. Mapbox needs a non-zero
+          bounding rect at initialisation time; `hidden` collapses the
+          container to 0×0, causing a permanently blank canvas. */}
+      {mapEverShown && (
+        <div
+          id="panel-map"
+          role="tabpanel"
+          aria-labelledby="tab-map"
+          className="space-y-6"
+          style={view !== 'map' ? { position: 'absolute', visibility: 'hidden', pointerEvents: 'none' } : undefined}
+        >
+          <MapboxCanvas profile={{ complete: profileComplete, matches: regionMatches }} />
+        </div>
+      )}
 
       {/* Countries view */}
       <div
