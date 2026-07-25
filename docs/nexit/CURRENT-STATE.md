@@ -2,7 +2,7 @@
 
 ## Last Updated
 
-Phase 7 — EconomicProfileTab disclosure audit; greenbook type fix
+Phase 8 — 04-LAYOUTS.md implementation: sidebar groups, collapse, saved country tree, URL-addressable country sections, hero pathway summary
 
 ---
 
@@ -208,10 +208,74 @@ Authentication, database schema, API contracts, Mapbox behavior, and Cloudflare 
 
 ---
 
+---
+
+## Phase 8 Summary (completed)
+
+**04-LAYOUTS.md implementation — gaps identified in prior audit, now resolved.**
+
+### Changes
+
+#### `src/components/nexit/app-shell.tsx` (rewritten)
+
+- **Sidebar section groups:** DISCOVER / MY NEXIT / PLANNING labeled sections replace the flat nav list.
+- **Collapse toggle:** Desktop sidebar collapses to 60px icon-only strip; preference persisted in `localStorage` (`nexit:sidebar-collapsed`). Collapse state initialized from storage on mount using lazy `useState` initializer (no `useEffect` cascade). Animated with `transition-[width]`.
+- **Active item color:** Active nav items now use `bg-gold-soft/25 text-white` (gold-soft tint on navy) per spec, replacing the full `bg-gold text-navy-deep`.
+- **Nested saved country tree:** Saved countries from `localStorage` appear as collapsible tree items under "My Nextinations". Each country expands to show all 16 section links. The currently active country auto-expands on mount. Sections link directly to `/nextinations/[slug]/[section]` routes.
+- **Canvas padding/max-width:** Desktop canvas padding updated to `px-14 py-10` (56px / 40px). Max-width tightened from 1180px to 960px per spec.
+- **Mobile:** Separate mobile layout block (no grid); same drawer and bottom nav behavior preserved.
+
+#### `src/components/nexit/use-saved-nextinations.ts` (new)
+
+Client-only hook that reads saved slugs from `localStorage` and returns matching country objects. Reacts to `storage` events and a custom `nexit:saved-nextinations-changed` event for cross-tab consistency.
+
+#### `src/app/(app)/(workspace)/nextinations/[countrySlug]/page.tsx` (updated)
+
+Now redirects to `/nextinations/[countrySlug]/overview` (with `?source` param preserved). Country sections are no longer client-state-only.
+
+#### `src/app/(app)/(workspace)/nextinations/[countrySlug]/[section]/page.tsx` (new)
+
+URL-addressable country section route. Validates the `section` param against the 16 known tab IDs; falls back to `overview` for unknown values. Passes `initialSection` and `pathwayCount` to `CountryWorkspace`.
+
+#### `src/components/country-workspace/CountryWorkspace.tsx` (updated)
+
+- Accepts `initialSection: CountryTabId` (from URL) and `pathwayCount: number` props.
+- Active section is now determined by the URL param, not client state.
+- Desktop section nav items are `<Link>` elements pointing to the section URL (no `useState` for active tab).
+- Mobile section selector uses `router.push()` to navigate.
+- `CountryHero` shows a Pathway count line when `pathwayCount > 0` (real data only, using a `Route` icon).
+- "Compare" button in hero links to `/nextinations/[slug]/compare` instead of `/countries`.
+
+### Files Changed
+
+| File | Change |
+|---|---|
+| `src/components/nexit/app-shell.tsx` | Sidebar groups, collapse toggle, gold-soft active style, nested country tree, canvas padding/max-width |
+| `src/components/nexit/use-saved-nextinations.ts` | New — localStorage hook for saved country slugs |
+| `src/app/(app)/(workspace)/nextinations/[countrySlug]/page.tsx` | Redirect to `/overview` |
+| `src/app/(app)/(workspace)/nextinations/[countrySlug]/[section]/page.tsx` | New — URL-addressable section route |
+| `src/components/country-workspace/CountryWorkspace.tsx` | URL-based active section, pathway count in hero, Compare link fix |
+
+### Tests Run
+
+| Check | Result |
+|---|---|
+| TypeScript (via `next build`) | ✅ Pass — 0 errors |
+| ESLint (`npm run lint`) | ✅ Pass — 0 errors, 0 warnings |
+| Production build (`npm run build`) | ✅ Pass — 48 pages + new `[section]` route, compiled |
+
+### Remaining known gaps (not in scope for this phase)
+
+- Header height is ~56px effective vs 72px spec — minor, no current user impact.
+- `countries/[slug]` legacy page still uses a different UI from the workspace; preserved for compatibility.
+- `useSavedNextinations` reads from `localStorage` only — no server-side persistence for saved countries yet.
+
+---
+
 ## Next Recommended Implementation Phase
 
-**Phase 8 — Greenbook disclosure pattern and Compare tab**
+**Phase 9 — Greenbook disclosure pattern and legacy page review**
 
-1. Review `GreenbookTab` to ensure its inline provenance legend is complete and clearly distinguishes verified resources, editorial context, and community reports.
-2. Consider adding `CompareTab` source disclosure for comparison data.
-3. After data completeness: review the `countries/[slug]` legacy page for consistency with the new workspace (or deprecate in favor of `/nextinations/[countrySlug]`).
+1. Review `GreenbookTab` inline provenance legend completeness.
+2. Review `countries/[slug]` legacy page for consistency or deprecation.
+3. Consider `CompareTab` source disclosure.

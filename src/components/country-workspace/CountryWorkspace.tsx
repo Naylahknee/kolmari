@@ -1,10 +1,11 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import {
   ArrowRight, BookOpenText, ChevronDown, Compass, ExternalLink,
-  Heart, Layers, ListChecks, Sparkles,
+  Heart, Layers, ListChecks, Route, Sparkles,
 } from 'lucide-react'
 import { countryFlag } from '@/lib/countries'
 import { ScoreRing } from '@/components/nexit/rings'
@@ -50,6 +51,8 @@ type Props = {
   isFamily: boolean
   monthlyIncome: number | null
   fromQuiz: boolean
+  initialSection: CountryTabId
+  pathwayCount: number
 }
 
 function matchLabel(score: number) {
@@ -68,8 +71,8 @@ const statusTone: Record<string, string> = {
 // ─── Persistent country hero ─────────────────────────────────────────────────
 
 function CountryHero({
-  country, match, readiness, fromQuiz,
-}: Pick<Props, 'country' | 'match' | 'readiness' | 'fromQuiz'>) {
+  country, match, readiness, fromQuiz, pathwayCount,
+}: Pick<Props, 'country' | 'match' | 'readiness' | 'fromQuiz' | 'pathwayCount'>) {
   return (
     <section className="overflow-hidden rounded-[var(--radius-card)] bg-navy-deep p-6 text-white sm:p-8" aria-label={`${country.name} Nextination overview`}>
       {fromQuiz && (
@@ -86,9 +89,20 @@ function CountryHero({
               <p className="mt-1 text-sm text-white/60">{country.city} · {country.region}</p>
             </div>
           </div>
+
+          {/* Pathway summary — real count only */}
+          {pathwayCount > 0 && (
+            <p className="mt-4 flex items-center gap-2 text-sm text-white/70">
+              <Route size={14} className="shrink-0 text-gold" aria-hidden="true" />
+              <span>
+                <span className="font-semibold text-white">{pathwayCount}</span> Nexit Pathway{pathwayCount === 1 ? '' : 's'} available for {country.name}
+              </span>
+            </p>
+          )}
+
           {match ? (
             <>
-              <p className="mt-5 text-xs font-bold uppercase tracking-widest text-gold">{matchLabel(match.score)}</p>
+              <p className="mt-4 text-xs font-bold uppercase tracking-widest text-gold">{matchLabel(match.score)}</p>
               {match.reasons.length > 0 && (
                 <ul className="mt-3 space-y-1.5">
                   {match.reasons.map((reason) => (
@@ -103,7 +117,7 @@ function CountryHero({
               </p>
             </>
           ) : (
-            <p className="mt-5 text-sm text-white/70">
+            <p className="mt-4 text-sm text-white/70">
               Complete your Nexit Profile to see your personalized Nexit Match for {country.name}.
             </p>
           )}
@@ -111,7 +125,7 @@ function CountryHero({
             <Link href="/saved" className="inline-flex items-center gap-2 rounded-[var(--radius-field)] bg-white/10 px-4 py-2.5 text-sm font-semibold hover:bg-white/15">
               <Heart size={15} aria-hidden="true" /> Save as a Nextination
             </Link>
-            <Link href="/countries" className="inline-flex items-center gap-2 rounded-[var(--radius-field)] bg-white/10 px-4 py-2.5 text-sm font-semibold hover:bg-white/15">
+            <Link href={`/nextinations/${country.slug}/compare`} className="inline-flex items-center gap-2 rounded-[var(--radius-field)] bg-white/10 px-4 py-2.5 text-sm font-semibold hover:bg-white/15">
               <Layers size={15} aria-hidden="true" /> Compare
             </Link>
             <Link href="/nexit-plan" className="gold-button">Build Your Nexit Plan <ArrowRight size={15} /></Link>
@@ -135,13 +149,12 @@ function CountryHero({
 // ─── Section navigation item ─────────────────────────────────────────────────
 
 function SectionNavItem({
-  tab, active, onClick,
-}: { tab: TabMeta; active: boolean; onClick: () => void }) {
+  tab, active, href,
+}: { tab: TabMeta; active: boolean; href: string }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-current={active ? 'true' : undefined}
+    <Link
+      href={href}
+      aria-current={active ? 'page' : undefined}
       className={[
         'flex w-full items-center justify-between rounded-[var(--radius-sidebar-row)] px-3 py-2 text-left text-sm transition-colors',
         active
@@ -151,7 +164,7 @@ function SectionNavItem({
     >
       <span>{tab.label}</span>
       {active && <span className="size-1.5 shrink-0 rounded-full bg-gold-deep" aria-hidden="true" />}
-    </button>
+    </Link>
   )
 }
 
@@ -159,24 +172,35 @@ function SectionNavItem({
 
 export function CountryWorkspace({
   country, match, readiness, tabs, allTabs,
-  pathways, content, compareData, hasChildren, studyInterest, isFamily, monthlyIncome, fromQuiz,
+  pathways, content, compareData, hasChildren, studyInterest, isFamily, monthlyIncome,
+  fromQuiz, initialSection, pathwayCount,
 }: Props) {
+  const router = useRouter()
   const [personalized, setPersonalized] = useState(true)
-  const [active, setActive] = useState<CountryTabId>(() => (personalized ? tabs : allTabs)[0]?.id ?? 'overview')
   const [mobileSectionOpen, setMobileSectionOpen] = useState(false)
 
   const shown = personalized ? tabs : allTabs
-  const activeTab = shown.find((t) => t.id === active) ?? shown[0]
+  const activeTab = shown.find((t) => t.id === initialSection) ?? shown[0]
 
-  function selectSection(id: CountryTabId) {
-    setActive(id)
+  function handlePersonalizedToggle() {
+    setPersonalized((v) => !v)
+  }
+
+  function navigateTo(id: CountryTabId) {
     setMobileSectionOpen(false)
+    router.push(`/nextinations/${country.slug}/${id}`)
   }
 
   return (
     <div className="space-y-5">
-      {/* Persistent country hero — never unmounts between sections */}
-      <CountryHero country={country} match={match} readiness={readiness} fromQuiz={fromQuiz} />
+      {/* Persistent country hero — stable across all sections */}
+      <CountryHero
+        country={country}
+        match={match}
+        readiness={readiness}
+        fromQuiz={fromQuiz}
+        pathwayCount={pathwayCount}
+      />
 
       {/* Section navigation + content area */}
       <div className="flex gap-5 items-start lg:grid lg:grid-cols-[200px_1fr]">
@@ -188,7 +212,7 @@ export function CountryWorkspace({
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Sections</p>
               <button
                 type="button"
-                onClick={() => setPersonalized((v) => !v)}
+                onClick={handlePersonalizedToggle}
                 className="text-[10px] font-bold text-gold-deep hover:text-navy"
               >
                 {personalized ? 'All' : 'Personalized'}
@@ -199,8 +223,8 @@ export function CountryWorkspace({
                 <SectionNavItem
                   key={tab.id}
                   tab={tab}
-                  active={tab.id === active}
-                  onClick={() => selectSection(tab.id)}
+                  active={tab.id === initialSection}
+                  href={`/nextinations/${country.slug}/${tab.id}`}
                 />
               ))}
             </nav>
@@ -228,7 +252,7 @@ export function CountryWorkspace({
                 <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Sections</p>
                 <button
                   type="button"
-                  onClick={() => setPersonalized((v) => !v)}
+                  onClick={handlePersonalizedToggle}
                   className="text-[10px] font-bold text-gold-deep"
                 >
                   {personalized ? 'Show all' : 'Personalized'}
@@ -236,12 +260,21 @@ export function CountryWorkspace({
               </div>
               <nav className="grid grid-cols-2 gap-0.5" aria-label="Country section navigation">
                 {shown.map((tab) => (
-                  <SectionNavItem
+                  <button
                     key={tab.id}
-                    tab={tab}
-                    active={tab.id === active}
-                    onClick={() => selectSection(tab.id)}
-                  />
+                    type="button"
+                    onClick={() => navigateTo(tab.id)}
+                    aria-current={tab.id === initialSection ? 'page' : undefined}
+                    className={[
+                      'flex w-full items-center justify-between rounded-[var(--radius-sidebar-row)] px-3 py-2 text-left text-sm transition-colors',
+                      tab.id === initialSection
+                        ? 'bg-gold-soft/60 font-semibold text-navy'
+                        : 'text-muted hover:bg-canvas hover:text-navy',
+                    ].join(' ')}
+                  >
+                    <span>{tab.label}</span>
+                    {tab.id === initialSection && <span className="size-1.5 shrink-0 rounded-full bg-gold-deep" aria-hidden="true" />}
+                  </button>
                 ))}
               </nav>
             </div>
@@ -251,7 +284,7 @@ export function CountryWorkspace({
         {/* Active section content */}
         <div className="min-w-0 flex-1" role="region" aria-label={activeTab?.label ?? 'Overview'}>
           <TabPanel
-            id={active}
+            id={initialSection}
             country={country}
             match={match}
             pathways={pathways}
