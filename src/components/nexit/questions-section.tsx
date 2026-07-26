@@ -94,12 +94,13 @@ export function QuestionsSection() {
           <div className="mb-7 flex items-center justify-center gap-4">
             <div className="h-px w-24 bg-[#F3C516]/60 sm:w-40" />
             <Image
-              src="/brand/nexit-butterfly.png"
+              src="/brand/favicon-32.png?v=20260726"
               alt=""
-              width={30}
-              height={30}
+              width={32}
+              height={32}
               aria-hidden="true"
-              className="h-[30px] w-[30px] object-contain"
+              unoptimized
+              className="h-8 w-8 object-contain"
             />
             <div className="h-px w-24 bg-[#F3C516]/60 sm:w-40" />
           </div>
