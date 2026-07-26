@@ -86,22 +86,6 @@ export function QuestionsSection() {
                   <div className="h-0.5 w-10 bg-[#F3C516] transition-all duration-300 group-hover:w-20" />
                 </div>
               </div>
-
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 420 80"
-                className="pointer-events-none absolute bottom-1 left-4 right-4 h-16 w-[calc(100%-2rem)] opacity-[0.09]"
-                fill="none"
-              >
-                <path
-                  d="M8 45C70 12 92 74 154 45C216 16 244 68 304 41C345 23 375 28 412 12"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeDasharray="7 8"
-                />
-                <circle cx="8" cy="45" r="4" fill="currentColor" />
-                <circle cx="412" cy="12" r="4" fill="currentColor" />
-              </svg>
             </article>
           ))}
         </div>
