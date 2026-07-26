@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -8,6 +9,7 @@ import {
   Heart, Layers, ListChecks, Route, Sparkles,
 } from 'lucide-react'
 import { countryFlag } from '@/lib/countries'
+import { getTopCities } from '@/lib/country-workspace/country-cities'
 import { ScoreRing } from '@/components/nexit/rings'
 import { IMPLEMENTED_TABS, type CountryTabId, type TabMeta } from '@/lib/country-workspace/tabs'
 import type { CountryContent } from '@/lib/country-workspace/country-content'
@@ -25,7 +27,6 @@ import { GreenbookTab } from './tabs/GreenbookTab'
 import { ResourcesTab } from './tabs/ResourcesTab'
 import { EconomicProfileTab } from './tabs/EconomicProfileTab'
 
-// Label lookup for breadcrumb display
 const SECTION_LABELS: Record<string, string> = {
   overview: 'Overview', 'economic-profile': 'Economic Profile', 'cost-of-living': 'Cost of Living',
   housing: 'Housing', pathways: 'Nexit Pathways', employment: 'Employment',
@@ -46,10 +47,17 @@ type PathwayCardData = {
   officialSource: string; sourceLabel: string; lastVerified: string
 }
 
+type ReadinessBreakdown = {
+  overall: number | null
+  profile: number
+  documents: number | null
+  research: number | null
+}
+
 type Props = {
   country: CountrySummary
   match: MatchData | null
-  readiness: number | null
+  readiness: ReadinessBreakdown
   tabs: TabMeta[]
   allTabs: TabMeta[]
   pathways: PathwayCardData[]
@@ -77,11 +85,9 @@ const statusTone: Record<string, string> = {
   'Missing Requirements': 'bg-info-soft text-info',
 }
 
-// ─── Persistent country hero ─────────────────────────────────────────────────
-
 function CountryHero({
-  country, match, readiness, fromQuiz, pathwayCount,
-}: Pick<Props, 'country' | 'match' | 'readiness' | 'fromQuiz' | 'pathwayCount'>) {
+  country, match, fromQuiz, pathwayCount,
+}: Pick<Props, 'country' | 'match' | 'fromQuiz' | 'pathwayCount'>) {
   return (
     <section className="overflow-hidden rounded-[var(--radius-card)] bg-navy-deep p-6 text-white sm:p-8" aria-label={`${country.name} Nextination overview`}>
       {fromQuiz && (
@@ -99,7 +105,6 @@ function CountryHero({
             </div>
           </div>
 
-          {/* Pathway summary — real count only */}
           {pathwayCount > 0 && (
             <p className="mt-4 flex items-center gap-2 text-sm text-white/70">
               <Route size={14} className="shrink-0 text-gold" aria-hidden="true" />
@@ -143,19 +148,12 @@ function CountryHero({
         {match && (
           <div className="shrink-0 rounded-[var(--radius-card)] bg-white/5 p-4 text-center">
             <ScoreRing value={match.score} label="Nexit Match" size={128} />
-            {readiness !== null && (
-              <p className="mt-2 text-xs text-white/60">
-                Nexit Readiness <span className="font-bold text-white">{readiness}%</span>
-              </p>
-            )}
           </div>
         )}
       </div>
     </section>
   )
 }
-
-// ─── Main workspace ──────────────────────────────────────────────────────────
 
 export function CountryWorkspace({
   country, match, readiness, allTabs,
@@ -174,7 +172,6 @@ export function CountryWorkspace({
 
   return (
     <div className="space-y-5">
-      {/* Breadcrumb — per 04-LAYOUTS.md §20 */}
       <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-muted">
         <Link href="/nextinations" className="hover:text-navy">My Nextinations</Link>
         <span aria-hidden="true">/</span>
@@ -183,16 +180,13 @@ export function CountryWorkspace({
         <span className="font-semibold text-navy" aria-current="page">{activeLabel}</span>
       </nav>
 
-      {/* Persistent country hero — stable across all sections */}
       <CountryHero
         country={country}
         match={match}
-        readiness={readiness}
         fromQuiz={fromQuiz}
         pathwayCount={pathwayCount}
       />
 
-      {/* Mobile section selector — sidebar handles desktop navigation */}
       <div className="lg:hidden">
         <button
           type="button"
@@ -232,12 +226,12 @@ export function CountryWorkspace({
         )}
       </div>
 
-      {/* Active section content — full available width (04-LAYOUTS.md §17) */}
       <div role="region" aria-label={activeLabel}>
         <TabPanel
           id={initialSection}
           country={country}
           match={match}
+          readiness={readiness}
           pathways={pathways}
           content={content}
           compareData={compareData}
@@ -251,12 +245,11 @@ export function CountryWorkspace({
   )
 }
 
-// ─── Tab panel (section content) ─────────────────────────────────────────────
-
 type TabPanelProps = {
   id: CountryTabId
   country: CountrySummary
   match: MatchData | null
+  readiness: ReadinessBreakdown
   pathways: PathwayCardData[]
   content: CountryContent | null
   compareData: CompareEntry[]
@@ -266,7 +259,7 @@ type TabPanelProps = {
   monthlyIncome: number | null
 }
 
-function TabPanel({ id, country, match, pathways, content, compareData, hasChildren, studyInterest, isFamily, monthlyIncome }: TabPanelProps) {
+function TabPanel({ id, country, match, readiness, pathways, content, compareData, hasChildren, studyInterest, isFamily, monthlyIncome }: TabPanelProps) {
   const countryPathways = pathways.filter((p) => p.country.toLowerCase() === country.name.toLowerCase())
   const displayPathways = countryPathways.length > 0 ? countryPathways : pathways
 
@@ -283,36 +276,86 @@ function TabPanel({ id, country, match, pathways, content, compareData, hasChild
   }
 
   if (id === 'overview') {
+    const cities = getTopCities(country.slug)
     return (
-      <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
-        <section className="card-surface p-6">
-          <h2 className="text-lg font-bold text-navy">Overview</h2>
-          <p className="mt-3 text-sm leading-6 text-muted">{country.summary}</p>
-          <dl className="mt-5 grid grid-cols-2 gap-3 text-sm">
-            <Fact label="Region" value={country.region} />
-            <Fact label="Common base city" value={country.city} />
-            <Fact label="Typical income guide" value={`$${country.incomeRequired.toLocaleString()}/mo`} />
-            <Fact label="Relative cost" value={country.cost} />
-            <Fact label="Safety signal" value={country.safety} />
-            <Fact label="Common route" value={country.visaType} />
-          </dl>
-        </section>
-        <section className="card-surface p-6">
-          <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Recommended first actions</p>
-          <div className="mt-4 space-y-2">
-            <Link href="/pathways" className="flex items-center justify-between rounded-[var(--radius-field)] bg-canvas p-4 text-sm font-semibold text-navy hover:bg-gold-soft/40">
-              <span className="flex items-center gap-2"><ListChecks size={15} aria-hidden="true" /> Review your Nexit Pathways</span>
-              <ArrowRight size={14} aria-hidden="true" />
-            </Link>
-            <Link href="/cost-calculator" className="flex items-center justify-between rounded-[var(--radius-field)] bg-canvas p-4 text-sm font-semibold text-navy hover:bg-gold-soft/40">
-              <span className="flex items-center gap-2"><ListChecks size={15} aria-hidden="true" /> Build your Cost Snapshot</span>
-              <ArrowRight size={14} aria-hidden="true" />
-            </Link>
-            <Link href="/nexit-plan" className="flex items-center justify-between rounded-[var(--radius-field)] bg-canvas p-4 text-sm font-semibold text-navy hover:bg-gold-soft/40">
-              <span className="flex items-center gap-2"><BookOpenText size={15} aria-hidden="true" /> Start your Nexit Plan</span>
-              <ArrowRight size={14} aria-hidden="true" />
-            </Link>
+      <div className="space-y-4">
+        <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+          <section className="card-surface p-6">
+            <h2 className="text-lg font-bold text-navy">Overview</h2>
+            <p className="mt-3 text-sm leading-6 text-muted">{country.summary}</p>
+            <dl className="mt-5 grid grid-cols-2 gap-3 text-sm">
+              <Fact label="Region" value={country.region} />
+              <Fact label="Common base city" value={country.city} />
+              <Fact label="Typical income guide" value={`$${country.incomeRequired.toLocaleString()}/mo`} />
+              <Fact label="Relative cost" value={country.cost} />
+              <Fact label="Safety signal" value={country.safety} />
+              <Fact label="Common route" value={country.visaType} />
+            </dl>
+          </section>
+          <section className="card-surface p-6">
+            <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Recommended first actions</p>
+            <div className="mt-4 space-y-2">
+              <Link href="/pathways" className="flex items-center justify-between rounded-[var(--radius-field)] bg-canvas p-4 text-sm font-semibold text-navy hover:bg-gold-soft/40">
+                <span className="flex items-center gap-2"><ListChecks size={15} aria-hidden="true" /> Review your Nexit Pathways</span>
+                <ArrowRight size={14} aria-hidden="true" />
+              </Link>
+              <Link href="/cost-calculator" className="flex items-center justify-between rounded-[var(--radius-field)] bg-canvas p-4 text-sm font-semibold text-navy hover:bg-gold-soft/40">
+                <span className="flex items-center gap-2"><ListChecks size={15} aria-hidden="true" /> Build your Cost Snapshot</span>
+                <ArrowRight size={14} aria-hidden="true" />
+              </Link>
+              <Link href="/nexit-plan" className="flex items-center justify-between rounded-[var(--radius-field)] bg-canvas p-4 text-sm font-semibold text-navy hover:bg-gold-soft/40">
+                <span className="flex items-center gap-2"><BookOpenText size={15} aria-hidden="true" /> Start your Nexit Plan</span>
+                <ArrowRight size={14} aria-hidden="true" />
+              </Link>
+            </div>
+          </section>
+        </div>
+
+        {cities.length > 0 && (
+          <section className="card-surface p-6">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">City research</p>
+              <h2 className="mt-1 text-lg font-bold text-navy">Top cities in {country.name}</h2>
+              <p className="mt-1 text-sm text-muted">A grounded starting set drawn from the country research already used in Nexit.</p>
+            </div>
+            <div className="mt-5 grid gap-4 md:grid-cols-3">
+              {cities.map((city) => (
+                <article key={city.id} className="overflow-hidden rounded-[var(--radius-card)] border border-line bg-white">
+                  <div className="relative aspect-[16/10] bg-canvas">
+                    <Image src={city.imageSrc} alt={city.imageAlt} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover" />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-semibold text-navy">{city.cityName}</h3>
+                    {city.region ? <p className="text-xs text-muted">{city.region}</p> : null}
+                    <p className="mt-2 text-sm leading-6 text-muted">{city.summary}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <section className="card-surface p-6" aria-labelledby="readiness-heading">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Planning status</p>
+              <h2 id="readiness-heading" className="mt-1 text-lg font-bold text-navy">Nexit Readiness</h2>
+              <p className="mt-1 text-sm text-muted">Profile, documents, and research are measured separately so incomplete systems are not presented as complete.</p>
+            </div>
+            {readiness.overall !== null ? (
+              <p className="text-3xl font-bold text-navy">{readiness.overall}%</p>
+            ) : (
+              <p className="max-w-sm text-sm font-semibold text-muted">Complete your profile and begin your research to calculate Nexit Readiness.</p>
+            )}
           </div>
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
+            <ReadinessMetric label="Profile" value={readiness.profile} />
+            <ReadinessMetric label="Documents" value={readiness.documents} unavailableLabel="Not yet assessed" />
+            <ReadinessMetric label="Research" value={readiness.research} unavailableLabel="Not yet assessed" />
+          </div>
+          <Link href="/nexit-plan" className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-gold-deep">
+            Continue building your Nexit Plan <ArrowRight size={14} aria-hidden="true" />
+          </Link>
         </section>
       </div>
     )
@@ -348,19 +391,10 @@ function TabPanel({ id, country, match, pathways, content, compareData, hasChild
     )
   }
 
-  if (id === 'economic-profile') {
-    return <EconomicProfileTab content={content?.economic ?? null} countryName={country.name} />
-  }
+  if (id === 'economic-profile') return <EconomicProfileTab content={content?.economic ?? null} countryName={country.name} />
 
   if (id === 'cost-of-living') {
-    return (
-      <CostOfLivingTab
-        content={content?.costOfLiving ?? null}
-        countryName={country.name}
-        monthlyIncome={monthlyIncome}
-        isFamily={isFamily}
-      />
-    )
+    return <CostOfLivingTab content={content?.costOfLiving ?? null} countryName={country.name} monthlyIncome={monthlyIncome} isFamily={isFamily} />
   }
 
   if (id === 'pathways') {
@@ -368,9 +402,7 @@ function TabPanel({ id, country, match, pathways, content, compareData, hasChild
       return (
         <section className="card-surface p-8 text-center">
           <p className="font-semibold text-navy">No specific Pathways found</p>
-          <p className="mt-1 text-sm text-muted">
-            We don&apos;t yet have specific Pathway data for {country.name}. Check the Resources section for official immigration links.
-          </p>
+          <p className="mt-1 text-sm text-muted">We don&apos;t yet have specific Pathway data for {country.name}. Check the Resources section for official immigration links.</p>
         </section>
       )
     }
@@ -383,23 +415,12 @@ function TabPanel({ id, country, match, pathways, content, compareData, hasChild
                 <h3 className="font-semibold text-navy">{p.name}</h3>
                 <p className="text-xs text-muted">{p.country} · {p.category}</p>
               </div>
-              <span className={`shrink-0 rounded-[var(--radius-pill)] px-2.5 py-1 text-[11px] font-bold ${statusTone[p.status] ?? 'bg-canvas text-muted'}`}>
-                {p.status}
-              </span>
+              <span className={`shrink-0 rounded-[var(--radius-pill)] px-2.5 py-1 text-[11px] font-bold ${statusTone[p.status] ?? 'bg-canvas text-muted'}`}>{p.status}</span>
             </div>
             <p className="mt-3 text-xs text-muted">Income guide: {p.incomeThreshold}</p>
-            {p.requirementsMet.length > 0 && (
-              <p className="mt-2 text-xs text-ok">✓ {p.requirementsMet.slice(0, 2).join(' · ')}</p>
-            )}
-            {p.missingRequirements.length > 0 && (
-              <p className="mt-1 text-xs text-muted">Needs: {p.missingRequirements.slice(0, 2).join(' · ')}</p>
-            )}
-            <a
-              href={p.officialSource}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-gold-deep"
-            >
+            {p.requirementsMet.length > 0 && <p className="mt-2 text-xs text-ok">✓ {p.requirementsMet.slice(0, 2).join(' · ')}</p>}
+            {p.missingRequirements.length > 0 && <p className="mt-1 text-xs text-muted">Needs: {p.missingRequirements.slice(0, 2).join(' · ')}</p>}
+            <a href={p.officialSource} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-gold-deep">
               {p.sourceLabel} <ExternalLink size={12} aria-hidden="true" />
             </a>
           </article>
@@ -411,9 +432,7 @@ function TabPanel({ id, country, match, pathways, content, compareData, hasChild
   if (id === 'housing') return <HousingTab content={content?.housing ?? null} countryName={country.name} />
   if (id === 'employment') return <EmploymentTab content={content?.employment ?? null} countryName={country.name} />
   if (id === 'healthcare') return <HealthcareTab content={content?.healthcare ?? null} countryName={country.name} />
-  if (id === 'education') {
-    return <EducationTab content={content?.education ?? null} countryName={country.name} hasChildren={hasChildren} studyInterest={studyInterest} />
-  }
+  if (id === 'education') return <EducationTab content={content?.education ?? null} countryName={country.name} hasChildren={hasChildren} studyInterest={studyInterest} />
   if (id === 'transportation') return <TransportationTab content={content?.transportation ?? null} countryName={country.name} />
   if (id === 'legal-taxes') return <LegalTaxesTab content={content?.legalTaxes ?? null} countryName={country.name} />
   if (id === 'daily-life') return <DailyLifeTab content={content?.dailyLife ?? null} countryName={country.name} />
@@ -436,6 +455,22 @@ function Fact({ label, value }: { label: string; value: string }) {
     <div className="rounded-[var(--radius-field)] bg-canvas p-3">
       <dt className="text-xs text-muted">{label}</dt>
       <dd className="mt-0.5 font-semibold text-navy">{value}</dd>
+    </div>
+  )
+}
+
+function ReadinessMetric({ label, value, unavailableLabel = 'Unavailable' }: { label: string; value: number | null; unavailableLabel?: string }) {
+  return (
+    <div className="rounded-[var(--radius-field)] bg-canvas p-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm font-semibold text-navy">{label}</p>
+        <p className="text-sm font-bold text-navy">{value === null ? unavailableLabel : `${value}%`}</p>
+      </div>
+      {value !== null ? (
+        <div className="mt-3 h-2 overflow-hidden rounded-full bg-line" aria-hidden="true">
+          <div className="h-full rounded-full bg-gold" style={{ width: `${value}%` }} />
+        </div>
+      ) : null}
     </div>
   )
 }
