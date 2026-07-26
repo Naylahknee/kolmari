@@ -1,9 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { useState } from 'react'
 import { Menu, X } from 'lucide-react'
+import { MarketingLogo } from './marketing-logo'
 
 export function MarketingMobileNav() {
   const [open, setOpen] = useState(false)
@@ -26,16 +26,9 @@ export function MarketingMobileNav() {
           className="absolute right-0 top-12 w-64 rounded-[var(--radius-card)] border border-white/10 bg-navy-card p-3 shadow-2xl"
         >
           <div className="mb-2 px-2 py-1">
-            <Link href="/" aria-label="Nexit home" onClick={() => setOpen(false)}>
-              <Image
-                src="/brand/NexitWordMark.svg"
-                alt="Nexit"
-                width={88}
-                height={22}
-                style={{ width: 'auto', height: 22 }}
-                priority
-              />
-            </Link>
+            <span onClick={() => setOpen(false)}>
+              <MarketingLogo compact />
+            </span>
           </div>
           {[
             ['How it works', '#how-it-works'],

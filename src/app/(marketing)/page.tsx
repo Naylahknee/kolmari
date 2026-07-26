@@ -10,6 +10,7 @@ import {
   UsersRound,
 } from 'lucide-react'
 import { MarketingMobileNav } from '@/components/nexit/marketing-mobile-nav'
+import { MarketingLogo } from '@/components/nexit/marketing-logo'
 import { QuestionsSection } from '@/components/nexit/questions-section'
 
 const nexitSteps = [
@@ -63,7 +64,7 @@ export default function LandingPage() {
           <div className="absolute inset-0 bg-[linear-gradient(90deg,#0d1b39_0%,#0d1b39_35%,rgba(13,27,57,.82)_49%,rgba(13,27,57,.12)_76%)]" />
 
           <header className="relative z-20 flex items-center justify-between px-5 py-5 sm:px-8 lg:px-11">
-            <MarketingWordmark />
+            <MarketingLogo />
             <nav className="hidden items-center gap-7 text-sm font-semibold text-white/75 md:flex" aria-label="Landing navigation">
               <a href="#how-it-works" className="transition hover:text-white">How it works</a>
               <a href="#features" className="transition hover:text-white">Features</a>
@@ -175,7 +176,7 @@ export default function LandingPage() {
         </div>
         <div className="border-t border-white/10 px-5 py-5">
           <div className="mx-auto flex max-w-[1180px] flex-col items-center justify-between gap-4 text-center text-xs text-white/55 sm:flex-row sm:text-left">
-            <MarketingWordmark compact />
+            <MarketingLogo compact />
             <p>© 2026 Nexit. Visa recommendations are planning guidance, not legal advice.</p>
           </div>
         </div>

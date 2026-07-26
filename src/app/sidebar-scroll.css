@@ -1,0 +1,15 @@
+.sidebar-scroll,
+[aria-label="Workspace navigation"],
+[aria-label="Workspace navigation"] > div,
+#mobile-nav-drawer {
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.sidebar-scroll::-webkit-scrollbar,
+[aria-label="Workspace navigation"]::-webkit-scrollbar,
+[aria-label="Workspace navigation"] > div::-webkit-scrollbar,
+#mobile-nav-drawer::-webkit-scrollbar {
+  display: none;
+}

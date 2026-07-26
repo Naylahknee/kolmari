@@ -4,6 +4,7 @@ import { getProfile, hasCompletedProfile, type PathwayGoal, type RelocationProfi
 import { REGION_SLUGS, type RegionSlug } from './nexitnation-data'
 import { evaluatePathways } from './pathways'
 import { COUNTRIES, type CountryDetail } from './countries'
+import { calculateNexitReadiness } from './readiness'
 
 export type NexitnationUserProfile = {
   name: string
@@ -47,33 +48,12 @@ export async function loadNexitnationProfile(userId: number, email: string) {
   return buildNexitnationProfile(await getProfile(userId), email.split('@')[0])
 }
 
-// ─── Nexit Readiness (person-level 0–100) ──────────────────────────────────
-// How prepared the person is overall. Null until the profile is complete so we
-// never fabricate a score.
+// Compatibility helper. Overall readiness remains unavailable until real
+// document and research completion inputs are implemented.
 export function calculateReadiness(profile: RelocationProfile): number | null {
-  if (!hasCompletedProfile(profile)) return null
-  const evaluations = evaluatePathways(profile)
-  const strong = evaluations.filter((item) => item.status === 'Strong Match').length
-  const possible = evaluations.filter((item) => item.status === 'Possible Match').length
-  let score = 0
-  // Financial readiness (35)
-  if (profile.monthly_income !== null) score += 10
-  if ((profile.monthly_income ?? 0) >= 2500) score += 10
-  if (profile.savings !== null) score += 8
-  if ((profile.savings ?? 0) >= 10_000) score += 7
-  // Pathway strength (35)
-  score += Math.min(35, strong * 18 + possible * 6)
-  // Clarity (20)
-  if (profile.goals.length) score += 8
-  if (profile.preferred_regions.length) score += 7
-  if (profile.timeline) score += 5
-  // Documentation readiness (10)
-  if (profile.occupation || profile.education) score += 5
-  if (profile.credentials || (profile.ancestry_connections && profile.ancestry_connections !== 'None known')) score += 5
-  return Math.min(100, Math.round(score))
+  return calculateNexitReadiness(profile).overall
 }
 
-// ─── Nexit Match (per-country 0–100 + explanation) ─────────────────────────
 export type CountryMatch = { score: number; reasons: string[]; tradeoff: string }
 
 export function calculateCountryMatch(profile: RelocationProfile, country: CountryDetail): CountryMatch | null {
@@ -81,7 +61,6 @@ export function calculateCountryMatch(profile: RelocationProfile, country: Count
   const reasons: string[] = []
   let score = 0
 
-  // Budget compatibility (0–30)
   if (profile.monthly_income !== null) {
     if (profile.monthly_income >= country.incomeRequired * 1.5) {
       score += 30
@@ -94,7 +73,6 @@ export function calculateCountryMatch(profile: RelocationProfile, country: Count
     }
   }
 
-  // Region preference (0–25)
   const regionLabels = country.region === 'Europe' ? ['Europe'] : ['North America', 'Latin America']
   if (regionLabels.some((label) => profile.preferred_regions.includes(label))) {
     score += 25
@@ -103,20 +81,17 @@ export function calculateCountryMatch(profile: RelocationProfile, country: Count
     score += 15
   }
 
-  // Pathway availability (0–25)
   const evaluations = evaluatePathways(profile)
   const strong = evaluations.filter((item) => item.status === 'Strong Match').length
   const possible = evaluations.filter((item) => item.status === 'Possible Match').length
   score += Math.min(25, strong * 14 + possible * 5)
   if (strong > 0) reasons.push(`${strong} Nexit Pathway${strong > 1 ? 's' : ''} may support your move`)
 
-  // Remote-income fit (0–10)
   if (profile.remote && /nomad|remote|d7/i.test(country.visaType)) {
     score += 10
     reasons.push(`${country.name} offers a route suited to remote income`)
   }
 
-  // Safety signal (0–10)
   score += country.safety === 'High' ? 10 : 6
   if (country.safety === 'High' && reasons.length < 3) reasons.push(`${country.name} rates highly on general safety signals`)
 
@@ -129,7 +104,6 @@ export function calculateCountryMatch(profile: RelocationProfile, country: Count
 
 export type RankedNextination = { country: CountryDetail; match: CountryMatch }
 
-// Top Nextinations for the quiz reveal (highest Nexit Match first).
 export function rankNextinations(profile: RelocationProfile): RankedNextination[] {
   return COUNTRIES
     .map((country) => ({ country, match: calculateCountryMatch(profile, country) }))

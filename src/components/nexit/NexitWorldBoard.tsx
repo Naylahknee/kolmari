@@ -2,20 +2,17 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { ArrowRight, Check, ExternalLink, MapPin, Plus, Search, Star, Trash2, X } from 'lucide-react'
+import { ArrowRight, Check, Plus, Search, Star, Trash2, X } from 'lucide-react'
 import { CONTINENT_PATHS, WORLD_VIEWBOX } from '@/lib/world-continents'
 import { searchPlaces, flagEmoji, type WorldPlace } from '@/lib/world-places'
-import { COUNTRIES } from '@/lib/countries'
-import { STATUS_META, STATUS_ORDER, useNextinationBoard, type NextinationStatus, type SavedNextination } from '@/lib/nextination-board'
+import { countryWorkspaceSlug, STATUS_META, STATUS_ORDER, useNextinationBoard, type NextinationStatus, type SavedNextination } from '@/lib/nextination-board'
 
 function toPercent(lat: number, lng: number) {
   return { left: ((lng + 180) / 360) * 100, top: ((90 - lat) / 180) * 100 }
 }
 
-const COUNTRY_SLUGS = new Set(COUNTRIES.map((c) => c.slug))
 function workspaceSlug(place: SavedNextination): string | null {
-  const slug = place.country.toLowerCase().replace(/\s+/g, '-')
-  return COUNTRY_SLUGS.has(slug) ? slug : null
+  return countryWorkspaceSlug(place.country)
 }
 
 export function NexitWorldBoard() {
@@ -35,8 +32,9 @@ export function NexitWorldBoard() {
   }
 
   return (
-    <div>
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(320px,520px)] lg:items-end">
+    <div className="space-y-5">
+      {/* Header + Add destination (top) */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Nexit World</p>
           <h1 className="mt-1 text-2xl font-bold text-navy sm:text-3xl">My Nextinations</h1>
@@ -44,10 +42,13 @@ export function NexitWorldBoard() {
             {ready ? `${counts.total} saved · ${counts.researching} researching · ${counts.shortlisted} shortlisted` : 'Loading your board…'}
           </p>
         </div>
-        <AddDestination onAdd={handleAdd} existingIds={new Set(items.map((x) => x.id))} />
+        <div className="w-full lg:max-w-sm">
+          <AddDestination onAdd={handleAdd} existingIds={new Set(items.map((x) => x.id))} />
+        </div>
       </div>
 
-      <section aria-label="World map of your Nextinations" className="card-surface mt-5 overflow-hidden p-3">
+      {/* Full-width map */}
+      <section aria-label="World map of your Nextinations" className="card-surface overflow-hidden p-3">
         <div className="relative w-full overflow-hidden rounded-[var(--radius-card)] bg-navy-deep" style={{ aspectRatio: '2 / 1' }}>
           <svg viewBox={`0 0 ${WORLD_VIEWBOX.width} ${WORLD_VIEWBOX.height}`} className="absolute inset-0 h-full w-full" role="img" aria-label="World map" preserveAspectRatio="xMidYMid slice">
             <rect width={WORLD_VIEWBOX.width} height={WORLD_VIEWBOX.height} fill="#0d1b39" />
@@ -55,6 +56,7 @@ export function NexitWorldBoard() {
               <path key={i} d={d} fill="#1c3161" stroke="#2a4570" strokeWidth={0.4} />
             ))}
           </svg>
+          {/* Pins */}
           {items.map((item) => {
             const pos = toPercent(item.lat, item.lng)
             const meta = STATUS_META[item.status]
@@ -81,6 +83,7 @@ export function NexitWorldBoard() {
           ) : null}
         </div>
 
+        {/* Destination tray */}
         {items.length > 0 ? (
           <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
             {items.map((item) => {
@@ -97,17 +100,10 @@ export function NexitWorldBoard() {
         ) : null}
       </section>
 
-      <div className="mt-5">
-        {selected ? (
-          <DetailPanel key={selected.id} item={selected} onStatus={(s) => update(selected.id, { status: s })} onNote={(n) => update(selected.id, { note: n })} onRemove={() => { remove(selected.id); setSelectedId(null) }} onClose={() => setSelectedId(null)} />
-        ) : (
-          <div className="card-surface p-6 text-sm text-muted">
-            <MapPin className="text-gold-deep" />
-            <p className="mt-3 font-bold text-navy">No destination selected</p>
-            <p className="mt-1">Select a pin or a saved card to see its planning details.</p>
-          </div>
-        )}
-      </div>
+      {/* Selected destination — below the map */}
+      {selected ? (
+        <DetailPanel key={selected.id} item={selected} onStatus={(s) => update(selected.id, { status: s })} onNote={(n) => update(selected.id, { note: n })} onRemove={() => { remove(selected.id); setSelectedId(null) }} onClose={() => setSelectedId(null)} />
+      ) : null}
     </div>
   )
 }

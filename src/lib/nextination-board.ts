@@ -8,6 +8,15 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import type { WorldPlace } from './world-places'
+import { COUNTRIES } from './countries'
+
+const COUNTRY_SLUGS = new Set(COUNTRIES.map((c) => c.slug))
+
+/** Country name → its country-workspace slug, or null when no workspace exists yet. */
+export function countryWorkspaceSlug(country: string): string | null {
+  const slug = country.toLowerCase().replace(/\s+/g, '-')
+  return COUNTRY_SLUGS.has(slug) ? slug : null
+}
 
 export type NextinationStatus = 'considering' | 'researching' | 'shortlisted' | 'selected' | 'archived'
 
