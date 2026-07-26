@@ -530,3 +530,36 @@ Single client component file containing:
 1. Review `GreenbookTab` inline provenance legend completeness.
 2. Consider `CompareTab` source disclosure.
 3. Adaptive section ordering (06-ADAPTIVE-WORKSPACE.md) — rank-country-sections lib and sidebar PersonalizedOrder toggle.
+
+---
+
+## Country Overview — per-country facts (data-integrity fix)
+
+The merged Country Overview dashboard displayed **Portugal's reference facts for
+every country**: the Country Snapshot grid showed real values only for Portugal
+(others "Researching"), and the climate cards (`16°C / 28°C / -5 hrs`) plus the
+hero membership badges (`Schengen · EU · NATO`) were hardcoded and therefore
+shown, incorrectly, for Spain, Greece, Estonia, and **Mexico** (which is not in
+Schengen, the EU, or NATO). That violated the no-fabricated-statistics rule.
+
+**Fix:** new `src/lib/country-workspace/country-facts.ts` provides
+`getCountryFacts(slug)` with real public reference facts (capital, population,
+currency, official language, government, time zone, driving side, Schengen, EU,
+climate) plus per-country climate averages and a source disclosure for all five
+workspace countries. The Overview snapshot grid, climate cards, and the hero
+membership badges now read from it. Countries without a facts dataset fall back
+to an honest "Researching" state, and membership badges render only when true.
+
+### Files Changed
+
+| File | Change |
+|---|---|
+| `src/lib/country-workspace/country-facts.ts` | New — `getCountryFacts(slug)` + per-country snapshot/climate reference data with source disclosure |
+| `src/components/country-workspace/CountryWorkspace.tsx` | Snapshot `factRows`, climate cards, and hero membership badges now derive from `getCountryFacts` instead of hardcoded Portugal values |
+
+### Tests Run
+
+| Check | Result |
+|---|---|
+| TypeScript (`tsc --noEmit`) | ✅ Pass |
+| Production build (`next build`) | ✅ Pass |
