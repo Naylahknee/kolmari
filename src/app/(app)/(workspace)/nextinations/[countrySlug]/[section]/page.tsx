@@ -3,11 +3,12 @@ import { notFound } from 'next/navigation'
 import { requireCurrentUser } from '@/lib/auth'
 import { getProfile } from '@/lib/profile'
 import { COUNTRIES } from '@/lib/countries'
-import { calculateCountryMatch, calculateReadiness, rankNextinations } from '@/lib/userProfile'
+import { calculateCountryMatch, rankNextinations } from '@/lib/userProfile'
 import { evaluatePathways } from '@/lib/pathways'
 import { ALL_TABS_ORDERED, buildTabContext, rankTabs, type CountryTabId } from '@/lib/country-workspace/tabs'
 import { getCountryContent } from '@/lib/country-workspace/country-content'
 import { CountryWorkspace } from '@/components/country-workspace/CountryWorkspace'
+import { CountryOverviewEnhancements } from '@/components/country-workspace/CountryOverviewEnhancements'
 
 type PageProps = {
   params: Promise<{ countrySlug: string; section: string }>
@@ -44,7 +45,6 @@ export default async function CountryWorkspaceSectionPage({ params, searchParams
 
   const tabContext = buildTabContext(profile)
   const match = calculateCountryMatch(profile, country)
-  const readiness = calculateReadiness(profile)
   const tabs = rankTabs(tabContext, true)
   const pathways = evaluatePathways(profile).map((p) => ({
     id: p.id, name: p.name, country: p.country, category: p.category, status: p.status,
@@ -65,30 +65,39 @@ export default async function CountryWorkspaceSectionPage({ params, searchParams
       }
     })
 
-  // Pathway count for hero display
   const countryPathways = pathways.filter((p) => p.country.toLowerCase() === country.name.toLowerCase())
   const pathwayCount = countryPathways.length
 
   return (
-    <CountryWorkspace
-      country={{
-        slug: country.slug, name: country.name, code: country.code, city: country.city, region: country.region,
-        visaType: country.visaType, incomeRequired: country.incomeRequired, safety: country.safety, cost: country.cost, summary: country.summary,
-      }}
-      match={match}
-      readiness={readiness}
-      tabs={tabs}
-      allTabs={ALL_TABS_ORDERED}
-      pathways={pathways}
-      content={content}
-      compareData={compareData}
-      hasChildren={tabContext.hasDependents || tabContext.familyHousehold}
-      studyInterest={tabContext.studyInterest}
-      isFamily={tabContext.familyHousehold}
-      monthlyIncome={profile.monthly_income}
-      fromQuiz={source === 'quiz'}
-      initialSection={sectionId}
-      pathwayCount={pathwayCount}
-    />
+    <>
+      <CountryWorkspace
+        country={{
+          slug: country.slug, name: country.name, code: country.code, city: country.city, region: country.region,
+          visaType: country.visaType, incomeRequired: country.incomeRequired, safety: country.safety, cost: country.cost, summary: country.summary,
+        }}
+        match={match}
+        readiness={null}
+        tabs={tabs}
+        allTabs={ALL_TABS_ORDERED}
+        pathways={pathways}
+        content={content}
+        compareData={compareData}
+        hasChildren={tabContext.hasDependents || tabContext.familyHousehold}
+        studyInterest={tabContext.studyInterest}
+        isFamily={tabContext.familyHousehold}
+        monthlyIncome={profile.monthly_income}
+        fromQuiz={source === 'quiz'}
+        initialSection={sectionId}
+        pathwayCount={pathwayCount}
+      />
+
+      {sectionId === 'overview' && (
+        <CountryOverviewEnhancements
+          countrySlug={country.slug}
+          countryName={country.name}
+          profile={profile}
+        />
+      )}
+    </>
   )
 }
