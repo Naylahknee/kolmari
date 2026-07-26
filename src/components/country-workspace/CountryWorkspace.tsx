@@ -6,7 +6,7 @@ import { useState } from 'react'
 import {
   ArrowRight, BookOpenText, BriefcaseBusiness, CheckCircle2, ChevronDown, Clock3,
   Compass, ExternalLink, Globe2, GraduationCap, Heart, HeartHandshake, Home,
-  Landmark, Languages, Layers, ListChecks, MapPinned, Route, ShieldCheck,
+  Landmark, Languages, Layers, ListChecks, Route, ShieldCheck,
   Sparkles, Sun, Users, WalletCards, Wifi, Bus, Stethoscope, CloudSun,
 } from 'lucide-react'
 import { countryFlag } from '@/lib/countries'
@@ -15,6 +15,7 @@ import { getCountryTourismMedia } from '@/lib/country-workspace/country-tourism-
 import { IMPLEMENTED_TABS, type CountryTabId, type TabMeta } from '@/lib/country-workspace/tabs'
 import type { CountryContent } from '@/lib/country-workspace/country-content'
 import { CityMapImage } from './CityMapImage'
+import { CountrySnapshotMap } from './CountrySnapshotMap'
 import { CompareTab } from './tabs/CompareTab'
 import { CostOfLivingTab } from './tabs/CostOfLivingTab'
 import { HousingTab } from './tabs/HousingTab'
@@ -197,12 +198,13 @@ function TabPanel({ id, country, match, pathways, content, compareData, hasChild
     const tourism = getCountryTourismMedia(country.slug)
     const costs = content?.costOfLiving.categories.slice(0, 6) ?? []
     const resources = content?.resources.filter((r) => r.type === 'official').slice(0, 4) ?? []
+    const snapshotCenter = cities[0] ?? null
     const factRows = [
-      ['Capital', country.city, Landmark], ['Population', country.slug === 'portugal' ? '10.6 million' : 'Country data', Users],
-      ['Currency', content?.costOfLiving.currency ?? 'Researching', WalletCards], ['Official Language', country.slug === 'portugal' ? 'Portuguese' : 'Researching', Languages],
+      ['Capital', country.city, Landmark], ['Population', country.slug === 'portugal' ? '10.6 million' : 'Researching', Users],
+      ['Currency', country.slug === 'portugal' ? 'Euro (EUR)' : (content?.costOfLiving.currency ?? 'Researching'), WalletCards], ['Official Language', country.slug === 'portugal' ? 'Portuguese' : 'Researching', Languages],
       ['Government', country.slug === 'portugal' ? 'Republic' : 'Researching', Landmark], ['Time Zone', country.slug === 'portugal' ? 'GMT (UTC+0)' : 'Researching', Clock3],
-      ['Driving Side', country.slug === 'portugal' ? 'Right' : 'Researching', Bus], ['Climate', content?.dailyLife.weather ? 'See climate context' : 'Researching', CloudSun],
-      ['Schengen Area', country.slug === 'portugal' ? 'Yes' : 'Researching', Globe2], ['EU Member', country.slug === 'portugal' ? 'Yes' : 'Researching', Globe2],
+      ['Driving Side', country.slug === 'portugal' ? 'Right' : 'Researching', Bus], ['Schengen Area', country.slug === 'portugal' ? 'Yes' : 'Researching', Globe2],
+      ['EU Member', country.slug === 'portugal' ? 'Yes' : 'Researching', Globe2], ['Climate', country.slug === 'portugal' ? 'Mediterranean' : (content?.dailyLife.weather ? 'See climate context' : 'Researching'), CloudSun],
     ] as const
     const moveReasons = [
       ['Affordable Living', 'Lower everyday costs outside the most expensive cities.', WalletCards],
@@ -219,17 +221,17 @@ function TabPanel({ id, country, match, pathways, content, compareData, hasChild
           <section className="card-surface p-5 sm:p-6">
             <SectionTitle number="1" title="Country Snapshot" />
             <div className="mt-5 grid gap-5 lg:grid-cols-[1.1fr_.9fr]">
-              <dl className="grid grid-cols-1 gap-x-5 sm:grid-cols-2">
-                {factRows.map(([label, value, Icon]) => <div key={label} className="flex items-center gap-3 border-b border-line py-3"><Icon size={17} className="shrink-0 text-navy" /><div><dt className="text-[11px] text-muted">{label}</dt><dd className="text-sm font-bold text-navy">{value}</dd></div></div>)}
+              <dl className="grid grid-cols-1 gap-x-6 overflow-hidden rounded-[var(--radius-card)] border border-line bg-white px-4 sm:grid-cols-2">
+                {factRows.map(([label, value, Icon]) => <div key={label} className="flex items-center gap-3 border-b border-line py-3 last:border-b-0 sm:[&:nth-last-child(-n+2)]:border-b-0"><Icon size={17} className="shrink-0 text-navy" /><div><dt className="text-[11px] text-muted">{label}</dt><dd className="text-sm font-bold text-navy">{value}</dd></div></div>)}
               </dl>
               <div>
-                <div className="relative min-h-56 overflow-hidden rounded-[var(--radius-card)] border border-line bg-canvas">
-                  {cities[0] ? <CityMapImage cityName={country.city} countryName={country.name} lat={cities[0].lat} lng={cities[0].lng} alt={`Map showing ${country.name}`} /> : <div className="grid min-h-56 place-items-center text-muted"><MapPinned size={40} /></div>}
+                <div className="overflow-hidden rounded-[var(--radius-card)] border border-line bg-canvas">
+                  {snapshotCenter ? <CountrySnapshotMap countryName={country.name} lat={snapshotCenter.lat} lng={snapshotCenter.lng} alt={`Country map showing ${country.name}`} /> : <div className="grid min-h-56 place-items-center text-muted">Country map unavailable</div>}
                 </div>
                 <div className="mt-3 grid grid-cols-3 divide-x divide-line rounded-[var(--radius-field)] border border-line bg-white p-3 text-center">
-                  <div><p className="text-[10px] text-muted">Winter</p><p className="font-bold text-navy">16°C</p></div>
-                  <div><p className="text-[10px] text-muted">Summer</p><p className="font-bold text-navy">28°C</p></div>
-                  <div><p className="text-[10px] text-muted">Time difference</p><p className="font-bold text-navy">-5 hrs</p></div>
+                  <div><p className="text-[10px] text-muted">Avg. temp ({country.city})</p><p className="font-bold text-navy">16°C</p><p className="text-[10px] text-muted">Winter</p></div>
+                  <div><p className="text-[10px] text-muted">Avg. temp</p><p className="font-bold text-navy">28°C</p><p className="text-[10px] text-muted">Summer</p></div>
+                  <div><p className="text-[10px] text-muted">Time difference</p><p className="font-bold text-navy">-5 hrs</p><p className="text-[10px] text-muted">from your time</p></div>
                 </div>
               </div>
             </div>
