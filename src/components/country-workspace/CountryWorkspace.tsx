@@ -4,10 +4,12 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import {
-  ArrowRight, BookOpenText, BriefcaseBusiness, CheckCircle2, ChevronDown, Clock3,
-  Compass, ExternalLink, Globe2, GraduationCap, Heart, HeartHandshake, Home,
-  Landmark, Languages, Layers, ListChecks, Route, ShieldCheck,
-  Sparkles, Sun, Users, WalletCards, Wifi, Bus, Stethoscope, CloudSun,
+  ArrowRight, BadgeDollarSign, BookOpenText, BriefcaseBusiness, Bus, CarFront,
+  CheckCircle2, ChevronDown, CircleDollarSign, ClipboardCheck, Clock3, CloudSun,
+  Coins, Compass, ExternalLink, Globe2, GraduationCap, Heart, HeartHandshake,
+  HeartPulse, Home, Hospital, Landmark, Languages, Layers, Lightbulb, ListChecks,
+  MapPinned, Route, ShieldCheck, ShoppingCart, Snowflake, Sparkles, Sun, SunMedium,
+  TrainFront, Users, Utensils, WalletCards, Wifi,
 } from 'lucide-react'
 import { countryFlag } from '@/lib/countries'
 import { getCountryCityOverviews } from '@/lib/country-workspace/country-cities'
@@ -187,6 +189,13 @@ type TabPanelProps = {
   compareData: CompareEntry[]; hasChildren: boolean; studyInterest: boolean; isFamily: boolean; monthlyIncome: number | null
 }
 
+const reasonIconTones = ['text-ok', 'text-[#E28A00]', 'text-[#6D4DD6]', 'text-info', 'text-ok', 'text-[#D97706]']
+const reasonIconBackgrounds = ['bg-ok-soft', 'bg-[#FFF4D6]', 'bg-[#EEE9FF]', 'bg-info-soft', 'bg-ok-soft', 'bg-[#FFF0DC]']
+const costIcons = [Home, Lightbulb, ShoppingCart, Bus, HeartPulse, Utensils]
+const cityMetrics = [
+  ['Population', Users], ['Average rent', Home], ['Walk score', MapPinned], ['Research status', ClipboardCheck],
+] as const
+
 function TabPanel({ id, country, match, pathways, content, compareData, hasChildren, studyInterest, isFamily, monthlyIncome }: TabPanelProps) {
   const countryPathways = pathways.filter((p) => p.country.toLowerCase() === country.name.toLowerCase())
   const displayPathways = countryPathways.length > 0 ? countryPathways : pathways
@@ -197,79 +206,67 @@ function TabPanel({ id, country, match, pathways, content, compareData, hasChild
     const cities = getCountryCityOverviews(country.slug)
     const tourism = getCountryTourismMedia(country.slug)
     const costs = content?.costOfLiving.categories.slice(0, 6) ?? []
-    const resources = content?.resources.filter((r) => r.type === 'official').slice(0, 4) ?? []
     const snapshotCenter = cities[0] ?? null
     const factRows = [
       ['Capital', country.city, Landmark], ['Population', country.slug === 'portugal' ? '10.6 million' : 'Researching', Users],
-      ['Currency', country.slug === 'portugal' ? 'Euro (EUR)' : (content?.costOfLiving.currency ?? 'Researching'), WalletCards], ['Official Language', country.slug === 'portugal' ? 'Portuguese' : 'Researching', Languages],
+      ['Currency', country.slug === 'portugal' ? 'Euro (EUR)' : (content?.costOfLiving.currency ?? 'Researching'), Coins], ['Official Language', country.slug === 'portugal' ? 'Portuguese' : 'Researching', Languages],
       ['Government', country.slug === 'portugal' ? 'Republic' : 'Researching', Landmark], ['Time Zone', country.slug === 'portugal' ? 'GMT (UTC+0)' : 'Researching', Clock3],
-      ['Driving Side', country.slug === 'portugal' ? 'Right' : 'Researching', Bus], ['Schengen Area', country.slug === 'portugal' ? 'Yes' : 'Researching', Globe2],
-      ['EU Member', country.slug === 'portugal' ? 'Yes' : 'Researching', Globe2], ['Climate', country.slug === 'portugal' ? 'Mediterranean' : (content?.dailyLife.weather ? 'See climate context' : 'Researching'), CloudSun],
+      ['Driving Side', country.slug === 'portugal' ? 'Right' : 'Researching', CarFront], ['Schengen Area', country.slug === 'portugal' ? 'Yes' : 'Researching', ShieldCheck],
+      ['EU Member', country.slug === 'portugal' ? 'Yes' : 'Researching', Globe2], ['Climate', country.slug === 'portugal' ? 'Mediterranean' : (content?.dailyLife.weather ? 'See climate context' : 'Researching'), SunMedium],
     ] as const
     const moveReasons = [
-      ['Affordable Living', 'Lower everyday costs outside the most expensive cities.', WalletCards],
+      ['Affordable Living', 'Lower costs than many Western European countries.', BadgeDollarSign],
       ['Great Weather', content?.dailyLife.weather ?? 'Climate context is being verified.', Sun],
-      ['Welcoming Locals', content?.greenbook.communityFit ?? 'Community-fit research is available.', Users],
-      ['Quality Healthcare', content?.healthcare.publicSystem ?? 'Healthcare details are available.', Stethoscope],
+      ['Welcoming Community', content?.greenbook.communityFit ?? 'Community-fit research is available.', Users],
+      ['Quality Healthcare', content?.healthcare.publicSystem ?? 'Healthcare details are available.', Hospital],
       ['Remote Work Friendly', content?.employment.remoteEnvironment ?? 'Remote-work conditions are being researched.', Wifi],
       ['Rich Culture', content?.dailyLife.culturalEtiquette ?? 'Culture and daily life context are available.', Landmark],
     ] as const
 
     return (
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <main className="space-y-5">
-          <section className="card-surface p-5 sm:p-6">
-            <SectionTitle number="1" title="Country Snapshot" />
-            <div className="mt-5 grid gap-5 lg:grid-cols-[1.1fr_.9fr]">
-              <dl className="grid grid-cols-1 gap-x-6 overflow-hidden rounded-[var(--radius-card)] border border-line bg-white px-4 sm:grid-cols-2">
-                {factRows.map(([label, value, Icon]) => <div key={label} className="flex items-center gap-3 border-b border-line py-3 last:border-b-0 sm:[&:nth-last-child(-n+2)]:border-b-0"><Icon size={17} className="shrink-0 text-navy" /><div><dt className="text-[11px] text-muted">{label}</dt><dd className="text-sm font-bold text-navy">{value}</dd></div></div>)}
-              </dl>
-              <div>
-                <div className="overflow-hidden rounded-[var(--radius-card)] border border-line bg-canvas">
-                  {snapshotCenter ? <CountrySnapshotMap countryName={country.name} lat={snapshotCenter.lat} lng={snapshotCenter.lng} alt={`Country map showing ${country.name}`} /> : <div className="grid min-h-56 place-items-center text-muted">Country map unavailable</div>}
-                </div>
-                <div className="mt-3 grid grid-cols-3 divide-x divide-line rounded-[var(--radius-field)] border border-line bg-white p-3 text-center">
-                  <div><p className="text-[10px] text-muted">Avg. temp ({country.city})</p><p className="font-bold text-navy">16°C</p><p className="text-[10px] text-muted">Winter</p></div>
-                  <div><p className="text-[10px] text-muted">Avg. temp</p><p className="font-bold text-navy">28°C</p><p className="text-[10px] text-muted">Summer</p></div>
-                  <div><p className="text-[10px] text-muted">Time difference</p><p className="font-bold text-navy">-5 hrs</p><p className="text-[10px] text-muted">from your time</p></div>
-                </div>
+      <main className="space-y-5">
+        <section className="card-surface p-5 sm:p-6">
+          <SectionTitle number="1" title="Country Snapshot" />
+          <div className="mt-5 grid gap-5 lg:grid-cols-[1.1fr_.9fr]">
+            <dl className="grid grid-cols-1 gap-x-6 overflow-hidden rounded-[var(--radius-card)] border border-line bg-white px-4 sm:grid-cols-2">
+              {factRows.map(([label, value, Icon]) => <div key={label} className="flex items-center gap-3 border-b border-line py-3 last:border-b-0 sm:[&:nth-last-child(-n+2)]:border-b-0"><Icon size={18} strokeWidth={2.25} className="shrink-0 text-navy" /><div><dt className="text-[11px] text-muted">{label}</dt><dd className="text-sm font-bold text-navy">{value}</dd></div></div>)}
+            </dl>
+            <div>
+              <div className="overflow-hidden rounded-[var(--radius-card)] border border-line bg-canvas">
+                {snapshotCenter ? <CountrySnapshotMap countryName={country.name} lat={snapshotCenter.lat} lng={snapshotCenter.lng} alt={`Country map showing ${country.name}`} /> : <div className="grid min-h-56 place-items-center text-muted">Country map unavailable</div>}
+              </div>
+              <div className="mt-3 grid grid-cols-3 divide-x divide-line overflow-hidden rounded-[var(--radius-field)] border border-line bg-white">
+                {[['Average winter temperature', '16°C', 'Winter', Snowflake], ['Average summer temperature', '28°C', 'Summer', Sun], ['Time difference', '-5 hrs', 'from your current location', Clock3]].map(([label, value, detail, Icon]) => <div key={String(label)} className="flex min-h-24 items-center gap-3 px-3 py-3 text-left"><Icon size={20} strokeWidth={2.25} className="shrink-0 text-gold-deep" /><div><p className="text-[10px] leading-4 text-muted">{String(label)}</p><p className="text-base font-bold text-navy">{String(value)}</p><p className="text-[10px] leading-4 text-muted">{String(detail)}</p></div></div>)}
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          {cities.length > 0 && <section className="card-surface p-5 sm:p-6">
-            <div className="flex items-center justify-between gap-4"><SectionTitle number="2" title="Top Cities to Live" /><Link href="#" className="text-xs font-bold text-info">View all cities <ArrowRight size={13} className="inline" /></Link></div>
-            <div className="mt-5 flex gap-3 overflow-x-auto pb-2">
-              {cities.slice(0, 5).map((city) => <article key={city.id} className="min-w-[180px] flex-1 overflow-hidden rounded-[var(--radius-card)] border border-line bg-white shadow-tile">
-                <div className="relative"><CityMapImage cityName={city.cityName} countryName={country.name} lat={city.lat} lng={city.lng} alt={city.imageAlt} />{tourism && <div className="absolute left-2 top-2 rounded bg-white/90 p-1 shadow">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={tourism.flagSrc} alt={tourism.flagAlt} className="h-4 w-auto" /></div>}</div>
-                <div className="p-3"><h3 className="font-bold text-navy">{city.cityName}</h3>{city.region && <p className="text-[11px] text-muted">{city.region}</p>}<p className="mt-2 text-[11px] text-muted">Research status</p><p className="text-[11px] font-semibold text-info">{city.researchStatus}</p></div>
-              </article>)}
-            </div>
-          </section>}
+        {cities.length > 0 && <section className="card-surface p-5 sm:p-6">
+          <div className="flex items-center justify-between gap-4"><SectionTitle number="2" title="Top Cities to Live" /><Link href={`/nextinations/${country.slug}/housing`} className="inline-flex items-center gap-1 text-xs font-bold text-info">View all cities <ArrowRight size={13} /></Link></div>
+          <div className="mt-5 flex snap-x gap-3 overflow-x-auto pb-3">
+            {cities.slice(0, 5).map((city, index) => {
+              const cityCost = costs[index % Math.max(costs.length, 1)]
+              const rentValue = cityCost ? `${cityCost.currency} ${cityCost.soloLow.toLocaleString()}–${cityCost.soloHigh.toLocaleString()}` : 'Researching'
+              const metricValues = ['Researching', rentValue, 'Researching', city.researchStatus]
+              return <article key={city.id} className="min-w-[220px] snap-start overflow-hidden rounded-[var(--radius-card)] border border-line bg-white shadow-tile transition duration-200 hover:-translate-y-1 hover:shadow-[var(--shadow-shell)]">
+                <div className="relative"><CityMapImage cityName={city.cityName} countryName={country.name} lat={city.lat} lng={city.lng} alt={city.imageAlt} />{tourism && <div className="absolute left-2 top-2 rounded-md border border-white/70 bg-white/90 p-1.5 shadow">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={tourism.flagSrc} alt={tourism.flagAlt} className="h-4 w-auto" /></div>}</div>
+                <div className="p-4"><h3 className="font-bold text-navy">{city.cityName}</h3>{city.region && <p className="mt-0.5 text-[11px] text-muted">{city.region}</p>}<div className="mt-4 space-y-2.5">{cityMetrics.map(([label, Icon], metricIndex) => <div key={label} className="flex items-center justify-between gap-3"><span className="flex items-center gap-2 text-[11px] text-muted"><Icon size={13} strokeWidth={2.25} />{label}</span><span className={`text-[11px] font-semibold ${label === 'Research status' ? 'text-info' : 'text-navy'}`}>{metricValues[metricIndex]}</span></div>)}</div></div>
+              </article>
+            })}
+          </div>
+        </section>}
 
-          <section className="card-surface p-5 sm:p-6">
-            <SectionTitle number="3" title={`Why People Move to ${country.name}`} />
-            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">{moveReasons.map(([title, body, Icon]) => <article key={title} className="rounded-[var(--radius-card)] border border-line bg-white p-4 text-center"><Icon size={30} className="mx-auto text-gold-deep" /><h3 className="mt-3 text-sm font-bold text-navy">{title}</h3><p className="mt-2 line-clamp-4 text-[11px] leading-4 text-muted">{body}</p></article>)}</div>
-          </section>
+        <section className="card-surface p-5 sm:p-6">
+          <SectionTitle number="3" title={`Why People Move to ${country.name}`} />
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">{moveReasons.map(([title, body, Icon], index) => <article key={title} className="flex min-h-44 flex-col items-center rounded-[var(--radius-card)] border border-line bg-white p-4 text-center shadow-tile"><span className={`grid size-12 place-items-center rounded-full ${reasonIconBackgrounds[index]}`}><Icon size={28} strokeWidth={2.25} className={reasonIconTones[index]} /></span><h3 className="mt-3 text-sm font-bold text-navy">{title}</h3><p className="mt-2 line-clamp-4 text-[11px] leading-4 text-muted">{body}</p></article>)}</div>
+        </section>
 
-          <section className="card-surface p-5 sm:p-6">
-            <div className="flex items-center justify-between gap-4"><SectionTitle number="4" title="Cost of Living Snapshot" /><Link href={`/nextinations/${country.slug}/cost-of-living`} className="text-xs font-bold text-info">View full analysis <ArrowRight size={13} className="inline" /></Link></div>
-            {costs.length ? <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">{costs.map((item) => <div key={item.label} className="rounded-[var(--radius-field)] border border-line bg-white p-3"><p className="text-[11px] font-semibold text-muted">{item.label}</p><p className="mt-1 text-sm font-bold text-navy">{item.currency} {item.soloLow.toLocaleString()}–{item.soloHigh.toLocaleString()}</p><p className="text-[10px] text-muted">/month</p></div>)}</div> : <p className="mt-4 text-sm text-muted">Cost research is still being verified.</p>}
-          </section>
-        </main>
-
-        <aside className="space-y-4 xl:sticky xl:top-24 xl:self-start">
-          {match && <section className="card-surface p-5"><p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Nexit Match</p><div className="mt-2 flex items-end gap-3"><p className="text-4xl font-extrabold text-navy">{match.score}%</p><p className="pb-1 font-bold text-ok">{matchLabel(match.score)}</p></div><div className="mt-3 h-2.5 overflow-hidden rounded-full bg-line"><div className="h-full rounded-full bg-gold" style={{ width: `${match.score}%` }} /></div><ul className="mt-4 space-y-2">{match.reasons.slice(0, 3).map((reason) => <li key={reason} className="flex gap-2 text-xs text-muted"><CheckCircle2 size={14} className="text-ok" />{reason}</li>)}</ul><p className="mt-4 text-xs text-muted"><strong className="text-navy">Tradeoff:</strong> {match.tradeoff}</p><Link href={`/nextinations/${country.slug}/why-you`} className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-info">View full match breakdown <ArrowRight size={12} /></Link></section>}
-
-          <section className="card-surface p-5"><p className="text-xs font-bold uppercase tracking-widest text-navy">Key Country Indicators</p><div className="mt-4 space-y-3">{[
-            ['Cost of Living', country.cost, 'bg-warn'], ['Healthcare System', content?.healthcare.publicSystem ? 'High quality' : 'Researching', 'bg-ok'], ['English Availability', 'Moderate', 'bg-warn'], ['Internet Quality', content?.dailyLife.internet ? 'High' : 'Researching', 'bg-ok'], ['Public Transport', content?.transportation.publicTransit ? 'Moderate' : 'Researching', 'bg-warn'], ['Family Suitability', hasChildren ? 'High' : 'General', 'bg-ok'], ['Safety Overall', country.safety, 'bg-ok'],
-          ].map(([label, value, tone]) => <div key={label} className="flex items-center justify-between gap-3 border-b border-line pb-3 last:border-0"><span className="text-xs text-muted">{label}</span><span className="flex items-center gap-2 text-xs font-semibold text-navy">{value}<span className={`size-2 rounded-full ${tone}`} /></span></div>)}</div></section>
-
-          <section className="card-surface p-5"><p className="text-xs font-bold uppercase tracking-widest text-navy">Official Resources</p><div className="mt-3 space-y-1">{resources.length ? resources.map((resource) => <a key={resource.url} href={resource.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between rounded-[var(--radius-field)] px-2 py-2 text-sm font-semibold text-info hover:bg-canvas"><span>{resource.title}</span><ExternalLink size={14} /></a>) : <p className="text-sm text-muted">Official links are being verified.</p>}</div></section>
-
-          <section className="rounded-[var(--radius-card)] border border-gold/35 bg-gold-soft/55 p-5 shadow-tile"><p className="font-bold text-navy">Planning to move to {country.name}?</p><p className="mt-2 text-sm leading-6 text-muted">View your {country.name} readiness and continue your relocation plan.</p><Link href="/nexit-plan" className="gold-button mt-4">Go to My Nexit Plan <ArrowRight size={15} /></Link></section>
-        </aside>
-      </div>
+        <section className="card-surface p-5 sm:p-6">
+          <div className="flex items-center justify-between gap-4"><SectionTitle number="4" title="Cost of Living Snapshot" /><Link href={`/nextinations/${country.slug}/cost-of-living`} className="inline-flex items-center gap-1 text-xs font-bold text-info">View full analysis <ArrowRight size={13} /></Link></div>
+          {costs.length ? <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">{costs.map((item, index) => { const Icon = costIcons[index] ?? CircleDollarSign; return <div key={item.label} className="min-h-32 rounded-[var(--radius-field)] border border-line bg-white p-4 shadow-tile"><Icon size={21} strokeWidth={2.25} className="text-gold-deep" /><p className="mt-3 text-[11px] font-semibold text-muted">{item.label}</p><p className="mt-1 text-sm font-bold text-navy">{item.currency} {item.soloLow.toLocaleString()}–{item.soloHigh.toLocaleString()}</p><p className="mt-1 text-[10px] text-muted">/month</p></div> })}</div> : <p className="mt-4 text-sm text-muted">Cost research is still being verified.</p>}
+        </section>
+      </main>
     )
   }
 
@@ -285,15 +282,15 @@ function TabPanel({ id, country, match, pathways, content, compareData, hasChild
   if (id === 'healthcare') return <HealthcareTab content={content?.healthcare ?? null} countryName={country.name} />
   if (id === 'education') return <EducationTab content={content?.education ?? null} countryName={country.name} hasChildren={hasChildren} studyInterest={studyInterest} />
   if (id === 'transportation') return <TransportationTab content={content?.transportation ?? null} countryName={country.name} />
-  if (id === 'legal-taxes') return <LegalTaxesTab content={content?.legalTaxes ?? null} countryName={country.name} />
   if (id === 'daily-life') return <DailyLifeTab content={content?.dailyLife ?? null} countryName={country.name} />
+  if (id === 'legal-taxes') return <LegalTaxesTab content={content?.legalTaxes ?? null} countryName={country.name} />
   if (id === 'family-pets') return <FamilyPetsTab content={content?.familyPets ?? null} countryName={country.name} />
   if (id === 'greenbook') return <GreenbookTab content={content?.greenbook ?? null} countryName={country.name} />
-  if (id === 'resources') return <ResourcesTab resources={content?.resources ?? []} countryName={country.name} />
-  if (id === 'compare') return <CompareTab current={{ country, match }} others={compareData} />
-  return <section className="card-surface p-8 text-center"><Compass className="mx-auto text-gold-deep" /><p className="mt-3 font-semibold text-navy">Research in progress</p></section>
+  if (id === 'resources') return <ResourcesTab content={content?.resources ?? []} countryName={country.name} />
+  if (id === 'compare') return <CompareTab country={country} compareData={compareData} />
+  return <section className="card-surface p-8 text-center"><p className="font-semibold text-navy">Research in progress</p></section>
 }
 
 function SectionTitle({ number, title }: { number: string; title: string }) {
-  return <div className="flex items-center gap-3"><span className="grid size-7 place-items-center rounded-full bg-navy-deep text-sm font-bold text-white">{number}</span><h2 className="text-xl font-bold text-navy">{title}</h2></div>
+  return <div className="flex items-center gap-3"><span className="grid size-7 place-items-center rounded-full bg-navy-deep text-xs font-bold text-white">{number}</span><h2 className="text-xl font-bold text-navy">{title}</h2></div>
 }
