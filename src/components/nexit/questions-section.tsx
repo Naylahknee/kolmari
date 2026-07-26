@@ -4,27 +4,27 @@ import Link from 'next/link'
 const questions = [
   {
     question: 'Could my family actually afford this?',
-    icon: '/icons/questions/family-affordability.png?v=20260725',
+    icon: '/icons/questions/family-affordability.png?v=20260726',
   },
   {
     question: 'Where would we feel safe and welcomed?',
-    icon: '/icons/questions/safety-welcome.png?v=20260725',
+    icon: '/icons/questions/safety-welcome.png?v=20260726',
   },
   {
     question: 'Are there visas I already qualify for?',
-    icon: '/icons/questions/visa-pathways.png?v=20260725',
+    icon: '/icons/questions/visa-pathways.png?v=20260726',
   },
   {
     question: 'What happens to healthcare and schools?',
-    icon: '/icons/questions/healthcare-schools.png?v=20260725',
+    icon: '/icons/questions/healthcare-schools.png?v=20260726',
   },
   {
     question: 'Can I move without being rich?',
-    icon: '/icons/questions/moving-budget.png?v=20260725',
+    icon: '/icons/questions/moving-budget.png?v=20260726',
   },
   {
     question: 'How do I turn “someday” into an actual plan?',
-    icon: '/icons/questions/action-plan.png?v=20260725',
+    icon: '/icons/questions/action-plan.png?v=20260726',
   },
 ]
 
