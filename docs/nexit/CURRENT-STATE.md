@@ -523,6 +523,54 @@ Single client component file containing:
 
 ---
 
+## Country Page Template (v2) — install + build fixes
+
+**Installed the approved `index.html` country-page mockup as the `v2` template** via
+`install-nexit-template.py` (26 files under `src/`), then repaired the converter
+artifacts so `npm run lint` and `npm run build` pass.
+
+### Install
+
+- Ran `python3 install-nexit-template.py`. It added the `v2` route tree
+  (`nextinations/[countrySlug]/v2/…`), the `country-template` frame + tabs
+  components, `lib/country-template/*`, and `styles/country-template.css`, and
+  rewrote `nextinations/page.tsx` with the `NEXT_PUBLIC_COUNTRY_TEMPLATE` gate.
+- **`NEXT_PUBLIC_COUNTRY_TEMPLATE` was deliberately left unset**, so the wizard
+  still lands users on the existing sixteen-tab workspace. The v2 template is
+  installed dormant and reachable only at `/nextinations/[slug]/v2/overview`.
+
+### Fixes applied to the installed template
+
+| Area | Fix |
+|---|---|
+| Parse errors (7 tabs) | Removed a stray trailing `{/* ══════ … ══════ */}` JSX comment left between the closing `</div>` and `)` in each tab (`Overview`, `MoveThere`, `CostHousing`, `WorkStudy`, `Healthcare`, `Lifestyle`, `FamilySchools`). |
+| `react/no-unescaped-entities` (6 tabs) | Escaped 31 literal `'`/`"` characters in prose to `&apos;`/`&quot;`. |
+| `@next/next/no-html-link-for-pages` | Converted internal `<a href="/…">` to `<Link>` in `Sidebar`, `RightRail`, `TopBar`, `OverviewTab`, `MoveThereTab`, `CostHousingTab`. |
+| `TopBar` units control | Replaced the hardcoded units block (which called an undefined `setUnit`) with the imported `<UnitsControl />` island (already inside `UnitsProvider`). |
+| Zero-JS server tabs | Removed dangling event handlers (`onClick`/`onChange`/`onInput`/`onError`) that referenced undefined functions (`go`, `setHousehold`, `setTaxReg`, `setTaxMode`, `renderEntry`, `calcTax`) — the tabs are server components with no JS per the template README, so the mockup's inline handlers were non-functional. |
+| JSX attribute type | `HealthcareTab`: `colSpan="4"` → `colSpan={4}`. |
+
+The `.backup` file the installer created was removed (original is preserved in git
+history), and `package-lock.json` was left untouched.
+
+### Tests Run
+
+| Check | Result |
+|---|---|
+| ESLint (`npm run lint`) | ✅ Pass — 0 errors (31 pre-existing style warnings remain) |
+| Production build (`npm run build`) | ✅ Pass — 54 pages generated |
+
+### Known follow-ups (from the template README, not yet done)
+
+- Tab markup is still verbatim Portugal copy; bind to `content.*` per section.
+- Interactive controls (household/tax toggles, cross-tab jump chips, passport
+  entry selector) are now static — rewire as client islands when those sections
+  become dynamic.
+- `NEXT_PUBLIC_MAPBOX_TOKEN` and the brand PNGs referenced by the template still
+  need to be provided before switching users onto v2.
+
+---
+
 ## Next Recommended Implementation Phase
 
 **Phase 13 — Greenbook disclosure pattern + adaptive section ordering**

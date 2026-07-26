@@ -1,0 +1,5 @@
+import '@/styles/country-template.css'
+
+export default function V2Layout({ children }: { children: React.ReactNode }) {
+  return <>{children}</>
+}
