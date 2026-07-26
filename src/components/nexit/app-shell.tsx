@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
-import { FormEvent, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   Bell,
   BookOpen,
@@ -19,7 +19,6 @@ import {
   Menu,
   NotebookTabs,
   Route,
-  Search,
   Settings,
   UserRound,
   X,
@@ -415,12 +414,6 @@ export function AppShell({
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [drawerOpen])
 
-  function onSearch(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    const q = String(new FormData(e.currentTarget).get('query') ?? '').trim()
-    router.push(q ? `/nexitnation?view=countries&q=${encodeURIComponent(q)}` : '/nexitnation?view=countries')
-  }
-
   async function logout() {
     await fetch('/api/logout', { method: 'POST' })
     router.push('/')
@@ -502,21 +495,6 @@ export function AppShell({
         {/* Top bar */}
         <header className="sticky top-0 z-20 border-b border-line bg-canvas/95 px-6 py-3 backdrop-blur md:px-10">
           <div className="flex items-center gap-3">
-            {/* Desktop: search */}
-            <form
-              onSubmit={onSearch}
-              role="search"
-              className="max-w-xl flex-1 items-center gap-2 rounded-[var(--radius-field)] border border-line bg-white px-3 hidden md:flex"
-            >
-              <Search size={16} className="shrink-0 text-muted" aria-hidden="true" />
-              <input
-                name="query"
-                aria-label="Search Nextinations, Pathways, and more"
-                placeholder="Search Nextinations, Pathways, and more…"
-                className="h-10 min-w-0 flex-1 bg-transparent text-sm text-navy outline-none placeholder:text-muted"
-              />
-            </form>
-
             {/* Notifications */}
             <div className="relative ml-auto">
               <button

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { ArrowRight, Check, MapPin, Plus, Search, Star, Trash2, X } from 'lucide-react'
+import { ArrowRight, Check, Plus, Search, Star, Trash2, X } from 'lucide-react'
 import { CONTINENT_PATHS, WORLD_VIEWBOX } from '@/lib/world-continents'
 import { searchPlaces, flagEmoji, type WorldPlace } from '@/lib/world-places'
 import { countryWorkspaceSlug, STATUS_META, STATUS_ORDER, useNextinationBoard, type NextinationStatus, type SavedNextination } from '@/lib/nextination-board'
@@ -33,9 +33,9 @@ export function NexitWorldBoard() {
   }
 
   return (
-    <div>
-      {/* Header */}
-      <div className="flex flex-wrap items-end justify-between gap-4">
+    <div className="space-y-5">
+      {/* Header + Add destination (top) */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Nexit World</p>
           <h1 className="mt-1 text-2xl font-bold text-navy sm:text-3xl">My Nextinations</h1>
@@ -43,76 +43,68 @@ export function NexitWorldBoard() {
             {ready ? `${counts.total} saved · ${counts.researching} researching · ${counts.shortlisted} shortlisted` : 'Loading your board…'}
           </p>
         </div>
+        <div className="w-full lg:max-w-sm">
+          <AddDestination onAdd={handleAdd} existingIds={new Set(items.map((x) => x.id))} />
+        </div>
       </div>
 
-      <div className="mt-5 grid gap-5 lg:grid-cols-[1.9fr_1fr]">
-        {/* Map */}
-        <section aria-label="World map of your Nextinations" className="card-surface overflow-hidden p-3">
-          <div className="relative w-full overflow-hidden rounded-[var(--radius-card)] bg-navy-deep" style={{ aspectRatio: '2 / 1' }}>
-            <svg viewBox={`0 0 ${WORLD_VIEWBOX.width} ${WORLD_VIEWBOX.height}`} className="absolute inset-0 h-full w-full" role="img" aria-label="World map" preserveAspectRatio="xMidYMid slice">
-              <rect width={WORLD_VIEWBOX.width} height={WORLD_VIEWBOX.height} fill="#0d1b39" />
-              {CONTINENT_PATHS.map((d, i) => (
-                <path key={i} d={d} fill="#1c3161" stroke="#2a4570" strokeWidth={0.4} />
-              ))}
-            </svg>
-            {/* Pins */}
+      {/* Full-width map */}
+      <section aria-label="World map of your Nextinations" className="card-surface overflow-hidden p-3">
+        <div className="relative w-full overflow-hidden rounded-[var(--radius-card)] bg-navy-deep" style={{ aspectRatio: '2 / 1' }}>
+          <svg viewBox={`0 0 ${WORLD_VIEWBOX.width} ${WORLD_VIEWBOX.height}`} className="absolute inset-0 h-full w-full" role="img" aria-label="World map" preserveAspectRatio="xMidYMid slice">
+            <rect width={WORLD_VIEWBOX.width} height={WORLD_VIEWBOX.height} fill="#0d1b39" />
+            {CONTINENT_PATHS.map((d, i) => (
+              <path key={i} d={d} fill="#1c3161" stroke="#2a4570" strokeWidth={0.4} />
+            ))}
+          </svg>
+          {/* Pins */}
+          {items.map((item) => {
+            const pos = toPercent(item.lat, item.lng)
+            const meta = STATUS_META[item.status]
+            const active = item.id === selectedId
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setSelectedId(item.id)}
+                aria-label={`${item.name}, ${meta.label}`}
+                aria-pressed={active}
+                className="absolute -translate-x-1/2 -translate-y-1/2 focus:outline-none"
+                style={{ left: `${pos.left}%`, top: `${pos.top}%` }}
+              >
+                <span className={`block rounded-full transition ${meta.dot} ${active ? 'size-[18px] ring-4 ring-white/40' : 'size-3.5 hover:scale-125'}`} />
+                {active ? <span className="pointer-events-none absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap rounded-pill bg-white px-2 py-0.5 text-[10px] font-bold text-navy shadow-card">{item.name}</span> : null}
+              </button>
+            )
+          })}
+          {ready && items.length === 0 ? (
+            <div className="absolute inset-0 flex items-center justify-center p-6 text-center">
+              <p className="max-w-xs text-sm text-white/70">Search for a city or country above and save it to start building your relocation board.</p>
+            </div>
+          ) : null}
+        </div>
+
+        {/* Destination tray */}
+        {items.length > 0 ? (
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
             {items.map((item) => {
-              const pos = toPercent(item.lat, item.lng)
               const meta = STATUS_META[item.status]
-              const active = item.id === selectedId
               return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setSelectedId(item.id)}
-                  aria-label={`${item.name}, ${meta.label}`}
-                  aria-pressed={active}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 focus:outline-none"
-                  style={{ left: `${pos.left}%`, top: `${pos.top}%` }}
-                >
-                  <span className={`block rounded-full transition ${meta.dot} ${active ? 'size-[18px] ring-4 ring-white/40' : 'size-3.5 hover:scale-125'}`} />
-                  {active ? <span className="pointer-events-none absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap rounded-pill bg-white px-2 py-0.5 text-[10px] font-bold text-navy shadow-card">{item.name}</span> : null}
+                <button key={item.id} type="button" onClick={() => setSelectedId(item.id)} className={`flex shrink-0 items-center gap-2 rounded-pill border px-3 py-1.5 text-xs font-bold transition ${item.id === selectedId ? 'border-gold bg-gold-soft/60 text-navy' : 'border-line bg-white text-muted hover:text-navy'}`}>
+                  <span aria-hidden>{flagEmoji(item.countryCode)}</span>
+                  {item.name}
+                  <span className={`rounded-pill px-1.5 py-0.5 text-[10px] ${meta.chip}`}>{meta.label}</span>
                 </button>
               )
             })}
-            {ready && items.length === 0 ? (
-              <div className="absolute inset-0 flex items-center justify-center p-6 text-center">
-                <p className="max-w-xs text-sm text-white/70">Search for a city or country on the right and save it to start building your relocation board.</p>
-              </div>
-            ) : null}
           </div>
+        ) : null}
+      </section>
 
-          {/* Destination tray */}
-          {items.length > 0 ? (
-            <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-              {items.map((item) => {
-                const meta = STATUS_META[item.status]
-                return (
-                  <button key={item.id} type="button" onClick={() => setSelectedId(item.id)} className={`flex shrink-0 items-center gap-2 rounded-pill border px-3 py-1.5 text-xs font-bold transition ${item.id === selectedId ? 'border-gold bg-gold-soft/60 text-navy' : 'border-line bg-white text-muted hover:text-navy'}`}>
-                    <span aria-hidden>{flagEmoji(item.countryCode)}</span>
-                    {item.name}
-                    <span className={`rounded-pill px-1.5 py-0.5 text-[10px] ${meta.chip}`}>{meta.label}</span>
-                  </button>
-                )
-              })}
-            </div>
-          ) : null}
-        </section>
-
-        {/* Right panel */}
-        <aside className="space-y-4">
-          <AddDestination onAdd={handleAdd} existingIds={new Set(items.map((x) => x.id))} />
-          {selected ? (
-            <DetailPanel key={selected.id} item={selected} onStatus={(s) => update(selected.id, { status: s })} onNote={(n) => update(selected.id, { note: n })} onRemove={() => { remove(selected.id); setSelectedId(null) }} onClose={() => setSelectedId(null)} />
-          ) : (
-            <div className="card-surface p-6 text-sm text-muted">
-              <MapPin className="text-gold-deep" />
-              <p className="mt-3 font-bold text-navy">No destination selected</p>
-              <p className="mt-1">Select a pin or a saved card to see its planning details.</p>
-            </div>
-          )}
-        </aside>
-      </div>
+      {/* Selected destination — below the map */}
+      {selected ? (
+        <DetailPanel key={selected.id} item={selected} onStatus={(s) => update(selected.id, { status: s })} onNote={(n) => update(selected.id, { note: n })} onRemove={() => { remove(selected.id); setSelectedId(null) }} onClose={() => setSelectedId(null)} />
+      ) : null}
     </div>
   )
 }
