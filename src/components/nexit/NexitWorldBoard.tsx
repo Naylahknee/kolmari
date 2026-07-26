@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { ArrowRight, Check, Plus, Search, Star, Trash2, X } from 'lucide-react'
+import { ArrowRight, Check, ExternalLink, Plus, Search, Star, Trash2, X } from 'lucide-react'
 import { CONTINENT_PATHS, WORLD_VIEWBOX } from '@/lib/world-continents'
 import { searchPlaces, flagEmoji, type WorldPlace } from '@/lib/world-places'
 import { countryWorkspaceSlug, STATUS_META, STATUS_ORDER, useNextinationBoard, type NextinationStatus, type SavedNextination } from '@/lib/nextination-board'
