@@ -5,27 +5,27 @@ import { PlaneTakeoff } from 'lucide-react'
 const questions = [
   {
     question: 'Could my family actually afford this?',
-    icon: '/icons/questions/family-affordability.png',
+    icon: '/icons/questions/family-affordability.png?v=20260725',
   },
   {
     question: 'Where would we feel safe and welcomed?',
-    icon: '/icons/questions/safety-welcome.png',
+    icon: '/icons/questions/safety-welcome.png?v=20260725',
   },
   {
     question: 'Are there visas I already qualify for?',
-    icon: '/icons/questions/visa-pathways.png',
+    icon: '/icons/questions/visa-pathways.png?v=20260725',
   },
   {
     question: 'What happens to healthcare and schools?',
-    icon: '/icons/questions/healthcare-schools.png',
+    icon: '/icons/questions/healthcare-schools.png?v=20260725',
   },
   {
     question: 'Can I move without being rich?',
-    icon: '/icons/questions/moving-budget.png',
+    icon: '/icons/questions/moving-budget.png?v=20260725',
   },
   {
     question: 'How do I turn “someday” into an actual plan?',
-    icon: '/icons/questions/action-plan.png',
+    icon: '/icons/questions/action-plan.png?v=20260725',
   },
 ]
 
@@ -72,6 +72,7 @@ export function QuestionsSection() {
                       src={icon}
                       alt=""
                       fill
+                      unoptimized
                       sizes="80px"
                       className="object-contain"
                     />
