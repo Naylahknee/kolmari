@@ -65,7 +65,7 @@ type ReadinessBreakdown = { overall: number | null; profile: number; documents: 
 type Props = {
   country: CountrySummary
   match: MatchData | null
-  readiness: ReadinessBreakdown
+  readiness: ReadinessBreakdown | null
   tabs: TabMeta[]
   allTabs: TabMeta[]
   pathways: PathwayCardData[]
