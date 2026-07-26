@@ -4,12 +4,9 @@ import {
   ArrowRight,
   Calculator,
   CheckCircle2,
-  FileCheck2,
-  Globe2,
   MapPinned,
   MessageCircleMore,
   Sparkles,
-  Star,
   UsersRound,
 } from 'lucide-react'
 import { MarketingMobileNav } from '@/components/nexit/marketing-mobile-nav'
@@ -39,13 +36,6 @@ const nexitSteps = [
     action: 'Discover Your Nexit Stage',
     experience: 'nexit-stage' as const,
   },
-]
-
-const stats = [
-  { value: '50+', label: 'Countries', icon: Globe2 },
-  { value: '120+', label: 'Pathways', icon: FileCheck2 },
-  { value: '20K+', label: 'Planners', icon: UsersRound },
-  { value: '4.8/5', label: 'Average rating', icon: Star },
 ]
 
 export default function LandingPage() {
@@ -138,18 +128,6 @@ export default function LandingPage() {
       </div>
 
       <QuestionsSection />
-
-      <section className="w-full bg-navy-deep py-10 text-white" aria-label="Nexit at a glance">
-        <div className="mx-auto grid max-w-[1180px] grid-cols-2 gap-y-9 px-5 text-center md:grid-cols-4 lg:px-0">
-          {stats.map(({ value, label, icon: Icon }, index) => (
-            <div key={label} className={`px-4 ${index % 2 ? '' : 'border-r border-white/10'} md:border-r md:last:border-r-0`}>
-              <Icon className="mx-auto text-gold" size={25} fill={label === 'Average rating' ? 'currentColor' : 'none'} />
-              <p className="mt-3 font-display text-3xl font-extrabold">{value}</p>
-              <p className="mt-1 text-xs font-semibold text-[#9fb2d1]">{label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
 
       <section id="community" className="mx-auto max-w-[1236px] px-4 py-20 sm:px-6 lg:px-7">
         <div className="mb-9 max-w-2xl">
