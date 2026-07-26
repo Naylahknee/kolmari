@@ -11,7 +11,6 @@ import {
 } from 'lucide-react'
 import { MarketingMobileNav } from '@/components/nexit/marketing-mobile-nav'
 import { Wordmark } from '@/components/nexit/wordmark'
-import { MiniExperienceTrigger } from '@/components/nexit/landing-mini-experiences'
 import { QuestionsSection } from '@/components/nexit/questions-section'
 
 const nexitSteps = [
@@ -19,22 +18,16 @@ const nexitSteps = [
     image: '/images/journey-globe-pins.png',
     title: 'Choose a Nextination',
     copy: 'Compare Nextinations, Pathways, and monthly costs side by side.',
-    action: 'Find Your Starting Places',
-    experience: 'starting-places' as const,
   },
   {
     image: '/images/passport-visa-documents.png',
     title: 'Review your Pathways',
     copy: 'Answer focused questions and get a practical starting shortlist.',
-    action: 'Explore Your Pathways',
-    experience: 'pathways' as const,
   },
   {
     image: '/images/luggage-tropical-coast.png',
     title: 'Build your Nexit Plan',
     copy: 'Track documents, budget, and the tasks that turn a plan into a departure.',
-    action: 'Discover Your Nexit Stage',
-    experience: 'nexit-stage' as const,
   },
 ]
 
@@ -115,11 +108,6 @@ export default function LandingPage() {
                 <div className="p-6">
                   <h3 className="text-xl font-extrabold text-navy">{item.title}</h3>
                   <p className="mt-2 min-h-12 text-sm leading-6 text-muted">{item.copy}</p>
-                  <MiniExperienceTrigger
-                    experience={item.experience}
-                    label={item.action}
-                    className="mt-5 inline-flex items-center gap-2 text-sm font-extrabold text-gold-deep focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-gold/50 focus-visible:rounded"
-                  />
                 </div>
               </article>
             ))}
