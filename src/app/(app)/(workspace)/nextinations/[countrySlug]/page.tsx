@@ -12,5 +12,8 @@ export default async function CountryWorkspaceIndexPage({
   const { countrySlug } = await params
   const sp = await searchParams
   const source = sp.source ? `?source=${sp.source}` : ''
+  if (countrySlug === 'portugal') {
+    redirect(`/nextinations/portugal/v2/overview${source}`)
+  }
   redirect(`/nextinations/${countrySlug}/overview${source}`)
 }

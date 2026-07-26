@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { requireCurrentUser } from '@/lib/auth'
 import { getProfile } from '@/lib/profile'
 import { COUNTRIES } from '@/lib/countries'
@@ -21,6 +21,20 @@ const VALID_SECTIONS: CountryTabId[] = [
   'legal-taxes', 'daily-life', 'family-pets', 'greenbook', 'resources', 'compare',
 ]
 
+const PORTUGAL_TEMPLATE_SECTIONS: Partial<Record<CountryTabId, string>> = {
+  overview: 'overview',
+  pathways: 'move-there',
+  'cost-of-living': 'cost-housing',
+  housing: 'cost-housing',
+  employment: 'work-study',
+  healthcare: 'healthcare',
+  education: 'family-schools',
+  'family-pets': 'family-schools',
+  'daily-life': 'lifestyle-community',
+  greenbook: 'lifestyle-community',
+  'legal-taxes': 'tax-money',
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { countrySlug, section } = await params
   const country = COUNTRIES.find((item) => item.slug === countrySlug)
@@ -38,6 +52,12 @@ export default async function CountryWorkspaceSectionPage({ params, searchParams
   if (!country) notFound()
 
   const sectionId = (VALID_SECTIONS.includes(section as CountryTabId) ? section : 'overview') as CountryTabId
+  if (countrySlug === 'portugal') {
+    const templateSection = PORTUGAL_TEMPLATE_SECTIONS[sectionId] ?? 'overview'
+    const source = (await searchParams).source
+    const query = source ? `?source=${source}` : ''
+    redirect(`/nextinations/portugal/v2/${templateSection}${query}`)
+  }
 
   const user = await requireCurrentUser()
   const profile = await getProfile(user.id)
