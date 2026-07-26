@@ -1,6 +1,5 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { PlaneTakeoff } from 'lucide-react'
 
 const questions = [
   {
@@ -94,7 +93,14 @@ export function QuestionsSection() {
         <div className="mx-auto mt-14 max-w-4xl text-center lg:mt-16">
           <div className="mb-7 flex items-center justify-center gap-4">
             <div className="h-px w-24 bg-[#F3C516]/60 sm:w-40" />
-            <PlaneTakeoff aria-hidden="true" className="h-5 w-5 text-[#F3C516]" />
+            <Image
+              src="/brand/nexit-butterfly.png"
+              alt=""
+              width={30}
+              height={30}
+              aria-hidden="true"
+              className="h-[30px] w-[30px] object-contain"
+            />
             <div className="h-px w-24 bg-[#F3C516]/60 sm:w-40" />
           </div>
 
