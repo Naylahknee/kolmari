@@ -6,56 +6,24 @@ import { useMemo, useState } from 'react'
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react'
 
 const questions = [
-  {
-    id: 'who',
-    prompt: 'Who are you planning this move for?',
-    options: ['Just me', 'Me and a partner', 'My family', 'I am only exploring'],
-  },
-  {
-    id: 'priority',
-    prompt: 'What matters most in your next life abroad?',
-    options: ['Affordability', 'Safety and belonging', 'Career opportunities', 'Healthcare and schools', 'Quality of life'],
-  },
-  {
-    id: 'region',
-    prompt: 'Which part of the world are you most curious about?',
-    options: ['Europe', 'Latin America and the Caribbean', 'Africa', 'Asia and the Pacific', 'I am open to anywhere'],
-  },
-  {
-    id: 'situation',
-    prompt: 'Which description is closest to your current situation?',
-    options: ['I work remotely', 'I may work abroad', 'I want to study', 'I am retired or planning retirement', 'I run or want to start a business'],
-  },
-  {
-    id: 'ties',
-    prompt: 'Do you have citizenship, ancestry, or close family ties outside your current country?',
-    options: ['Yes', 'No', 'I am not sure'],
-  },
-  {
-    id: 'budget',
-    prompt: 'What monthly housing budget feels realistic?',
-    options: ['Under $1,000', '$1,000–$2,000', '$2,000–$3,500', 'More than $3,500', 'I am not sure yet'],
-  },
-  {
-    id: 'timeline',
-    prompt: 'When would you ideally like to relocate?',
-    options: ['Within 12 months', 'In 1–3 years', 'More than 3 years', 'Someday'],
-  },
-  {
-    id: 'obstacle',
-    prompt: 'What feels like your biggest obstacle right now?',
-    options: ['Choosing a country', 'Understanding visas', 'Money and budgeting', 'Employment', 'Documents and logistics', 'I do not know where to begin'],
-  },
+  { id: 'who', prompt: 'Who are you planning this move for?', options: ['Just me', 'Me and a partner', 'My family', 'I am only exploring'] },
+  { id: 'priority', prompt: 'What matters most in your next life abroad?', options: ['Affordability', 'Safety and belonging', 'Career opportunities', 'Healthcare and schools', 'Quality of life'] },
+  { id: 'region', prompt: 'Which part of the world are you most curious about?', options: ['Europe', 'Latin America and the Caribbean', 'Africa', 'Asia and the Pacific', 'I am open to anywhere'] },
+  { id: 'situation', prompt: 'Which description is closest to your current situation?', options: ['I work remotely', 'I may work abroad', 'I want to study', 'I am retired or planning retirement', 'I run or want to start a business'] },
+  { id: 'ties', prompt: 'Do you have citizenship, ancestry, or close family ties outside your current country?', options: ['Yes', 'No', 'I am not sure'] },
+  { id: 'budget', prompt: 'What monthly housing budget feels realistic?', options: ['Under $1,000', '$1,000–$2,000', '$2,000–$3,500', 'More than $3,500', 'I am not sure yet'] },
+  { id: 'timeline', prompt: 'When would you ideally like to relocate?', options: ['Within 12 months', 'In 1–3 years', 'More than 3 years', 'Someday'] },
+  { id: 'obstacle', prompt: 'What feels like your biggest obstacle right now?', options: ['Choosing a country', 'Understanding visas', 'Money and budgeting', 'Employment', 'Documents and logistics', 'I do not know where to begin'] },
 ] as const
 
 type Answers = Record<string, string>
 
 function buildResult(answers: Answers) {
-  const timeline = answers.timeline
-  const obstacle = answers.obstacle
-  const region = answers.region
-  const situation = answers.situation
-  const ties = answers.ties
+  const timeline = answers.timeline ?? 'Someday'
+  const obstacle = answers.obstacle ?? 'I do not know where to begin'
+  const region = answers.region ?? 'I am open to anywhere'
+  const situation = answers.situation ?? ''
+  const ties = answers.ties ?? 'No'
 
   const stage =
     timeline === 'Within 12 months' && !['Choosing a country', 'I do not know where to begin'].includes(obstacle)
@@ -96,8 +64,8 @@ export default function NexitQuizPage() {
   const [answers, setAnswers] = useState<Answers>({})
   const [complete, setComplete] = useState(false)
 
-  const current = questions[step]
-  const selected = answers[current?.id]
+  const current = questions[step] ?? questions[0]
+  const selected = answers[current.id]
   const result = useMemo(() => buildResult(answers), [answers])
 
   function choose(value: string) {
@@ -112,12 +80,9 @@ export default function NexitQuizPage() {
     }
 
     try {
-      window.localStorage.setItem(
-        'nexit-quiz-result',
-        JSON.stringify({ answers, completedAt: new Date().toISOString() }),
-      )
+      window.localStorage.setItem('nexit-quiz-result', JSON.stringify({ answers, completedAt: new Date().toISOString() }))
     } catch {
-      // The result remains visible even when storage is unavailable.
+      // The result remains visible even when browser storage is unavailable.
     }
     setComplete(true)
   }
@@ -134,11 +99,7 @@ export default function NexitQuizPage() {
 
           <div className="space-y-6 p-6 sm:p-10">
             <div className="grid gap-3">
-              {[
-                `Start with ${result.region}.`,
-                `Explore ${result.pathway}.`,
-                result.firstStep,
-              ].map((item) => (
+              {[`Start with ${result.region}.`, `Explore ${result.pathway}.`, result.firstStep].map((item) => (
                 <div key={item} className="flex items-start gap-3 rounded-xl border border-line bg-canvas p-4 text-sm leading-6 text-navy">
                   <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-gold-soft text-gold-deep"><Check size={11} strokeWidth={3} /></span>
                   <span>{item}</span>
