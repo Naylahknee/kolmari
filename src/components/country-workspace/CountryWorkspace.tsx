@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -55,10 +56,17 @@ type PathwayCardData = {
   officialSource: string; sourceLabel: string; lastVerified: string
 }
 
+type ReadinessBreakdown = {
+  overall: number | null
+  profile: number
+  documents: number | null
+  research: number | null
+}
+
 type Props = {
   country: CountrySummary
   match: MatchData | null
-  readiness: number | null
+  readiness: ReadinessBreakdown
   tabs: TabMeta[]
   allTabs: TabMeta[]
   pathways: PathwayCardData[]
@@ -285,6 +293,7 @@ export function CountryWorkspace({
           id={initialSection}
           country={country}
           match={match}
+          readiness={readiness}
           pathways={pathways}
           content={content}
           compareData={compareData}
@@ -302,6 +311,7 @@ type TabPanelProps = {
   id: CountryTabId
   country: CountrySummary
   match: MatchData | null
+  readiness: ReadinessBreakdown
   pathways: PathwayCardData[]
   content: CountryContent | null
   compareData: CompareEntry[]
@@ -311,7 +321,7 @@ type TabPanelProps = {
   monthlyIncome: number | null
 }
 
-function TabPanel({ id, country, match, pathways, content, compareData, hasChildren, studyInterest, isFamily, monthlyIncome }: TabPanelProps) {
+function TabPanel({ id, country, match, readiness, pathways, content, compareData, hasChildren, studyInterest, isFamily, monthlyIncome }: TabPanelProps) {
   const countryPathways = pathways.filter((p) => p.country.toLowerCase() === country.name.toLowerCase())
   const displayPathways = countryPathways.length > 0 ? countryPathways : pathways
 
@@ -505,4 +515,20 @@ function TabPanel({ id, country, match, pathways, content, compareData, hasChild
 
 function Fact({ label, value }: { label: string; value: string }) {
   return <div className="rounded-[var(--radius-field)] bg-canvas p-3"><dt className="text-xs text-muted">{label}</dt><dd className="mt-0.5 font-semibold text-navy">{value}</dd></div>
+}
+
+function ReadinessMetric({ label, value, unavailableLabel = 'Unavailable' }: { label: string; value: number | null; unavailableLabel?: string }) {
+  return (
+    <div className="rounded-[var(--radius-field)] bg-canvas p-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm font-semibold text-navy">{label}</p>
+        <p className="text-sm font-bold text-navy">{value === null ? unavailableLabel : `${value}%`}</p>
+      </div>
+      {value !== null ? (
+        <div className="mt-3 h-2 overflow-hidden rounded-full bg-line" aria-hidden="true">
+          <div className="h-full rounded-full bg-gold" style={{ width: `${value}%` }} />
+        </div>
+      ) : null}
+    </div>
+  )
 }

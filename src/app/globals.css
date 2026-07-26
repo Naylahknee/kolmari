@@ -232,6 +232,20 @@ textarea:focus-visible {
 .nexit-region:focus .nexit-region-outline { filter: drop-shadow(0 0 10px rgba(243, 197, 22, .9)); fill-opacity: .28; stroke-width: 5; }
 @keyframes nexit-region-drift { from { transform: scale(1.01) translateX(-.5%); } to { transform: scale(1.08) translateX(.5%); } }
 
+/* Keep workspace navigation scrollable without showing browser scrollbar chrome. */
+aside[aria-label="Workspace navigation"],
+aside[aria-label="Workspace navigation"] > div,
+#mobile-nav-drawer {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+aside[aria-label="Workspace navigation"]::-webkit-scrollbar,
+aside[aria-label="Workspace navigation"] > div::-webkit-scrollbar,
+#mobile-nav-drawer::-webkit-scrollbar {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }

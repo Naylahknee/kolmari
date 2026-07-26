@@ -31,6 +31,23 @@ const nexitSteps = [
   },
 ]
 
+function MarketingWordmark({ compact = false }: { compact?: boolean }) {
+  const width = compact ? 120 : 152
+  const height = compact ? 32 : 40
+  return (
+    <Link href="/" aria-label="Nexit home" className="inline-flex shrink-0 items-center">
+      <Image
+        src="/brand/nexit-wordmark-dark.png"
+        alt="Nexit"
+        width={width}
+        height={height}
+        className="h-auto w-auto object-contain"
+        priority
+      />
+    </Link>
+  )
+}
+
 export default function LandingPage() {
   return (
     <main className="min-h-screen overflow-hidden bg-canvas">
