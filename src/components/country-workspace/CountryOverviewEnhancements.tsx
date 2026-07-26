@@ -3,7 +3,9 @@ import { ArrowRight } from 'lucide-react'
 import type { RelocationProfile } from '@/lib/profile'
 import { calculateNexitReadiness } from '@/lib/readiness'
 import { getCountryCityOverviews } from '@/lib/country-workspace/country-cities'
+import { getCountryTourismMedia } from '@/lib/country-workspace/country-tourism-media'
 import { CityMapImage } from './CityMapImage'
+import { CountryTourismIdentity } from './CountryTourismIdentity'
 
 export function CountryOverviewEnhancements({
   countrySlug,
@@ -15,10 +17,13 @@ export function CountryOverviewEnhancements({
   profile: RelocationProfile
 }) {
   const cities = getCountryCityOverviews(countrySlug)
+  const tourismMedia = getCountryTourismMedia(countrySlug)
   const readiness = calculateNexitReadiness(profile)
 
   return (
     <div className="mt-5 space-y-5">
+      {tourismMedia && <CountryTourismIdentity media={tourismMedia} />}
+
       {cities.length > 0 && (
         <section className="card-surface p-6" aria-labelledby="top-cities-heading">
           <div>
