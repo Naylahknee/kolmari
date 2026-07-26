@@ -286,8 +286,8 @@ function TabPanel({ id, country, match, pathways, content, compareData, hasChild
   if (id === 'legal-taxes') return <LegalTaxesTab content={content?.legalTaxes ?? null} countryName={country.name} />
   if (id === 'family-pets') return <FamilyPetsTab content={content?.familyPets ?? null} countryName={country.name} />
   if (id === 'greenbook') return <GreenbookTab content={content?.greenbook ?? null} countryName={country.name} />
-  if (id === 'resources') return <ResourcesTab content={content?.resources ?? []} countryName={country.name} />
-  if (id === 'compare') return <CompareTab country={country} compareData={compareData} />
+  if (id === 'resources') return <ResourcesTab resources={content?.resources ?? []} countryName={country.name} />
+  if (id === 'compare') return <CompareTab current={{ country, match }} others={compareData} />
   return <section className="card-surface p-8 text-center"><p className="font-semibold text-navy">Research in progress</p></section>
 }
 
