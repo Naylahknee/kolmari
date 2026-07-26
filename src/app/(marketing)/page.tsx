@@ -54,7 +54,7 @@ export default function LandingPage() {
               <a href="#nextinations" className="transition hover:text-white">Nextinations</a>
               <a href="#community" className="transition hover:text-white">Community</a>
               <Link href="/login" className="transition hover:text-white">Sign in</Link>
-              <Link href="/signup?next=%2Fnexitnation" className="gold-button !min-h-10 !px-4">Start Your Nexit</Link>
+              <Link href="/quiz" className="gold-button !min-h-10 !px-4">Start Your Nexit</Link>
             </nav>
             <MarketingMobileNav />
           </header>
@@ -70,7 +70,7 @@ export default function LandingPage() {
                 Compare Nextinations, review Pathways, and build a realistic Nexit Plan without piecing it together across a dozen tabs.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="/signup?next=%2Fnexitnation" className="gold-button">Start Your Nexit <ArrowRight size={17} /></Link>
+                <Link href="/quiz" className="gold-button">Start Your Nexit <ArrowRight size={17} /></Link>
                 <Link href="#how-it-works" className="inline-flex min-h-12 items-center rounded-xl border border-white/25 px-5 font-bold text-white transition hover:bg-white/8">
                   See how it works
                 </Link>
@@ -154,7 +154,7 @@ export default function LandingPage() {
           <div className="mx-auto w-full max-w-[1180px] px-5">
             <h2 className="max-w-xl font-display text-4xl font-extrabold">Your next chapter deserves a real plan.</h2>
             <p className="mt-3 text-white/75">Compare clearly. Prepare practically. Move with confidence.</p>
-            <Link href="/signup?next=%2Fnexitnation" className="gold-button mt-6">Start Your Nexit <ArrowRight size={17} /></Link>
+            <Link href="/quiz" className="gold-button mt-6">Start Your Nexit <ArrowRight size={17} /></Link>
           </div>
         </div>
         <div className="border-t border-white/10 px-5 py-5">
