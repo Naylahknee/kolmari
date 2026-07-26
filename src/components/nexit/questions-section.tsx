@@ -115,10 +115,10 @@ export function QuestionsSection() {
 
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
-              href="/starter-plan"
+              href="/quiz"
               className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#F3C516] px-7 py-3 font-medium text-[#0D1B39] transition hover:bg-[#FFD52E]"
             >
-              Create my free Starter Plan
+              Create My Nexit Plan
             </Link>
 
             <span className="text-sm text-white/55">
