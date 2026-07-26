@@ -43,7 +43,7 @@ export function MarketingMobileNav() {
             ['Nextinations', '#nextinations'],
             ['Community', '#community'],
             ['Sign in', '/login'],
-            ['Start Your Nexit', '/signup?next=%2Fnexitnation'],
+            ['Start Your Nexit', '/quiz'],
           ].map(([label, href]) => (
             <Link
               key={href}
