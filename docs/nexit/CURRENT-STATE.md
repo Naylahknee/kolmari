@@ -1,5 +1,14 @@
 # Nexit Current Implementation State
 
+## 2026-07-26 — Interactive Nexit World regions
+
+- The live Nexit World SVG now exposes six labeled, clickable region targets with visible hover and keyboard-focus states.
+- Every region routes to the existing canonical `/nexitnation/[region]` page.
+- A non-map region grid provides an accessible alternate navigation path.
+- All six region pages use the shared continent template and contain editorial starter locations.
+- Incomplete profiles see “Popular places to research” without fabricated Match Scores or personalized claims.
+- Country cards route only to available country guides; unavailable guides show an honest research-in-progress state.
+
 ## 2026-07-26 — Sidebar brand mark visibility
 
 - The butterfly favicon is hidden while the workspace sidebar is expanded.

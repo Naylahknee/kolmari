@@ -6,6 +6,7 @@ import { ArrowRight, Check, ExternalLink, Plus, Search, Star, Trash2, X } from '
 import { CONTINENT_PATHS, WORLD_VIEWBOX } from '@/lib/world-continents'
 import { searchPlaces, flagEmoji, type WorldPlace } from '@/lib/world-places'
 import { countryWorkspaceSlug, STATUS_META, STATUS_ORDER, useNextinationBoard, type NextinationStatus, type SavedNextination } from '@/lib/nextination-board'
+import { REGION_MAP_LABELS, REGION_MAP_SHAPES, regionList, type RegionSlug } from '@/lib/nexitnation-data'
 
 function toPercent(lat: number, lng: number) {
   return { left: ((lng + 180) / 360) * 100, top: ((90 - lat) / 180) * 100 }
@@ -15,7 +16,13 @@ function workspaceSlug(place: SavedNextination): string | null {
   return countryWorkspaceSlug(place.country)
 }
 
-export function NexitWorldBoard() {
+export function NexitWorldBoard({
+  profileComplete,
+  regionMatches,
+}: {
+  profileComplete: boolean
+  regionMatches: Record<RegionSlug, number> | null
+}) {
   const { items, ready, add, update, remove } = useNextinationBoard()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const selected = items.find((x) => x.id === selectedId) ?? null
@@ -55,6 +62,33 @@ export function NexitWorldBoard() {
             {CONTINENT_PATHS.map((d, i) => (
               <path key={i} d={d} fill="#1c3161" stroke="#2a4570" strokeWidth={0.4} />
             ))}
+            {regionList.map((region) => {
+              const [x, y] = REGION_MAP_LABELS[region.slug]
+              const match = regionMatches?.[region.slug]
+              return (
+                <Link
+                  key={region.slug}
+                  href={`/nexitnation/${region.slug}`}
+                  aria-label={`Open ${region.name}, ${region.countryCount} countries`}
+                  className="group focus:outline-none"
+                >
+                  <path
+                    d={REGION_MAP_SHAPES[region.slug]}
+                    fill="#F3C516"
+                    fillOpacity="0"
+                    stroke="#F3C516"
+                    strokeOpacity="0"
+                    strokeWidth="4"
+                    className="cursor-pointer transition group-hover:fill-opacity-[.14] group-hover:stroke-opacity-100 group-focus:fill-opacity-[.18] group-focus:stroke-opacity-100"
+                  />
+                  <g className="pointer-events-none">
+                    <rect x={x - 58} y={y - 15} width="116" height={match !== undefined ? 42 : 28} rx="8" fill="#0D1B39" fillOpacity=".84" stroke="#F3C516" strokeOpacity=".55" />
+                    <text x={x} y={y + 2} textAnchor="middle" fill="white" fontSize="11" fontWeight="700">{region.name}</text>
+                    {profileComplete && match !== undefined && <text x={x} y={y + 18} textAnchor="middle" fill="#F3C516" fontSize="8" fontWeight="700">Nexit Match {match}%</text>}
+                  </g>
+                </Link>
+              )
+            })}
           </svg>
           {/* Pins */}
           {items.map((item) => {
@@ -99,6 +133,31 @@ export function NexitWorldBoard() {
           </div>
         ) : null}
       </section>
+
+      {!profileComplete && (
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-[var(--radius-card)] border border-gold/25 bg-gold-soft/35 p-5">
+          <div>
+            <p className="font-bold text-navy">Explore every region now.</p>
+            <p className="mt-1 text-sm text-muted">Complete your Nexit Profile later to add personalized region matches.</p>
+          </div>
+          <Link href="/profile-wizard" className="gold-button">Complete Nexit Profile <ArrowRight size={15} /></Link>
+        </div>
+      )}
+
+      <nav aria-label="Browse world regions">
+        <p className="mb-3 text-xs font-bold uppercase tracking-widest text-muted">Browse by region</p>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {regionList.map((region) => (
+            <Link key={region.slug} href={`/nexitnation/${region.slug}`} className="card-surface flex items-center justify-between gap-3 p-4 font-bold text-navy transition hover:border-gold focus-visible:outline focus-visible:outline-3 focus-visible:outline-gold/50">
+              <span>
+                <span className="block">{region.name}</span>
+                <span className="mt-1 block text-xs font-medium text-muted">{region.countryCount} countries</span>
+              </span>
+              <ArrowRight size={16} className="text-gold-deep" aria-hidden="true" />
+            </Link>
+          ))}
+        </div>
+      </nav>
 
       {/* Selected destination — below the map */}
       {selected ? (
