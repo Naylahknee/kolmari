@@ -15,6 +15,7 @@ export function WorkspaceShell({
 }) {
   const pathname = usePathname()
   const usesCountryTemplate =
+    /^\/nextinations\/[^/]+\/v2(?:\/|$)/.test(pathname) ||
     pathname === '/nextinations/portugal' ||
     pathname.startsWith('/nextinations/portugal/')
 

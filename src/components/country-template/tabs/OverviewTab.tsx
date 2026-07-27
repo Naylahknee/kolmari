@@ -12,7 +12,7 @@ export function OverviewTab({ slug }: { slug: string }) {
               <section className="card-surface sec">
                 <div className="sec-head">
                   <div className="sec-title"><span className="sec-num">1</span><h2>Country Snapshot</h2></div>
-                  <a className="sec-link" href="#">Full daily life <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="13" height="13"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+                  <Link className="sec-link" href={`/nextinations/${slug}/v2/lifestyle-community`}>Full daily life <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="13" height="13"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
                 </div>
                 <div className="snap-top">
                   <div className="narrative">
@@ -68,10 +68,10 @@ export function OverviewTab({ slug }: { slug: string }) {
               </section>
 
               {/* 2. TOP CITIES */}
-              <section className="card-surface sec">
+              <section className="card-surface sec" id="top-cities">
                 <div className="sec-head">
                   <div className="sec-title"><span className="sec-num">2</span><h2>Top Cities to Live</h2></div>
-                  <a className="sec-link" href="#">View all cities <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="13" height="13"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+                  <Link className="sec-link" href={`/nextinations/${slug}/v2/overview#top-cities`}>View all cities <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="13" height="13"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
                 </div>
                 <div className="cities">
                   <article className="city">
@@ -88,7 +88,7 @@ export function OverviewTab({ slug }: { slug: string }) {
                         <div className="city-row"><span className="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M8 8h8M8 12h6" /></svg>Data status</span><span className="val soft">Verified</span></div>
                       </div>
                       <div className="city-why">Pick this if you need international schools, consulate access, and a real expat network from day one.</div>
-                      <Link className="city-cta" href="/nextinations/portugal/cities/lisbon">View Lisbon details <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
+                      <Link className="city-cta" href={`/nextinations/${slug}/v2/overview#top-cities`}>View Lisbon details <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
                     </div>
                   </article>
                   <article className="city">
@@ -105,7 +105,7 @@ export function OverviewTab({ slug }: { slug: string }) {
                         <div className="city-row"><span className="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M8 8h8M8 12h6" /></svg>Data status</span><span className="val soft">Verified</span></div>
                       </div>
                       <div className="city-why">Real city amenities at roughly two thirds of Lisbon cost. Colder, wetter, slower social entry.</div>
-                      <Link className="city-cta" href="/nextinations/portugal/cities/porto">View Porto details <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
+                      <Link className="city-cta" href={`/nextinations/${slug}/v2/overview#top-cities`}>View Porto details <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
                     </div>
                   </article>
                   <article className="city">
@@ -122,7 +122,7 @@ export function OverviewTab({ slug }: { slug: string }) {
                         <div className="city-row"><span className="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M8 8h8M8 12h6" /></svg>Data status</span><span className="val soft">Verified</span></div>
                       </div>
                       <div className="city-why">Mild year round with an established nomad scene. Mainland travel means a flight, healthcare is thinner.</div>
-                      <Link className="city-cta" href="/nextinations/portugal/cities/funchal">View Funchal details <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
+                      <Link className="city-cta" href={`/nextinations/${slug}/v2/overview#top-cities`}>View Funchal details <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
                     </div>
                   </article>
                   <article className="city">
@@ -139,7 +139,7 @@ export function OverviewTab({ slug }: { slug: string }) {
                         <div className="city-row"><span className="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M8 8h8M8 12h6" /></svg>Data status</span><span className="val soft">Researching</span></div>
                       </div>
                       <div className="city-why">Cheapest of the four with a young university population. Expect to need Portuguese much sooner.</div>
-                      <Link className="city-cta" href="/nextinations/portugal/cities/braga">View Braga details <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
+                      <Link className="city-cta" href={`/nextinations/${slug}/v2/overview#top-cities`}>View Braga details <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
                     </div>
                   </article>
                 </div>
@@ -163,7 +163,7 @@ export function OverviewTab({ slug }: { slug: string }) {
               <section className="card-surface sec">
                 <div className="sec-head">
                   <div className="sec-title"><span className="sec-num">4</span><h2>General Lifestyle Summary</h2></div>
-                  <a className="sec-link" href="#">Full daily life detail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="13" height="13"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+                  <Link className="sec-link" href={`/nextinations/${slug}/v2/lifestyle-community`}>Full daily life detail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="13" height="13"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
                 </div>
                 <div className="life">
                   <div>
@@ -205,7 +205,7 @@ export function OverviewTab({ slug }: { slug: string }) {
               <section className="card-surface sec">
                 <div className="sec-head">
                   <div className="sec-title"><span className="sec-num">5</span><h2>Your Ways In</h2></div>
-                  <a className="sec-link" href="#">See all pathways <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="13" height="13"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+                  <Link className="sec-link" href={`/nextinations/${slug}/v2/move-there`}>See all pathways <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="13" height="13"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
                 </div>
                 <p className="note" style={{margin: '0 0 14px', color: 'var(--muted)'}}>Five routes you qualify for, across three different strategies. A visa is one way in, not the only one.</p>
                 <div className="chips">

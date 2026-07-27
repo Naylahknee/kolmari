@@ -11,7 +11,7 @@ export function LifestyleTab({ slug }: { slug: string }) {
               <section className="card-surface sec">
                 <div className="sec-head">
                   <div className="sec-title"><span className="sec-num">1</span><h2>The Culture Shift</h2></div>
-                  <a className="sec-link" href="#">Lifestyle summary <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+                  <a className="sec-link" href="/nextinations/portugal/v2/overview">Lifestyle summary <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
                 </div>
                 <p className="lead">Not a list of facts about Portugal. A list of the things you currently do automatically that will land differently here.</p>
                 <table className="tbl contrast">
@@ -132,7 +132,7 @@ export function LifestyleTab({ slug }: { slug: string }) {
               <section className="card-surface sec">
                 <div className="sec-head">
                   <div className="sec-title"><span className="sec-num">3</span><h2>Getting Around</h2></div>
-                  <a className="sec-link" href="#">Transport costs <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+                  <a className="sec-link" href="/nextinations/portugal/v2/cost-housing">Transport costs <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
                 </div>
                 <table className="tbl">
                   <thead><tr><th>Place</th><th className="num">Living without a car</th><th className="num">Walkability</th><th>What carries you</th></tr></thead>
@@ -146,7 +146,7 @@ export function LifestyleTab({ slug }: { slug: string }) {
                 </table>
                 <div className="callout warn">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 9v4M12 17h.01" /><circle cx="12" cy="12" r="9" /></svg>
-                  <span><b>Walkability scores hide two things.</b> Hills are relentless in Lisbon and parts of Porto, and <i>calçada portuguesa</i>, the decorative limestone paving, turns slippery in rain and is punishing on ankles, strollers, and wheels. If mobility is part of your daily life, see <a href="#" style={{textDecoration: 'underline', fontWeight: '700'}}>Healthcare, section 8</a>.</span>
+                      <span><b>Walkability scores hide two things.</b> Hills are relentless in Lisbon and parts of Porto, and <i>calçada portuguesa</i>, the decorative limestone paving, turns slippery in rain and is punishing on ankles, strollers, and wheels. If mobility is part of your daily life, see <a href="/nextinations/portugal/v2/healthcare" style={{textDecoration: 'underline', fontWeight: '700'}}>Healthcare, section 8</a>.</span>
                 </div>
               </section>
 

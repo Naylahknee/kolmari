@@ -92,7 +92,7 @@ export function HealthcareTab({ slug }: { slug: string }) {
               <section className="card-surface sec">
                 <div className="sec-head">
                   <div className="sec-title"><span className="sec-num">4</span><h2>Eligibility and Health Registration Requirements</h2></div>
-                  <a className="sec-link" href="#">See the residency steps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="13" height="13"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+                  <a className="sec-link" href="/nextinations/portugal/v2/move-there">See the residency steps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="13" height="13"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
                 </div>
                 <p className="lead">Access follows residency, and the sequence matters. Skipping a step leaves you paying privately for longer than you need to.</p>
                 <div className="ladder">

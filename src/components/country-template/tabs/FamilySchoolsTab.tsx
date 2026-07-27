@@ -308,7 +308,7 @@ export function FamilySchoolsTab({ slug }: { slug: string }) {
                 </div>
                 <div className="callout info">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-5M12 8h.01" /></svg>
-                  <span>For the adult disability certificate, benefits, and physical accessibility, see <a href="#" style={{textDecoration: 'underline', fontWeight: '700'}}>Healthcare, section 8</a>.</span>
+                      <span>For the adult disability certificate, benefits, and physical accessibility, see <a href="/nextinations/portugal/v2/healthcare" style={{textDecoration: 'underline', fontWeight: '700'}}>Healthcare, section 8</a>.</span>
                 </div>
               </section>
 
@@ -316,7 +316,7 @@ export function FamilySchoolsTab({ slug }: { slug: string }) {
               <section className="card-surface sec">
                 <div className="sec-head">
                   <div className="sec-title"><span className="sec-num">7</span><h2>Family Benefits, Parental Leave, and Visa Considerations</h2></div>
-                  <a className="sec-link" href="#">See the pathways <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="13" height="13"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+                  <a className="sec-link" href="/nextinations/portugal/v2/move-there">See the pathways <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="13" height="13"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
                 </div>
                 <div className="two">
                   <div>

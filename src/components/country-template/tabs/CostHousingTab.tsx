@@ -498,7 +498,7 @@ export function CostHousingTab({ slug }: { slug: string }) {
               <section className="card-surface sec">
                 <div className="sec-head">
                   <div className="sec-title"><span className="sec-num">8</span><h2>Common Upfront Moving Costs</h2></div>
-                  <a className="sec-link" href="#">See the filing steps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="13" height="13"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+                  <a className="sec-link" href="/nextinations/portugal/v2/move-there">See the filing steps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="13" height="13"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
                 </div>
                 <p className="lead">The one-time number is what most people underestimate. This is what you need saved <b>before</b> you file, not after you land.</p>
                 <table className="tbl">

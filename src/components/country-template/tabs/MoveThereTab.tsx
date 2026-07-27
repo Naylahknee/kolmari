@@ -54,7 +54,7 @@ export function MoveThereTab({}: Record<string, never>) {
                       <span className="req miss">Needs: 12 month lease</span>
                       <span className="req miss">Needs: health insurance</span>
                     </div>
-                    <a className="route-src" href="#">gov.pt visa guidance <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5" /></svg></a>
+                    <a className="route-src" href="https://www.gov.pt/guias/migrantes-vistos-e-autorizacoes-para-entrar-e-viver-em-portugal" target="_blank" rel="noopener noreferrer">gov.pt visa guidance <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5" /></svg></a>
                   </div>
                 </div>
 
@@ -72,7 +72,7 @@ export function MoveThereTab({}: Record<string, never>) {
                       <span className="req miss">Needs: passive income proof</span>
                       <span className="req miss">Needs: 12 month lease</span>
                     </div>
-                    <a className="route-src" href="#">gov.pt visa guidance <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5" /></svg></a>
+                    <a className="route-src" href="https://www.gov.pt/guias/migrantes-vistos-e-autorizacoes-para-entrar-e-viver-em-portugal" target="_blank" rel="noopener noreferrer">gov.pt visa guidance <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5" /></svg></a>
                   </div>
                 </div>
 
@@ -90,7 +90,7 @@ export function MoveThereTab({}: Record<string, never>) {
                       <span className="req miss">Needs: business plan</span>
                       <span className="req miss">Needs: Portuguese counsel</span>
                     </div>
-                    <a className="route-src" href="#">gov.pt visa guidance <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5" /></svg></a>
+                    <a className="route-src" href="https://www.gov.pt/guias/migrantes-vistos-e-autorizacoes-para-entrar-e-viver-em-portugal" target="_blank" rel="noopener noreferrer">gov.pt visa guidance <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5" /></svg></a>
                   </div>
                 </div>
 
@@ -107,7 +107,7 @@ export function MoveThereTab({}: Record<string, never>) {
                       <span className="req met"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" /></svg>Prior degree on file</span>
                       <span className="req miss">Needs: enrollment letter</span>
                     </div>
-                    <a className="route-src" href="#">Enrolment and visa detail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5" /></svg></a>
+                    <a className="route-src" href="https://www.dges.gov.pt/en" target="_blank" rel="noopener noreferrer">Enrolment and visa detail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 011-1h5" /></svg></a>
                   </div>
                 </div>
 
@@ -123,7 +123,7 @@ export function MoveThereTab({}: Record<string, never>) {
                       <span className="req met"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" /></svg>Proof of funds</span>
                       <span className="req miss">Needs: return ticket</span>
                     </div>
-                    <a className="route-src" href="#">gov.pt visa guidance <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5" /></svg></a>
+                    <a className="route-src" href="https://www.gov.pt/guias/migrantes-vistos-e-autorizacoes-para-entrar-e-viver-em-portugal" target="_blank" rel="noopener noreferrer">gov.pt visa guidance <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 011-1h5" /></svg></a>
                   </div>
                 </div>
                 <div className="src"><span>Last verified: January 2026 · gov.pt, AIMA, Portuguese consular network</span><span className="sbadge">Official source verified</span></div>

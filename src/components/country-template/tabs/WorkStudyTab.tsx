@@ -78,7 +78,7 @@ export function WorkStudyTab({ slug }: { slug: string }) {
                     </ul>
                     <div className="callout ok">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" /></svg>
-                      <span>On your matched route, work authorization comes free with residency. <a href="#" style={{textDecoration: 'underline', fontWeight: '700'}}>See the pathway detail</a>.</span>
+                      <span>On your matched route, work authorization comes free with residency. <a href="/nextinations/portugal/v2/move-there" style={{textDecoration: 'underline', fontWeight: '700'}}>See the pathway detail</a>.</span>
                     </div>
                   </div>
                 </div>
