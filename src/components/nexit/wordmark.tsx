@@ -22,10 +22,10 @@ export function Wordmark({
   const h = compact ? 28 : 32
   const w = compact ? 96 : 112
   return (
-    <Link href={href} aria-label="Nexit home" className="inline-flex shrink-0 items-center">
+    <Link href={href} aria-label="Kolmari home" className="inline-flex shrink-0 items-center">
       <Image
         src="/brand/NexitWordMark.svg"
-        alt="Nexit"
+        alt="Kolmari"
         width={w}
         height={h}
         style={{ width: 'auto', height: h }}

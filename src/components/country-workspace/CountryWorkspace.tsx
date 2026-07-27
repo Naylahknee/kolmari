@@ -28,7 +28,7 @@ import { EconomicProfileTab } from './tabs/EconomicProfileTab'
 // Label lookup for breadcrumb display
 const SECTION_LABELS: Record<string, string> = {
   overview: 'Overview', 'economic-profile': 'Economic Profile', 'cost-of-living': 'Cost of Living',
-  housing: 'Housing', pathways: 'Nexit Pathways', employment: 'Employment',
+  housing: 'Housing', pathways: 'Pathways', employment: 'Employment',
   healthcare: 'Healthcare', education: 'Education', transportation: 'Transportation',
   'legal-taxes': 'Legal & Taxes', 'daily-life': 'Daily Life', 'family-pets': 'Family & Pets',
   greenbook: 'Greenbook', resources: 'Resources', compare: 'Compare', 'why-you': 'Why You',
@@ -86,7 +86,7 @@ function CountryHero({
     <section className="overflow-hidden rounded-[var(--radius-card)] bg-navy-deep p-6 text-white sm:p-8" aria-label={`${country.name} Nextination overview`}>
       {fromQuiz && (
         <p className="mb-4 inline-flex items-center gap-2 rounded-[var(--radius-pill)] bg-gold-soft/20 px-3 py-1.5 text-xs font-bold text-gold">
-          <Sparkles size={14} aria-hidden="true" /> Your top Nextination from the Nexit Match Quiz
+          <Sparkles size={14} aria-hidden="true" /> Your top Destination from the Match Quiz
         </p>
       )}
       <div className="flex flex-wrap items-start justify-between gap-6">
@@ -104,7 +104,7 @@ function CountryHero({
             <p className="mt-4 flex items-center gap-2 text-sm text-white/70">
               <Route size={14} className="shrink-0 text-gold" aria-hidden="true" />
               <span>
-                <span className="font-semibold text-white">{pathwayCount}</span> Nexit Pathway{pathwayCount === 1 ? '' : 's'} available for {country.name}
+                <span className="font-semibold text-white">{pathwayCount}</span> Pathway{pathwayCount === 1 ? '' : 's'} available for {country.name}
               </span>
             </p>
           )}
@@ -127,7 +127,7 @@ function CountryHero({
             </>
           ) : (
             <p className="mt-4 text-sm text-white/70">
-              Complete your Nexit Profile to see your personalized Nexit Match for {country.name}.
+              Complete your Kolmari Profile to see your personalized Match Score for {country.name}.
             </p>
           )}
           <div className="mt-6 flex flex-wrap gap-2">
@@ -137,15 +137,15 @@ function CountryHero({
             <Link href={`/nextinations/${country.slug}/compare`} className="inline-flex items-center gap-2 rounded-[var(--radius-field)] bg-white/10 px-4 py-2.5 text-sm font-semibold hover:bg-white/15">
               <Layers size={15} aria-hidden="true" /> Compare
             </Link>
-            <Link href="/nexit-plan" className="gold-button">Build Your Nexit Plan <ArrowRight size={15} /></Link>
+            <Link href="/nexit-plan" className="gold-button">Build Your Move Plan <ArrowRight size={15} /></Link>
           </div>
         </div>
         {match && (
           <div className="shrink-0 rounded-[var(--radius-card)] bg-white/5 p-4 text-center">
-            <ScoreRing value={match.score} label="Nexit Match" size={128} />
+            <ScoreRing value={match.score} label="Match Score" size={128} />
             {readiness !== null && (
               <p className="mt-2 text-xs text-white/60">
-                Nexit Readiness <span className="font-bold text-white">{readiness}%</span>
+                Move Readiness <span className="font-bold text-white">{readiness}%</span>
               </p>
             )}
           </div>
@@ -301,7 +301,7 @@ function TabPanel({ id, country, match, pathways, content, compareData, hasChild
           <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Recommended first actions</p>
           <div className="mt-4 space-y-2">
             <Link href="/pathways" className="flex items-center justify-between rounded-[var(--radius-field)] bg-canvas p-4 text-sm font-semibold text-navy hover:bg-gold-soft/40">
-              <span className="flex items-center gap-2"><ListChecks size={15} aria-hidden="true" /> Review your Nexit Pathways</span>
+              <span className="flex items-center gap-2"><ListChecks size={15} aria-hidden="true" /> Review your Pathways</span>
               <ArrowRight size={14} aria-hidden="true" />
             </Link>
             <Link href="/cost-calculator" className="flex items-center justify-between rounded-[var(--radius-field)] bg-canvas p-4 text-sm font-semibold text-navy hover:bg-gold-soft/40">
@@ -309,7 +309,7 @@ function TabPanel({ id, country, match, pathways, content, compareData, hasChild
               <ArrowRight size={14} aria-hidden="true" />
             </Link>
             <Link href="/nexit-plan" className="flex items-center justify-between rounded-[var(--radius-field)] bg-canvas p-4 text-sm font-semibold text-navy hover:bg-gold-soft/40">
-              <span className="flex items-center gap-2"><BookOpenText size={15} aria-hidden="true" /> Start your Nexit Plan</span>
+              <span className="flex items-center gap-2"><BookOpenText size={15} aria-hidden="true" /> Start your Move Plan</span>
               <ArrowRight size={14} aria-hidden="true" />
             </Link>
           </div>
@@ -332,7 +332,7 @@ function TabPanel({ id, country, match, pathways, content, compareData, hasChild
               ))}
             </div>
             <p className="mt-5 text-sm leading-6 text-muted">
-              We surfaced {country.name} because of how your Nexit Profile lines up with what this place asks for — the factors above weigh budget compatibility, your preferred regions, and available Pathways.{' '}
+              We surfaced {country.name} because of how your Kolmari Profile lines up with what this place asks for — the factors above weigh budget compatibility, your preferred regions, and available Pathways.{' '}
               <span className="font-semibold text-navy">Tradeoff:</span> {match.tradeoff}
             </p>
             <p className="mt-4 text-xs text-muted">
@@ -341,7 +341,7 @@ function TabPanel({ id, country, match, pathways, content, compareData, hasChild
           </>
         ) : (
           <p className="mt-3 text-sm text-muted">
-            Complete your Nexit Profile to see why {country.name} matches you.
+            Complete your Kolmari Profile to see why {country.name} matches you.
           </p>
         )}
       </section>

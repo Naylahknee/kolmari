@@ -23,10 +23,10 @@ const VALID_SECTIONS: CountryTabId[] = [
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { countrySlug, section } = await params
   const country = COUNTRIES.find((item) => item.slug === countrySlug)
-  if (!country) return { title: 'Nextination Not Found | Nexit' }
+  if (!country) return { title: 'Destination Not Found | Kolmari' }
   const sectionLabel = section.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
   return {
-    title: `${country.name} — ${sectionLabel} | Nexit`,
+    title: `${country.name} — ${sectionLabel} | Kolmari`,
     description: `${country.name} ${sectionLabel} — your personalized relocation research workspace.`,
   }
 }

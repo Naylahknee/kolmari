@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const canonical = absoluteUrl(`/${page.slug}`)
 
   return {
-    title: `${page.title} | Nexit`,
+    title: `${page.title} | Kolmari`,
     description: page.description,
     keywords: page.keywords,
     alternates: { canonical },
@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: canonical,
       publishedTime: page.lastReviewed,
       modifiedTime: page.lastReviewed,
-      images: [{ url: absoluteUrl('/og.png'), width: 1536, height: 1024, alt: 'Nexit — Build your Nexit Plan' }],
+      images: [{ url: absoluteUrl('/og.png'), width: 1536, height: 1024, alt: 'Kolmari — Build a life without borders' }],
     },
     twitter: { card: 'summary_large_image', title: page.title, description: page.description, images: [absoluteUrl('/og.png')] },
   }
@@ -70,14 +70,14 @@ export default async function SeoPageRoute({ params }: Props) {
     datePublished: page.lastReviewed,
     dateModified: page.lastReviewed,
     mainEntityOfPage: canonical,
-    author: { '@type': 'Organization', name: 'Nexit' },
-    publisher: { '@type': 'Organization', name: 'Nexit', url: absoluteUrl('/') },
+    author: { '@type': 'Organization', name: 'Kolmari' },
+    publisher: { '@type': 'Organization', name: 'Kolmari', url: absoluteUrl('/') },
   }
   const breadcrumbs = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Nexit', item: absoluteUrl('/') },
+      { '@type': 'ListItem', position: 1, name: 'Kolmari', item: absoluteUrl('/') },
       { '@type': 'ListItem', position: 2, name: page.h1, item: canonical },
     ],
   }
@@ -93,7 +93,7 @@ export default async function SeoPageRoute({ params }: Props) {
   const howTo = page.steps ? {
     '@context': 'https://schema.org',
     '@type': 'HowTo',
-    name: `${page.h1}: build your Nexit Plan`,
+    name: `${page.h1}: build your Move Plan`,
     description: `A practical planning sequence for ${page.h1.toLowerCase()}.`,
     step: page.steps.map((step, index) => ({ '@type': 'HowToStep', position: index + 1, name: step.name, text: step.text })),
   } : null
@@ -110,7 +110,7 @@ export default async function SeoPageRoute({ params }: Props) {
           <Wordmark dark />
           <nav className="flex items-center gap-4 text-sm font-bold" aria-label="SEO page navigation">
             <Link href="/login" className="hidden text-white/72 transition hover:text-white sm:inline">Sign in</Link>
-            <Link href={signupHref} className="gold-button !min-h-10 !px-4">{NEXIT_LEXICON.startCta}</Link>
+            <Link href={signupHref} className="gold-button !min-h-10 !px-4">Build My Move Plan</Link>
           </nav>
         </div>
       </header>
@@ -118,15 +118,15 @@ export default async function SeoPageRoute({ params }: Props) {
       <section className="hero-grid bg-navy-deep px-5 pb-20 pt-14 text-white sm:px-7 sm:pb-24 sm:pt-20">
         <div className="mx-auto max-w-6xl">
           <nav aria-label="Breadcrumb" className="text-xs font-bold text-white/55">
-            <Link href="/" className="hover:text-white">Nexit</Link><span className="mx-2">/</span><span>{page.eyebrow}</span>
+            <Link href="/" className="hover:text-white">Kolmari</Link><span className="mx-2">/</span><span>{page.eyebrow}</span>
           </nav>
           <p className="mt-8 text-xs font-extrabold uppercase tracking-[.22em] text-gold">{page.eyebrow}</p>
           <h1 className="mt-4 max-w-4xl font-display text-4xl font-extrabold leading-tight sm:text-6xl">{page.h1}</h1>
           <p className="mt-6 max-w-3xl text-base leading-8 text-[#c3d0e6] sm:text-lg">{page.intro}</p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href={signupHref} className="gold-button">{NEXIT_LEXICON.startCta}<ArrowRight size={17} /></Link>
+            <Link href={signupHref} className="gold-button">Build My Move Plan<ArrowRight size={17} /></Link>
             <Link href={page.mapHref} className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/20 px-5 font-bold text-white transition hover:bg-white/8">
-              {NEXIT_LEXICON.mapTitle}<MapPinned size={17} />
+              Your World<MapPinned size={17} />
             </Link>
           </div>
           <p className="mt-6 text-xs text-white/50">Last reviewed {page.lastReviewed}. Planning guidance, not legal, tax, or safety advice.</p>
@@ -138,7 +138,7 @@ export default async function SeoPageRoute({ params }: Props) {
           <div className="max-w-2xl">
             <p className="text-xs font-extrabold uppercase tracking-[.18em] text-gold-deep">Decision engine</p>
             <h2 id="match-heading" className="mt-2 font-display text-3xl font-bold sm:text-4xl">Compare your strongest signals</h2>
-            <p className="mt-3 leading-7 text-muted">Scores are planning signals, not guarantees. Your Nexit Profile produces the personalized decision.</p>
+            <p className="mt-3 leading-7 text-muted">Scores are planning signals, not guarantees. Your Kolmari Profile produces the personalized decision.</p>
           </div>
           <div className="mt-7 grid gap-5 lg:grid-cols-3">
             {page.countryCards.map((item) => (
@@ -152,7 +152,7 @@ export default async function SeoPageRoute({ params }: Props) {
                   <div><dt className="font-bold text-muted">{NEXIT_LEXICON.pathways}</dt><dd className="mt-1 font-extrabold">{item.pathways}</dd></div>
                   <div><dt className="font-bold text-muted">{NEXIT_LEXICON.communityFit}</dt><dd className="mt-1 font-extrabold">{item.communityFit}</dd></div>
                 </dl>
-                <Link href={item.href} className="mx-6 mb-6 inline-flex items-center gap-2 text-sm font-extrabold text-gold-deep">{NEXIT_LEXICON.regionTitle}<ArrowRight size={15} /></Link>
+                <Link href={item.href} className="mx-6 mb-6 inline-flex items-center gap-2 text-sm font-extrabold text-gold-deep">Explore This Destination<ArrowRight size={15} /></Link>
               </article>
             ))}
           </div>
@@ -193,8 +193,8 @@ export default async function SeoPageRoute({ params }: Props) {
 
         {page.steps ? (
           <section aria-labelledby="steps-heading">
-            <p className="text-xs font-extrabold uppercase tracking-[.18em] text-gold-deep">Nexit action layer</p>
-            <h2 id="steps-heading" className="mt-3 font-display text-3xl font-bold sm:text-4xl">Build your Nexit Plan</h2>
+            <p className="text-xs font-extrabold uppercase tracking-[.18em] text-gold-deep">Move action layer</p>
+            <h2 id="steps-heading" className="mt-3 font-display text-3xl font-bold sm:text-4xl">Build your Move Plan</h2>
             <ol className="mt-7 grid gap-4 md:grid-cols-2">
               {page.steps.map((step, index) => <li key={step.name} className="card-surface flex gap-4 p-6"><span className="grid size-9 shrink-0 place-items-center rounded-full bg-gold font-extrabold">{index + 1}</span><div><h3 className="font-extrabold">{step.name}</h3><p className="mt-2 text-sm leading-6 text-muted">{step.text}</p></div></li>)}
             </ol>
@@ -214,16 +214,16 @@ export default async function SeoPageRoute({ params }: Props) {
 
         <section className="rounded-[24px] bg-navy-deep p-7 text-white sm:p-10">
           <p className="text-xs font-extrabold uppercase tracking-[.18em] text-gold">From planning to doing</p>
-          <h2 className="mt-3 max-w-3xl font-display text-3xl font-bold sm:text-4xl">Turn this research into your Nexit Plan.</h2>
-          <p className="mt-4 max-w-2xl leading-7 text-white/70">Save your Nexit Profile, compare personalized Match Scores, review Pathways, and move the strongest Nextination into Nexicution Mode.</p>
-          <Link href={signupHref} className="gold-button mt-7">{NEXIT_LEXICON.startCta}<ArrowRight size={17} /></Link>
+          <h2 className="mt-3 max-w-3xl font-display text-3xl font-bold sm:text-4xl">Turn this research into your Move Plan.</h2>
+          <p className="mt-4 max-w-2xl leading-7 text-white/70">Build your Kolmari Profile, compare personalized Match Scores, review Pathways, and enter Flutter Mode when you&apos;re ready to move.</p>
+          <Link href={signupHref} className="gold-button mt-7">Build My Move Plan<ArrowRight size={17} /></Link>
         </section>
       </div>
 
       <footer className="bg-navy-deep px-5 py-8 text-white">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-center text-xs text-white/55 sm:flex-row sm:text-left">
           <Wordmark dark compact />
-          <p>© 2026 Nexit. Planning guidance is not legal, tax, medical, or safety advice.</p>
+          <p>© 2026 Kolmari. Planning guidance is not legal, tax, medical, or safety advice.</p>
         </div>
       </footer>
     </main>

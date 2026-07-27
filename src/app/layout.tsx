@@ -9,12 +9,12 @@ const playfair = Playfair_Display({
   variable: '--font-playfair', subsets: ['latin'], weight: ['600', '700', '800'], style: ['normal', 'italic'],
 })
 
-const title = 'Nexit | Build your Nexit Plan'
-const description = 'Compare Nextinations, review Pathways, build your budget, and turn relocation research into a practical Nexit Plan.'
+const title = 'Kolmari | Build a life without borders'
+const description = 'Kolmari helps you discover destinations, understand relocation pathways, and build a practical plan for life abroad.'
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
-  applicationName: 'Nexit',
+  applicationName: 'Kolmari',
   title,
   description,
   icons: {
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     title,
     description,
     type: 'website',
-    images: [{ url: absoluteUrl('/og.png'), width: 1536, height: 1024, alt: 'Nexit — Build your Nexit Plan' }],
+    images: [{ url: absoluteUrl('/og.png'), width: 1536, height: 1024, alt: 'Kolmari — Build a life without borders' }],
   },
   twitter: { card: 'summary_large_image', title, description, images: [absoluteUrl('/og.png')] },
 }

@@ -9,33 +9,32 @@ import {
   MapPinned,
   MessageCircleMore,
   Sparkles,
-  Star,
   UsersRound,
 } from 'lucide-react'
 import { MarketingMobileNav } from '@/components/nexit/marketing-mobile-nav'
 import { Wordmark } from '@/components/nexit/wordmark'
 import { MiniExperienceTrigger } from '@/components/nexit/landing-mini-experiences'
 
-const nexitSteps = [
+const steps = [
   {
     image: '/images/journey-globe-pins.png',
-    title: 'Choose a Nextination',
-    copy: 'Compare Nextinations, Pathways, and monthly costs side by side.',
-    action: 'Find Your Starting Places',
+    title: 'Find your Destination',
+    copy: 'Compare Destinations, Pathways, and monthly costs side by side.',
+    action: 'Explore Destinations',
     experience: 'starting-places' as const,
   },
   {
     image: '/images/passport-visa-documents.png',
-    title: 'Review your Pathways',
+    title: 'View your Pathways',
     copy: 'Answer focused questions and get a practical starting shortlist.',
-    action: 'Explore Your Pathways',
+    action: 'View My Pathways',
     experience: 'pathways' as const,
   },
   {
     image: '/images/luggage-tropical-coast.png',
-    title: 'Build your Nexit Plan',
+    title: 'Build your Move Plan',
     copy: 'Track documents, budget, and the tasks that turn a plan into a departure.',
-    action: 'Discover Your Nexit Stage',
+    action: 'Start Your Move Plan',
     experience: 'nexit-stage' as const,
   },
 ]
@@ -44,7 +43,6 @@ const stats = [
   { value: '50+', label: 'Countries', icon: Globe2 },
   { value: '120+', label: 'Pathways', icon: FileCheck2 },
   { value: '20K+', label: 'Planners', icon: UsersRound },
-  { value: '4.8/5', label: 'Average rating', icon: Star },
 ]
 
 export default function LandingPage() {
@@ -67,10 +65,10 @@ export default function LandingPage() {
             <nav className="hidden items-center gap-7 text-sm font-semibold text-white/75 md:flex" aria-label="Landing navigation">
               <a href="#how-it-works" className="transition hover:text-white">How it works</a>
               <a href="#features" className="transition hover:text-white">Features</a>
-              <a href="#nextinations" className="transition hover:text-white">Nextinations</a>
+              <a href="#destinations" className="transition hover:text-white">Destinations</a>
               <a href="#community" className="transition hover:text-white">Community</a>
               <Link href="/login" className="transition hover:text-white">Sign in</Link>
-              <Link href="/signup?next=%2Fnexitnation" className="gold-button !min-h-10 !px-4">Start Your Nexit</Link>
+              <Link href="/signup?next=%2Fnexitnation" className="gold-button !min-h-10 !px-4">Build My Move Plan</Link>
             </nav>
             <MarketingMobileNav />
           </header>
@@ -79,14 +77,14 @@ export default function LandingPage() {
             <div className="max-w-[530px]">
               <p className="mb-5 text-xs font-extrabold uppercase tracking-[0.24em] text-gold sm:text-sm">Your move, made clearer</p>
               <h1 className="font-display text-[2.85rem] font-extrabold leading-[1.04] sm:text-6xl lg:text-[4.25rem]">
-                Plan your exit.<br />
-                <span className="italic text-gold">Build your next<br className="hidden sm:block" /> life abroad.</span>
+                Build a life<br />
+                <span className="italic text-gold">without borders.</span>
               </h1>
               <p className="mt-6 max-w-[430px] text-base leading-7 text-[#c3d0e6]">
-                Compare Nextinations, review Pathways, and build a realistic Nexit Plan without piecing it together across a dozen tabs.
+                Compare Destinations, review Pathways, and build a realistic Move Plan — without piecing it together across a dozen tabs.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="/signup?next=%2Fnexitnation" className="gold-button">Start Your Nexit <ArrowRight size={17} /></Link>
+                <Link href="/signup?next=%2Fnexitnation" className="gold-button">Build My Move Plan <ArrowRight size={17} /></Link>
                 <Link href="#how-it-works" className="inline-flex min-h-12 items-center rounded-xl border border-white/25 px-5 font-bold text-white transition hover:bg-white/8">
                   See how it works
                 </Link>
@@ -97,9 +95,9 @@ export default function LandingPage() {
 
         <section id="features" className="relative z-20 mx-3 -mt-9 grid overflow-hidden rounded-[18px] border border-line bg-white shadow-[0_20px_50px_-30px_rgba(16,34,68,.4)] sm:mx-8 sm:grid-cols-3">
           {[
-            [Sparkles, 'Find your strongest Pathway', 'Match Scores based on your Nexit Profile'],
+            [Sparkles, 'Find your strongest Pathway', 'Match Scores based on your Kolmari Profile'],
             [Calculator, 'Plan your budget', 'Understand realistic costs before you move'],
-            [CheckCircle2, 'Move with confidence', 'A step-by-step checklist that stays on track'],
+            [CheckCircle2, 'Move with confidence', 'A step-by-step Move Plan that stays on track'],
           ].map(([Icon, title, copy], index) => (
             <div key={String(title)} className={`flex items-center gap-4 px-5 py-5 sm:px-7 sm:py-6 ${index ? 'border-t border-line sm:border-l sm:border-t-0' : ''}`}>
               <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-gold-soft text-gold-deep"><Icon size={20} /></span>
@@ -111,12 +109,12 @@ export default function LandingPage() {
         <section id="how-it-works" className="pb-20 pt-24 sm:pt-28">
           <div className="text-center">
             <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-gold-deep">A practical path forward</p>
-            <h2 className="mt-3 font-display text-4xl font-extrabold text-navy sm:text-5xl">Your Nexit starts here</h2>
+            <h2 className="mt-3 font-display text-4xl font-extrabold text-navy sm:text-5xl">Your move starts here</h2>
             <div className="mx-auto mt-5 h-1 w-16 rounded-full bg-gold" />
           </div>
 
-          <div id="nextinations" className="mt-11 grid gap-5 md:grid-cols-3">
-            {nexitSteps.map((item) => (
+          <div id="destinations" className="mt-11 grid gap-5 md:grid-cols-3">
+            {steps.map((item) => (
               <article key={item.title} className="group overflow-hidden rounded-[20px] border border-line bg-white shadow-card">
                 <div className="relative aspect-[4/3] overflow-hidden bg-canvas">
                   <Image src={item.image} alt="" fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover transition duration-500 group-hover:scale-[1.025]" />
@@ -140,20 +138,20 @@ export default function LandingPage() {
             <div className="hidden size-24 rounded-full border-[3px] border-gold/60 sm:block" aria-hidden />
             <div className="relative z-10">
               <blockquote className="font-display text-2xl font-bold italic leading-relaxed sm:text-[1.65rem]">
-                “Nexit gave me a clear plan and the confidence to finally make my move. Best decision ever!”
+                &ldquo;Kolmari gave me a clear plan and the confidence to finally make my move.&rdquo;
               </blockquote>
-              <p className="mt-4 text-sm font-extrabold text-gold">— Maya R., Bali, Indonesia</p>
+              <p className="mt-4 text-sm font-extrabold text-gold">— Early Kolmari user</p>
             </div>
             <Image src="/images/airplane.png" alt="" width={440} height={278} className="pointer-events-none absolute -right-5 bottom-0 w-64 opacity-65 brightness-0 invert sm:relative sm:right-auto sm:w-[210px]" />
           </div>
         </section>
       </div>
 
-      <section className="w-full bg-navy-deep py-10 text-white" aria-label="Nexit at a glance">
-        <div className="mx-auto grid max-w-[1180px] grid-cols-2 gap-y-9 px-5 text-center md:grid-cols-4 lg:px-0">
+      <section className="w-full bg-navy-deep py-10 text-white" aria-label="Kolmari at a glance">
+        <div className="mx-auto grid max-w-[1180px] grid-cols-3 gap-y-9 px-5 text-center lg:px-0">
           {stats.map(({ value, label, icon: Icon }, index) => (
-            <div key={label} className={`px-4 ${index % 2 ? '' : 'border-r border-white/10'} md:border-r md:last:border-r-0`}>
-              <Icon className="mx-auto text-gold" size={25} fill={label === 'Average rating' ? 'currentColor' : 'none'} />
+            <div key={label} className={`px-4 ${index < stats.length - 1 ? 'border-r border-white/10' : ''}`}>
+              <Icon className="mx-auto text-gold" size={25} />
               <p className="mt-3 font-display text-3xl font-extrabold">{value}</p>
               <p className="mt-1 text-xs font-semibold text-[#9fb2d1]">{label}</p>
             </div>
@@ -163,8 +161,8 @@ export default function LandingPage() {
 
       <section id="community" className="mx-auto max-w-[1236px] px-4 py-20 sm:px-6 lg:px-7">
         <div className="mb-9 max-w-2xl">
-          <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-teal-deep">Community insight, built in</p>
-          <h2 className="mt-3 font-display text-4xl font-extrabold text-navy sm:text-5xl">Join our community of Nexiters</h2>
+          <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-teal-deep">Community built in</p>
+          <h2 className="mt-3 font-display text-4xl font-extrabold text-navy sm:text-5xl">Join Kolmari Klub</h2>
           <p className="mt-4 text-base leading-7 text-muted">Connect with people planning real international moves, compare practical notes, and make decisions with better context.</p>
         </div>
 
@@ -172,15 +170,15 @@ export default function LandingPage() {
           <article className="relative min-h-80 overflow-hidden rounded-[24px] bg-teal-deep p-7 text-white lg:col-span-7 sm:p-10">
             <div className="absolute -right-16 -top-20 size-72 rounded-full border-[48px] border-white/8" />
             <UsersRound size={34} className="text-teal-soft" />
-            <h3 className="mt-10 max-w-lg font-display text-3xl font-extrabold sm:text-4xl">A place for the questions that don’t fit on an application form.</h3>
+            <h3 className="mt-10 max-w-lg font-display text-3xl font-extrabold sm:text-4xl">A place for the questions that don&apos;t fit on an application form.</h3>
             <p className="mt-4 max-w-xl text-sm leading-6 text-white/75">Learn from people researching neighborhoods, paperwork, budgets, healthcare, and the everyday reality of starting again somewhere new.</p>
-            <Link href="/signup?next=%2Fnexitnation" className="gold-button mt-7">Join the Nexiters <ArrowRight size={17} /></Link>
+            <Link href="/signup?next=%2Fcommunity" className="gold-button mt-7">Join Kolmari Klub <ArrowRight size={17} /></Link>
           </article>
 
           <div className="grid gap-5 lg:col-span-5">
             <article className="rounded-[24px] border border-line bg-white p-7 shadow-card">
               <span className="grid size-12 place-items-center rounded-xl bg-teal-soft text-teal-deep"><MessageCircleMore size={22} /></span>
-              <h3 className="mt-6 text-xl font-extrabold text-navy">Country conversations</h3>
+              <h3 className="mt-6 text-xl font-extrabold text-navy">Destination conversations</h3>
               <p className="mt-2 text-sm leading-6 text-muted">Trade grounded, location-specific insight with people considering the same move.</p>
             </article>
             <article className="rounded-[24px] border border-line bg-white p-7 shadow-card">
@@ -198,13 +196,13 @@ export default function LandingPage() {
           <div className="mx-auto w-full max-w-[1180px] px-5">
             <h2 className="max-w-xl font-display text-4xl font-extrabold">Your next chapter deserves a real plan.</h2>
             <p className="mt-3 text-white/75">Compare clearly. Prepare practically. Move with confidence.</p>
-            <Link href="/signup?next=%2Fnexitnation" className="gold-button mt-6">Start Your Nexit <ArrowRight size={17} /></Link>
+            <Link href="/signup?next=%2Fnexitnation" className="gold-button mt-6">Build My Move Plan <ArrowRight size={17} /></Link>
           </div>
         </div>
         <div className="border-t border-white/10 px-5 py-5">
           <div className="mx-auto flex max-w-[1180px] flex-col items-center justify-between gap-4 text-center text-xs text-white/55 sm:flex-row sm:text-left">
             <Wordmark dark compact />
-            <p>© 2026 Nexit. Visa recommendations are planning guidance, not legal advice.</p>
+            <p>© 2026 Kolmari. Pathway recommendations are planning guidance, not legal advice.</p>
           </div>
         </div>
       </footer>

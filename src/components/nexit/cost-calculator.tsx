@@ -65,7 +65,7 @@ export function CostCalculator({
       })
       const result = await res.json()
       if (!res.ok) throw new Error(result.error ?? 'Unable to save your income.')
-      setMessage('Monthly income saved to your Nexit Profile.')
+      setMessage('Monthly income saved to your Kolmari Profile.')
     } catch (err) {
       setMessage(err instanceof Error ? err.message : 'Unable to save your income.')
     } finally {
@@ -76,7 +76,7 @@ export function CostCalculator({
   function download() {
     if (monthlyIncome === null && !amounts.length) return
     const lines = [
-      'Nexit monthly cost research',
+      'Kolmari monthly cost research',
       `Monthly income,${monthlyIncome ?? ''}`,
       ...Object.entries(budget).map(([key, val]) => `${key},${val ?? ''}`),
       `Total entered expenses,${total}`,
@@ -125,7 +125,7 @@ export function CostCalculator({
       {/* Profile incomplete notice */}
       {!profileComplete && (
         <div className="rounded-[var(--radius-card)] border border-gold/30 bg-gold-soft/50 p-5">
-          <p className="font-semibold text-navy">Complete your Nexit Profile to save personalized cost inputs.</p>
+          <p className="font-semibold text-navy">Complete your Kolmari Profile to save personalized cost inputs.</p>
           <p className="mt-1 text-sm text-muted">You may still use this calculator for unsaved general research.</p>
           <Link href="/profile-wizard" className="mt-2 inline-flex text-sm font-bold text-gold-deep hover:underline">
             Start Wizard

@@ -26,10 +26,10 @@ export function MarketingMobileNav() {
           className="absolute right-0 top-12 w-64 rounded-[var(--radius-card)] border border-white/10 bg-navy-card p-3 shadow-2xl"
         >
           <div className="mb-2 px-2 py-1">
-            <Link href="/" aria-label="Nexit home" onClick={() => setOpen(false)}>
+            <Link href="/" aria-label="Kolmari home" onClick={() => setOpen(false)}>
               <Image
                 src="/brand/NexitWordMark.svg"
-                alt="Nexit"
+                alt="Kolmari"
                 width={88}
                 height={22}
                 style={{ width: 'auto', height: 22 }}
@@ -43,14 +43,14 @@ export function MarketingMobileNav() {
             ['Nextinations', '#nextinations'],
             ['Community', '#community'],
             ['Sign in', '/login'],
-            ['Start Your Nexit', '/signup?next=%2Fnexitnation'],
+            ['Build My Move Plan', '/signup?next=%2Fnexitnation'],
           ].map(([label, href]) => (
             <Link
               key={href}
               href={href}
               onClick={() => setOpen(false)}
               className={`block rounded-xl px-4 py-3 text-sm font-bold ${
-                label === 'Start Your Nexit'
+                label === 'Build My Move Plan'
                   ? 'mt-1 bg-gold text-navy'
                   : 'text-white/80 hover:bg-white/5'
               }`}

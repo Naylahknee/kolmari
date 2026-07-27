@@ -1,35 +1,24 @@
 import Link from 'next/link'
-import { ArrowRight, BookOpen, Globe2, Users } from 'lucide-react'
+import { ArrowRight, BookOpen, Globe2 } from 'lucide-react'
+import { KlubHeader, KlubEmptyState } from '@/components/community/klub-header'
+import { KlubTabs } from '@/components/community/klub-tabs'
 
 const relatedActions = [
-  { href: '/greenbook',   title: 'Greenbook Insights',    copy: 'Use practical prompts to research daily life and Community Fit.',             icon: BookOpen },
-  { href: '/nexitnation', title: 'Nexitnation',            copy: 'Open the Nexitnation map and narrow your strongest regional fit.',           icon: Globe2   },
-  { href: '/saved',       title: 'My Nextinations',        copy: 'Save the Nextinations you want to keep comparing.',                          icon: Users    },
+  { href: '/greenbook',   title: 'Greenbook Insights',  copy: 'Sourced planning context to research daily life and Community Fit.', icon: BookOpen },
+  { href: '/nexitnation', title: 'Your World',           copy: 'Explore the map and narrow your strongest regional fit.',            icon: Globe2   },
 ]
 
 export default function CommunityPage() {
   return (
     <div>
-      <p className="text-xs font-bold uppercase tracking-widest text-teal-deep">Nexiters</p>
-      <h1 className="mt-1 text-2xl font-bold text-navy sm:text-3xl">Nexiters Community</h1>
-      <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
-        Build a stronger Nexit Plan with context from people thinking seriously about relocation — not vacation content or unsupported claims.
-      </p>
+      <KlubHeader />
 
-      {/* Honest state — verified community features are not yet available */}
-      <section className="mt-6 overflow-hidden rounded-[var(--radius-card)] border border-line bg-white p-7">
-        <Users size={28} className="text-teal" aria-hidden="true" />
-        <h2 className="mt-4 text-lg font-bold text-navy">Verified community features are in development.</h2>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
-          Moderated member discussions, country-specific conversations, and verified relocation notes are being built. Until moderation and verification are ready, Nexit clearly labels editorial planning prompts and sourced insights.
-        </p>
-        <p className="mt-4 text-sm leading-6 text-muted">
-          In the meantime, use Greenbook Insights for sourced planning context and Nexitnation to compare regions with real data.
-        </p>
-      </section>
+      <KlubEmptyState />
+
+      <KlubTabs />
 
       {/* Related actions */}
-      <div className="mt-6 grid gap-4 md:grid-cols-3">
+      <div className="mt-8 grid gap-4 md:grid-cols-2">
         {relatedActions.map(({ href, title, copy, icon: Icon }) => (
           <Link
             key={href}

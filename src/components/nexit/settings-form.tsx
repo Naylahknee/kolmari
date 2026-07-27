@@ -38,7 +38,7 @@ export function SettingsForm({ initial, email }: { initial: RelocationProfile; e
       <form onSubmit={save} className="card-surface p-6 sm:p-8" aria-labelledby="profile-section-heading">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h2 id="profile-section-heading" className="text-lg font-bold text-navy">Your Nexit Profile</h2>
+            <h2 id="profile-section-heading" className="text-lg font-bold text-navy">Your Kolmari Profile</h2>
             <p className="mt-1 text-sm text-muted">
               Status:{' '}
               <span className={profile.wizard_status === 'completed' ? 'text-ok font-semibold' : 'text-muted'}>

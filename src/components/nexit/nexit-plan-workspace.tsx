@@ -142,11 +142,13 @@ export function NexitPlanWorkspace({
   nextinations,
   pathways,
   profileHousehold,
+  // defaultTab reserved for future use (Flutter Mode scroll-to-section)
 }: {
   initial: NexitPlan
   nextinations: string[]
   pathways: string[]
   profileHousehold: number | null
+  defaultTab?: 'checklist' | 'plan'
 }) {
   const [plan, setPlan] = useState({ ...initial, household_members: initial.household_members ?? profileHousehold })
   const [task, setTask] = useState('')
@@ -179,7 +181,7 @@ export function NexitPlanWorkspace({
       const result = await res.json()
       if (!res.ok) throw new Error(result.error ?? 'Unable to save your plan.')
       setPlan(result)
-      setMessage('Your Nexit Plan is saved.')
+      setMessage('Your Move Plan is saved.')
     } catch (err) {
       setMessage(err instanceof Error ? err.message : 'Unable to save your plan.')
     } finally {
@@ -211,13 +213,13 @@ export function NexitPlanWorkspace({
         </div>
         <div className="mt-3 flex flex-wrap items-end justify-between gap-5">
           <div>
-            <h1 className="text-3xl font-bold sm:text-4xl">Your Nexit Plan</h1>
+            <h1 className="text-3xl font-bold sm:text-4xl">My Plan</h1>
             <p className="mt-2 max-w-2xl text-sm text-white/70">
               Save decisions, evidence, dates, and preparation work in one place.
             </p>
           </div>
           <div className="rounded-[var(--radius-card)] border border-white/12 bg-white/8 px-5 py-4 text-right">
-            <p className="text-xs font-semibold text-white/55">Nexit Readiness</p>
+            <p className="text-xs font-semibold text-white/55">Move Readiness</p>
             <p className="mt-1 text-2xl font-bold text-gold">
               {progress === null ? 'Not started' : `${progress}%`}
             </p>
@@ -230,7 +232,7 @@ export function NexitPlanWorkspace({
         <h2 id="plan-details-heading" className="font-semibold text-navy">Plan details</h2>
         <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           <Select
-            label="Saved Nextination"
+            label="Saved Destination"
             value={plan.saved_nextination}
             options={nextinations}
             onChange={(v) => update('saved_nextination', v)}
@@ -266,7 +268,7 @@ export function NexitPlanWorkspace({
 
       {/* ── Nexit Timeline ───────────────────────────────────────────────── */}
       <section className="card-surface p-6" aria-labelledby="timeline-heading">
-        <h2 id="timeline-heading" className="font-semibold text-navy">Nexit Timeline</h2>
+        <h2 id="timeline-heading" className="font-semibold text-navy">Move Timeline</h2>
         <p className="mt-1 text-sm text-muted">Select your current stage. Stages are checkpoints, not prescriptions.</p>
         <div className="mt-5 grid gap-2 sm:grid-cols-3 xl:grid-cols-6">
           {STAGES.map((stage, index) => (
@@ -347,7 +349,7 @@ export function NexitPlanWorkspace({
         </section>
       </div>
 
-      {/* ── Greenbook + Nexicution Mode ──────────────────────────────────── */}
+      {/* ── Greenbook + Flutter Mode ──────────────────────────────────────── */}
       <div className="grid gap-5 md:grid-cols-2">
         <article className="rounded-[var(--radius-card)] bg-teal-soft p-6">
           <p className="font-semibold text-teal-deep">Greenbook Insights</p>
@@ -368,9 +370,9 @@ export function NexitPlanWorkspace({
             onClick={enterMode}
             className="gold-button mt-5"
           >
-            Enter Nexicution Mode
+            Enter Flutter Mode
           </button>
-          <p className="mt-2 text-xs text-white/55">Choose a Nextination and Pathway first.</p>
+          <p className="mt-2 text-xs text-white/55">Choose a Destination and Pathway first.</p>
         </article>
       </div>
 
@@ -384,7 +386,7 @@ export function NexitPlanWorkspace({
           className="gold-button"
         >
           {saving ? <LoaderCircle size={16} className="animate-spin" aria-hidden="true" /> : <Save size={16} aria-hidden="true" />}
-          {saving ? 'Saving…' : 'Save Nexit Plan'}
+          {saving ? 'Saving…' : 'Save My Plan'}
         </button>
       </div>
     </div>
