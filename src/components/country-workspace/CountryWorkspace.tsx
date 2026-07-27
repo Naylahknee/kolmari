@@ -35,7 +35,7 @@ import { EconomicProfileTab } from './tabs/EconomicProfileTab'
 
 const SECTION_LABELS: Record<string, string> = {
   overview: 'Overview', 'economic-profile': 'Economic Profile', 'cost-of-living': 'Cost of Living',
-  housing: 'Housing', pathways: 'Nexit Pathways', employment: 'Employment',
+  housing: 'Housing', pathways: 'Pathways', employment: 'Employment',
   healthcare: 'Healthcare', education: 'Education', transportation: 'Transportation',
   'legal-taxes': 'Legal & Taxes', 'daily-life': 'Daily Life', 'family-pets': 'Family & Pets',
   greenbook: 'Greenbook', resources: 'Resources', compare: 'Compare', 'why-you': 'Why You',

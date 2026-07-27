@@ -38,17 +38,17 @@ export default async function DashboardPage() {
       {/* ── Page header ──────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Your Nexit workspace</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Your Kolmari workspace</p>
           <h1 className="mt-1 text-2xl font-bold text-navy sm:text-3xl">
             Welcome back, {firstName}.
           </h1>
-          <p className="mt-1 text-sm text-muted">Continue planning your Nexit.</p>
+          <p className="mt-1 text-sm text-muted">Continue building your move plan.</p>
         </div>
         <Link
-          href={complete ? '/nexit-plan' : '/profile-wizard'}
+          href={complete ? '/flutter' : '/profile-wizard'}
           className="gold-button"
         >
-          {complete ? 'Enter Nexicution Mode' : 'Start Nexit Profile'} <ArrowRight size={16} />
+          {complete ? 'Enter Flutter Mode' : 'Build My Move Plan'} <ArrowRight size={16} />
         </Link>
       </div>
 
@@ -56,7 +56,7 @@ export default async function DashboardPage() {
       {!complete && (
         <section className="rounded-[var(--radius-card)] border border-gold/30 bg-gold-soft/50 p-5 sm:flex sm:items-center sm:justify-between sm:gap-6">
           <div>
-            <p className="font-semibold text-navy">Complete your Nexit Profile to see personalized matches.</p>
+            <p className="font-semibold text-navy">Complete your Kolmari Profile to see personalized matches.</p>
             <p className="mt-1 text-sm text-muted">
               Until then, no budget, work setup, household type, Match Score, or readiness score is assumed.
             </p>
@@ -73,10 +73,10 @@ export default async function DashboardPage() {
           Continue where you left off
         </h2>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard icon={UserRound}   label="Nexit Profile"          value={complete ? 'Complete' : 'Not started'} href="/profile-wizard" action={complete ? 'Edit profile' : 'Start Wizard'} />
-          <StatCard icon={Route}       label="Strong Pathway signals"  value={complete ? String(strong.length) : '—'}     href="/pathways"      action="Review Pathways" />
-          <StatCard icon={NotebookTabs} label="Nexit Plan stage"       value={plan?.timeline_stage ?? 'Not started'} href="/nexit-plan"     action="Open plan" />
-          <StatCard icon={CheckCircle2} label="Saved plan tasks"       value={plan ? String(plan.checklist.length) : '0'} href="/nexit-plan#checklist" action="Open checklist" />
+          <StatCard icon={UserRound}   label="Kolmari Profile"       value={complete ? 'Complete' : 'Not started'} href="/profile-wizard" action={complete ? 'Edit profile' : 'Start Wizard'} />
+          <StatCard icon={Route}       label="Strong Pathway signals" value={complete ? String(strong.length) : '—'}     href="/pathways"      action="Review Pathways" />
+          <StatCard icon={NotebookTabs} label="Plan stage"            value={plan?.timeline_stage ?? 'Not started'} href="/nexit-plan"     action="Open My Plan" />
+          <StatCard icon={CheckCircle2} label="Saved plan tasks"      value={plan ? String(plan.checklist.length) : '0'} href="/flutter" action="Open Flutter Mode" />
         </div>
       </section>
 
@@ -84,9 +84,9 @@ export default async function DashboardPage() {
       <section aria-labelledby="nextinations-heading">
         <div className="mb-3 flex items-center justify-between">
           <h2 id="nextinations-heading" className="text-xs font-bold uppercase tracking-widest text-muted">
-            Nextinations to explore
+            Destinations to explore
           </h2>
-          <Link href="/countries" className="text-xs font-bold text-gold-deep hover:text-navy">
+          <Link href="/nexitnation?view=countries" className="text-xs font-bold text-gold-deep hover:text-navy">
             View all
           </Link>
         </div>
@@ -121,8 +121,8 @@ export default async function DashboardPage() {
         <section className="card-surface p-6" aria-labelledby="plan-heading">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Nexit Tracker</p>
-              <h2 id="plan-heading" className="mt-1 text-lg font-bold text-navy">Nexit Timeline progress</h2>
+              <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Progress Tracker</p>
+              <h2 id="plan-heading" className="mt-1 text-lg font-bold text-navy">Move Timeline</h2>
             </div>
             <span className="grid size-10 place-items-center rounded-[var(--radius-field)] bg-gold-soft" aria-hidden="true">
               <ListChecks size={17} />
@@ -135,16 +135,16 @@ export default async function DashboardPage() {
                 <p className="text-xs text-muted">Current stage</p>
                 <p className="font-bold text-navy">{plan.timeline_stage}</p>
                 <p className="mt-0.5 text-xs text-muted">{plan.checklist.length} saved task{plan.checklist.length === 1 ? '' : 's'}</p>
-                <Link href="/nexit-plan#checklist" className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-gold-deep">
-                  Open Nexit Tracker <ArrowRight size={12} />
+                <Link href="/flutter" className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-gold-deep">
+                  Open Flutter Mode <ArrowRight size={12} />
                 </Link>
               </div>
             </div>
           ) : (
             <div className="mt-4 rounded-[var(--radius-field)] bg-canvas p-4 text-sm text-muted">
-              Start your Nexit Plan to track your relocation timeline.
+              Start your Move Plan to track your relocation timeline.
               <Link href="/nexit-plan" className="mt-2 flex items-center gap-1 text-xs font-bold text-gold-deep">
-                Open Nexit Plan <ArrowRight size={12} />
+                Open My Plan <ArrowRight size={12} />
               </Link>
             </div>
           )}
@@ -153,7 +153,7 @@ export default async function DashboardPage() {
         <section className="card-surface p-6" aria-labelledby="budget-heading">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Nexit Budget</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Budget</p>
               <h2 id="budget-heading" className="mt-1 text-lg font-bold text-navy">Monthly cost snapshot</h2>
             </div>
             <span className="grid size-10 place-items-center rounded-[var(--radius-field)] bg-gold-soft" aria-hidden="true">
@@ -166,7 +166,7 @@ export default async function DashboardPage() {
             </div>
           ) : (
             <div className="mt-4 rounded-[var(--radius-field)] bg-canvas p-4 text-sm text-muted">
-              Add your monthly budget in the Cost Calculator to see your Nexit Budget breakdown.
+              Add your monthly budget in the Cost Calculator to see your budget breakdown.
               <Link href="/cost-calculator" className="mt-2 flex items-center gap-1 text-xs font-bold text-gold-deep">
                 Open Cost Calculator <ArrowRight size={12} />
               </Link>
@@ -179,9 +179,9 @@ export default async function DashboardPage() {
       <section className="card-surface p-6" aria-labelledby="pathways-heading">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Nexit Pathways</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Pathways</p>
             <h2 id="pathways-heading" className="mt-1 text-lg font-bold text-navy">
-              Recommendation output from your profile
+              Your Pathway matches
             </h2>
           </div>
           <Globe2 size={20} className="mt-1 shrink-0 text-muted" aria-hidden="true" />
@@ -189,7 +189,7 @@ export default async function DashboardPage() {
         {complete ? (
           <>
             <p className="mt-3 text-sm text-muted">
-              Your saved goals currently produce {strong.length} strong research signal{strong.length === 1 ? '' : 's'}. Official requirements still control eligibility.
+              Your saved goals currently show {strong.length} strong Pathway signal{strong.length === 1 ? '' : 's'}. Official requirements still control eligibility.
             </p>
             {strong.length > 0 ? (
               <div className="mt-4 space-y-2">
@@ -205,20 +205,20 @@ export default async function DashboardPage() {
               </div>
             ) : (
               <div className="mt-4 rounded-[var(--radius-field)] bg-canvas px-4 py-3 text-sm text-muted">
-                No strong signals yet. Review Possible Matches and missing requirements in Nexit Pathways.
+                No strong signals yet. Review Possible Matches and missing requirements in Pathways.
               </div>
             )}
           </>
         ) : (
           <p className="mt-3 text-sm text-muted">
-            Finish the Nexit Profile Wizard before Pathway signals are calculated.
+            Finish the Profile Wizard before Pathway signals are calculated.
           </p>
         )}
         <Link
           href={complete ? '/pathways' : '/profile-wizard'}
           className="gold-button mt-5 inline-flex items-center gap-2"
         >
-          {complete ? 'Open Nexit Pathways' : 'Start Wizard'} <ArrowRight size={15} />
+          {complete ? 'View My Pathways' : 'Build My Move Plan'} <ArrowRight size={15} />
         </Link>
       </section>
     </div>

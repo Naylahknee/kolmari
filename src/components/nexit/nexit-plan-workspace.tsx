@@ -48,11 +48,13 @@ export function NexitPlanWorkspace({
   nextinations,
   pathways,
   profileHousehold,
+  // defaultTab reserved for future use (Flutter Mode scroll-to-section)
 }: {
   initial: NexitPlan
   nextinations: string[]
   pathways: string[]
   profileHousehold: number | null
+  defaultTab?: 'checklist' | 'plan'
 }) {
   const [plan, setPlan] = useState({ ...initial, household_members: initial.household_members ?? profileHousehold })
   const [task, setTask] = useState('')

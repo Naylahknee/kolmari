@@ -4,7 +4,7 @@ import { requireCurrentUser } from '@/lib/auth'
 import { getProfile } from '@/lib/profile'
 import { evaluatePathways, PATHWAYS } from '@/lib/pathways'
 
-export const metadata: Metadata = { title: 'Nexit Pathways | Nexit', description: 'Compare official residency and visa Pathways using your Nexit Profile.' }
+export const metadata: Metadata = { title: 'Pathways | Kolmari', description: 'Compare official residency and visa Pathways using your Kolmari Profile.' }
 
 export default async function PathwaysPage() {
   const user = await requireCurrentUser()

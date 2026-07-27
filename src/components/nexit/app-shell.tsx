@@ -20,8 +20,10 @@ import {
   NotebookTabs,
   Route,
   Settings,
+  Sparkles,
   UserRound,
   X,
+  Zap,
 } from 'lucide-react'
 import { Wordmark } from './wordmark'
 import { countryWorkspaceSlug, useNextinationBoard } from '@/lib/nextination-board'
@@ -41,13 +43,15 @@ const NAV_DISCOVER = [
   { href: '/dashboard',   label: 'Dashboard',   icon: LayoutDashboard },
 ] as const
 
-// PLANNING group
-const NAV_PLANNING = [
-  { href: '/pathways',        label: 'Nexit Pathways',  icon: Route },
-  { href: '/nexit-plan',      label: 'Nexit Plan',      icon: NotebookTabs },
+// CONNECT group
+const NAV_CONNECT = [
+  { href: '/community', label: 'Kolmari Klub', icon: Sparkles },
+] as const
+
+// TOOLS group
+const NAV_TOOLS = [
   { href: '/cost-calculator', label: 'Cost Calculator', icon: Calculator },
   { href: '/greenbook',       label: 'Greenbook',       icon: BookOpen },
-  { href: '/documents',       label: 'Documents',       icon: FileText },
 ] as const
 
 // Bottom ungrouped items
@@ -76,13 +80,25 @@ const COUNTRY_SECTIONS = [
   { id: 'compare',            label: 'Compare' },
 ] as const
 
-const COLLAPSE_KEY = 'nexit:sidebar-collapsed'
+// ─── Persistence keys ────────────────────────────────────────────────────────
+// Read old key for backward compat; write new key going forward.
+const COLLAPSE_KEY = 'kolmari:sidebar-collapsed'
+const COLLAPSE_KEY_LEGACY = 'nexit:sidebar-collapsed'
 
 function readCollapsed() {
-  try { return window.localStorage.getItem(COLLAPSE_KEY) === 'true' } catch { return false }
+  try {
+    const newVal = window.localStorage.getItem(COLLAPSE_KEY)
+    if (newVal !== null) return newVal === 'true'
+    // Compatibility: fall back to legacy key
+    return window.localStorage.getItem(COLLAPSE_KEY_LEGACY) === 'true'
+  } catch { return false }
 }
 function writeCollapsed(v: boolean) {
-  try { window.localStorage.setItem(COLLAPSE_KEY, String(v)) } catch { /* noop */ }
+  try {
+    window.localStorage.setItem(COLLAPSE_KEY, String(v))
+    // Remove legacy key once written
+    window.localStorage.removeItem(COLLAPSE_KEY_LEGACY)
+  } catch { /* noop */ }
 }
 
 function isActive(pathname: string, href: string) {
@@ -237,15 +253,16 @@ function SidebarNav({
     })
   }
 
-  // "My Nextinations" row is active when on any /nextinations/* path
-  const myNextinationsActive = isActive(pathname, '/nextinations')
-
   return (
     <nav aria-label="Main navigation" className="space-y-0.5">
 
-      {/* ── DISCOVER ──────────────────────────────────────────────────── */}
-      <GroupLabel label="Discover" collapsed={collapsed} />
-      {NAV_DISCOVER.map(({ href, label, icon }) => (
+      {/* ── Dashboard (standalone) ────────────────────────────────────── */}
+      <SidebarItem href="/dashboard" label="Dashboard" icon={LayoutDashboard}
+        active={isActive(pathname, '/dashboard')} collapsed={collapsed} />
+
+      {/* ── EXPLORE ───────────────────────────────────────────────────── */}
+      <GroupLabel label="Explore" collapsed={collapsed} />
+      {NAV_EXPLORE.map(({ href, label, icon }) => (
         <SidebarItem key={href} href={href} label={label} icon={icon}
           active={isActive(pathname, href)} collapsed={collapsed} />
       ))}
@@ -318,12 +335,28 @@ function SidebarNav({
                 <ChevronDown
                   size={13}
                   aria-hidden="true"
-                  className={`shrink-0 text-[#9fb0cc] transition-transform duration-[var(--duration-standard)] ${openCountries.has('__my-nextinations__') ? 'rotate-180' : ''}`}
+                  className={`shrink-0 text-[#9fb0cc] transition-transform duration-[var(--duration-standard)] ${openCountries.has('__my-destinations__') ? 'rotate-180' : ''}`}
                 />
-              )}
-            </>
+              </>
+            )}
+          </button>
+
+          {!collapsed && openCountries.has('__my-destinations__') && (
+            <ul className="mt-0.5 border-l border-white/10 pl-3 ml-4 space-y-0.5">
+              {savedCountries.map((c) => (
+                <CountryTreeItem
+                  key={c.slug}
+                  countrySlug={c.slug}
+                  countryName={c.name}
+                  countryCode={c.code}
+                  open={openCountries.has(c.slug)}
+                  onToggle={() => toggleCountry(c.slug)}
+                  pathname={pathname}
+                  collapsed={false}
+                />
+              ))}
+            </ul>
           )}
-        </button>
 
         {/* Saved destinations — indented one level under My Nextinations */}
         {!collapsed && savedItems.length > 0 && openCountries.has('__my-nextinations__') && (
@@ -373,9 +406,9 @@ function SidebarNav({
         )}
       </div>
 
-      {/* ── PLANNING ──────────────────────────────────────────────────── */}
-      <GroupLabel label="Planning" collapsed={collapsed} />
-      {NAV_PLANNING.map(({ href, label, icon }) => (
+      {/* ── TOOLS ─────────────────────────────────────────────────────── */}
+      <GroupLabel label="Tools" collapsed={collapsed} />
+      {NAV_TOOLS.map(({ href, label, icon }) => (
         <SidebarItem key={href} href={href} label={label} icon={icon}
           active={isActive(pathname, href)} collapsed={collapsed} />
       ))}
@@ -479,10 +512,10 @@ export function AppShell({
         {/* Logo + collapse toggle */}
         <div className={`mb-4 flex items-center pt-5 ${collapsed ? 'justify-center px-2' : 'justify-between px-3'}`}>
           {!collapsed && (
-            <Link href="/dashboard" aria-label="Nexit home" className="inline-flex items-center px-1">
+            <Link href="/dashboard" aria-label="Kolmari home" className="inline-flex items-center px-1">
               <Image
                 src="/brand/NexitWordMark.svg"
-                alt="Nexit"
+                alt="Kolmari"
                 width={108}
                 height={28}
                 style={{ width: 'auto', height: 28 }}
@@ -516,7 +549,7 @@ export function AppShell({
         {/* Profile readiness footer */}
         {!collapsed && (
           <div className="mx-2 mb-4 rounded-[var(--radius-card)] border border-white/10 bg-navy-card p-4 text-center">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[#cdd7e8]">Nexit Readiness</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#cdd7e8]">Move Readiness</p>
             <p className="mt-2 text-sm font-bold text-white">
               {profileComplete ? 'Profile complete' : 'Not started'}
             </p>
@@ -553,12 +586,12 @@ export function AppShell({
               {noticesOpen && (
                 <div className="absolute right-0 top-12 w-72 rounded-[var(--radius-card)] border border-line bg-white p-4 text-sm shadow-[var(--shadow-shell)]">
                   <p className="font-bold text-navy">
-                    {profileComplete ? 'Your Nexit Profile is ready' : 'Personalized matches are off'}
+                    {profileComplete ? 'Your Kolmari Profile is ready' : 'Personalized matches are off'}
                   </p>
                   <p className="mt-1 text-muted">
                     {profileComplete
-                      ? 'Review Nexit Pathways or continue your Nexit Plan.'
-                      : 'Complete your Nexit Profile to see personalized matches.'}
+                      ? 'Review Pathways or continue your Move Plan.'
+                      : 'Complete your Kolmari Profile to see personalized matches.'}
                   </p>
                 </div>
               )}
@@ -583,7 +616,7 @@ export function AppShell({
                 <div className="absolute right-0 top-12 w-52 rounded-[var(--radius-card)] border border-line bg-white p-2 shadow-[var(--shadow-shell)]">
                   <Link href="/profile-wizard" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 rounded-[var(--radius-sidebar-row)] px-3 py-2 text-sm text-navy hover:bg-canvas">
                     <UserRound size={15} aria-hidden="true" />
-                    {profileComplete ? 'Edit Nexit Profile' : 'Start Nexit Profile'}
+                    {profileComplete ? 'Edit Profile' : 'Build My Profile'}
                   </Link>
                   <Link href="/settings" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 rounded-[var(--radius-sidebar-row)] px-3 py-2 text-sm text-navy hover:bg-canvas">
                     <Settings size={15} aria-hidden="true" />Settings
@@ -635,7 +668,7 @@ export function AppShell({
                 <div className="absolute right-0 top-12 w-52 rounded-[var(--radius-card)] border border-line bg-white p-2 shadow-[var(--shadow-shell)] z-50">
                   <Link href="/profile-wizard" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 rounded-[var(--radius-sidebar-row)] px-3 py-2 text-sm text-navy hover:bg-canvas">
                     <UserRound size={15} aria-hidden="true" />
-                    {profileComplete ? 'Edit Nexit Profile' : 'Start Nexit Profile'}
+                    {profileComplete ? 'Edit Profile' : 'Build My Profile'}
                   </Link>
                   <button type="button" onClick={logout} className="flex w-full items-center gap-2 rounded-[var(--radius-sidebar-row)] px-3 py-2 text-left text-sm text-danger hover:bg-canvas">
                     <LogOut size={15} aria-hidden="true" />Sign out
@@ -672,8 +705,8 @@ export function AppShell({
         ].join(' ')}
       >
         <div className="mb-5 flex items-center justify-between px-2">
-          <Link href="/dashboard" aria-label="Nexit home" className="inline-flex items-center" onClick={() => setDrawerOpen(false)}>
-            <Image src="/brand/NexitWordMark.svg" alt="Nexit" width={100} height={26} style={{ width: 'auto', height: 26 }} priority />
+          <Link href="/dashboard" aria-label="Kolmari home" className="inline-flex items-center" onClick={() => setDrawerOpen(false)}>
+            <Image src="/brand/NexitWordMark.svg" alt="Kolmari" width={100} height={26} style={{ width: 'auto', height: 26 }} priority />
           </Link>
           <button
             type="button"
@@ -692,7 +725,7 @@ export function AppShell({
         />
 
         <div className="mx-1 mt-4 rounded-[var(--radius-card)] border border-white/10 bg-navy-card p-4">
-          <p className="text-xs font-semibold uppercase tracking-widest text-[#cdd7e8]">Nexit Readiness</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-[#cdd7e8]">Move Readiness</p>
           <p className="mt-1 text-sm font-bold text-white">
             {profileComplete ? 'Profile complete' : 'Not started'}
           </p>

@@ -3,8 +3,8 @@
 import dynamic from 'next/dynamic'
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowRight, Globe2, LayoutGrid } from 'lucide-react'
-import { regionList, type RegionSlug } from '@/lib/nexitnation-data'
+import { Globe2, LayoutGrid } from 'lucide-react'
+import { type RegionSlug } from '@/lib/nexitnation-data'
 import { CountriesView } from './countries-browser'
 
 type View = 'map' | 'countries'
@@ -42,44 +42,7 @@ const MapboxCanvas = dynamic(
   },
 )
 
-// ─── Accessible region grid (always shown under the map) ─────────────────────
-
-function RegionGrid({ profileComplete, regionMatches }: { profileComplete: boolean; regionMatches: Record<RegionSlug, number> | null }) {
-  const router = useRouter()
-  return (
-    <section aria-label="All regions">
-      <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-muted">All regions</h2>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {regionList.map((region) => {
-          const matchValue = regionMatches?.[region.slug]
-          return (
-            <button
-              key={region.slug}
-              type="button"
-              onClick={() => router.push(`/nexitnation/${region.slug}`)}
-              className="flex items-center justify-between rounded-xl border border-line bg-white p-4 text-left shadow-tile transition hover:border-navy hover:shadow-card"
-            >
-              <span>
-                <strong className="block text-sm font-bold text-navy">{region.name}</strong>
-                <span className="mt-0.5 block text-xs text-muted">
-                  {region.countryCount} countries
-                  {profileComplete && matchValue !== undefined
-                    ? ` · Nexit Match ${matchValue}%`
-                    : !profileComplete
-                      ? ' · Complete your profile for match data'
-                      : ''}
-                </span>
-              </span>
-              <ArrowRight size={16} className="shrink-0 text-gold-deep" aria-hidden="true" />
-            </button>
-          )
-        })}
-      </div>
-    </section>
-  )
-}
-
-// ─── Unified Nexit World workspace ───────────────────────────────────────────
+// ─── Unified Your World workspace ─────────────────────────────────────────────
 
 export function NexitWorldWorkspace({ profileComplete, regionMatches, initialView, initialQuery }: Props) {
   const router = useRouter()
