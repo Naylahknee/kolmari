@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { COUNTRIES, getDiscoverableCountry } from '@/lib/countries'
 import { CountryResearchPage } from '@/components/nexit/CountryResearchPage'
+import { CountryResearchShell } from '@/components/country-template/CountryResearchShell'
 import { CountryTemplate } from '@/components/country-template/CountryTemplate'
 import { TAB_SLUGS, type TabSlug } from '@/components/country-template/TabBar'
 import { OverviewTab } from '@/components/country-template/tabs/OverviewTab'
@@ -30,7 +31,12 @@ export default async function CountryV2Page({ params, searchParams }: Props) {
   const country = COUNTRIES.find((c) => c.slug === countrySlug)
   const discoverableCountry = getDiscoverableCountry(countrySlug)
   if (!country && !discoverableCountry) notFound()
-  if (discoverableCountry && countrySlug !== 'portugal') return <CountryResearchPage country={discoverableCountry} />
+  if (discoverableCountry && countrySlug !== 'portugal')
+    return (
+      <CountryResearchShell>
+        <CountryResearchPage country={discoverableCountry} />
+      </CountryResearchShell>
+    )
 
   const active = (TAB_SLUGS.includes(section as TabSlug) ? section : 'overview') as TabSlug
   const source = (await searchParams).source
