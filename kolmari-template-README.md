@@ -1,4 +1,4 @@
-# Nexit country page template
+# Kolmari country page template
 
 The approved `index.html` mockup converted into the repo's component structure,
 wired to be the page a user lands on when the profile wizard completes.
@@ -8,23 +8,23 @@ wired to be the page a user lands on when the profile wizard completes.
 Your existing flow already does the hard part:
 
 ```
-profile-wizard.tsx  ->  /nextinations?source=quiz
-/nextinations       ->  rankNextinations(profile), redirect to the top match
-/nextinations/[slug] ->  /overview
+profile-wizard.tsx  ->  /Destinations?source=quiz
+/Destinations       ->  rankDestinations(profile), redirect to the top match
+/Destinations/[slug] ->  /overview
 ```
 
 So switching the landing page is **one line**, in
-`src/app/(app)/(workspace)/nextinations/page.tsx`:
+`src/app/(app)/(workspace)/Destinations/page.tsx`:
 
 ```diff
 +const TEMPLATE_PATH = process.env.NEXT_PUBLIC_COUNTRY_TEMPLATE === 'v2' ? '/v2/overview' : ''
 +
--  redirect(`/nextinations/${ranked[0].country.slug}?source=quiz`)
-+  redirect(`/nextinations/${ranked[0].country.slug}${TEMPLATE_PATH}?source=quiz`)
+-  redirect(`/Destinations/${ranked[0].country.slug}?source=quiz`)
++  redirect(`/Destinations/${ranked[0].country.slug}${TEMPLATE_PATH}?source=quiz`)
 ```
 
-`rankNextinations` still picks the country. `?source=quiz` still flows through,
-so the hero still shows the "Your top Nextination from the Nexit Match Quiz"
+`rankDestinations` still picks the country. `?source=quiz` still flows through,
+so the hero still shows the "Your top Destination from the Kolmari Match Quiz"
 pill. Nothing about the wizard changes.
 
 ## Reversible without a deploy
@@ -39,29 +39,29 @@ for a post-signup landing page, which is the worst place to discover a problem.
 
 ## Install
 
-1. Copy `src/` over the repo's `src/`. Only `nextinations/page.tsx` is
+1. Copy `src/` over the repo's `src/`. Only `Destinations/page.tsx` is
    overwritten, and the diff is in `SWITCH.diff`.
 2. Add the brand PNGs to `public/brand/`. `marketing-logo.tsx` points at
-   `/brand/nexit-butterfly.png`, which does not exist. That is the broken logo
+   `/brand/Kolmari-butterfly.png`, which does not exist. That is the broken logo
    in the sidebar today.
 3. Set `NEXT_PUBLIC_MAPBOX_TOKEN`.
 4. Set `NEXT_PUBLIC_COUNTRY_TEMPLATE=v2`.
 5. `npm run dev`, complete the wizard, and you land on the new page.
 
 Leave step 4 out and everything installs dormant. You can review
-`/nextinations/portugal/v2/overview` directly before switching anyone onto it.
+`/Destinations/portugal/v2/overview` directly before switching anyone onto it.
 
 ## Routes added
 
 ```
-/nextinations/[countrySlug]/v2                    -> redirects to /v2/overview
-/nextinations/[countrySlug]/v2/[section]          -> the new template
+/Destinations/[countrySlug]/v2                    -> redirects to /v2/overview
+/Destinations/[countrySlug]/v2/[section]          -> the new template
 ```
 
 Eight sections: `overview`, `move-there`, `cost-housing`, `work-study`,
 `healthcare`, `family-schools`, `lifestyle-community`, `tax-money`.
 
-Nothing at `/nextinations/[countrySlug]/[section]` is touched. Both templates
+Nothing at `/Destinations/[countrySlug]/[section]` is touched. Both templates
 run side by side.
 
 ## What is where
