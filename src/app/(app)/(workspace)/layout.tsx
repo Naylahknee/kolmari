@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { requireCurrentUser } from '@/lib/auth'
 import { WorkspaceShell } from '@/components/nexit/workspace-shell'
 import { getProfile } from '@/lib/profile'
-import '@/styles/country-template.css'
+import '@/styles/workspace-chrome.css'
 
 export default async function WorkspaceLayout({ children }: { children: React.ReactNode }) {
   const user = await requireCurrentUser()
