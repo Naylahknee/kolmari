@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 /**
- * Wordmark — uses the approved NexitWordMark.svg from public/brand/.
+ * Wordmark — uses the approved KolmariWordMark.svg from public/brand/.
  *
  * The SVG carries transparent background and works on both dark surfaces
  * (sidebar, hero) and light surfaces (auth, cards, mobile header).
@@ -22,10 +22,10 @@ export function Wordmark({
   const h = compact ? 28 : 32
   const w = compact ? 96 : 112
   return (
-    <Link href={href} aria-label="Nexit home" className="inline-flex shrink-0 items-center">
+    <Link href={href} aria-label="Kolmari home" className="inline-flex shrink-0 items-center">
       <Image
-        src="/brand/NexitWordMark.svg"
-        alt="Nexit"
+        src="/brand/KolmariWordMark.svg"
+        alt="Kolmari"
         width={w}
         height={h}
         style={{ width: 'auto', height: h }}
