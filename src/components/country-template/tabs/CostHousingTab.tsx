@@ -6,7 +6,7 @@ import type { CountryContent } from '@/lib/country-workspace/country-content'
    section as the model is extended. See README step 4. */
 export function CostHousingTab({ slug }: { slug: string }) {
   return (
-      <div className="tabpanel" id="p-cost">
+      <div className="tabpanel on" id="p-cost">
 
               {/* 1. COST OF LIVING */}
               <section className="card-surface sec">

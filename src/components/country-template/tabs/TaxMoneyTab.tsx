@@ -5,7 +5,7 @@ import type { CountryContent } from '@/lib/country-workspace/country-content'
    section as the model is extended. See README step 4. */
 export function TaxMoneyTab({ slug }: { slug: string }) {
   return (
-      <div className="tabpanel" id="p-money">
+      <div className="tabpanel on" id="p-money">
 
               {/* 1. ESTIMATOR */}
               <section className="card-surface sec">

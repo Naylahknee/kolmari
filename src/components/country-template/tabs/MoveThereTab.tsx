@@ -6,7 +6,7 @@ import type { CountryContent } from '@/lib/country-workspace/country-content'
    section as the model is extended. See README step 4. */
 export function MoveThereTab({}: Record<string, never>) {
   return (
-      <div className="tabpanel" id="p-move">
+      <div className="tabpanel on" id="p-move">
 
               {/* 1. WAYS IN */}
               <section className="card-surface sec">

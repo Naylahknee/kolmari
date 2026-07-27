@@ -5,7 +5,7 @@ import type { CountryContent } from '@/lib/country-workspace/country-content'
    section as the model is extended. See README step 4. */
 export function HealthcareTab({ slug }: { slug: string }) {
   return (
-      <div className="tabpanel" id="p-health">
+      <div className="tabpanel on" id="p-health">
 
               {/* 1. SYSTEM OVERVIEW */}
               <section className="card-surface sec">

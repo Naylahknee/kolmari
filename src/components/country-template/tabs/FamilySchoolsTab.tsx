@@ -5,7 +5,7 @@ import type { CountryContent } from '@/lib/country-workspace/country-content'
    section as the model is extended. See README step 4. */
 export function FamilySchoolsTab({ slug }: { slug: string }) {
   return (
-      <div className="tabpanel" id="p-family">
+      <div className="tabpanel on" id="p-family">
 
               {/* 1. OVERVIEW */}
               <section className="card-surface sec">

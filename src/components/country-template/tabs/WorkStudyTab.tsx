@@ -5,7 +5,7 @@ import type { CountryContent } from '@/lib/country-workspace/country-content'
    section as the model is extended. See README step 4. */
 export function WorkStudyTab({ slug }: { slug: string }) {
   return (
-      <div className="tabpanel" id="p-work">
+      <div className="tabpanel on" id="p-work">
 
               {/* 1. EMPLOYMENT MARKET */}
               <section className="card-surface sec">

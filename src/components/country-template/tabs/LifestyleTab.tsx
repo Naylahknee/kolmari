@@ -5,7 +5,7 @@ import type { CountryContent } from '@/lib/country-workspace/country-content'
    section as the model is extended. See README step 4. */
 export function LifestyleTab({ slug }: { slug: string }) {
   return (
-      <div className="tabpanel" id="p-life">
+      <div className="tabpanel on" id="p-life">
 
               {/* 1. THE CULTURE SHIFT */}
               <section className="card-surface sec">
