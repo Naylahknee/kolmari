@@ -1,5 +1,15 @@
 # Nexit Current Implementation State
 
+## 2026-07-26 — Nexit Pathways directory redesign
+
+- `PathwaysResults` accepts evaluated Pathway data as a prop from the server-rendered route.
+- Strong signals use a responsive one-, two-, and three-column card grid.
+- Category filters use one horizontally scrollable, counted, accessible chip row.
+- Results are grouped by likely, possible, and unknown fit, with country codes visible on every row.
+- Pathway rows use full-width accessible accordion headers and show structured requirements, facts, and official sources.
+- The research disclaimer appears once at the end of the page.
+- The page retains the Geist interface font and existing Nexit design tokens.
+
 ## Last Updated
 
 Phase 8 — 04-LAYOUTS.md implementation: sidebar groups, collapse, saved country tree, URL-addressable country sections, hero pathway summary
