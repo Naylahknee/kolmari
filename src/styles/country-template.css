@@ -48,17 +48,18 @@ a{color:inherit;text-decoration:none}
 /* ══ shell ══ */
 .shell{display:flex;align-items:flex-start}
 .rail{position:sticky;top:56px;flex:0 0 254px;width:254px;height:calc(100vh - 56px);overflow-y:auto;background:var(--navy-deep);color:#fff;padding:18px 12px 40px;transition:flex-basis .2s,width .2s}
-body.rail-collapsed .rail{flex-basis:70px;width:70px;padding:18px 9px 40px}
-body.rail-collapsed .rail-title{display:none}
+.rail-collapsed .rail{flex-basis:70px;width:70px;padding:18px 9px 40px}
+.rail-collapsed .rail-title{display:none}
 .rail-head{display:flex;align-items:center;justify-content:space-between;padding:0 6px;margin-bottom:2px}
 .rail-title{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#9fb0cc}
 .rail .icon-btn{color:#9fb0cc}
 .rail .icon-btn:hover{background:rgba(255,255,255,.06);color:#fff}
-body.rail-collapsed .rail .icon-btn svg{transform:scaleX(-1)}
+.rail-collapsed .rail .icon-btn svg{transform:scaleX(-1)}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--teal)}
 .dot.mid{background:var(--gold)}.dot.low{background:#7d90b0}
 
 .main{flex:1;min-width:0;padding:18px 20px 60px;max-width:1500px}
+.workspace-main{max-width:none;width:100%}
 
 /* ══ hero ══ */
 .hero{position:relative;border-radius:var(--r-card);overflow:hidden;min-height:392px;display:flex;flex-direction:column;justify-content:flex-end;box-shadow:var(--shadow-shell);isolation:isolate;background:var(--navy-deep)}
@@ -560,13 +561,13 @@ body.rail-collapsed .rail .icon-btn svg{transform:scaleX(-1)}
 .readiness .rbar i{display:block;height:100%;background:var(--gold);border-radius:3px}
 .readiness a{font-size:11.5px;font-weight:700;color:var(--gold)}
 .readiness a:hover{text-decoration:underline}
-body.rail-collapsed .sb-label,
-body.rail-collapsed .sb-item .lbl,
-body.rail-collapsed .sb-item .chev,
-body.rail-collapsed .sb-tree,
-body.rail-collapsed .sb-div,
-body.rail-collapsed .readiness{display:none}
-body.rail-collapsed .sb-item{justify-content:center;padding:10px 0;gap:0}
+.rail-collapsed .sb-label,
+.rail-collapsed .sb-item .lbl,
+.rail-collapsed .sb-item .chev,
+.rail-collapsed .sb-tree,
+.rail-collapsed .sb-div,
+.rail-collapsed .readiness{display:none}
+.rail-collapsed .sb-item{justify-content:center;padding:10px 0;gap:0}
 
 /* ══ tax estimator ══ */
 .calc{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:24px;align-items:start}
@@ -699,7 +700,7 @@ input[type="range"]:focus-visible{outline:2px solid var(--gold-deep);outline-off
 }
 @media (max-width:900px){
   .rail{position:fixed;left:0;z-index:50;box-shadow:var(--shadow-shell)}
-  body.rail-collapsed .rail{flex-basis:62px;width:62px}
+  .rail-collapsed .rail{flex-basis:62px;width:62px}
   .main{padding:14px}
   .metrics{grid-template-columns:1fr 1fr}
   .metric:nth-child(2){border-right:none}

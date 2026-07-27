@@ -1,13 +1,14 @@
 'use client'
 
+import { useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { AppShell } from './app-shell'
 import type { WizardStatus } from '@/lib/profile'
+import { UnitsProvider } from '@/components/country-template/client/UnitsControl'
+import { TopBar } from '@/components/country-template/TopBar'
+import { Sidebar } from '@/components/country-template/Sidebar'
 
 export function WorkspaceShell({
   children,
-  email,
-  wizardStatus,
 }: {
   children: React.ReactNode
   email: string
@@ -21,9 +22,20 @@ export function WorkspaceShell({
 
   if (usesCountryTemplate) return children
 
+  return <NewWorkspaceChrome>{children}</NewWorkspaceChrome>
+}
+
+function NewWorkspaceChrome({ children }: { children: React.ReactNode }) {
+  const [railOpen, setRailOpen] = useState(true)
   return (
-    <AppShell email={email} wizardStatus={wizardStatus}>
-      {children}
-    </AppShell>
+    <UnitsProvider>
+      <div className={railOpen ? '' : 'rail-collapsed'}>
+        <TopBar onToggleRail={() => setRailOpen((value) => !value)} />
+        <div className="shell">
+          <Sidebar onToggleRail={() => setRailOpen((value) => !value)} />
+          <main className="main workspace-main">{children}</main>
+        </div>
+      </div>
+    </UnitsProvider>
   )
 }
