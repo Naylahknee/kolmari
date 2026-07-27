@@ -723,3 +723,41 @@ two-line visual treatment while staying truthful.
 | Lint (`eslint` on changed file) | ✅ Pass |
 | Production build (`next build`) | ✅ Pass |
 | Visual check (headless Chromium render of 8 countries) | ✅ Matches Portugal hero style |
+
+## Country research shell layout fix and capital-accurate card pins
+
+Two follow-ups to the sidebar and country-card work:
+
+**Research page layout.** `CountryResearchShell` originally wrapped the
+Tailwind-based `CountryResearchPage` in the `country-template-root` frame,
+whose global CSS reset (`* { margin: 0; padding: 0 }`) and scoped image rules
+clobbered the page's spacing (overlapping flag/title, collapsed hero, cramped
+cards). The shell now renders the shared workspace chrome instead — the same
+top bar, collapsible sidebar, and `.main.workspace-main` container that
+Dashboard, Pathways, and every other Tailwind workspace page use — so the
+research page keeps the sidebar while its own layout renders correctly.
+
+**Capital-accurate card pins.** `CountryShapePanel` pins now mark each
+country's national capital instead of the shape centroid. `generate-country-shapes.mjs`
+gained a capitals table and now emits `src/lib/country-capitals.ts`, projecting
+each capital's WGS84 lat/lng through the *same* per-country fit transform as the
+silhouette, so the pin always lands on the drawn shape. The pin label shows the
+capital and country; the card body still shows the featured research city
+(which is often not the capital, e.g. Barcelona, Fukuoka, Melbourne). Countries
+without capital data fall back to the shape centre and the featured city.
+
+| File | Change |
+|---|---|
+| `src/components/country-template/CountryResearchShell.tsx` | Use shared workspace chrome instead of `country-template-root` |
+| `scripts/generate-country-shapes.mjs` | Add capitals table; emit projected `country-capitals.ts` alongside shapes |
+| `src/lib/country-capitals.ts` | Generated capital name + projected (x, y) per country |
+| `src/components/nexit/CountryShapePanel.tsx` | Pin on the capital, labelled capital + country |
+
+### Tests Run
+
+| Check | Result |
+|---|---|
+| TypeScript (`tsc --noEmit`) | ✅ Pass |
+| Lint (`eslint` on changed files) | ✅ Pass |
+| Production build (`next build`) | ✅ Pass |
+| Visual check (headless Chromium, 12 countries) | ✅ Pins land on capitals, on-shape |

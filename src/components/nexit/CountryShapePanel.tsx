@@ -1,8 +1,9 @@
 import { COUNTRY_SHAPES } from '@/lib/country-shapes'
+import { COUNTRY_CAPITALS } from '@/lib/country-capitals'
 
-/* Bounding-box centre of a shape path, used to sit the capital pin on the
-   country. Paths only use absolute M/L/Z commands, so every number is one
-   coordinate of an x,y pair. */
+/* Bounding-box centre of a shape path, used as a fallback pin position when a
+   country has no capital entry. Paths only use absolute M/L/Z commands, so
+   every number is one coordinate of an x,y pair. */
 function shapeCenter(d: string) {
   const nums = d.match(/-?\d+(?:\.\d+)?/g)?.map(Number) ?? []
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
@@ -18,17 +19,20 @@ function shapeCenter(d: string) {
 }
 
 /* Country card artwork that mirrors the Portugal Nextination hero: a warm
-   navy-to-earth wash, a faint diamond-grid brand pattern, a low-opacity white
-   country silhouette, and a gold butterfly location pin marking the featured
-   city. The sub-label shows the country (not "capital"), because the featured
-   city is not always the national capital. */
+   navy-to-earth wash, the faint diamond-grid brand pattern, a low-opacity
+   white country silhouette, and a gold butterfly location pin. The pin marks
+   the national capital (projected onto the same shape), labelled with the
+   capital and country. Countries without capital data fall back to the shape
+   centre and the featured research city. */
 export function CountryShapePanel({ code, country, city }: { code: string; country: string; city: string }) {
   const shape = COUNTRY_SHAPES[code]
-  const { cx, cy } = shape ? shapeCenter(shape) : { cx: 120, cy: 60 }
+  const capital = COUNTRY_CAPITALS[code]
+  const center = shape ? shapeCenter(shape) : { cx: 120, cy: 60 }
+  const marker = capital ?? { name: city, x: center.cx, y: center.cy }
 
   // Keep the pin and its label inside the frame.
-  const pinX = Math.min(Math.max(cx, 34), 176)
-  const pinY = Math.min(Math.max(cy, 40), 96)
+  const pinX = Math.min(Math.max(marker.x, 34), 176)
+  const pinY = Math.min(Math.max(marker.y, 40), 96)
   const anchorEnd = pinX > 150
   const labelX = anchorEnd ? pinX - 15 : pinX + 15
 
@@ -36,7 +40,7 @@ export function CountryShapePanel({ code, country, city }: { code: string; count
 
   return (
     <div className="relative h-40 overflow-hidden bg-navy-deep">
-      <svg viewBox="0 0 240 120" className="h-full w-full" role="img" aria-label={`${country} — ${city}`}>
+      <svg viewBox="0 0 240 120" className="h-full w-full" role="img" aria-label={`${country} — capital ${marker.name}`}>
         <defs>
           <linearGradient id={`sp-wash-${uid}`} x1="0" y1="0" x2="0.35" y2="1">
             <stop offset="0%" stopColor="#122a52" />
@@ -72,8 +76,8 @@ export function CountryShapePanel({ code, country, city }: { code: string; count
 
         {shape && <path d={shape} fill="#ffffff" fillOpacity="0.09" />}
 
-        {/* Capital-style location pin: gold glow, navy teardrop with gold edge,
-            and the gold butterfly mark. */}
+        {/* Capital location pin: gold glow, navy teardrop with gold edge, and
+            the gold butterfly mark. */}
         <g transform={`translate(${pinX} ${pinY}) scale(0.5)`}>
           <circle cx="0" cy="-22" r="40" fill={`url(#sp-pin-${uid})`} />
           <ellipse cx="0" cy="2" rx="9" ry="2.6" fill="#000000" opacity="0.28" />
@@ -81,7 +85,7 @@ export function CountryShapePanel({ code, country, city }: { code: string; count
           <image href="/brand/favicon-48.png" x="-11.5" y="-39.5" width="23" height="23" preserveAspectRatio="xMidYMid meet" />
         </g>
 
-        <text x={labelX} y={pinY - 4} textAnchor={anchorEnd ? 'end' : 'start'} fill="#f3c516" fillOpacity="0.9" fontSize="12" fontWeight="700" fontFamily="Geist, system-ui, sans-serif">{city}</text>
+        <text x={labelX} y={pinY - 4} textAnchor={anchorEnd ? 'end' : 'start'} fill="#f3c516" fillOpacity="0.92" fontSize="12" fontWeight="700" fontFamily="Geist, system-ui, sans-serif">{marker.name}</text>
         <text x={labelX} y={pinY + 8} textAnchor={anchorEnd ? 'end' : 'start'} fill="#ffffff" fillOpacity="0.5" fontSize="8" letterSpacing="1.2" fontFamily="Geist, system-ui, sans-serif">{country.toUpperCase()}</text>
       </svg>
     </div>
