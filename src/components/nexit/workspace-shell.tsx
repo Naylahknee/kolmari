@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import type { WizardStatus } from '@/lib/profile'
 import { UnitsProvider } from '@/components/country-template/client/UnitsControl'
@@ -26,13 +25,14 @@ export function WorkspaceShell({
 }
 
 function NewWorkspaceChrome({ children }: { children: React.ReactNode }) {
-  const [railOpen, setRailOpen] = useState(true)
+  const toggleRail = () => document.body.classList.toggle('rail-collapsed')
+
   return (
     <UnitsProvider>
-      <div className={railOpen ? '' : 'rail-collapsed'}>
-        <TopBar onToggleRail={() => setRailOpen((value) => !value)} />
+      <div>
+        <TopBar onToggleRail={toggleRail} />
         <div className="shell">
-          <Sidebar onToggleRail={() => setRailOpen((value) => !value)} />
+          <Sidebar onToggleRail={toggleRail} />
           <main className="main workspace-main">{children}</main>
         </div>
       </div>

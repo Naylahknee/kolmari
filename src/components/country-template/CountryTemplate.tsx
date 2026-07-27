@@ -1,5 +1,4 @@
 'use client'
-import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { UnitsProvider } from './client/UnitsControl'
 import { TopBar } from './TopBar'
@@ -12,16 +11,16 @@ import { RightRail } from './RightRail'
    stay a server component and ship no JavaScript of its own. */
 export function CountryTemplate({ slug, active, fromQuiz = false, children }:
   { slug: string; active: TabSlug; fromQuiz?: boolean; children: React.ReactNode }) {
-  const [railOpen, setRailOpen] = useState(true)
   const router = useRouter()
   const go = (s: string) => router.push(`/nextinations/${slug}/v2/${s}`)
+  const toggleRail = () => document.body.classList.toggle('rail-collapsed')
 
   return (
     <UnitsProvider>
-      <div className={railOpen ? '' : 'rail-collapsed'}>
-        <TopBar onToggleRail={() => setRailOpen(v => !v)} />
+      <div>
+        <TopBar onToggleRail={toggleRail} />
         <div className="shell">
-          <Sidebar onToggleRail={() => setRailOpen(v => !v)} />
+          <Sidebar onToggleRail={toggleRail} />
           <main className="main">
             <CountryHero go={go} fromQuiz={fromQuiz} />
             <TabBar slug={slug} active={active} />
