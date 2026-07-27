@@ -14,6 +14,7 @@ import {
 import { countryFlag } from '@/lib/countries'
 import { getCountryCityOverviews } from '@/lib/country-workspace/country-cities'
 import { getCountryTourismMedia } from '@/lib/country-workspace/country-tourism-media'
+import { getCountryFacts } from '@/lib/country-workspace/country-facts'
 import { IMPLEMENTED_TABS, type CountryTabId, type TabMeta } from '@/lib/country-workspace/tabs'
 import type { CountryContent } from '@/lib/country-workspace/country-content'
 import { CityMapImage } from './CityMapImage'
@@ -97,6 +98,17 @@ function CountryHero({ country, match, fromQuiz, pathwayCount }: Pick<Props, 'co
   const media = getCountryTourismMedia(country.slug)
   const [imageFailed, setImageFailed] = useState(false)
 
+  // Membership badges derived from verified per-country facts — no blanket
+  // "Schengen / EU / NATO" claims shown for countries where they are untrue.
+  const facts = getCountryFacts(country.slug)
+  const heroBadges = facts
+    ? [
+        facts.snapshot.find((f) => f.icon === 'schengen')?.value === 'Yes' ? 'Schengen Area' : null,
+        facts.snapshot.find((f) => f.icon === 'eu')?.value === 'Member' ? 'EU Member' : null,
+        facts.snapshot.find((f) => f.icon === 'currency')?.value ?? null,
+      ].filter((b): b is string => Boolean(b))
+    : []
+
   return (
     <section className="relative min-h-[500px] overflow-hidden rounded-[var(--radius-card)] bg-navy-deep text-white shadow-[var(--shadow-shell)]" aria-label={`${country.name} Nextination overview`}>
       {media && !imageFailed && (
@@ -124,11 +136,13 @@ function CountryHero({ country, match, fromQuiz, pathwayCount }: Pick<Props, 'co
             </div>
           </div>
 
-          <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-white/85">
-            <span className="rounded-[var(--radius-pill)] border border-white/20 bg-navy-deep/45 px-3 py-1.5 backdrop-blur-sm">Schengen Area</span>
-            <span className="rounded-[var(--radius-pill)] border border-white/20 bg-navy-deep/45 px-3 py-1.5 backdrop-blur-sm">EU Member</span>
-            <span className="rounded-[var(--radius-pill)] border border-white/20 bg-navy-deep/45 px-3 py-1.5 backdrop-blur-sm">NATO Member</span>
-          </div>
+          {heroBadges.length > 0 && (
+            <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-white/85">
+              {heroBadges.map((badge) => (
+                <span key={badge} className="rounded-[var(--radius-pill)] border border-white/20 bg-navy-deep/45 px-3 py-1.5 backdrop-blur-sm">{badge}</span>
+              ))}
+            </div>
+          )}
 
           {pathwayCount > 0 && <p className="mt-5 flex items-center gap-2 text-sm text-white/82"><Route size={15} className="text-gold" /><span><strong>{pathwayCount}</strong> Nexit Pathway{pathwayCount === 1 ? '' : 's'} available for {country.name}</span></p>}
 
@@ -207,13 +221,18 @@ function TabPanel({ id, country, match, pathways, content, compareData, hasChild
     const tourism = getCountryTourismMedia(country.slug)
     const costs = content?.costOfLiving.categories.slice(0, 6) ?? []
     const snapshotCenter = cities[0] ?? null
-    const factRows = [
-      ['Capital', country.city, Landmark], ['Population', country.slug === 'portugal' ? '10.6 million' : 'Researching', Users],
-      ['Currency', country.slug === 'portugal' ? 'Euro (EUR)' : (content?.costOfLiving.currency ?? 'Researching'), Coins], ['Official Language', country.slug === 'portugal' ? 'Portuguese' : 'Researching', Languages],
-      ['Government', country.slug === 'portugal' ? 'Republic' : 'Researching', Landmark], ['Time Zone', country.slug === 'portugal' ? 'GMT (UTC+0)' : 'Researching', Clock3],
-      ['Driving Side', country.slug === 'portugal' ? 'Right' : 'Researching', CarFront], ['Schengen Area', country.slug === 'portugal' ? 'Yes' : 'Researching', ShieldCheck],
-      ['EU Member', country.slug === 'portugal' ? 'Yes' : 'Researching', Globe2], ['Climate', country.slug === 'portugal' ? 'Mediterranean' : (content?.dailyLife.weather ? 'See climate context' : 'Researching'), SunMedium],
-    ] as const
+    const facts = getCountryFacts(country.slug)
+    // Real, per-country reference facts (public country data) — never Portugal's
+    // values shown for another country. Falls back to an honest "Researching"
+    // state when a country has no verified facts dataset yet.
+    const factIcons = [Landmark, Users, Coins, Languages, Landmark, Clock3, CarFront, ShieldCheck, Globe2, SunMedium] as const
+    const factLabels = ['Capital', 'Population', 'Currency', 'Official Language', 'Government', 'Time Zone', 'Driving Side', 'Schengen Area', 'EU Member', 'Climate']
+    const factRows = facts
+      ? facts.snapshot.map((f, i) => [f.label === 'EU Membership' ? 'EU Member' : f.label, f.value, factIcons[i]] as const)
+      : factLabels.map((label, i) => [label, label === 'Capital' ? country.city : 'Researching', factIcons[i]] as const)
+    const winterTemp = facts?.climate.find((c) => c.icon === 'winter')?.value ?? 'Researching'
+    const summerTemp = facts?.climate.find((c) => c.icon === 'summer')?.value ?? 'Researching'
+    const timeDiff = facts?.climate.find((c) => c.icon === 'timeDifference')?.value ?? 'Researching'
     const moveReasons = [
       ['Affordable Living', 'Lower costs than many Western European countries.', BadgeDollarSign],
       ['Great Weather', content?.dailyLife.weather ?? 'Climate context is being verified.', Sun],
@@ -236,7 +255,7 @@ function TabPanel({ id, country, match, pathways, content, compareData, hasChild
                 {snapshotCenter ? <CountrySnapshotMap countryName={country.name} lat={snapshotCenter.lat} lng={snapshotCenter.lng} alt={`Country map showing ${country.name}`} /> : <div className="grid min-h-56 place-items-center text-muted">Country map unavailable</div>}
               </div>
               <div className="mt-3 grid grid-cols-3 divide-x divide-line overflow-hidden rounded-[var(--radius-field)] border border-line bg-white">
-                {[['Average winter temperature', '16°C', 'Winter', Snowflake], ['Average summer temperature', '28°C', 'Summer', Sun], ['Time difference', '-5 hrs', 'from your current location', Clock3]].map(([label, value, detail, Icon]) => <div key={String(label)} className="flex min-h-24 items-center gap-3 px-3 py-3 text-left"><Icon size={20} strokeWidth={2.25} className="shrink-0 text-gold-deep" /><div><p className="text-[10px] leading-4 text-muted">{String(label)}</p><p className="text-base font-bold text-navy">{String(value)}</p><p className="text-[10px] leading-4 text-muted">{String(detail)}</p></div></div>)}
+                {[['Average winter temperature', winterTemp, 'Winter avg', Snowflake], ['Average summer temperature', summerTemp, 'Summer avg', Sun], ['Time difference', timeDiff, 'Editorial estimate', Clock3]].map(([label, value, detail, Icon]) => <div key={String(label)} className="flex min-h-24 items-center gap-3 px-3 py-3 text-left"><Icon size={20} strokeWidth={2.25} className="shrink-0 text-gold-deep" /><div><p className="text-[10px] leading-4 text-muted">{String(label)}</p><p className="text-base font-bold text-navy">{String(value)}</p><p className="text-[10px] leading-4 text-muted">{String(detail)}</p></div></div>)}
               </div>
             </div>
           </div>
