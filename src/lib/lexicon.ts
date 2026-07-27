@@ -1,29 +1,39 @@
-export const NEXIT_LEXICON = {
-  brand: 'Nexit',
-  map: 'Nexitnation',
-  place: 'Nextination',
-  profile: 'Nexit Profile',
-  plan: 'Nexit Plan',
-  matchScore: 'Match Score',
-  pathways: 'Pathways',
-  readiness: 'Nexit Readiness',
-  timeline: 'Nexit Timeline',
+import { BRAND } from '@/config/brand'
+import { PRODUCT_COPY } from '@/config/product-copy'
+
+export const KOLMARI_LEXICON = {
+  brand: BRAND.name,
+  world: PRODUCT_COPY.world,
+  destinations: PRODUCT_COPY.destinations,
+  destination: PRODUCT_COPY.destination,
+  profile: 'Profile',
+  plan: PRODUCT_COPY.plan,
+  matchScore: PRODUCT_COPY.matchScore,
+  pathways: PRODUCT_COPY.pathways,
+  readiness: PRODUCT_COPY.readiness,
+  timeline: PRODUCT_COPY.timeline,
   greenbookLayer: 'Greenbook Layer',
   greenbookInsights: 'Greenbook Insights',
-  communityFit: 'Community Fit',
-  nexicutionMode: 'Nexicution Mode',
-  tracker: 'Nexit Tracker',
-  startCta: 'Start Your Nexit',
-  executionCta: 'Enter Nexicution Mode',
-  mapTitle: 'Choose Your Nexitnation',
-  regionTitle: 'Explore This Nextination',
+  communityFit: PRODUCT_COPY.communityFit,
+  flutterMode: PRODUCT_COPY.flutterMode,
+  tracker: PRODUCT_COPY.tracker,
+  startCta: PRODUCT_COPY.startCta,
+  executionCta: PRODUCT_COPY.executionCta,
+  worldTitle: PRODUCT_COPY.worldTitle,
+  destinationTitle: PRODUCT_COPY.destinationTitle,
 } as const
 
-export const NEXIT_STORY = [
-  NEXIT_LEXICON.startCta,
-  NEXIT_LEXICON.mapTitle,
-  'Explore a Nextination',
+export const KOLMARI_STORY = [
+  KOLMARI_LEXICON.startCta,
+  KOLMARI_LEXICON.worldTitle,
+  'Explore a Destination',
   'Review Your Pathways',
-  'Build Your Nexit Plan',
-  NEXIT_LEXICON.executionCta,
+  'Build My Move Plan',
+  KOLMARI_LEXICON.executionCta,
 ] as const
+
+/**
+ * Temporary compatibility exports. Remove after all legacy imports are migrated.
+ */
+export const NEXIT_LEXICON = KOLMARI_LEXICON
+export const NEXIT_STORY = KOLMARI_STORY

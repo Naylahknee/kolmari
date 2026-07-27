@@ -2,17 +2,23 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { BRAND } from '@/config/brand'
+import { PRODUCT_COPY } from '@/config/product-copy'
 import { UnitsControl } from './client/UnitsControl'
 
 const pageNames: Record<string, string> = {
-  '/dashboard': 'Dashboard',
-  '/nexitnation': 'Nexit World',
-  '/pathways': 'Nexit Pathways',
-  '/nexit-plan': 'Nexit Plan',
-  '/cost-calculator': 'Cost Calculator',
-  '/greenbook': 'Greenbook',
-  '/documents': 'Documents',
-  '/settings': 'Settings',
+  '/dashboard': PRODUCT_COPY.dashboard,
+  '/nexitnation': PRODUCT_COPY.world,
+  '/saved': PRODUCT_COPY.destinations,
+  '/countries': PRODUCT_COPY.destinations,
+  '/pathways': PRODUCT_COPY.pathways,
+  '/nexit-plan': PRODUCT_COPY.plan,
+  '/checklist': PRODUCT_COPY.flutterMode,
+  '/community': PRODUCT_COPY.kolmariKlub,
+  '/cost-calculator': PRODUCT_COPY.costCalculator,
+  '/greenbook': PRODUCT_COPY.greenbook,
+  '/documents': PRODUCT_COPY.documents,
+  '/settings': PRODUCT_COPY.settings,
   '/profile-wizard': 'Profile',
 }
 
@@ -26,7 +32,7 @@ export function TopBar({ onToggleRail }: { onToggleRail: () => void }) {
   const section = countryMatch?.[2] ? titleCase(countryMatch[2]) : 'Overview'
   const pageName =
     Object.entries(pageNames).find(([route]) => pathname === route || pathname.startsWith(`${route}/`))?.[1] ??
-    'Nexit'
+    BRAND.name
 
   return (
     <header className="topbar">
@@ -34,7 +40,7 @@ export function TopBar({ onToggleRail }: { onToggleRail: () => void }) {
         <Link
           className="mark"
           href="/dashboard"
-          aria-label="Nexit home"
+          aria-label={`${BRAND.name} home`}
           onClick={(event) => {
             if (document.body.classList.contains('rail-collapsed')) {
               event.preventDefault()
@@ -43,7 +49,7 @@ export function TopBar({ onToggleRail }: { onToggleRail: () => void }) {
           }}
         >
           <img className="mark-bf" src="/brand/favicon-48.png" alt="" width="26" height="26" />
-          <span className="mark-word">ne<b>x</b>it</span>
+          <span className="mark-word">Kolmari</span>
         </Link>
         <div className="zone-a-actions">
           <button className="icon-btn" type="button" aria-label="Search">
