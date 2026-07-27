@@ -24,11 +24,12 @@ function RegionGrid({ profile }: Props) {
             key={region.slug}
             type="button"
             onClick={() => router.push(`/nexitnation/${region.slug}`)}
-            className="flex items-center justify-between rounded-xl border border-line bg-white p-4 text-left shadow-tile transition hover:border-navy hover:shadow-card"
+            className="group relative min-h-28 overflow-hidden rounded-xl border border-line bg-navy-deep p-4 text-left shadow-tile transition hover:border-gold hover:shadow-card"
+            style={{ backgroundImage: `linear-gradient(90deg, rgba(9,20,44,.96), rgba(9,20,44,.54)), url(${region.image})`, backgroundPosition: 'center', backgroundSize: 'cover' }}
           >
-            <span>
-              <strong className="block text-sm font-bold text-navy">{region.name}</strong>
-              <span className="mt-0.5 block text-xs text-muted">
+            <span className="relative z-10">
+              <strong className="block text-sm font-bold text-white">{region.name}</strong>
+              <span className="mt-1 block text-xs text-white/70">
                 {region.countryCount} countries
                 {profile.complete && matchValue !== undefined
                   ? ` · Nexit Match ${matchValue}%`
@@ -37,7 +38,7 @@ function RegionGrid({ profile }: Props) {
                     : ' · Complete your profile for match data'}
               </span>
             </span>
-            <ArrowRight size={16} className="shrink-0 text-gold-deep" aria-hidden="true" />
+            <ArrowRight size={16} className="relative z-10 shrink-0 text-gold" aria-hidden="true" />
           </button>
         )
       })}
@@ -69,7 +70,8 @@ function RegionFallback({ profile }: Props) {
               key={region.slug}
               type="button"
               onClick={() => router.push(`/nexitnation/${region.slug}`)}
-              className="flex items-center justify-between rounded-2xl border border-white/12 bg-white/8 p-4 text-left transition hover:border-gold hover:bg-white/12"
+              className="relative min-h-28 overflow-hidden rounded-2xl border border-white/12 p-4 text-left transition hover:border-gold"
+              style={{ backgroundImage: `linear-gradient(90deg, rgba(9,20,44,.96), rgba(9,20,44,.56)), url(${region.image})`, backgroundPosition: 'center', backgroundSize: 'cover' }}
             >
               <span>
                 <strong className="block text-sm">{region.name}</strong>

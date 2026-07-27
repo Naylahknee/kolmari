@@ -192,8 +192,34 @@ export const regions: Record<RegionSlug, RegionConfig> = {
   },
 }
 
+const REGION_BY_COUNTRY_REGION = {
+  Europe: 'europe',
+  Asia: 'asia',
+  'North America': 'north-america',
+  'Latin America': 'latin-america',
+  Oceania: 'oceania',
+} as const
+
+for (const country of DISCOVERABLE_COUNTRIES) {
+  const region = regions[REGION_BY_COUNTRY_REGION[country.region]]
+  const existing = region.countries.find((item) => item.slug === country.slug)
+  if (existing) {
+    existing.guideAvailable = true
+    continue
+  }
+  region.countries.push({
+    name: country.name,
+    slug: country.slug,
+    code: country.code,
+    city: country.city,
+    image: region.image,
+    guideAvailable: true,
+  })
+}
+
 export const regionList = REGION_SLUGS.map((slug) => regions[slug])
 
 export function isNexitnationRegion(value: string): value is RegionSlug {
   return REGION_SLUGS.some((slug) => slug === value)
 }
+import { DISCOVERABLE_COUNTRIES } from '@/lib/countries'

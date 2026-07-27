@@ -26,6 +26,7 @@ import {
 import { Wordmark } from './wordmark'
 import { countryWorkspaceSlug, useNextinationBoard } from '@/lib/nextination-board'
 import { countryFlag } from '@/lib/countries'
+import { regionList } from '@/lib/nexitnation-data'
 import type { WizardStatus } from '@/lib/profile'
 
 // A saved-destination row for the sidebar tree. `slug` is the country-workspace
@@ -38,7 +39,6 @@ type SavedItem = { id: string; name: string; code: string; slug: string | null }
 // DISCOVER group
 const NAV_DISCOVER = [
   { href: '/dashboard',   label: 'Dashboard',   icon: LayoutDashboard },
-  { href: '/nexitnation', label: 'Nexit World',  icon: Globe2 },
 ] as const
 
 // PLANNING group
@@ -219,6 +219,7 @@ function SidebarNav({
 }) {
   const [openCountries, setOpenCountries] = useState<Set<string>>(() => {
     const initial = new Set<string>()
+    if (pathname.startsWith('/nexitnation/')) initial.add('__nexit-world__')
     // Auto-open My Nextinations group when user is on any /nextinations route
     if (pathname.startsWith('/nextinations')) initial.add('__my-nextinations__')
     // Auto-open the active country's section list
@@ -248,6 +249,48 @@ function SidebarNav({
         <SidebarItem key={href} href={href} label={label} icon={icon}
           active={isActive(pathname, href)} collapsed={collapsed} />
       ))}
+
+      {collapsed ? (
+        <SidebarItem href="/nexitnation" label="Nexit World" icon={Globe2}
+          active={isActive(pathname, '/nexitnation')} collapsed />
+      ) : (
+        <div>
+          <div className={[
+            'flex items-center rounded-[var(--radius-sidebar-row)] transition-colors',
+            isActive(pathname, '/nexitnation')
+              ? 'bg-gold-soft/25 text-white font-semibold'
+              : 'text-[#9fb0cc] hover:bg-white/5 hover:text-white',
+          ].join(' ')}>
+            <Link href="/nexitnation" className="flex min-w-0 flex-1 items-center gap-3 px-3 py-2 text-sm font-medium">
+              <Globe2 size={16} aria-hidden="true" className="shrink-0" />
+              <span>Nexit World</span>
+            </Link>
+            <button
+              type="button"
+              onClick={() => toggleCountry('__nexit-world__')}
+              aria-label="Toggle continents"
+              aria-expanded={openCountries.has('__nexit-world__')}
+              className="mr-1 grid size-8 place-items-center rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold"
+            >
+              <ChevronDown size={13} className={`transition-transform ${openCountries.has('__nexit-world__') ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
+          {openCountries.has('__nexit-world__') && (
+            <ul className="ml-4 mt-0.5 space-y-0.5 border-l border-white/10 pl-3">
+              {regionList.map((region) => (
+                <li key={region.slug}>
+                  <Link
+                    href={`/nexitnation/${region.slug}`}
+                    className="block rounded-[var(--radius-sidebar-row)] px-2 py-1.5 text-xs font-medium text-[#7a91b0] transition-colors hover:bg-white/5 hover:text-white"
+                  >
+                    {region.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       {/* ── MY NEXIT ──────────────────────────────────────────────────── */}
       <GroupLabel label="My Nexit" collapsed={collapsed} />

@@ -92,7 +92,10 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
                 <CountryShapePanel code={country.code} country={country.name} city={country.city} />
                 <div className="p-5">
                   <h3 className="text-lg font-extrabold text-navy">{country.name}</h3>
-                  <p className="text-sm text-muted">{country.code} · {country.city}</p>
+                  <p className="mt-1 flex items-center gap-2 text-sm text-muted">
+                    <Image src={`https://flagcdn.com/${country.code.toLowerCase()}.svg`} alt="" width={24} height={16} className="h-4 w-6 rounded-[2px] object-cover" />
+                    <span>{country.city}</span>
+                  </p>
                   {profileComplete && (country.pathway || country.communityFit || country.monthlyCost) ? (
                     <dl className="mt-4 space-y-2 text-sm">
                       {country.pathway && <div><dt className="text-muted">{NEXIT_LEXICON.pathways}</dt><dd className="font-semibold text-navy">{country.pathway}</dd></div>}
@@ -105,7 +108,7 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
                     </div>
                   )}
                   {country.guideAvailable ? (
-                    <Link href={`/countries/${country.slug}`} className="gold-button mt-5 w-full">View Nextination <ArrowRight size={15} /></Link>
+                    <Link href={`/nextinations/${country.slug}/v2/overview`} className="gold-button mt-5 w-full">View Nextination <ArrowRight size={15} /></Link>
                   ) : (
                     <span className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-[var(--radius-btn)] bg-canvas px-4 text-sm font-bold text-muted">Country guide in progress</span>
                   )}

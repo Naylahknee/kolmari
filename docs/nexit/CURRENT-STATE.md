@@ -646,3 +646,14 @@ Every continent page uses a country-specific silhouette in each country card.
 The shapes come from the repository's Natural Earth boundary data. Mauritius
 uses a simplified local outline because it is below the 1:110m dataset's
 minimum feature size. Country cards no longer repeat continent hero artwork.
+## Expanded Nexit World discovery
+
+- Mapbox region labels remain hidden until pointer hover or keyboard focus.
+- Nexit World has a collapsible continent list in the application sidebar.
+- Browse-by-region cards use their continent artwork as a background.
+- The 30 requested expat research countries are listed on their continent
+  pages and open country research pages without being automatically saved to
+  My Nextinations.
+- Country cards use flag images and country-specific boundary silhouettes.
+- Countries without verified detailed datasets display an explicit research
+  starting point rather than copied Portugal content or invented facts.

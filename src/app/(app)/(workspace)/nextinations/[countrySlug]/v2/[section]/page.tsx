@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
-import { COUNTRIES } from '@/lib/countries'
+import { COUNTRIES, getDiscoverableCountry } from '@/lib/countries'
+import { CountryResearchPage } from '@/components/nexit/CountryResearchPage'
 import { CountryTemplate } from '@/components/country-template/CountryTemplate'
 import { TAB_SLUGS, type TabSlug } from '@/components/country-template/TabBar'
 import { OverviewTab } from '@/components/country-template/tabs/OverviewTab'
@@ -18,7 +19,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props) {
   const { countrySlug, section } = await params
-  const country = COUNTRIES.find((c) => c.slug === countrySlug)
+  const country = COUNTRIES.find((c) => c.slug === countrySlug) ?? getDiscoverableCountry(countrySlug)
   if (!country) return { title: 'Nextination Not Found | Nexit' }
   const label = section.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
   return { title: `${country.name} \u2014 ${label} | Nexit` }
@@ -27,7 +28,9 @@ export async function generateMetadata({ params }: Props) {
 export default async function CountryV2Page({ params, searchParams }: Props) {
   const { countrySlug, section } = await params
   const country = COUNTRIES.find((c) => c.slug === countrySlug)
-  if (!country) notFound()
+  const discoverableCountry = getDiscoverableCountry(countrySlug)
+  if (!country && !discoverableCountry) notFound()
+  if (discoverableCountry && countrySlug !== 'portugal') return <CountryResearchPage country={discoverableCountry} />
 
   const active = (TAB_SLUGS.includes(section as TabSlug) ? section : 'overview') as TabSlug
   const source = (await searchParams).source

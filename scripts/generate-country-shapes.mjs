@@ -1,10 +1,12 @@
 import fs from 'node:fs'
 
 const source = JSON.parse(fs.readFileSync('public/data/countries-110m.geojson', 'utf8'))
-const codes = new Set(['PT', 'ES', 'GR', 'EE', 'GH', 'ZA', 'KE', 'MU', 'TH', 'MY', 'JP', 'ID', 'CA', 'MX', 'CR', 'CO', 'PA', 'NZ', 'AU'])
+const codes = new Set(['AL', 'AU', 'BG', 'BZ', 'CA', 'CO', 'CR', 'DE', 'EC', 'EE', 'ES', 'FR', 'GB', 'GE', 'GH', 'GR', 'ID', 'IE', 'IL', 'IT', 'JP', 'KE', 'KH', 'KR', 'MT', 'MU', 'MX', 'MY', 'NL', 'NZ', 'PA', 'PH', 'PT', 'PY', 'RO', 'SI', 'TH', 'UY', 'ZA'])
 const fallbackShapes = {
   // Mauritius is below Natural Earth's 1:110m minimum feature size.
   MU: 'M128 19 C139 24 148 35 151 48 C154 61 150 76 141 89 C134 99 121 103 109 98 C96 92 87 80 87 66 C87 52 94 40 104 30 C111 23 120 18 128 19 Z',
+  // Malta is also below the dataset's minimum feature size.
+  MT: 'M91 57 L106 44 L130 45 L148 55 L145 72 L124 82 L101 77 Z M157 76 L166 72 L173 78 L168 87 L159 85 Z',
 }
 
 function ringsOf(geometry) {
@@ -35,9 +37,13 @@ function createPath(geometry) {
 }
 
 const entries = source.features
-  .filter((feature) => codes.has(feature.properties.ISO_A2))
-  .sort((a, b) => a.properties.ISO_A2.localeCompare(b.properties.ISO_A2))
-  .map((feature) => `  ${JSON.stringify(feature.properties.ISO_A2)}: ${JSON.stringify(createPath(feature.geometry))},`)
+  .map((feature) => ({
+    feature,
+    code: codes.has(feature.properties.ISO_A2) ? feature.properties.ISO_A2 : feature.properties.ISO_A2_EH,
+  }))
+  .filter(({ code }) => codes.has(code))
+  .sort((a, b) => a.code.localeCompare(b.code))
+  .map(({ feature, code }) => `  ${JSON.stringify(code)}: ${JSON.stringify(createPath(feature.geometry))},`)
 
 for (const [code, path] of Object.entries(fallbackShapes)) {
   if (!entries.some((entry) => entry.startsWith(`  "${code}"`))) {
