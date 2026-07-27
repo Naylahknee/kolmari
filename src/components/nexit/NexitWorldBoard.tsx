@@ -3,14 +3,10 @@
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { ArrowRight, Check, ExternalLink, Plus, Search, Star, Trash2, X } from 'lucide-react'
-import { CONTINENT_PATHS, WORLD_VIEWBOX } from '@/lib/world-continents'
+import { NexitnationMapLoader } from '@/components/nexit/NexitnationMapLoader'
 import { searchPlaces, flagEmoji, type WorldPlace } from '@/lib/world-places'
 import { countryWorkspaceSlug, STATUS_META, STATUS_ORDER, useNextinationBoard, type NextinationStatus, type SavedNextination } from '@/lib/nextination-board'
-import { REGION_MAP_LABELS, REGION_MAP_SHAPES, regionList, type RegionSlug } from '@/lib/nexitnation-data'
-
-function toPercent(lat: number, lng: number) {
-  return { left: ((lng + 180) / 360) * 100, top: ((90 - lat) / 180) * 100 }
-}
+import type { RegionSlug } from '@/lib/nexitnation-data'
 
 function workspaceSlug(place: SavedNextination): string | null {
   return countryWorkspaceSlug(place.country)
@@ -54,85 +50,24 @@ export function NexitWorldBoard({
         </div>
       </div>
 
-      {/* Full-width map */}
-      <section aria-label="World map of your Nextinations" className="card-surface overflow-hidden p-3">
-        <div className="relative w-full overflow-hidden rounded-[var(--radius-card)] bg-navy-deep" style={{ aspectRatio: '2 / 1' }}>
-          <svg viewBox={`0 0 ${WORLD_VIEWBOX.width} ${WORLD_VIEWBOX.height}`} className="absolute inset-0 h-full w-full" role="img" aria-label="World map" preserveAspectRatio="xMidYMid slice">
-            <rect width={WORLD_VIEWBOX.width} height={WORLD_VIEWBOX.height} fill="#0d1b39" />
-            {CONTINENT_PATHS.map((d, i) => (
-              <path key={i} d={d} fill="#1c3161" stroke="#2a4570" strokeWidth={0.4} />
-            ))}
-            {regionList.map((region) => {
-              const [x, y] = REGION_MAP_LABELS[region.slug]
-              const match = regionMatches?.[region.slug]
-              return (
-                <Link
-                  key={region.slug}
-                  href={`/nexitnation/${region.slug}`}
-                  aria-label={`Open ${region.name}, ${region.countryCount} countries`}
-                  className="group focus:outline-none"
-                >
-                  <path
-                    d={REGION_MAP_SHAPES[region.slug]}
-                    fill="#F3C516"
-                    fillOpacity="0"
-                    stroke="#F3C516"
-                    strokeOpacity="0"
-                    strokeWidth="4"
-                    className="cursor-pointer transition group-hover:fill-opacity-[.14] group-hover:stroke-opacity-100 group-focus:fill-opacity-[.18] group-focus:stroke-opacity-100"
-                  />
-                  <g className="pointer-events-none">
-                    <rect x={x - 58} y={y - 15} width="116" height={match !== undefined ? 42 : 28} rx="8" fill="#0D1B39" fillOpacity=".84" stroke="#F3C516" strokeOpacity=".55" />
-                    <text x={x} y={y + 2} textAnchor="middle" fill="white" fontSize="11" fontWeight="700">{region.name}</text>
-                    {profileComplete && match !== undefined && <text x={x} y={y + 18} textAnchor="middle" fill="#F3C516" fontSize="8" fontWeight="700">Nexit Match {match}%</text>}
-                  </g>
-                </Link>
-              )
-            })}
-          </svg>
-          {/* Pins */}
+      <section aria-label="Interactive Nexit World map" className="card-surface overflow-hidden p-3">
+        <NexitnationMapLoader profile={{ complete: profileComplete, matches: regionMatches }} />
+      </section>
+
+      {items.length > 0 ? (
+        <section aria-label="Saved Nextinations" className="card-surface flex gap-2 overflow-x-auto p-3">
           {items.map((item) => {
-            const pos = toPercent(item.lat, item.lng)
             const meta = STATUS_META[item.status]
-            const active = item.id === selectedId
             return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => setSelectedId(item.id)}
-                aria-label={`${item.name}, ${meta.label}`}
-                aria-pressed={active}
-                className="absolute -translate-x-1/2 -translate-y-1/2 focus:outline-none"
-                style={{ left: `${pos.left}%`, top: `${pos.top}%` }}
-              >
-                <span className={`block rounded-full transition ${meta.dot} ${active ? 'size-[18px] ring-4 ring-white/40' : 'size-3.5 hover:scale-125'}`} />
-                {active ? <span className="pointer-events-none absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap rounded-pill bg-white px-2 py-0.5 text-[10px] font-bold text-navy shadow-card">{item.name}</span> : null}
+              <button key={item.id} type="button" onClick={() => setSelectedId(item.id)} className={`flex shrink-0 items-center gap-2 rounded-pill border px-3 py-1.5 text-xs font-bold transition ${item.id === selectedId ? 'border-gold bg-gold-soft/60 text-navy' : 'border-line bg-white text-muted hover:text-navy'}`}>
+                <span aria-hidden>{flagEmoji(item.countryCode)}</span>
+                {item.name}
+                <span className={`rounded-pill px-1.5 py-0.5 text-[10px] ${meta.chip}`}>{meta.label}</span>
               </button>
             )
           })}
-          {ready && items.length === 0 ? (
-            <div className="absolute inset-0 flex items-center justify-center p-6 text-center">
-              <p className="max-w-xs text-sm text-white/70">Search for a city or country above and save it to start building your relocation board.</p>
-            </div>
-          ) : null}
-        </div>
-
-        {/* Destination tray */}
-        {items.length > 0 ? (
-          <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-            {items.map((item) => {
-              const meta = STATUS_META[item.status]
-              return (
-                <button key={item.id} type="button" onClick={() => setSelectedId(item.id)} className={`flex shrink-0 items-center gap-2 rounded-pill border px-3 py-1.5 text-xs font-bold transition ${item.id === selectedId ? 'border-gold bg-gold-soft/60 text-navy' : 'border-line bg-white text-muted hover:text-navy'}`}>
-                  <span aria-hidden>{flagEmoji(item.countryCode)}</span>
-                  {item.name}
-                  <span className={`rounded-pill px-1.5 py-0.5 text-[10px] ${meta.chip}`}>{meta.label}</span>
-                </button>
-              )
-            })}
-          </div>
-        ) : null}
-      </section>
+        </section>
+      ) : null}
 
       {!profileComplete && (
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-[var(--radius-card)] border border-gold/25 bg-gold-soft/35 p-5">
@@ -143,21 +78,6 @@ export function NexitWorldBoard({
           <Link href="/profile-wizard" className="gold-button">Complete Nexit Profile <ArrowRight size={15} /></Link>
         </div>
       )}
-
-      <nav aria-label="Browse world regions">
-        <p className="mb-3 text-xs font-bold uppercase tracking-widest text-muted">Browse by region</p>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {regionList.map((region) => (
-            <Link key={region.slug} href={`/nexitnation/${region.slug}`} className="card-surface flex items-center justify-between gap-3 p-4 font-bold text-navy transition hover:border-gold focus-visible:outline focus-visible:outline-3 focus-visible:outline-gold/50">
-              <span>
-                <span className="block">{region.name}</span>
-                <span className="mt-1 block text-xs font-medium text-muted">{region.countryCount} countries</span>
-              </span>
-              <ArrowRight size={16} className="text-gold-deep" aria-hidden="true" />
-            </Link>
-          ))}
-        </div>
-      </nav>
 
       {/* Selected destination — below the map */}
       {selected ? (

@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowRight, ChevronRight } from 'lucide-react'
+import { CountryShapePanel } from '@/components/nexit/CountryShapePanel'
 import { PassportIndexLink } from '@/components/nexit/PassportIndexLink'
 import { requireCurrentUser } from '@/lib/auth'
 import { getProfile } from '@/lib/profile'
@@ -88,9 +89,7 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
           <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
             {region.countries.map((country) => (
               <article key={`${country.slug}-${country.city}`} className="overflow-hidden rounded-card border border-line bg-white shadow-card">
-                <div className="relative h-40">
-                  <Image src={country.image} alt={`${country.city}, ${country.name}`} fill sizes="(min-width: 1280px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
-                </div>
+                <CountryShapePanel code={country.code} country={country.name} city={country.city} />
                 <div className="p-5">
                   <h3 className="text-lg font-extrabold text-navy">{country.name}</h3>
                   <p className="text-sm text-muted">{country.code} · {country.city}</p>

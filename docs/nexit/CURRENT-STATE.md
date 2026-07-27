@@ -635,3 +635,14 @@ to an honest "Researching" state, and membership badges render only when true.
 |---|---|
 | TypeScript (`tsc --noEmit`) | ✅ Pass |
 | Production build (`next build`) | ✅ Pass |
+## Nexit World interactive map and country panels
+
+The active Nexit World workspace renders the existing Mapbox GL map rather
+than the static SVG substitute. Clicking a region badge opens that continent
+page. The region controls below the map provide the same routes for keyboard
+and screen-reader users.
+
+Every continent page uses a country-specific silhouette in each country card.
+The shapes come from the repository's Natural Earth boundary data. Mauritius
+uses a simplified local outline because it is below the 1:110m dataset's
+minimum feature size. Country cards no longer repeat continent hero artwork.
