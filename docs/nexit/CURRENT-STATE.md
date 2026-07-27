@@ -667,3 +667,30 @@ close it, and the page always retains the full viewport width.
 Country workspaces now stack the hero metrics, primary content, and right rail
 at phone widths. Tabs remain horizontally scrollable, card headings wrap, and
 mobile page padding is reduced without changing desktop layouts.
+
+## Sidebar restored on all country research pages
+
+Country research pages for discoverable Nextinations (every country except
+Portugal, e.g. Japan at `/nextinations/japan/v2/overview`) previously rendered
+without the workspace sidebar. `WorkspaceShell` intentionally omits its own
+chrome for `/nextinations/[slug]/v2` routes because the full `CountryTemplate`
+supplies its own top bar and sidebar, but the lighter `CountryResearchPage`
+supplied none, so those pages appeared with no navigation menu.
+
+A new `CountryResearchShell` client component now wraps `CountryResearchPage`
+in the same `country-template-root` frame (top bar + collapsible sidebar) used
+by `CountryTemplate`. Every country research workspace page now shows the
+sidebar menu at all breakpoints.
+
+| File | Change |
+|---|---|
+| `src/components/country-template/CountryResearchShell.tsx` | New client shell providing the top bar and sidebar chrome for research pages |
+| `src/app/(app)/(workspace)/nextinations/[countrySlug]/v2/[section]/page.tsx` | Wrap `CountryResearchPage` in `CountryResearchShell` |
+
+### Tests Run
+
+| Check | Result |
+|---|---|
+| TypeScript (`tsc --noEmit`) | ✅ Pass |
+| Lint (`eslint`) | ✅ No new errors (36 pre-existing errors unchanged) |
+| Production build (`next build`) | ✅ Pass |
