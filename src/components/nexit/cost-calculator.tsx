@@ -94,20 +94,20 @@ export function CostCalculator({
   const hasGap = remaining !== null && remaining < 0
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-[1280px] space-y-6 pb-2">
 
       {/* ── Page header ──────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Planning tool</p>
-          <h1 className="mt-1 text-2xl font-bold text-navy sm:text-3xl">Cost Calculator</h1>
+          <h1 className="mt-1 font-display text-3xl font-bold leading-tight text-navy sm:text-4xl">Cost Calculator</h1>
           <p className="mt-1 text-sm text-muted">Enter your own figures. Nexit does not preload a sample budget.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={reset}
-            className="inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-btn)] border border-line bg-white px-4 text-sm font-semibold text-navy hover:bg-canvas"
+            className="inline-flex h-10 items-center gap-2 rounded-[var(--radius-btn)] border border-line bg-white px-4 text-sm font-semibold text-navy hover:bg-canvas"
           >
             <RefreshCcw size={15} aria-hidden="true" /> Clear
           </button>
@@ -115,7 +115,7 @@ export function CostCalculator({
             type="button"
             onClick={download}
             disabled={monthlyIncome === null && !amounts.length}
-            className="gold-button !min-h-11"
+            className="gold-button !h-10"
           >
             <Download size={15} aria-hidden="true" /> Export
           </button>
@@ -134,15 +134,15 @@ export function CostCalculator({
       )}
 
       {/* ── Summary (visible first per calculator tool template) ────────── */}
-      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid overflow-hidden rounded-[var(--radius-card)] border border-line bg-white shadow-card sm:grid-cols-2 xl:grid-cols-3">
         {/* Income */}
-        <section className="card-surface p-6" aria-labelledby="income-heading">
+        <section className="min-h-36 border-b border-line p-5 sm:border-r xl:border-b-0" aria-labelledby="income-heading">
           <h2 id="income-heading" className="text-xs font-bold uppercase tracking-widest text-muted">Monthly income</h2>
           <div className="relative mt-3">
             <span className="absolute inset-y-0 left-4 flex items-center text-muted" aria-hidden="true">$</span>
             <input
               aria-label="Monthly income"
-              className="field pl-8 text-xl font-bold"
+              className="field !h-12 pl-8 text-xl font-bold"
               type="number"
               min="0"
               max="1000000"
@@ -157,7 +157,7 @@ export function CostCalculator({
               type="button"
               onClick={saveIncome}
               disabled={saving || monthlyIncome === null}
-              className="mt-4 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-[var(--radius-btn)] bg-navy px-4 text-sm font-semibold text-white disabled:opacity-60"
+              className="mt-3 inline-flex items-center gap-2 text-xs font-bold text-gold-deep disabled:opacity-60"
             >
               {saving ? <LoaderCircle size={15} className="animate-spin" aria-hidden="true" /> : <Save size={15} aria-hidden="true" />}
               {saving ? 'Saving…' : 'Save to Nexit Profile'}
@@ -166,9 +166,9 @@ export function CostCalculator({
         </section>
 
         {/* Total expenses */}
-        <section className="card-surface p-6" aria-labelledby="total-heading">
+        <section className="min-h-36 border-b border-line p-5 xl:border-b-0 xl:border-r" aria-labelledby="total-heading">
           <h2 id="total-heading" className="text-xs font-bold uppercase tracking-widest text-muted">Entered expenses</h2>
-          <p className="mt-3 text-3xl font-bold text-navy">
+          <p className="mt-4 text-2xl font-bold text-navy">
             {amounts.length ? `$${total.toLocaleString()}` : <span className="text-muted text-xl">Not entered</span>}
           </p>
           <p className="mt-1 text-xs text-muted">Sum of categories below</p>
@@ -176,13 +176,13 @@ export function CostCalculator({
 
         {/* Gap / cushion */}
         <section
-          className={`rounded-[var(--radius-card)] p-6 ${hasGap ? 'bg-danger text-white' : 'bg-navy text-white'}`}
+          className={`min-h-36 p-5 ${hasGap ? 'bg-danger text-white' : 'bg-[#1d3969] text-white'}`}
           aria-labelledby="remaining-heading"
         >
           <h2 id="remaining-heading" className="text-xs font-bold uppercase tracking-widest opacity-70">
             {hasGap ? 'Budget gap' : 'After entered expenses'}
           </h2>
-          <p className="mt-3 text-3xl font-bold">
+          <p className="mt-4 text-2xl font-bold">
             {remaining === null
               ? <span className="text-xl opacity-70">Not calculated</span>
               : `${remaining < 0 ? '−' : ''}$${Math.abs(remaining).toLocaleString()}`}
@@ -190,25 +190,36 @@ export function CostCalculator({
           {hasGap && (
             <p className="mt-1 text-xs opacity-70">Expenses exceed entered income</p>
           )}
+          {remaining === null && (
+            <p className="mt-1 text-xs opacity-80">Enter income and at least one expense</p>
+          )}
         </section>
       </div>
 
       {/* ── Inputs + donut ──────────────────────────────────────────────── */}
-      <div className="grid gap-5 xl:grid-cols-[1fr_.7fr]">
+      <div className="grid gap-5 xl:grid-cols-[1.08fr_.92fr]">
 
         {/* Expense inputs */}
         <section className="card-surface p-6" aria-labelledby="expenses-heading">
           <h2 id="expenses-heading" className="font-semibold text-navy">Monthly expenses</h2>
           <p className="mt-1 text-sm text-muted">Enter your own research figures. Leave a category blank if it does not apply.</p>
-          <div className="mt-6 space-y-4">
+          <div className="mt-5 divide-y divide-line">
             {(Object.keys(budget) as (keyof Budget)[]).map((key) => (
-              <label key={key} className="grid gap-1.5 sm:grid-cols-[1fr_180px] sm:items-center">
-                <span className="text-sm font-semibold capitalize text-navy">{key}</span>
-                <span className="relative">
-                  <span className="absolute inset-y-0 left-4 flex items-center text-muted" aria-hidden="true">$</span>
+              <label key={key} className="grid gap-3 py-3 sm:grid-cols-[1fr_140px] sm:items-center">
+                <span>
+                  <span className="block text-sm font-semibold capitalize text-navy">{key}</span>
+                  <span className="mt-2 block h-1 overflow-hidden rounded-full bg-canvas">
+                    <span
+                      className="block h-full rounded-full bg-gold transition-[width]"
+                      style={{ width: total > 0 ? `${Math.min(100, ((budget[key] ?? 0) / total) * 100)}%` : '0%' }}
+                    />
+                  </span>
+                </span>
+                <span className="relative block">
+                  <span className="pointer-events-none absolute inset-y-0 left-4 z-10 flex items-center text-muted" aria-hidden="true">$</span>
                   <input
                     aria-label={`${key} expense`}
-                    className="field pl-8"
+                    className="field !h-11 !pl-8"
                     type="number"
                     min="0"
                     max="100000"
@@ -219,6 +230,10 @@ export function CostCalculator({
                 </span>
               </label>
             ))}
+          </div>
+          <div className="mt-2 flex items-center justify-between border-t border-line pt-4 text-sm font-bold text-navy">
+            <span>Total</span>
+            <span>{amounts.length ? `$${total.toLocaleString()}` : '–'}</span>
           </div>
         </section>
 
@@ -232,23 +247,26 @@ export function CostCalculator({
             </div>
           </section>
         ) : (
-          <section className="card-surface flex items-center justify-center p-6 text-center" aria-label="Cost snapshot">
+          <section className="card-surface flex min-h-[420px] flex-col p-6" aria-label="Cost snapshot">
+            <div className="text-left">
+              <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Nexit Cost Snapshot</p>
+              <p className="mt-1 font-semibold text-navy">Monthly breakdown</p>
+            </div>
+            <div className="flex flex-1 items-center justify-center text-center">
             <div>
               <Calculator size={28} className="mx-auto text-gold-deep" aria-hidden="true" />
               <p className="mt-3 font-semibold text-navy">No entries yet</p>
-              <p className="mt-1 text-sm text-muted">Add expenses to see your monthly breakdown.</p>
+              <p className="mx-auto mt-1 max-w-52 text-sm leading-5 text-muted">Add one expense to see the breakdown. It updates as you go, so you do not need every category.</p>
+            </div>
             </div>
           </section>
         )}
       </div>
 
       {/* Methodology note */}
-      <section className="rounded-[var(--radius-card)] border border-line bg-canvas p-5 text-sm text-muted" aria-label="Methodology">
-        <p className="font-semibold text-navy">Research notes</p>
-        <p className="mt-1 leading-6">
-          All figures are your own research estimates. Nexit does not preload any sample budget, average cost, or typical-spend assumption. Verify costs directly through official sources and local contacts before making financial decisions.
-        </p>
-      </section>
+      <p className="text-xs text-muted" aria-label="Methodology">
+        Figures are your own planning estimates. Nexit does not verify them and they are not official cost data.
+      </p>
 
       {/* Status message */}
       {message && (
