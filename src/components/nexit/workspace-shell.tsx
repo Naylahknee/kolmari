@@ -14,7 +14,9 @@ export function WorkspaceShell({
   wizardStatus: WizardStatus
 }) {
   const pathname = usePathname()
-  const usesCountryTemplate = /^\/nextinations\/[^/]+\/v2(?:\/|$)/.test(pathname)
+  const usesCountryTemplate =
+    pathname === '/nextinations/portugal' ||
+    pathname.startsWith('/nextinations/portugal/')
 
   if (usesCountryTemplate) return children
 
