@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 import type { WizardStatus } from '@/lib/profile'
+import { usesResearchPage } from '@/lib/countries'
 import { UnitsProvider } from '@/components/country-template/client/UnitsControl'
 import { TopBar } from '@/components/country-template/TopBar'
 import { Sidebar } from '@/components/country-template/Sidebar'
@@ -18,8 +19,13 @@ export function WorkspaceShell({
   useEffect(() => {
     if (window.innerWidth <= 900) document.body.classList.remove('rail-collapsed')
   }, [pathname])
+  // CountryTemplate pages (Portugal and any non-research country) bring their
+  // own chrome, so the shell passes them through. Discoverable research pages
+  // use the shared workspace chrome below so they keep the sidebar and their
+  // Tailwind layout renders correctly.
+  const v2Match = pathname.match(/^\/nextinations\/([^/]+)\/v2(?:\/|$)/)
   const usesCountryTemplate =
-    /^\/nextinations\/[^/]+\/v2(?:\/|$)/.test(pathname) ||
+    (v2Match ? !usesResearchPage(v2Match[1]) : false) ||
     pathname === '/nextinations/portugal' ||
     pathname.startsWith('/nextinations/portugal/')
 

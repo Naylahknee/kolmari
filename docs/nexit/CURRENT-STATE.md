@@ -761,3 +761,35 @@ without capital data fall back to the shape centre and the featured city.
 | Lint (`eslint` on changed files) | ✅ Pass |
 | Production build (`next build`) | ✅ Pass |
 | Visual check (headless Chromium, 12 countries) | ✅ Pins land on capitals, on-shape |
+
+## Country research pages use the shared workspace chrome (final)
+
+Superseding the `CountryResearchShell` note above: that bespoke shell has been
+removed. Discoverable country research pages now render through the same
+`NewWorkspaceChrome` path in `WorkspaceShell` that Dashboard, Pathways, and
+every other Tailwind workspace page use — the proven chrome that keeps the
+sidebar and renders the page's Tailwind layout correctly.
+
+`WorkspaceShell` previously bypassed its chrome for *all* `/nextinations/[slug]/v2`
+routes, assuming each page brought its own (true only for `CountryTemplate`
+pages such as Portugal). It now uses the shared `usesResearchPage(slug)` helper
+to pass through only genuine `CountryTemplate` routes and wrap research pages in
+the standard chrome. The v2 page renders `CountryResearchPage` bare again, as it
+did originally, so its layout is intact.
+
+| File | Change |
+|---|---|
+| `src/lib/countries.ts` | Add `usesResearchPage(slug)` — shared source of truth for which chrome wraps a country route |
+| `src/components/nexit/workspace-shell.tsx` | Pass through only CountryTemplate routes; wrap research pages in the shared workspace chrome |
+| `src/app/(app)/(workspace)/nextinations/[countrySlug]/v2/[section]/page.tsx` | Render `CountryResearchPage` without the removed shell |
+| `src/components/country-template/CountryResearchShell.tsx` | Removed |
+
+### Tests Run
+
+| Check | Result |
+|---|---|
+| TypeScript (`tsc --noEmit`) | ✅ Pass |
+| Lint (`eslint` on changed files) | ✅ Pass |
+| Production build (`next build`) | ✅ Pass |
+| Cloudflare worker build (`opennextjs-cloudflare build`) | ✅ Pass |
+| Route smoke test (`next start` + curl) | ✅ /nextinations/uruguay/v2/overview redirects to /login like /dashboard (no 500) |

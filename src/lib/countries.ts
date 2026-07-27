@@ -90,3 +90,11 @@ export const DISCOVERABLE_COUNTRIES: DiscoverableCountry[] = [
 export function getDiscoverableCountry(slug: string) {
   return DISCOVERABLE_COUNTRIES.find((country) => country.slug === slug) ?? null
 }
+
+/* A discoverable Nextination renders the lightweight CountryResearchPage inside
+   the shared workspace chrome — except Portugal, which uses the full
+   CountryTemplate with its own chrome. The page and the WorkspaceShell both
+   call this so they agree on which chrome wraps the route. */
+export function usesResearchPage(slug: string) {
+  return slug !== 'portugal' && getDiscoverableCountry(slug) !== null
+}
