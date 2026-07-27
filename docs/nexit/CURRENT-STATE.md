@@ -657,3 +657,13 @@ minimum feature size. Country cards no longer repeat continent hero artwork.
 - Country cards use flag images and country-specific boundary silhouettes.
 - Countries without verified detailed datasets display an explicit research
   starting point rather than copied Portugal content or invented facts.
+## Mobile workspace optimization
+
+At widths of 900px and below, the shared workspace navigation is now an
+off-canvas drawer instead of a narrow fixed rail that pushes the page off
+screen. The header menu button opens it, the backdrop and navigation links
+close it, and the page always retains the full viewport width.
+
+Country workspaces now stack the hero metrics, primary content, and right rail
+at phone widths. Tabs remain horizontally scrollable, card headings wrap, and
+mobile page padding is reduced without changing desktop layouts.

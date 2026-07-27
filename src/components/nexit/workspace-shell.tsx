@@ -1,6 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { useEffect } from 'react'
 import type { WizardStatus } from '@/lib/profile'
 import { UnitsProvider } from '@/components/country-template/client/UnitsControl'
 import { TopBar } from '@/components/country-template/TopBar'
@@ -14,6 +15,9 @@ export function WorkspaceShell({
   wizardStatus: WizardStatus
 }) {
   const pathname = usePathname()
+  useEffect(() => {
+    if (window.innerWidth <= 900) document.body.classList.remove('rail-collapsed')
+  }, [pathname])
   const usesCountryTemplate =
     /^\/nextinations\/[^/]+\/v2(?:\/|$)/.test(pathname) ||
     pathname === '/nextinations/portugal' ||
@@ -32,7 +36,8 @@ function NewWorkspaceChrome({ children }: { children: React.ReactNode }) {
       <div>
         <TopBar onToggleRail={toggleRail} />
         <div className="shell">
-          <Sidebar onToggleRail={toggleRail} />
+          <button type="button" className="rail-backdrop" onClick={toggleRail} aria-label="Close navigation" />
+          <Sidebar />
           <main className="main workspace-main">{children}</main>
         </div>
       </div>

@@ -84,6 +84,7 @@
 .icon-btn:hover { background: var(--color-canvas); color: var(--color-navy); }
 
 .shell { display: flex; align-items: flex-start; }
+.rail-backdrop { display: none; }
 
 .rail {
   position: sticky;
@@ -168,8 +169,72 @@ body.rail-collapsed .sb-item .ic {
 }
 
 @media (max-width: 900px) {
-  .rail { position: fixed; left: 0; z-index: 50; box-shadow: var(--shadow-shell); }
-  body.rail-collapsed .rail { flex-basis: 62px; width: 62px; }
-  .main.workspace-main { padding: 14px; margin-left: 256px; }
-  body.rail-collapsed .main.workspace-main { margin-left: 62px; }
+  body.rail-collapsed { overflow: hidden; }
+  .topbar { grid-template-columns: 56px minmax(0, 1fr); }
+  .topbar-zone-a { padding: 0; justify-content: center; border-right: 1px solid var(--color-line); }
+  .topbar-zone-a .mark { display: none; }
+  .topbar-zone-a .zone-a-actions { display: flex; }
+  .topbar-zone-a .zone-a-actions .icon-btn:first-child { display: none; }
+  .topbar-zone-b { padding: 0 10px 0 12px; }
+  .topbar-zone-b .page-section,
+  .topbar-zone-b .header-pill,
+  .topbar-zone-b .header-ghost,
+  .topbar-zone-b .units { display: none; }
+  .topbar-zone-b .tb-right { gap: 2px; }
+  .topbar-zone-b .tb-right .icon-btn:nth-last-child(2) { display: none; }
+
+  body.rail-collapsed .topbar { grid-template-columns: 56px minmax(0, 1fr); }
+  body.rail-collapsed .topbar-zone-a { padding: 0; }
+  body.rail-collapsed .zone-a-actions { display: flex; }
+
+  .rail,
+  body.rail-collapsed .rail {
+    position: fixed;
+    inset: 56px auto 0 0;
+    z-index: 80;
+    width: min(86vw, 300px);
+    height: calc(100dvh - 56px);
+    padding: 16px 12px 32px;
+    transform: translateX(-105%);
+    transition: transform .2s ease;
+    box-shadow: var(--shadow-shell);
+  }
+  body.rail-collapsed .rail { transform: translateX(0); }
+  body.rail-collapsed .rail-title { display: block; }
+  body.rail-collapsed .sb-label,
+  body.rail-collapsed .sb-item .lbl,
+  body.rail-collapsed .sb-item .chev,
+  body.rail-collapsed .sb-tree,
+  body.rail-collapsed .sb-div,
+  body.rail-collapsed .readiness { display: revert; }
+  body.rail-collapsed .sb-item {
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    min-height: 0;
+    justify-content: flex-start;
+    gap: 11px;
+    padding: 9px 10px;
+  }
+  body.rail-collapsed .rail-backdrop {
+    display: block;
+    position: fixed;
+    inset: 56px 0 0;
+    z-index: 70;
+    background: rgba(9, 20, 44, .58);
+  }
+  .main.workspace-main,
+  body.rail-collapsed .main.workspace-main {
+    width: 100%;
+    margin-left: 0;
+    padding: 14px;
+  }
+}
+
+@media (max-width: 560px) {
+  .topbar-zone-b .page-title-button svg,
+  .topbar-zone-b .tb-right .icon-btn:last-child { display: none; }
+  .main.workspace-main,
+  body.rail-collapsed .main.workspace-main { padding: 12px; }
+  .main.workspace-main > * { min-width: 0; max-width: 100%; }
 }

@@ -4,14 +4,18 @@ import { usePathname } from 'next/navigation'
 import { toggleTree } from './client/behaviours'
 
 /* Converted from the approved index.html mockup. Markup verbatim. */
-export function Sidebar(_: { onToggleRail: () => void }) {
+export function Sidebar() {
   const pathname = usePathname()
   const active = (route: string) => pathname === route || pathname.startsWith(`${route}/`)
   const isCountry = pathname.startsWith('/nextinations/')
 
   return (
     <aside className="rail">
-        <nav aria-label="Main">
+        <nav aria-label="Main" onClick={(event) => {
+          if (window.innerWidth <= 900 && (event.target as HTMLElement).closest('a')) {
+            document.body.classList.remove('rail-collapsed')
+          }
+        }}>
           <p className="sb-label">Discover</p>
           <Link className={`sb-item${active('/dashboard') ? ' active' : ''}`} href="/dashboard"><svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></svg><span className="lbl">Dashboard</span></Link>
           <Link className={`sb-item${active('/nexitnation') ? ' active' : ''}`} href="/nexitnation"><svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18" /></svg><span className="lbl">Nexit World</span></Link>

@@ -1,5 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import { UnitsProvider } from './client/UnitsControl'
 import { TopBar } from './TopBar'
 import { Sidebar } from './Sidebar'
@@ -14,13 +15,17 @@ export function CountryTemplate({ slug, active, fromQuiz = false, children }:
   const router = useRouter()
   const go = (s: string) => router.push(`/nextinations/${slug}/v2/${s}`)
   const toggleRail = () => document.body.classList.toggle('rail-collapsed')
+  useEffect(() => {
+    if (window.innerWidth <= 900) document.body.classList.remove('rail-collapsed')
+  }, [])
 
   return (
     <UnitsProvider>
       <div className="country-template-root">
         <TopBar onToggleRail={toggleRail} />
         <div className="shell">
-          <Sidebar onToggleRail={toggleRail} />
+          <button type="button" className="rail-backdrop" onClick={toggleRail} aria-label="Close navigation" />
+          <Sidebar />
           <main className="main">
             <CountryHero go={go} fromQuiz={fromQuiz} />
             <TabBar slug={slug} active={active} />
