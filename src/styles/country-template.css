@@ -33,7 +33,7 @@
 
 /* ══ topbar ══ */
 .country-template-root .topbar{position:sticky;top:0;z-index:60;height:56px;display:flex;align-items:center;gap:14px;padding:0 18px;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.country-template-root .mark{display:inline-flex;align-items:center;gap:9px;font-family:"Playfair Display",Georgia,serif;
+.country-template-root .mark{display:inline-flex;align-items:center;gap:9px;font-family:var(--font-sans);
   font-size:23px;font-weight:700;letter-spacing:-.01em;line-height:1}
 .country-template-root .mark-bf{display:block;width:26px;height:26px;object-fit:contain;flex:0 0 auto}
 .country-template-root .mark:hover .mark-bf{transform:scale(1.06);transition:transform .16s}
@@ -70,7 +70,7 @@ body.rail-collapsed .country-template-root .rail .icon-btn svg{transform:scaleX(
 .country-template-root .scrim{position:absolute;inset:0;z-index:-1;background:linear-gradient(to top,rgba(13,27,57,.94) 0%,rgba(13,27,57,.74) 38%,rgba(13,27,57,.2) 78%,rgba(13,27,57,.34) 100%)}
 .country-template-root .hero-body{padding:28px 30px 0;color:#fff;max-width:840px}
 .country-template-root .hero-eyebrow{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--gold);margin-bottom:10px}
-.country-template-root .hero-name{font-family:"Playfair Display",Georgia,serif;font-weight:700;font-size:clamp(38px,5vw,60px);line-height:1.04;letter-spacing:-.015em;display:flex;align-items:center;gap:15px}
+.country-template-root .hero-name{font-family:var(--font-sans);font-weight:700;font-size:clamp(38px,5vw,60px);line-height:1.04;letter-spacing:-.015em;display:flex;align-items:center;gap:15px}
 .country-template-root .hero-blurb{margin-top:12px;font-size:14.5px;line-height:1.62;color:rgba(255,255,255,.84);max-width:640px}
 .country-template-root .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
 .country-template-root .badge-h{display:inline-flex;align-items:center;gap:7px;padding:6px 12px 6px 9px;border-radius:var(--r-pill);font-size:12px;font-weight:600;background:rgba(13,27,57,.5);border:1px solid rgba(255,255,255,.2);color:#fff;backdrop-filter:blur(6px)}
