@@ -43,7 +43,7 @@
 }
 
 .mark-bf {
-  display: block;
+  display: none;
   width: 26px;
   height: 26px;
   object-fit: contain;
@@ -103,7 +103,7 @@ body.rail-collapsed .topbar-zone-a { padding: 0 16px; }
 body.rail-collapsed .mark-word,
 body.rail-collapsed .zone-a-actions { display: none; }
 body.rail-collapsed .mark { width: 32px; justify-content: center; }
-body.rail-collapsed .mark-bf { width: 27px; height: 27px; }
+body.rail-collapsed .mark-bf { display: block; width: 27px; height: 27px; }
 body.rail-collapsed .rail { flex-basis: 64px; width: 64px; padding: 18px 9px 40px; }
 body.rail-collapsed .rail-title { display: none; }
 .rail-head { display: flex; align-items: center; justify-content: space-between; padding: 0 6px; margin-bottom: 2px; }

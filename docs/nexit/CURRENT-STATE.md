@@ -1,5 +1,10 @@
 # Nexit Current Implementation State
 
+## 2026-07-26 — Sidebar brand mark visibility
+
+- The butterfly favicon is hidden while the workspace sidebar is expanded.
+- The butterfly favicon appears in the sidebar-aligned header zone only when the sidebar is collapsed.
+
 ## 2026-07-26 — Nexit Pathways directory redesign
 
 - `PathwaysResults` accepts evaluated Pathway data as a prop from the server-rendered route.

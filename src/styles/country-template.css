@@ -35,7 +35,7 @@
 .country-template-root .topbar{position:sticky;top:0;z-index:60;height:56px;display:flex;align-items:center;gap:14px;padding:0 18px;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
 .country-template-root .mark{display:inline-flex;align-items:center;gap:9px;font-family:var(--font-sans);
   font-size:23px;font-weight:700;letter-spacing:-.01em;line-height:1}
-.country-template-root .mark-bf{display:block;width:26px;height:26px;object-fit:contain;flex:0 0 auto}
+.country-template-root .mark-bf{display:none;width:26px;height:26px;object-fit:contain;flex:0 0 auto}
 .country-template-root .mark:hover .mark-bf{transform:scale(1.06);transition:transform .16s}
 .country-template-root .mark b{color:var(--gold-deep);font-weight:700}
 .country-template-root .tb-sep{width:1px;height:20px;background:var(--line)}
@@ -705,7 +705,7 @@ body.rail-collapsed .country-template-root .topbar{grid-template-columns:64px mi
 body.rail-collapsed .country-template-root .topbar-zone-a{padding:0 16px}
 body.rail-collapsed .country-template-root .mark-word,body.rail-collapsed .country-template-root .zone-a-actions{display:none}
 body.rail-collapsed .country-template-root .mark{width:32px;justify-content:center}
-body.rail-collapsed .country-template-root .mark-bf{width:27px;height:27px}
+body.rail-collapsed .country-template-root .mark-bf{display:block;width:27px;height:27px}
 body.rail-collapsed .country-template-root .rail{flex-basis:64px;width:64px}
 
 @media (max-width:1240px){
