@@ -7,17 +7,17 @@ import { absoluteUrl, getSiteUrl } from '@/lib/site'
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] })
 
-const title = 'Nexit | Build your Nexit Plan'
-const description = 'Compare Nextinations, review Pathways, build your budget, and turn relocation research into a practical Nexit Plan.'
+const title = 'Kolmari | Build Your Relocation Plan'
+const description = 'Compare destinations, review pathways, build your budget, and turn relocation research into a practical Kolmari Plan.'
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
-  applicationName: 'Nexit',
+  applicationName: 'Kolmari',
   title,
   description,
   icons: {
     icon: [
-      { url: '/brand/faviconNexit.svg', type: 'image/svg+xml' },
+      { url: '/brand/faviconKolmari.svg', type: 'image/svg+xml' },
       { url: '/brand/favicon-32.png', type: 'image/png', sizes: '32x32' },
       { url: '/brand/favicon-16.png', type: 'image/png', sizes: '16x16' },
       { url: '/brand/favicon.ico' },
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     title,
     description,
     type: 'website',
-    images: [{ url: absoluteUrl('/og.png'), width: 1536, height: 1024, alt: 'Nexit — Build your Nexit Plan' }],
+    images: [{ url: absoluteUrl('/og.png'), width: 1536, height: 1024, alt: 'Kolmari — Build Your Relocation Plan' }],
   },
   twitter: { card: 'summary_large_image', title, description, images: [absoluteUrl('/og.png')] },
 }
