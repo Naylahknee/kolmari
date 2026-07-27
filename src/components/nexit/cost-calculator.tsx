@@ -23,6 +23,48 @@ const BUDGET_LABELS: Record<keyof Budget, string> = {
   other: 'Other',
 }
 
+function parseMoney(value: string, maximum: number) {
+  if (value === '') return null
+  const amount = Number(value)
+  if (!Number.isFinite(amount)) return null
+  return Math.min(maximum, Math.max(0, amount))
+}
+
+function MoneyInput({
+  label,
+  value,
+  maximum,
+  step = 1,
+  prominent = false,
+  onChange,
+}: {
+  label: string
+  value: number | null
+  maximum: number
+  step?: number
+  prominent?: boolean
+  onChange: (value: number | null) => void
+}) {
+  return (
+    <span className="relative block">
+      <span className="pointer-events-none absolute inset-y-0 left-4 z-10 flex items-center font-semibold text-muted" aria-hidden="true">$</span>
+      <input
+        aria-label={label}
+        className={`field placeholder:text-muted-soft ${prominent ? '!h-12 text-xl font-bold' : '!h-11'}`}
+        style={{ paddingLeft: '2.25rem' }}
+        type="number"
+        inputMode="decimal"
+        min="0"
+        max={maximum}
+        step={step}
+        value={value ?? ''}
+        placeholder="0"
+        onChange={(event) => onChange(parseMoney(event.target.value, maximum))}
+      />
+    </span>
+  )
+}
+
 export function CostCalculator({
   income,
   profileComplete,
@@ -138,18 +180,14 @@ export function CostCalculator({
         {/* Income */}
         <section className="min-h-36 border-b border-line p-5 sm:border-r xl:border-b-0" aria-labelledby="income-heading">
           <h2 id="income-heading" className="text-xs font-bold uppercase tracking-widest text-muted">Monthly income</h2>
-          <div className="relative mt-3">
-            <span className="absolute inset-y-0 left-4 flex items-center text-muted" aria-hidden="true">$</span>
-            <input
-              aria-label="Monthly income"
-              className="field !h-12 pl-8 text-xl font-bold"
-              type="number"
-              min="0"
-              max="1000000"
-              step="100"
-              value={monthlyIncome ?? ''}
-              placeholder="Not entered"
-              onChange={(e) => setMonthlyIncome(e.target.value ? Math.max(0, Number(e.target.value)) : null)}
+          <div className="mt-3">
+            <MoneyInput
+              label="Monthly income"
+              value={monthlyIncome}
+              maximum={1_000_000}
+              step={100}
+              prominent
+              onChange={setMonthlyIncome}
             />
           </div>
           {profileComplete && (
@@ -215,19 +253,12 @@ export function CostCalculator({
                     />
                   </span>
                 </span>
-                <span className="relative block">
-                  <span className="pointer-events-none absolute inset-y-0 left-4 z-10 flex items-center text-muted" aria-hidden="true">$</span>
-                  <input
-                    aria-label={`${key} expense`}
-                    className="field !h-11 !pl-8"
-                    type="number"
-                    min="0"
-                    max="100000"
-                    value={budget[key] ?? ''}
-                    placeholder="Not entered"
-                    onChange={(e) => setBudget({ ...budget, [key]: e.target.value ? Math.max(0, Number(e.target.value)) : null })}
-                  />
-                </span>
+                <MoneyInput
+                  label={`${BUDGET_LABELS[key]} expense`}
+                  value={budget[key]}
+                  maximum={100_000}
+                  onChange={(value) => setBudget((current) => ({ ...current, [key]: value }))}
+                />
               </label>
             ))}
           </div>
