@@ -42,7 +42,7 @@ export function TopBar({ onToggleRail }: { onToggleRail: () => void }) {
             }
           }}
         >
-          <img className="mark-bf" src="/icon.png" alt="" width="26" height="26" />
+          <img className="mark-bf" src="/brand/favicon-48.png" alt="" width="26" height="26" />
           <span className="mark-word">ne<b>x</b>it</span>
         </Link>
         <div className="zone-a-actions">
