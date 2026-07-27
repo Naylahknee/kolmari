@@ -60,7 +60,15 @@ body.rail-collapsed .country-template-root .rail .icon-btn svg{transform:scaleX(
 
 .country-template-root .main{flex:1;min-width:0;padding:18px 20px 60px;max-width:1500px}
 .country-template-root .workspace-main{max-width:none;width:100%}
-.country-template-root .workspace-main img{border-color:transparent}
+.country-template-root .workspace-main img{
+  border:0!important;
+  outline:0!important;
+}
+.country-template-root .hero-shape,
+.country-template-root .hero-shape *{
+  border:0!important;
+  outline:0!important;
+}
 
 /* ══ hero ══ */
 .country-template-root .hero{position:relative;border-radius:var(--r-card);overflow:hidden;min-height:392px;display:flex;flex-direction:column;justify-content:flex-end;box-shadow:var(--shadow-shell);isolation:isolate;background:var(--navy-deep)}
@@ -636,7 +644,7 @@ body.rail-collapsed .country-template-root .sb-item .ic{width:18px;height:18px;m
   height:124%;width:auto;pointer-events:none;overflow:visible}
 .country-template-root .hero-shape .outline{opacity:.085}
 .country-template-root .hero-shape .fill{fill:#fff}
-.country-template-root .hero-shape .edge{display:none}
+.country-template-root .hero-shape .edge{display:none!important;stroke:none!important}
 /* capital marker: owner-supplied butterfly, no geometry redrawn. Sits at full
    strength over the faint outline so the capital reads as the lit point. */
 .country-template-root .cap-glow{fill:url(#capGlow)}
