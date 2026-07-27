@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Install the Nexit country-page template into this repo.
+"""Install the Kolmari country-page template into this repo.
 
-Run from the root of your nexit checkout, the folder containing package.json:
+Run from the root of your Kolmari checkout, the folder containing package.json:
 
-    python3 install-nexit-template.py
+    python3 install-Kolmari-template.py
 
 Writes 26 files under src/. Overwrites exactly one existing file,
 src/app/(app)/(workspace)/nextinations/page.tsx, and backs it up first.
@@ -17,7 +17,7 @@ OVERWRITES = "src/app/(app)/(workspace)/nextinations/page.tsx"
 
 def main():
     if not os.path.exists("package.json"):
-        sys.exit("Run this from your nexit repo root, the folder with package.json in it.")
+        sys.exit("Run this from your Kolmari repo root, the folder with package.json in it.")
     if not os.path.isdir("src"):
         sys.exit("No src/ directory here. Are you in the right folder?")
 
@@ -30,10 +30,10 @@ def main():
 
     for path, b64 in files.items():
         if path in ("README.md", "SWITCH.diff"):
-            out = "nexit-template-" + path
+            out = "Kolmari-template-" + path
         else:
             out = path
-        if os.path.exists(out) and out != OVERWRITES and not out.startswith("nexit-template-"):
+        if os.path.exists(out) and out != OVERWRITES and not out.startswith("Kolmari-template-"):
             skipped.append(out)
             continue
         os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
