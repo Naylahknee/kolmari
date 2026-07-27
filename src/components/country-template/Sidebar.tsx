@@ -1,32 +1,9 @@
 'use client'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import { toggleTree } from './client/behaviours'
-
-const PORTUGAL_SECTIONS = [
-  { label: 'Overview', target: 'overview' },
-  { label: 'Why This Matches You', target: 'overview' },
-  { label: 'Economic Profile', target: 'tax-money' },
-  { label: 'Cost of Living', target: 'cost-housing' },
-  { label: 'Nexit Pathways', target: 'move-there' },
-  { label: 'Healthcare', target: 'healthcare' },
-  { label: 'Greenbook', target: 'lifestyle-community' },
-  { label: 'Housing', target: 'cost-housing' },
-  { label: 'Legal & Taxes', target: 'tax-money' },
-  { label: 'Employment', target: 'work-study' },
-  { label: 'Transportation', target: 'lifestyle-community' },
-  { label: 'Daily Life', target: 'lifestyle-community' },
-  { label: 'Education', target: 'family-schools' },
-  { label: 'Family & Pets', target: 'family-schools' },
-  { label: 'Resources', target: 'overview' },
-  { label: 'Compare', target: 'overview' },
-] as const
 
 /* Converted from the approved index.html mockup. Markup verbatim. */
 export function Sidebar({ onToggleRail }: { onToggleRail: () => void }) {
-  const pathname = usePathname()
-  const activeSection = pathname.split('/').at(-1) ?? 'overview'
-
   return (
     <aside className="rail">
         <div className="rail-head">
@@ -43,18 +20,6 @@ export function Sidebar({ onToggleRail }: { onToggleRail: () => void }) {
           <button className="sb-item active" aria-expanded="true" onClick={(e) => toggleTree(e.currentTarget)}><svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M15.5 8.5l-2 5-5 2 2-5z" /></svg><span className="lbl">My Nextinations</span><svg className="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 9l6 6 6-6" /></svg></button>
           <div className="sb-tree">
             <Link className="sb-country active" href="/nextinations/portugal/v2/overview" aria-current="page"><span className="sb-cc">PT</span><span className="nm">Portugal</span><span className="sc">87%</span></Link>
-            <div className="sb-sections" aria-label="Portugal sections">
-              {PORTUGAL_SECTIONS.map(({ label, target }) => (
-                <Link
-                  key={label}
-                  href={`/nextinations/portugal/v2/${target}`}
-                  className={`sb-section${activeSection === target ? ' active' : ''}`}
-                  aria-current={activeSection === target ? 'page' : undefined}
-                >
-                  {label}
-                </Link>
-              ))}
-            </div>
             <Link className="sb-country" href="/nextinations/spain/v2/overview" title="Open the Spain page"><span className="sb-cc">ES</span><span className="nm">Spain</span><span className="sc">84%</span></Link>
             <Link className="sb-country" href="/nextinations/uruguay/v2/overview" title="Open the Uruguay page"><span className="sb-cc">UY</span><span className="nm">Uruguay</span><span className="sc">81%</span></Link>
             <Link className="sb-country" href="/nextinations/costa-rica/v2/overview" title="Open the Costa Rica page"><span className="sb-cc">CR</span><span className="nm">Costa Rica</span><span className="sc">76%</span></Link>

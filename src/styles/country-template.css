@@ -552,10 +552,6 @@ body.rail-collapsed .rail .icon-btn svg{transform:scaleX(-1)}
 .sb-country .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sb-country .sc{font-size:10.5px;opacity:.6;flex:0 0 auto}
 .sb-country.active .sc{opacity:.85}
-.sb-sections{margin:1px 0 7px 25px;padding-left:9px;border-left:1px solid rgba(255,255,255,.1)}
-.sb-section{display:block;padding:4px 7px;border-radius:var(--r-row);color:#7a91b0;font-size:11px;font-weight:500;line-height:1.35}
-.sb-section:hover{background:rgba(255,255,255,.05);color:#fff}
-.sb-section.active{background:rgba(243,197,22,.09);color:var(--gold);font-weight:700}
 .sb-div{height:1px;background:rgba(255,255,255,.1);margin:16px 4px 4px}
 .readiness{margin-top:12px;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.05);border-radius:var(--r-tile);padding:14px 14px 13px;text-align:center}
 .readiness .rl{font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#9fb0cc}
@@ -637,7 +633,7 @@ input[type="range"]:focus-visible{outline:2px solid var(--gold-deep);outline-off
   height:124%;width:auto;pointer-events:none;overflow:visible}
 .hero-shape .outline{opacity:.085}
 .hero-shape .fill{fill:#fff}
-.hero-shape .edge{fill:none;stroke:#fff;stroke-width:2.5;stroke-linejoin:round;opacity:.55}
+.hero-shape .edge{display:none}
 /* capital marker: owner-supplied butterfly, no geometry redrawn. Sits at full
    strength over the faint outline so the capital reads as the lit point. */
 .cap-glow{fill:url(#capGlow)}
