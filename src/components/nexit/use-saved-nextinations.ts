@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react'
 import { COUNTRIES } from '@/lib/countries'
 
-const STORAGE_KEY = 'nexit:saved-nextinations'
-const CHANGED_EVENT = 'nexit:saved-nextinations-changed'
+const STORAGE_KEY = 'kolmari:saved-destinations'
+const CHANGED_EVENT = 'kolmari:saved-destinations-changed'
 
 function readSaved(): string[] {
   try {
@@ -16,10 +16,10 @@ function readSaved(): string[] {
 }
 
 /**
- * Reactive hook that returns the list of saved Nextination slugs and the
+ * Reactive hook that returns the list of saved Destination slugs and the
  * matching country objects. Updates whenever the saved list changes in any tab.
  */
-export function useSavedNextinations() {
+export function useSavedDestinations() {
   const [slugs, setSlugs] = useState<string[]>([])
 
   useEffect(() => {
