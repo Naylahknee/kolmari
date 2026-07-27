@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
-import { REGION_MAP_LABELS, REGION_MAP_SHAPES, regionList, type RegionSlug } from '@/lib/nexitnation-data'
+import { REGION_MAP_LABELS, REGION_MAP_SHAPES, regionList, type RegionSlug } from '@/lib/Destination-data'
 
 type MapProfile = { complete: boolean; matches: Record<RegionSlug, number> | null }
 
@@ -13,10 +13,10 @@ const imagePosition: Record<RegionSlug, { x: number; y: number; width: number; h
   oceania: { x: 730, y: 245, width: 230, height: 200 },
 }
 
-export default function NexitnationMap({ profile }: { profile: MapProfile }) {
-  return <section className="overflow-hidden rounded-[24px] border border-white/10 bg-navy-deep p-3 shadow-card sm:p-5" aria-label="Illustrated Nexitnation region map">
-    <svg viewBox="0 0 1000 520" role="img" aria-labelledby="nexitnation-map-title nexitnation-map-desc" className="h-auto w-full">
-      <desc id="nexitnation-map-desc">Six selectable world regions filled with relocation imagery.</desc>
+export default function DestinationMap({ profile }: { profile: MapProfile }) {
+  return <section className="overflow-hidden rounded-[24px] border border-white/10 bg-navy-deep p-3 shadow-card sm:p-5" aria-label="Illustrated Destination region map">
+    <svg viewBox="0 0 1000 520" role="img" aria-labelledby="Destination-map-title Destination-map-desc" className="h-auto w-full">
+      <desc id="Destination-map-desc">Six selectable world regions filled with relocation imagery.</desc>
       <defs>{regionList.map((region) => <clipPath id={`clip-${region.slug}`} key={region.slug}><path d={REGION_MAP_SHAPES[region.slug]} /></clipPath>)}</defs>
       <rect width="1000" height="520" rx="20" fill="#0D1B39" />
       <g opacity=".18" stroke="#F3C516" strokeWidth="1"><path d="M60 260 Q500 15 940 260" fill="none" /><path d="M60 300 Q500 505 940 300" fill="none" /></g>
@@ -24,7 +24,7 @@ export default function NexitnationMap({ profile }: { profile: MapProfile }) {
         const image = imagePosition[region.slug]
         const [x, y] = REGION_MAP_LABELS[region.slug]
         const match = profile.matches?.[region.slug]
-        return <Link href={`/nexitnation/${region.slug}`} key={region.slug} aria-label={`${region.name}, ${region.countryCount} countries`} className="nexit-region">
+        return <Link href={`/Destination/${region.slug}`} key={region.slug} aria-label={`${region.name}, ${region.countryCount} countries`} className="nexit-region">
           <image href={region.image} {...image} preserveAspectRatio="xMidYMid slice" clipPath={`url(#clip-${region.slug})`} className="nexit-region-image" />
           <path d={REGION_MAP_SHAPES[region.slug]} fill="#0D1B39" fillOpacity=".48" stroke="#F3C516" strokeWidth="3" className="nexit-region-outline" />
           <text x={x} y={y} textAnchor="middle" fill="white" fontSize="18" fontWeight="800" className="pointer-events-none">{region.name}</text>
