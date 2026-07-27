@@ -1,4 +1,5 @@
 'use client'
+
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { UnitsControl } from './client/UnitsControl'
@@ -15,39 +16,77 @@ const pageNames: Record<string, string> = {
   '/profile-wizard': 'Profile',
 }
 
-/* Converted from the approved index.html mockup. Markup verbatim. */
+const titleCase = (value: string) =>
+  value.split('-').map((part) => part[0].toUpperCase() + part.slice(1)).join(' ')
+
 export function TopBar({ onToggleRail }: { onToggleRail: () => void }) {
   const pathname = usePathname()
   const countryMatch = pathname.match(/^\/nextinations\/([^/]+)\/v2(?:\/([^/]+))?/)
-  const country = countryMatch
-    ? countryMatch[1].split('-').map((part) => part[0].toUpperCase() + part.slice(1)).join(' ')
-    : null
-  const section = countryMatch?.[2]
-    ? countryMatch[2].split('-').map((part) => part[0].toUpperCase() + part.slice(1)).join(' ')
-    : 'Overview'
+  const country = countryMatch ? titleCase(countryMatch[1]) : null
+  const section = countryMatch?.[2] ? titleCase(countryMatch[2]) : 'Overview'
   const pageName =
     Object.entries(pageNames).find(([route]) => pathname === route || pathname.startsWith(`${route}/`))?.[1] ??
     'Nexit'
 
   return (
-    <div className="topbar">
-      <button className="icon-btn" onClick={onToggleRail} aria-label="Toggle matches"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><path d="M3 6h18M3 12h18M3 18h18" /></svg></button>
-      <Link className="mark" href="/dashboard" aria-label="Nexit home"><img className="mark-bf" src="data:image/png;base64,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" alt="" width="26" height="26" /><span>ne<b>x</b>it</span></Link>
-      <div className="tb-sep"></div>
-      <div className="crumb">
-        {country ? (
-          <>My Nextinations <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="12" height="12"><path d="M9 18l6-6-6-6" /></svg> <b>{country}</b> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="12" height="12"><path d="M9 18l6-6-6-6" /></svg> <span id="crumbSection">{section}</span></>
-        ) : (
-          <b>{pageName}</b>
-        )}
-      </div>
-      {country && (
-        <div className="tb-right">
-          <UnitsControl />
-          <button className="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="15" height="15"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" /></svg> Compare</button>
-          <button className="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="15" height="15"><path d="M20.8 5.6a5.5 5.5 0 00-7.8 0L12 6.6l-1-1a5.5 5.5 0 00-7.8 7.8l8.8 8.8 8.8-8.8a5.5 5.5 0 000-7.8z" /></svg> Save</button>
+    <header className="topbar">
+      <div className="topbar-zone-a">
+        <Link
+          className="mark"
+          href="/dashboard"
+          aria-label="Nexit home"
+          onClick={(event) => {
+            if (document.body.classList.contains('rail-collapsed')) {
+              event.preventDefault()
+              onToggleRail()
+            }
+          }}
+        >
+          <img className="mark-bf" src="/icon.png" alt="" width="26" height="26" />
+          <span className="mark-word">ne<b>x</b>it</span>
+        </Link>
+        <div className="zone-a-actions">
+          <button className="icon-btn" type="button" aria-label="Search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
+          </button>
+          <button className="icon-btn" type="button" onClick={onToggleRail} aria-label="Toggle sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M9 4v16" /></svg>
+          </button>
         </div>
-      )}
-    </div>
+      </div>
+
+      <div className="topbar-zone-b">
+        <button className="page-title-button" type="button">
+          <span>{country ?? pageName}</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M6 9l6 6 6-6" /></svg>
+          {country && <span className="page-section">{section}</span>}
+        </button>
+
+        <div className="tb-right">
+          {country && <UnitsControl />}
+          {country && (
+            <button className="header-pill" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" /></svg>
+              Compare
+            </button>
+          )}
+          {country && (
+            <button className="header-ghost" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M20.8 5.6a5.5 5.5 0 00-7.8 0L12 6.6l-1-1a5.5 5.5 0 00-7.8 7.8l8.8 8.8 8.8-8.8a5.5 5.5 0 000-7.8z" /></svg>
+              Save
+            </button>
+          )}
+          <button className="icon-btn" type="button" aria-label="Notifications">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="17" height="17"><path d="M18 8a6 6 0 00-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></svg>
+          </button>
+          <button className="icon-btn" type="button" aria-label="Help">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="17" height="17"><circle cx="12" cy="12" r="9" /><path d="M9.5 9a2.7 2.7 0 115 1.4c-.8 1.1-2.5 1.3-2.5 3.1M12 17h.01" /></svg>
+          </button>
+          <button className="icon-btn" type="button" aria-label="More options">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="17" height="17"><circle cx="5" cy="12" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="19" cy="12" r="1.5" /></svg>
+          </button>
+        </div>
+      </div>
+    </header>
   )
 }

@@ -4,18 +4,13 @@ import { usePathname } from 'next/navigation'
 import { toggleTree } from './client/behaviours'
 
 /* Converted from the approved index.html mockup. Markup verbatim. */
-export function Sidebar({ onToggleRail }: { onToggleRail: () => void }) {
+export function Sidebar(_: { onToggleRail: () => void }) {
   const pathname = usePathname()
   const active = (route: string) => pathname === route || pathname.startsWith(`${route}/`)
   const isCountry = pathname.startsWith('/nextinations/')
 
   return (
     <aside className="rail">
-        <div className="rail-head">
-          <span className="rail-title">Navigation</span>
-          <button className="icon-btn" onClick={onToggleRail} aria-label="Collapse sidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M15 18l-6-6 6-6" /></svg></button>
-        </div>
-
         <nav aria-label="Main">
           <p className="sb-label">Discover</p>
           <Link className={`sb-item${active('/dashboard') ? ' active' : ''}`} href="/dashboard"><svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></svg><span className="lbl">Dashboard</span></Link>

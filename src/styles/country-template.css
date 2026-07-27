@@ -688,6 +688,25 @@ input[type="range"]:focus-visible{outline:2px solid var(--gold-deep);outline-off
   border:1.5px solid rgba(255,255,255,.55);box-shadow:0 3px 12px rgba(8,15,26,.45)}
 .flag.sm{height:15px;width:22px;border-radius:3px;border:1px solid rgba(255,255,255,.7);box-shadow:0 1px 3px rgba(8,15,26,.3)}
 
+/* Shared two-zone application header. These overrides keep the country page
+   aligned with the workspace chrome imported by the parent layout. */
+.topbar{display:grid;grid-template-columns:256px minmax(0,1fr);padding:0;gap:0}
+.topbar-zone-a,.topbar-zone-b{height:100%;display:flex;align-items:center;justify-content:space-between}
+.topbar-zone-a{padding:0 14px 0 16px;border-right:1px solid var(--line)}
+.topbar-zone-b{min-width:0;padding:0 20px 0 28px}
+.zone-a-actions{display:flex;align-items:center;gap:6px}
+.page-title-button{display:inline-flex;align-items:center;gap:6px;min-width:0;font-size:14px;font-weight:700;color:var(--navy)}
+.page-section{color:var(--muted);font-size:12px;font-weight:500;margin-left:4px}
+.header-pill,.header-ghost{height:32px;display:inline-flex;align-items:center;gap:6px;padding:0 13px;border-radius:9px;font-size:13px;font-weight:650}
+.header-pill{border:1px solid var(--line);background:#fff}
+.header-pill:hover,.header-ghost:hover{background:var(--canvas)}
+body.rail-collapsed .topbar{grid-template-columns:64px minmax(0,1fr)}
+body.rail-collapsed .topbar-zone-a{padding:0 16px}
+body.rail-collapsed .mark-word,body.rail-collapsed .zone-a-actions{display:none}
+body.rail-collapsed .mark{width:32px;justify-content:center}
+body.rail-collapsed .mark-bf{width:27px;height:27px}
+body.rail-collapsed .rail{flex-basis:64px;width:64px}
+
 @media (max-width:1240px){
   .cols{grid-template-columns:1fr}
   .rightcol{position:static;flex-direction:row;flex-wrap:wrap}
