@@ -1,6 +1,6 @@
-CREATE TABLE IF NOT EXISTS nexit_plans (
+CREATE TABLE IF NOT EXISTS kolmari_plans (
   user_id INT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-  saved_nextination TEXT,
+  saved_destination TEXT,
   selected_pathway TEXT,
   target_move_date DATE,
   household_members INT CHECK (household_members BETWEEN 1 AND 20),
