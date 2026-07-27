@@ -1,34 +1,24 @@
-# Kolmari Route Migration Plan
+# Kolmari Route Migration
 
-## Current routes → future canonical Kolmari routes
+## Milestone 1 rule
 
-| Current route | Kolmari canonical | Status |
-|---|---|---|
-| `/nexitnation` | `/world` | Future phase |
-| `/nexitnation/[region]` | `/world/[region]` | Future phase |
-| `/nextinations/[slug]/[section]` | `/destinations/[slug]/[section]` | Future phase |
-| `/nexit-plan` | `/plan` | Future phase |
-| `/checklist` | `/flutter` | Future phase |
-| `/community` | `/klub` | Future phase |
-| `/saved` | `/destinations` | Future phase |
-| `/countries` | Redirects to `/nexitnation?view=countries` | Active |
-| `/visa-wizard` | Redirects to `/profile-wizard` | Active |
-| `/onboarding` | Redirects to `/welcome` | Active |
+Do not rename or remove existing routes. The application shell may display Kolmari terminology while existing bookmarks, authentication continuation paths, and internal links continue to resolve.
 
-## Redirects to add (route migration phase)
+## Current routes retained temporarily
 
-```ts
-// Future redirects (do not add until page migration is verified)
-'/nexitnation' → '/world'
-'/nexitnation/[region]' → '/world/[region]'
-'/nexit-plan' → '/plan'
-'/checklist' → '/flutter'
-'/community' → '/klub'
-```
+| Current route | Current Kolmari label | Future canonical route |
+| --- | --- | --- |
+| `/nexitnation` | Your World | `/world` |
+| `/saved` and `/countries` | Destinations | `/destinations` |
+| `/nexit-plan` | My Plan | `/plan` |
+| `/checklist` | Flutter Mode | `/flutter` |
+| `/community` | Kolmari Klub | `/klub` |
+| `/nextinations/[slug]` | Destination page | `/destinations/[slug]` |
 
-## Rules
+## Future redirect requirements
 
-- Do not remove old routes before redirects are active and tested
-- Old routes must return 301 (permanent) or 308 (permanent, method-preserving) redirects
-- Test all deep-links before removing old routes
-- Flutter Mode gets its own route `/flutter` (new, not a redirect)
+Before any current route is removed, add and test redirects for static and dynamic paths. Validate authentication `next` parameters, saved links, email links, browser refreshes, and external shared URLs.
+
+## Data rule
+
+Route migration does not authorize renaming database fields, cookies, local-storage keys, analytics events, or API contracts. Those require explicit compatibility plans.

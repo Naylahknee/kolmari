@@ -1,54 +1,42 @@
-# Kolmari Rebrand Migration Strategy
+# Kolmari Rebrand Migration
 
-## Scope
+## Objective
 
-This document describes the controlled migration from Nexit presentation layer and terminology to Kolmari design and product language.
+Migrate the existing relocation application from Nexit to Kolmari without rebuilding or breaking working authentication, database access, API routes, route protection, scoring, saved-country behavior, Mapbox, Greenbook, or Cloudflare compatibility.
 
-This is NOT a rebuild. The existing application remains the functional source of truth.
+## Milestone 1 scope
 
-## Classification system
+- Centralize Kolmari brand and product copy.
+- Introduce a canonical Kolmari app-shell boundary while preserving the existing shell implementation.
+- Update the protected workspace shell and sidebar to approved Kolmari labels.
+- Keep existing routes and persistent data structures unchanged.
+- Inventory remaining legacy references before deeper renames.
 
-Before renaming any occurrence of legacy terminology, classify it as one of:
+## Approved public terminology
 
-| Category | Safe to rename on page conversion? |
-|---|---|
-| Public UI copy | Yes — migrate on each page conversion |
-| Route URL | No — use redirects in a separate phase |
-| Component filename | No — internal; rename in refactor phase |
-| TypeScript type or interface | No — rename in type migration phase |
-| Variable / constant name | No — internal; leave until refactor |
-| API route | No — must not break contracts |
-| Database field | No — requires formal DB migration |
-| Cookie name | No — requires compatibility layer |
-| localStorage key | Partial — read old, write new with shim |
-| Metadata / SEO | Yes — migrate with each page |
-| Test fixture | No — update alongside code |
-| Documentation | Yes — update as docs are migrated |
+| Purpose | Term |
+| --- | --- |
+| Product | Kolmari |
+| Community | Kolmari Klub |
+| Execution workspace | Flutter Mode |
+| Country exploration | Your World |
+| Saved countries | Destinations |
+| Visa and residence options | Pathways |
+| Relocation plan | My Plan |
+| Preparation level | Move Readiness |
+| Timeline | Move Timeline |
+| Progress system | Progress Tracker |
 
-## Migration sequence
+## Guardrails
 
-### Foundation (no page changes)
-- Brand config files
-- Kolmari lexicon
-- App shell labels
-- Root metadata
+1. Public copy may change before internal identifiers.
+2. Legacy routes remain active until redirects are implemented in a later milestone.
+3. Database fields, stored keys, API contracts, and authentication behavior are not renamed in Milestone 1.
+4. Compatibility exports may remain temporarily.
+5. HTML mockups are design references and must be converted into accessible React components rather than served directly.
 
-### Page-by-page (visual + copy only)
-- One page per branch section
-- Connect real data
-- Add honest empty states
+## Current compatibility decisions
 
-### Route migration (separate phase)
-- Add redirects before removing old routes
-- Test all redirects
-- Remove old routes only after verification
-
-### Database migration (separate phase)
-- Rename `nexit_plans` → `kolmari_plans`
-- Update all query references
-- Test thoroughly
-
-### Auth migration (separate phase)
-- Update cookie name `nexit_session` → `kolmari_session`
-- Update JWT issuer and audience
-- Invalidation plan for existing sessions
+- `/nexitnation`, `/nexit-plan`, `/checklist`, `/community`, `/saved`, and existing country URLs remain unchanged during Milestone 1.
+- `NEXIT_LEXICON` and `NEXIT_STORY` remain temporary aliases to the new Kolmari lexicon.
+- The existing `WorkspaceShell` remains the shell implementation behind `KolmariAppShell` until later domain-by-domain refactoring.

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
-import { FormEvent, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   Bell,
   BookOpen,
@@ -19,7 +19,6 @@ import {
   Menu,
   NotebookTabs,
   Route,
-  Search,
   Settings,
   Sparkles,
   UserRound,
@@ -27,24 +26,21 @@ import {
   Zap,
 } from 'lucide-react'
 import { Wordmark } from './wordmark'
-import { useSavedNextinations } from './use-saved-nextinations'
+import { countryWorkspaceSlug, useNextinationBoard } from '@/lib/nextination-board'
 import { countryFlag } from '@/lib/countries'
+import { regionList } from '@/lib/nexitnation-data'
 import type { WizardStatus } from '@/lib/profile'
 
-// ─── Sidebar structure (Kolmari) ─────────────────────────────────────────────
+// A saved-destination row for the sidebar tree. `slug` is the country-workspace
+// slug when one exists (collapsible sections), or null for a city/country with
+// no workspace yet (plain link to the board).
+type SavedItem = { id: string; name: string; code: string; slug: string | null }
 
-// EXPLORE group
-const NAV_EXPLORE = [
-  { href: '/nexitnation', label: 'Your World',   icon: Globe2 },
-  { href: '/saved',       label: 'Destinations', icon: Compass },
-] as const
+// ─── Sidebar structure ───────────────────────────────────────────────────────
 
-// PLAN group
-const NAV_PLAN = [
-  { href: '/pathways',        label: 'Pathways',      icon: Route },
-  { href: '/nexit-plan',      label: 'My Plan',       icon: NotebookTabs },
-  { href: '/flutter',         label: 'Flutter Mode',  icon: Zap },
-  { href: '/documents',       label: 'Documents',     icon: FileText },
+// DISCOVER group
+const NAV_DISCOVER = [
+  { href: '/dashboard',   label: 'Dashboard',   icon: LayoutDashboard },
 ] as const
 
 // CONNECT group
@@ -63,15 +59,6 @@ const NAV_BOTTOM = [
   { href: '/settings',       label: 'Settings', icon: Settings },
   { href: '/profile-wizard', label: 'Profile',  icon: UserRound },
 ] as const
-
-// Flat list for mobile bottom nav
-const ALL_NAV_ITEMS = [
-  { href: '/dashboard',   label: 'Dashboard',   icon: LayoutDashboard },
-  { href: '/nexitnation', label: 'Your World',  icon: Globe2 },
-  { href: '/pathways',    label: 'Pathways',    icon: Route },
-  { href: '/nexit-plan',  label: 'My Plan',     icon: NotebookTabs },
-]
-const MOBILE_PRIMARY_HREFS = ['/dashboard', '/nexitnation', '/pathways', '/nexit-plan']
 
 // Country section labels (matches tab IDs in tabs.ts)
 const COUNTRY_SECTIONS = [
@@ -240,16 +227,17 @@ function GroupLabel({ label, collapsed }: { label: string; collapsed: boolean })
 function SidebarNav({
   pathname,
   collapsed,
-  savedCountries,
+  savedItems,
 }: {
   pathname: string
   collapsed: boolean
-  savedCountries: { slug: string; name: string; code: string }[]
+  savedItems: SavedItem[]
 }) {
   const [openCountries, setOpenCountries] = useState<Set<string>>(() => {
     const initial = new Set<string>()
-    // Auto-open My Destinations group when user is on any /nextinations route
-    if (pathname.startsWith('/nextinations')) initial.add('__my-destinations__')
+    if (pathname.startsWith('/nexitnation/')) initial.add('__nexit-world__')
+    // Auto-open My Nextinations group when user is on any /nextinations route
+    if (pathname.startsWith('/nextinations')) initial.add('__my-nextinations__')
     // Auto-open the active country's section list
     const match = pathname.match(/^\/nextinations\/([^/]+)/)
     if (match) initial.add(match[1])
@@ -279,25 +267,71 @@ function SidebarNav({
           active={isActive(pathname, href)} collapsed={collapsed} />
       ))}
 
-      {/* Saved Destinations — collapsible country tree */}
-      {savedCountries.length > 0 && (
+      {collapsed ? (
+        <SidebarItem href="/nexitnation" label="Nexit World" icon={Globe2}
+          active={isActive(pathname, '/nexitnation')} collapsed />
+      ) : (
         <div>
-          <button
-            type="button"
-            onClick={() => toggleCountry('__my-destinations__')}
-            aria-expanded={openCountries.has('__my-destinations__')}
-            title={collapsed ? 'My Destinations' : undefined}
-            className={[
-              'flex w-full items-center gap-3 rounded-[var(--radius-sidebar-row)] px-3 py-2 text-sm font-medium transition-colors pl-6',
-              collapsed ? 'justify-center px-2' : '',
-              isActive(pathname, '/nextinations')
-                ? 'text-white'
-                : 'text-[#9fb0cc] hover:bg-white/5 hover:text-white',
-            ].join(' ')}
-          >
-            {!collapsed && (
-              <>
-                <span className="flex-1 text-left text-xs">My Destinations</span>
+          <div className={[
+            'flex items-center rounded-[var(--radius-sidebar-row)] transition-colors',
+            isActive(pathname, '/nexitnation')
+              ? 'bg-gold-soft/25 text-white font-semibold'
+              : 'text-[#9fb0cc] hover:bg-white/5 hover:text-white',
+          ].join(' ')}>
+            <Link href="/nexitnation" className="flex min-w-0 flex-1 items-center gap-3 px-3 py-2 text-sm font-medium">
+              <Globe2 size={16} aria-hidden="true" className="shrink-0" />
+              <span>Nexit World</span>
+            </Link>
+            <button
+              type="button"
+              onClick={() => toggleCountry('__nexit-world__')}
+              aria-label="Toggle continents"
+              aria-expanded={openCountries.has('__nexit-world__')}
+              className="mr-1 grid size-8 place-items-center rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold"
+            >
+              <ChevronDown size={13} className={`transition-transform ${openCountries.has('__nexit-world__') ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
+          {openCountries.has('__nexit-world__') && (
+            <ul className="ml-4 mt-0.5 space-y-0.5 border-l border-white/10 pl-3">
+              {regionList.map((region) => (
+                <li key={region.slug}>
+                  <Link
+                    href={`/nexitnation/${region.slug}`}
+                    className="block rounded-[var(--radius-sidebar-row)] px-2 py-1.5 text-xs font-medium text-[#7a91b0] transition-colors hover:bg-white/5 hover:text-white"
+                  >
+                    {region.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {/* ── MY NEXIT ──────────────────────────────────────────────────── */}
+      <GroupLabel label="My Nexit" collapsed={collapsed} />
+
+      {/* My Nextinations — parent row, collapsible, shows saved tree when open */}
+      <div>
+        <button
+          type="button"
+          onClick={() => toggleCountry('__my-nextinations__')}
+          aria-expanded={openCountries.has('__my-nextinations__')}
+          title={collapsed ? 'My Nextinations' : undefined}
+          className={[
+            'flex w-full items-center gap-3 rounded-[var(--radius-sidebar-row)] px-3 py-2 text-sm font-medium transition-colors',
+            collapsed ? 'justify-center px-2' : '',
+            myNextinationsActive
+              ? 'bg-gold-soft/25 text-white font-semibold'
+              : 'text-[#9fb0cc] hover:bg-white/5 hover:text-white',
+          ].join(' ')}
+        >
+          <Compass size={16} aria-hidden="true" className="shrink-0" />
+          {!collapsed && (
+            <>
+              <span className="flex-1 text-left">My Nextinations</span>
+              {savedItems.length > 0 && (
                 <ChevronDown
                   size={13}
                   aria-hidden="true"
@@ -324,37 +358,53 @@ function SidebarNav({
             </ul>
           )}
 
-          {collapsed && (
-            <ul className="mt-0.5 space-y-0.5">
-              {savedCountries.map((c) => (
-                <li key={c.slug}>
+        {/* Saved destinations — indented one level under My Nextinations */}
+        {!collapsed && savedItems.length > 0 && openCountries.has('__my-nextinations__') && (
+          <ul className="mt-0.5 border-l border-white/10 pl-3 ml-4 space-y-0.5">
+            {savedItems.map((item) =>
+              item.slug ? (
+                <CountryTreeItem
+                  key={item.id}
+                  countrySlug={item.slug}
+                  countryName={item.name}
+                  countryCode={item.code}
+                  open={openCountries.has(item.id)}
+                  onToggle={() => toggleCountry(item.id)}
+                  pathname={pathname}
+                  collapsed={false}
+                />
+              ) : (
+                <li key={item.id}>
                   <Link
-                    href={`/nextinations/${c.slug}/overview`}
-                    title={c.name}
-                    className="flex justify-center rounded-[var(--radius-sidebar-row)] px-2 py-2 text-base leading-none text-[#9fb0cc] hover:bg-white/5"
+                    href="/nexitnation"
+                    className="flex items-center gap-2.5 rounded-[var(--radius-sidebar-row)] px-3 py-2 text-sm font-medium text-[#9fb0cc] transition-colors hover:bg-white/5 hover:text-white"
                   >
-                    {countryFlag(c.code)}
+                    <span className="shrink-0 text-base leading-none" aria-hidden="true">{countryFlag(item.code)}</span>
+                    <span className="flex-1 truncate">{item.name}</span>
                   </Link>
                 </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
+              ),
+            )}
+          </ul>
+        )}
 
-      {/* ── PLAN ──────────────────────────────────────────────────────── */}
-      <GroupLabel label="Plan" collapsed={collapsed} />
-      {NAV_PLAN.map(({ href, label, icon }) => (
-        <SidebarItem key={href} href={href} label={label} icon={icon}
-          active={isActive(pathname, href)} collapsed={collapsed} />
-      ))}
-
-      {/* ── CONNECT ───────────────────────────────────────────────────── */}
-      <GroupLabel label="Connect" collapsed={collapsed} />
-      {NAV_CONNECT.map(({ href, label, icon }) => (
-        <SidebarItem key={href} href={href} label={label} icon={icon}
-          active={isActive(pathname, href)} collapsed={collapsed} />
-      ))}
+        {/* When sidebar is collapsed, show destination flags as icon rows */}
+        {collapsed && savedItems.length > 0 && (
+          <ul className="mt-0.5 space-y-0.5">
+            {savedItems.map((item) => (
+              <li key={item.id}>
+                <Link
+                  href={item.slug ? `/nextinations/${item.slug}/overview` : '/nexitnation'}
+                  title={item.name}
+                  className="flex justify-center rounded-[var(--radius-sidebar-row)] px-2 py-2 text-base leading-none text-[#9fb0cc] hover:bg-white/5"
+                >
+                  {countryFlag(item.code)}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       {/* ── TOOLS ─────────────────────────────────────────────────────── */}
       <GroupLabel label="Tools" collapsed={collapsed} />
@@ -403,16 +453,20 @@ export function AppShell({
   const profileComplete = wizardStatus === 'completed'
   const initials = email.slice(0, 1).toUpperCase()
 
-  const mobilePrimary = ALL_NAV_ITEMS.filter(({ href }) => MOBILE_PRIMARY_HREFS.includes(href))
-
   function toggleCollapse() {
     const next = !collapsed
     setCollapsed(next)
     writeCollapsed(next)
   }
 
-  // Saved nextinations for the sidebar tree
-  const { countries: savedCountries } = useSavedNextinations()
+  // Saved nextinations for the sidebar tree — sourced from the planning board.
+  const { items: boardItems } = useNextinationBoard()
+  const savedItems: SavedItem[] = boardItems.map((x) => ({
+    id: x.id,
+    name: x.name,
+    code: x.countryCode,
+    slug: countryWorkspaceSlug(x.country),
+  }))
 
   // Close menus on outside click
   useEffect(() => {
@@ -436,12 +490,6 @@ export function AppShell({
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [drawerOpen])
 
-  function onSearch(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    const q = String(new FormData(e.currentTarget).get('query') ?? '').trim()
-    router.push(q ? `/nexitnation?view=countries&q=${encodeURIComponent(q)}` : '/nexitnation?view=countries')
-  }
-
   async function logout() {
     await fetch('/api/logout', { method: 'POST' })
     router.push('/')
@@ -452,7 +500,7 @@ export function AppShell({
 
   return (
     <div
-      className="min-h-screen bg-canvas"
+      className="min-h-screen overflow-x-hidden bg-canvas"
       style={{ ['--sidebar-w' as string]: sidebarWidth }}
     >
       {/* ── Desktop sidebar ─────────────────────────────────────────────── */}
@@ -494,7 +542,7 @@ export function AppShell({
           <SidebarNav
               pathname={pathname}
               collapsed={collapsed}
-              savedCountries={savedCountries}
+              savedItems={savedItems}
             />
         </div>
 
@@ -523,21 +571,6 @@ export function AppShell({
         {/* Top bar */}
         <header className="sticky top-0 z-20 border-b border-line bg-canvas/95 px-6 py-3 backdrop-blur md:px-10">
           <div className="flex items-center gap-3">
-            {/* Desktop: search */}
-            <form
-              onSubmit={onSearch}
-              role="search"
-              className="max-w-xl flex-1 items-center gap-2 rounded-[var(--radius-field)] border border-line bg-white px-3 hidden md:flex"
-            >
-              <Search size={16} className="shrink-0 text-muted" aria-hidden="true" />
-              <input
-                name="query"
-                aria-label="Search Destinations, Pathways, and more"
-                placeholder="Search Destinations, Pathways, and more…"
-                className="h-10 min-w-0 flex-1 bg-transparent text-sm text-navy outline-none placeholder:text-muted"
-              />
-            </form>
-
             {/* Notifications */}
             <div className="relative ml-auto">
               <button
@@ -604,7 +637,7 @@ export function AppShell({
       </div>
 
       {/* ── Mobile layout (replaces the grid) ─────────────────────────────── */}
-      <div className="flex min-h-screen flex-col md:hidden">
+      <div className="flex min-h-screen min-w-0 flex-col overflow-x-hidden md:hidden">
         {/* Mobile top bar */}
         <header className="sticky top-0 z-20 border-b border-line bg-canvas/95 px-4 py-3 backdrop-blur">
           <div className="flex items-center gap-3">
@@ -647,7 +680,7 @@ export function AppShell({
         </header>
 
         {/* Mobile page content */}
-        <main className="flex-1 px-4 py-6 pb-24">
+        <main className="min-w-0 flex-1 px-4 py-6 pb-10">
           {children}
         </main>
       </div>
@@ -688,7 +721,7 @@ export function AppShell({
         <SidebarNav
           pathname={pathname}
           collapsed={false}
-          savedCountries={savedCountries}
+          savedItems={savedItems}
         />
 
         <div className="mx-1 mt-4 rounded-[var(--radius-card)] border border-white/10 bg-navy-card p-4">
@@ -706,41 +739,6 @@ export function AppShell({
         </div>
       </div>
 
-      {/* ── Mobile bottom navigation ───────────────────────────────────────── */}
-      <nav
-        className="fixed inset-x-0 bottom-0 z-30 flex justify-around border-t border-line bg-white px-2 py-2 md:hidden"
-        aria-label="Mobile navigation"
-      >
-        {mobilePrimary.map(({ href, label, icon: Icon }) => {
-          const active = isActive(pathname, href)
-          const shortLabel = label
-          return (
-            <Link
-              key={href}
-              href={href}
-              aria-current={active ? 'page' : undefined}
-              className={[
-                'flex min-w-[3rem] flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[10px] font-semibold',
-                active ? 'text-gold-deep' : 'text-muted',
-              ].join(' ')}
-            >
-              <Icon size={20} aria-hidden="true" />
-              <span>{shortLabel}</span>
-            </Link>
-          )
-        })}
-        <button
-          type="button"
-          onClick={() => setDrawerOpen(true)}
-          aria-label="Open full navigation"
-          aria-expanded={drawerOpen}
-          aria-controls="mobile-nav-drawer"
-          className="flex min-w-[3rem] flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[10px] font-semibold text-muted"
-        >
-          <Menu size={20} aria-hidden="true" />
-          <span>More</span>
-        </button>
-      </nav>
     </div>
   )
 }

@@ -2,11 +2,10 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { Check, FileText, LoaderCircle, NotebookTabs, Plus, Save, Sparkles, Trash2 } from 'lucide-react'
+import { BookOpen, Check, FileText, LoaderCircle, Plus, Save, Sparkles, Trash2 } from 'lucide-react'
 import type { NexitPlan, PlanBudget, PlanStage } from '@/lib/nexit-plan'
 
 const STAGES: PlanStage[] = ['Explore', 'Decide', 'Prepare', 'Apply', 'Move', 'Settle']
-
 const DEFAULT_TASKS = [
   'Confirm passport validity',
   'Verify official Pathway requirements',
@@ -14,7 +13,6 @@ const DEFAULT_TASKS = [
   'Research housing areas',
   'Review healthcare coverage',
 ]
-
 const BUDGET_LABELS: Record<keyof PlanBudget, string> = {
   housing: 'Housing',
   food: 'Food',
@@ -22,8 +20,6 @@ const BUDGET_LABELS: Record<keyof PlanBudget, string> = {
   healthcare: 'Healthcare',
   other: 'Other',
 }
-
-// ─── Sub-components ──────────────────────────────────────────────────────────
 
 function Select({
   label,
@@ -37,105 +33,15 @@ function Select({
   onChange: (value: string | null) => void
 }) {
   return (
-    <label className="block text-sm font-semibold text-navy">
+    <label className="block text-xs font-semibold text-navy">
       {label}
-      <select
-        className="field mt-2"
-        value={value ?? ''}
-        onChange={(e) => onChange(e.target.value || null)}
-      >
+      <select className="field mt-2" value={value ?? ''} onChange={(event) => onChange(event.target.value || null)}>
         <option value="">Not selected</option>
         {options.map((item) => <option key={item}>{item}</option>)}
       </select>
     </label>
   )
 }
-
-function ListEditor({
-  title,
-  icon,
-  items,
-  value,
-  setValue,
-  onAdd,
-  onRemove,
-  suggestions = [],
-  onSuggestion,
-}: {
-  title: string
-  icon: React.ReactNode
-  items: string[]
-  value: string
-  setValue: (v: string) => void
-  onAdd: () => void
-  onRemove: (item: string) => void
-  suggestions?: string[]
-  onSuggestion?: (item: string) => void
-}) {
-  return (
-    <section className="card-surface p-6" aria-labelledby={`list-heading-${title}`}>
-      <div className="flex items-center gap-2">
-        <span className="text-gold-deep" aria-hidden="true">{icon}</span>
-        <h2 id={`list-heading-${title}`} className="font-semibold text-navy">{title}</h2>
-      </div>
-      <div className="mt-4 flex gap-2">
-        <input
-          className="field"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); onAdd() } }}
-          placeholder={`Add ${title.toLowerCase()} item`}
-          aria-label={`Add ${title.toLowerCase()} item`}
-        />
-        <button
-          type="button"
-          onClick={onAdd}
-          aria-label={`Add to ${title}`}
-          className="grid size-11 shrink-0 place-items-center rounded-[var(--radius-btn)] bg-navy text-white"
-        >
-          <Plus size={17} />
-        </button>
-      </div>
-      {suggestions.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {suggestions.map((item) => (
-            <button
-              key={item}
-              type="button"
-              onClick={() => onSuggestion?.(item)}
-              className="rounded-[var(--radius-pill)] bg-canvas px-3 py-1.5 text-xs font-semibold text-muted hover:bg-gold-soft/40 hover:text-navy"
-            >
-              + {item}
-            </button>
-          ))}
-        </div>
-      )}
-      <ul className="mt-5 space-y-2">
-        {items.map((item) => (
-          <li
-            key={item}
-            className="flex items-center justify-between gap-3 rounded-[var(--radius-field)] bg-canvas px-4 py-3 text-sm"
-          >
-            <span className="text-navy">{item}</span>
-            <button
-              type="button"
-              aria-label={`Remove ${item}`}
-              onClick={() => onRemove(item)}
-              className="text-muted hover:text-danger"
-            >
-              <Trash2 size={15} />
-            </button>
-          </li>
-        ))}
-        {!items.length && (
-          <li className="text-sm text-muted">No items added yet.</li>
-        )}
-      </ul>
-    </section>
-  )
-}
-
-// ─── Main workspace ──────────────────────────────────────────────────────────
 
 export function NexitPlanWorkspace({
   initial,
@@ -153,6 +59,7 @@ export function NexitPlanWorkspace({
   const [plan, setPlan] = useState({ ...initial, household_members: initial.household_members ?? profileHousehold })
   const [task, setTask] = useState('')
   const [docItem, setDocItem] = useState('')
+  const [activeList, setActiveList] = useState<'checklist' | 'documents'>('checklist')
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
 
@@ -162,28 +69,42 @@ export function NexitPlanWorkspace({
     Boolean(plan.selected_pathway),
     Boolean(plan.target_move_date),
     plan.checklist.length > 0,
-    Object.values(plan.budget).some((v) => v !== null),
+    Object.values(plan.budget).some((value) => value !== null),
     plan.documents.length > 0,
   ]
+  const progressLabels = [
+    'Nextination chosen',
+    'Pathway selected',
+    'Target date set',
+    'Checklist started',
+    'Budget entered',
+    'Documents listed',
+  ]
+  const completed = progressChecks.filter(Boolean).length
   const progress = !hasSavedPlan && !progressChecks.some(Boolean)
     ? null
-    : Math.round(progressChecks.filter(Boolean).length / progressChecks.length * 100)
+    : Math.round(completed / progressChecks.length * 100)
+  const nextStep = progressLabels[progressChecks.findIndex((item) => !item)] ?? 'Ready for Nexicution'
 
   function update<K extends keyof NexitPlan>(key: K, value: NexitPlan[K]) {
-    setPlan((cur) => ({ ...cur, [key]: value }))
+    setPlan((current) => ({ ...current, [key]: value }))
   }
 
   async function save(nextPlan = plan) {
     setSaving(true)
     setMessage('')
     try {
-      const res = await fetch('/api/plan', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(nextPlan) })
-      const result = await res.json()
-      if (!res.ok) throw new Error(result.error ?? 'Unable to save your plan.')
+      const response = await fetch('/api/plan', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nextPlan),
+      })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error ?? 'Unable to save your plan.')
       setPlan(result)
-      setMessage('Your Move Plan is saved.')
-    } catch (err) {
-      setMessage(err instanceof Error ? err.message : 'Unable to save your plan.')
+      setMessage('Your Nexit Plan is saved.')
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to save your plan.')
     } finally {
       setSaving(false)
     }
@@ -202,192 +123,229 @@ export function NexitPlanWorkspace({
     clear()
   }
 
-  return (
-    <div className="space-y-6">
+  const listItems = plan[activeList]
+  const listValue = activeList === 'checklist' ? task : docItem
+  const setListValue = activeList === 'checklist' ? setTask : setDocItem
 
-      {/* ── Plan header ──────────────────────────────────────────────────── */}
-      <header className="rounded-[20px] bg-navy-deep p-7 text-white sm:p-9">
-        <div className="flex items-center gap-3">
-          <NotebookTabs size={20} className="text-gold" aria-hidden="true" />
-          <p className="text-sm font-bold text-gold">Private workspace</p>
+  return (
+    <div className="mx-auto max-w-[1280px] pb-6">
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-gold-deep">Private workspace</p>
+          <h1 className="font-display mt-1 text-3xl font-bold text-navy sm:text-4xl">Your Nexit Plan</h1>
+          <p className="mt-1 text-sm text-muted">Save decisions, evidence, dates, and preparation work in one place.</p>
         </div>
-        <div className="mt-3 flex flex-wrap items-end justify-between gap-5">
-          <div>
-            <h1 className="text-3xl font-bold sm:text-4xl">My Plan</h1>
-            <p className="mt-2 max-w-2xl text-sm text-white/70">
-              Save decisions, evidence, dates, and preparation work in one place.
-            </p>
-          </div>
-          <div className="rounded-[var(--radius-card)] border border-white/12 bg-white/8 px-5 py-4 text-right">
-            <p className="text-xs font-semibold text-white/55">Move Readiness</p>
-            <p className="mt-1 text-2xl font-bold text-gold">
-              {progress === null ? 'Not started' : `${progress}%`}
-            </p>
-          </div>
-        </div>
+        <button type="button" disabled={saving} onClick={() => save()} className="gold-button">
+          {saving ? <LoaderCircle size={16} className="animate-spin" aria-hidden="true" /> : <Save size={16} aria-hidden="true" />}
+          {saving ? 'Saving…' : 'Save Nexit Plan'}
+        </button>
       </header>
 
-      {/* ── Plan details ─────────────────────────────────────────────────── */}
-      <section className="card-surface p-6" aria-labelledby="plan-details-heading">
-        <h2 id="plan-details-heading" className="font-semibold text-navy">Plan details</h2>
-        <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-          <Select
-            label="Saved Destination"
-            value={plan.saved_nextination}
-            options={nextinations}
-            onChange={(v) => update('saved_nextination', v)}
-          />
-          <Select
-            label="Selected Pathway"
-            value={plan.selected_pathway}
-            options={pathways}
-            onChange={(v) => update('selected_pathway', v)}
-          />
-          <label className="block text-sm font-semibold text-navy">
-            Target move date
-            <input
-              className="field mt-2"
-              type="date"
-              value={plan.target_move_date ?? ''}
-              onChange={(e) => update('target_move_date', e.target.value || null)}
-            />
-          </label>
-          <label className="block text-sm font-semibold text-navy">
-            Household members
-            <input
-              className="field mt-2"
-              type="number"
-              min="1"
-              max="20"
-              value={plan.household_members ?? ''}
-              onChange={(e) => update('household_members', e.target.value ? Number(e.target.value) : null)}
-            />
-          </label>
-        </div>
-      </section>
+      {message && <p role="status" className="mt-3 text-sm font-semibold text-muted">{message}</p>}
 
-      {/* ── Nexit Timeline ───────────────────────────────────────────────── */}
-      <section className="card-surface p-6" aria-labelledby="timeline-heading">
-        <h2 id="timeline-heading" className="font-semibold text-navy">Move Timeline</h2>
-        <p className="mt-1 text-sm text-muted">Select your current stage. Stages are checkpoints, not prescriptions.</p>
-        <div className="mt-5 grid gap-2 sm:grid-cols-3 xl:grid-cols-6">
-          {STAGES.map((stage, index) => (
-            <button
-              key={stage}
-              type="button"
-              onClick={() => update('timeline_stage', stage)}
-              aria-pressed={plan.timeline_stage === stage}
-              className={[
-                'rounded-[var(--radius-field)] border px-3 py-4 text-sm font-semibold transition-colors',
-                plan.timeline_stage === stage
-                  ? 'border-gold bg-gold text-navy'
-                  : 'border-line bg-canvas text-muted hover:border-navy/20 hover:text-navy',
-              ].join(' ')}
-            >
-              <span className="block text-xs opacity-65">{index + 1}</span>
-              {stage}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Checklist and Documents ──────────────────────────────────────── */}
-      <div className="grid gap-5 xl:grid-cols-2">
-        <ListEditor
-          title="Checklist"
-          icon={<Check size={17} />}
-          items={plan.checklist}
-          value={task}
-          setValue={setTask}
-          onAdd={() => addList('checklist', task, () => setTask(''))}
-          onRemove={(item) => update('checklist', plan.checklist.filter((v) => v !== item))}
-          suggestions={DEFAULT_TASKS}
-          onSuggestion={(item) => { if (!plan.checklist.includes(item)) update('checklist', [...plan.checklist, item]) }}
-        />
-        <ListEditor
-          title="Documents"
-          icon={<FileText size={17} />}
-          items={plan.documents}
-          value={docItem}
-          setValue={setDocItem}
-          onAdd={() => addList('documents', docItem, () => setDocItem(''))}
-          onRemove={(item) => update('documents', plan.documents.filter((v) => v !== item))}
-        />
-      </div>
-
-      {/* ── Budget and Notes ─────────────────────────────────────────────── */}
-      <div className="grid gap-5 xl:grid-cols-2">
-        <section className="card-surface p-6" aria-labelledby="budget-heading">
-          <h2 id="budget-heading" className="font-semibold text-navy">Budget</h2>
-          <p className="mt-1 text-sm text-muted">Blank until you enter your own planning figures.</p>
-          <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            {(Object.keys(BUDGET_LABELS) as (keyof PlanBudget)[]).map((key) => (
-              <label key={key} className="block text-sm font-semibold text-navy">
-                {BUDGET_LABELS[key]}
-                <input
-                  className="field mt-2"
-                  type="number"
-                  min="0"
-                  value={plan.budget[key] ?? ''}
-                  onChange={(e) => update('budget', { ...plan.budget, [key]: e.target.value ? Number(e.target.value) : null })}
-                />
+      <div className="mt-6 grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
+        <main className="space-y-5">
+          <section className="card-surface p-5" aria-labelledby="plan-details-heading">
+            <h2 id="plan-details-heading" className="text-sm font-bold text-navy">Plan details</h2>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <Select label="Saved Nextination" value={plan.saved_nextination} options={nextinations} onChange={(value) => update('saved_nextination', value)} />
+              <Select label="Selected Pathway" value={plan.selected_pathway} options={pathways} onChange={(value) => update('selected_pathway', value)} />
+              <label className="block text-xs font-semibold text-navy">
+                Target move date
+                <input className="field mt-2" type="date" value={plan.target_move_date ?? ''} onChange={(event) => update('target_move_date', event.target.value || null)} />
               </label>
-            ))}
-          </div>
-        </section>
+              <label className="block text-xs font-semibold text-navy">
+                Household members
+                <input className="field mt-2" type="number" min="1" max="20" value={plan.household_members ?? ''} onChange={(event) => update('household_members', event.target.value ? Number(event.target.value) : null)} />
+              </label>
+            </div>
+          </section>
 
-        <section className="card-surface p-6" aria-labelledby="notes-heading">
-          <h2 id="notes-heading" className="font-semibold text-navy">Notes</h2>
-          <p className="mt-1 text-sm text-muted">Record questions, decisions, and follow-ups.</p>
-          <textarea
-            className="field mt-4 min-h-44 py-3"
-            value={plan.notes ?? ''}
-            onChange={(e) => update('notes', e.target.value || null)}
-            placeholder="Questions, decisions, and follow-ups…"
-            aria-label="Plan notes"
-          />
-        </section>
-      </div>
+          <section className="card-surface p-5" aria-labelledby="timeline-heading">
+            <h2 id="timeline-heading" className="text-sm font-bold text-navy">Nexit Timeline</h2>
+            <p className="mt-1 text-xs text-muted">Select your current stage. Stages are checkpoints, not prescriptions.</p>
+            <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+              {STAGES.map((stage, index) => (
+                <button
+                  key={stage}
+                  type="button"
+                  onClick={() => update('timeline_stage', stage)}
+                  aria-pressed={plan.timeline_stage === stage}
+                  className={[
+                    'rounded-[var(--radius-field)] border px-2 py-3 text-xs font-semibold transition-colors',
+                    plan.timeline_stage === stage
+                      ? 'border-gold bg-gold text-navy'
+                      : 'border-line bg-canvas text-muted hover:border-navy/20 hover:text-navy',
+                  ].join(' ')}
+                >
+                  <span className="mb-1 block text-[10px] opacity-65">{index + 1}</span>
+                  {stage}
+                </button>
+              ))}
+            </div>
+          </section>
 
-      {/* ── Greenbook + Flutter Mode ──────────────────────────────────────── */}
-      <div className="grid gap-5 md:grid-cols-2">
-        <article className="rounded-[var(--radius-card)] bg-teal-soft p-6">
-          <p className="font-semibold text-teal-deep">Greenbook Insights</p>
-          <h2 className="mt-1 text-lg font-bold text-navy">Add community context to your plan.</h2>
-          <p className="mt-2 text-sm text-muted">
-            Review sourced neighborhood and lived-experience research before making decisions.
-          </p>
-          <Link href="/greenbook" className="mt-4 inline-flex text-sm font-bold text-teal-deep hover:underline">
-            Open Greenbook Insights
-          </Link>
-        </article>
-        <article className="rounded-[var(--radius-card)] bg-navy p-6 text-white">
-          <Sparkles className="text-gold" aria-hidden="true" />
-          <h2 className="mt-3 text-lg font-bold">Ready to move from planning to doing?</h2>
-          <button
-            type="button"
-            disabled={saving || !plan.saved_nextination || !plan.selected_pathway}
-            onClick={enterMode}
-            className="gold-button mt-5"
-          >
-            Enter Flutter Mode
-          </button>
-          <p className="mt-2 text-xs text-white/55">Choose a Destination and Pathway first.</p>
-        </article>
-      </div>
+          <section className="card-surface overflow-hidden" aria-label="Plan checklist and documents">
+            <div className="flex border-b border-line px-5">
+              {([
+                ['checklist', 'Checklist', Check, plan.checklist.length],
+                ['documents', 'Documents', FileText, plan.documents.length],
+              ] as const).map(([key, label, Icon, count]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setActiveList(key)}
+                  className={[
+                    'flex items-center gap-2 border-b-2 px-3 py-4 text-xs font-bold',
+                    activeList === key ? 'border-gold text-navy' : 'border-transparent text-muted',
+                  ].join(' ')}
+                >
+                  <Icon size={14} aria-hidden="true" />
+                  {label}
+                  <span className="rounded-full bg-canvas px-1.5 py-0.5 text-[10px]">{count}</span>
+                </button>
+              ))}
+            </div>
+            <div className="p-5">
+              <div className="flex gap-2">
+                <input
+                  className="field"
+                  value={listValue}
+                  onChange={(event) => setListValue(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault()
+                      addList(activeList, listValue, () => setListValue(''))
+                    }
+                  }}
+                  placeholder={`Add ${activeList === 'checklist' ? 'checklist' : 'document'} item`}
+                />
+                <button
+                  type="button"
+                  onClick={() => addList(activeList, listValue, () => setListValue(''))}
+                  aria-label={`Add ${activeList} item`}
+                  className="grid size-11 shrink-0 place-items-center rounded-[var(--radius-btn)] bg-navy text-white"
+                >
+                  <Plus size={17} />
+                </button>
+              </div>
 
-      {/* ── Sticky save bar ──────────────────────────────────────────────── */}
-      <div className="sticky bottom-4 flex flex-wrap items-center justify-end gap-4 rounded-[var(--radius-card)] border border-line bg-white/95 p-4 shadow-[var(--shadow-shell)] backdrop-blur">
-        <p role="status" className="mr-auto text-sm font-semibold text-muted">{message}</p>
-        <button
-          type="button"
-          disabled={saving}
-          onClick={() => save()}
-          className="gold-button"
-        >
-          {saving ? <LoaderCircle size={16} className="animate-spin" aria-hidden="true" /> : <Save size={16} aria-hidden="true" />}
-          {saving ? 'Saving…' : 'Save My Plan'}
-        </button>
+              {activeList === 'checklist' && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {DEFAULT_TASKS.map((item) => (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => {
+                        if (!plan.checklist.includes(item)) update('checklist', [...plan.checklist, item])
+                      }}
+                      className="rounded-[var(--radius-pill)] border border-line px-3 py-1.5 text-[11px] font-semibold text-muted hover:border-gold hover:text-navy"
+                    >
+                      + {item}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <ul className="mt-4 space-y-2">
+                {listItems.map((item) => (
+                  <li key={item} className="flex items-center justify-between gap-3 rounded-[var(--radius-field)] bg-canvas px-4 py-2.5 text-sm">
+                    <span className="text-navy">{item}</span>
+                    <button type="button" aria-label={`Remove ${item}`} onClick={() => update(activeList, listItems.filter((value) => value !== item))} className="text-muted hover:text-danger">
+                      <Trash2 size={15} />
+                    </button>
+                  </li>
+                ))}
+                {!listItems.length && <li className="pt-1 text-xs text-muted">No items added yet.</li>}
+              </ul>
+            </div>
+          </section>
+
+          <section className="card-surface p-5" aria-labelledby="notes-heading">
+            <h2 id="notes-heading" className="text-sm font-bold text-navy">Notes</h2>
+            <p className="mt-1 text-xs text-muted">Record questions, decisions, and follow-ups.</p>
+            <textarea
+              className="field mt-4 min-h-32 py-3"
+              value={plan.notes ?? ''}
+              onChange={(event) => update('notes', event.target.value || null)}
+              placeholder="Questions, decisions, and follow-ups…"
+              aria-label="Plan notes"
+            />
+          </section>
+        </main>
+
+        <aside className="space-y-4">
+          <section className="rounded-[var(--radius-card)] bg-navy p-5 text-white" aria-labelledby="readiness-heading">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/55">Nexit Readiness</p>
+            <h2 id="readiness-heading" className="font-display mt-2 text-2xl font-bold text-gold">
+              {progress === null ? 'Not started' : `${progress}% ready`}
+            </h2>
+            <div className="mt-4 h-1 rounded-full bg-white/15">
+              <div className="h-full rounded-full bg-gold transition-[width]" style={{ width: `${progress ?? 0}%` }} />
+            </div>
+            <p className="mt-2 text-[10px] font-semibold text-white/55">{completed} of {progressChecks.length} complete</p>
+            <div className="my-4 h-px bg-white/15" />
+            <ul className="space-y-2">
+              {progressLabels.map((label, index) => (
+                <li key={label} className="flex items-center gap-2 text-xs font-semibold text-white/80">
+                  <span className={`grid size-4 place-items-center rounded-full border ${progressChecks[index] ? 'border-gold bg-gold text-navy' : 'border-white/35'}`}>
+                    {progressChecks[index] && <Check size={10} strokeWidth={3} />}
+                  </span>
+                  {label}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 text-[10px] font-bold text-gold">Next: {nextStep}</p>
+          </section>
+
+          <section className="card-surface p-5" aria-labelledby="budget-heading">
+            <h2 id="budget-heading" className="text-sm font-bold text-navy">Budget</h2>
+            <p className="mt-1 text-[10px] text-muted">Blank until you enter your own planning figures.</p>
+            <div className="mt-4 space-y-2">
+              {(Object.keys(BUDGET_LABELS) as (keyof PlanBudget)[]).map((key) => (
+                <label key={key} className="flex items-center justify-between gap-3 text-xs font-medium text-muted">
+                  {BUDGET_LABELS[key]}
+                  <input
+                    className="field h-9 w-24 px-2"
+                    type="number"
+                    min="0"
+                    aria-label={`${BUDGET_LABELS[key]} budget`}
+                    value={plan.budget[key] ?? ''}
+                    onChange={(event) => update('budget', { ...plan.budget, [key]: event.target.value ? Number(event.target.value) : null })}
+                  />
+                </label>
+              ))}
+            </div>
+            <Link href="/cost-calculator" className="mt-4 inline-flex text-xs font-bold text-gold-deep hover:underline">
+              Open Cost Calculator
+            </Link>
+          </section>
+
+          <article className="rounded-[var(--radius-card)] border border-teal/25 bg-teal-soft p-5">
+            <div className="flex items-start gap-3">
+              <BookOpen size={16} className="mt-0.5 shrink-0 text-teal-deep" aria-hidden="true" />
+              <div>
+                <p className="text-xs font-bold text-teal-deep">Greenbook Insights</p>
+                <p className="mt-1 text-[11px] leading-5 text-muted">Sourced neighborhood and lived-experience research to review before deciding.</p>
+                <Link href="/greenbook" className="mt-2 inline-flex text-[11px] font-bold text-teal-deep hover:underline">Open Greenbook Insights</Link>
+              </div>
+            </div>
+          </article>
+
+          <article className="rounded-[var(--radius-card)] bg-navy p-5 text-white">
+            <Sparkles size={16} className="text-gold" aria-hidden="true" />
+            <h2 className="mt-3 text-sm font-bold">Ready to move from planning to doing?</h2>
+            <button
+              type="button"
+              disabled={saving || !plan.saved_nextination || !plan.selected_pathway}
+              onClick={enterMode}
+              className="gold-button mt-4 w-full justify-center text-xs"
+            >
+              Enter Nexicution Mode
+            </button>
+            <p className="mt-2 text-[10px] text-white/55">Choose a Nextination and Pathway first.</p>
+          </article>
+        </aside>
       </div>
     </div>
   )

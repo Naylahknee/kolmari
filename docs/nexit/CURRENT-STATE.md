@@ -1,5 +1,29 @@
 # Nexit Current Implementation State
 
+## 2026-07-26 — Interactive Nexit World regions
+
+- The live Nexit World SVG now exposes six labeled, clickable region targets with visible hover and keyboard-focus states.
+- Every region routes to the existing canonical `/nexitnation/[region]` page.
+- A non-map region grid provides an accessible alternate navigation path.
+- All six region pages use the shared continent template and contain editorial starter locations.
+- Incomplete profiles see “Popular places to research” without fabricated Match Scores or personalized claims.
+- Country cards route only to available country guides; unavailable guides show an honest research-in-progress state.
+
+## 2026-07-26 — Sidebar brand mark visibility
+
+- The butterfly favicon is hidden while the workspace sidebar is expanded.
+- The butterfly favicon appears in the sidebar-aligned header zone only when the sidebar is collapsed.
+
+## 2026-07-26 — Nexit Pathways directory redesign
+
+- `PathwaysResults` accepts evaluated Pathway data as a prop from the server-rendered route.
+- Strong signals use a responsive one-, two-, and three-column card grid.
+- Category filters use one horizontally scrollable, counted, accessible chip row.
+- Results are grouped by likely, possible, and unknown fit, with country codes visible on every row.
+- Pathway rows use full-width accessible accordion headers and show structured requirements, facts, and official sources.
+- The research disclaimer appears once at the end of the page.
+- The page retains the Geist interface font and existing Nexit design tokens.
+
 ## Last Updated
 
 Phase 8 — 04-LAYOUTS.md implementation: sidebar groups, collapse, saved country tree, URL-addressable country sections, hero pathway summary
@@ -523,6 +547,54 @@ Single client component file containing:
 
 ---
 
+## Country Page Template (v2) — install + build fixes
+
+**Installed the approved `index.html` country-page mockup as the `v2` template** via
+`install-nexit-template.py` (26 files under `src/`), then repaired the converter
+artifacts so `npm run lint` and `npm run build` pass.
+
+### Install
+
+- Ran `python3 install-nexit-template.py`. It added the `v2` route tree
+  (`nextinations/[countrySlug]/v2/…`), the `country-template` frame + tabs
+  components, `lib/country-template/*`, and `styles/country-template.css`, and
+  rewrote `nextinations/page.tsx` with the `NEXT_PUBLIC_COUNTRY_TEMPLATE` gate.
+- **`NEXT_PUBLIC_COUNTRY_TEMPLATE` was deliberately left unset**, so the wizard
+  still lands users on the existing sixteen-tab workspace. The v2 template is
+  installed dormant and reachable only at `/nextinations/[slug]/v2/overview`.
+
+### Fixes applied to the installed template
+
+| Area | Fix |
+|---|---|
+| Parse errors (7 tabs) | Removed a stray trailing `{/* ══════ … ══════ */}` JSX comment left between the closing `</div>` and `)` in each tab (`Overview`, `MoveThere`, `CostHousing`, `WorkStudy`, `Healthcare`, `Lifestyle`, `FamilySchools`). |
+| `react/no-unescaped-entities` (6 tabs) | Escaped 31 literal `'`/`"` characters in prose to `&apos;`/`&quot;`. |
+| `@next/next/no-html-link-for-pages` | Converted internal `<a href="/…">` to `<Link>` in `Sidebar`, `RightRail`, `TopBar`, `OverviewTab`, `MoveThereTab`, `CostHousingTab`. |
+| `TopBar` units control | Replaced the hardcoded units block (which called an undefined `setUnit`) with the imported `<UnitsControl />` island (already inside `UnitsProvider`). |
+| Zero-JS server tabs | Removed dangling event handlers (`onClick`/`onChange`/`onInput`/`onError`) that referenced undefined functions (`go`, `setHousehold`, `setTaxReg`, `setTaxMode`, `renderEntry`, `calcTax`) — the tabs are server components with no JS per the template README, so the mockup's inline handlers were non-functional. |
+| JSX attribute type | `HealthcareTab`: `colSpan="4"` → `colSpan={4}`. |
+
+The `.backup` file the installer created was removed (original is preserved in git
+history), and `package-lock.json` was left untouched.
+
+### Tests Run
+
+| Check | Result |
+|---|---|
+| ESLint (`npm run lint`) | ✅ Pass — 0 errors (31 pre-existing style warnings remain) |
+| Production build (`npm run build`) | ✅ Pass — 54 pages generated |
+
+### Known follow-ups (from the template README, not yet done)
+
+- Tab markup is still verbatim Portugal copy; bind to `content.*` per section.
+- Interactive controls (household/tax toggles, cross-tab jump chips, passport
+  entry selector) are now static — rewire as client islands when those sections
+  become dynamic.
+- `NEXT_PUBLIC_MAPBOX_TOKEN` and the brand PNGs referenced by the template still
+  need to be provided before switching users onto v2.
+
+---
+
 ## Next Recommended Implementation Phase
 
 **Phase 13 — Greenbook disclosure pattern + adaptive section ordering**
@@ -530,3 +602,95 @@ Single client component file containing:
 1. Review `GreenbookTab` inline provenance legend completeness.
 2. Consider `CompareTab` source disclosure.
 3. Adaptive section ordering (06-ADAPTIVE-WORKSPACE.md) — rank-country-sections lib and sidebar PersonalizedOrder toggle.
+
+---
+
+## Country Overview — per-country facts (data-integrity fix)
+
+The merged Country Overview dashboard displayed **Portugal's reference facts for
+every country**: the Country Snapshot grid showed real values only for Portugal
+(others "Researching"), and the climate cards (`16°C / 28°C / -5 hrs`) plus the
+hero membership badges (`Schengen · EU · NATO`) were hardcoded and therefore
+shown, incorrectly, for Spain, Greece, Estonia, and **Mexico** (which is not in
+Schengen, the EU, or NATO). That violated the no-fabricated-statistics rule.
+
+**Fix:** new `src/lib/country-workspace/country-facts.ts` provides
+`getCountryFacts(slug)` with real public reference facts (capital, population,
+currency, official language, government, time zone, driving side, Schengen, EU,
+climate) plus per-country climate averages and a source disclosure for all five
+workspace countries. The Overview snapshot grid, climate cards, and the hero
+membership badges now read from it. Countries without a facts dataset fall back
+to an honest "Researching" state, and membership badges render only when true.
+
+### Files Changed
+
+| File | Change |
+|---|---|
+| `src/lib/country-workspace/country-facts.ts` | New — `getCountryFacts(slug)` + per-country snapshot/climate reference data with source disclosure |
+| `src/components/country-workspace/CountryWorkspace.tsx` | Snapshot `factRows`, climate cards, and hero membership badges now derive from `getCountryFacts` instead of hardcoded Portugal values |
+
+### Tests Run
+
+| Check | Result |
+|---|---|
+| TypeScript (`tsc --noEmit`) | ✅ Pass |
+| Production build (`next build`) | ✅ Pass |
+## Nexit World interactive map and country panels
+
+The active Nexit World workspace renders the existing Mapbox GL map rather
+than the static SVG substitute. Clicking a region badge opens that continent
+page. The region controls below the map provide the same routes for keyboard
+and screen-reader users.
+
+Every continent page uses a country-specific silhouette in each country card.
+The shapes come from the repository's Natural Earth boundary data. Mauritius
+uses a simplified local outline because it is below the 1:110m dataset's
+minimum feature size. Country cards no longer repeat continent hero artwork.
+## Expanded Nexit World discovery
+
+- Mapbox region labels remain hidden until pointer hover or keyboard focus.
+- Nexit World has a collapsible continent list in the application sidebar.
+- Browse-by-region cards use their continent artwork as a background.
+- The 30 requested expat research countries are listed on their continent
+  pages and open country research pages without being automatically saved to
+  My Nextinations.
+- Country cards use flag images and country-specific boundary silhouettes.
+- Countries without verified detailed datasets display an explicit research
+  starting point rather than copied Portugal content or invented facts.
+## Mobile workspace optimization
+
+At widths of 900px and below, the shared workspace navigation is now an
+off-canvas drawer instead of a narrow fixed rail that pushes the page off
+screen. The header menu button opens it, the backdrop and navigation links
+close it, and the page always retains the full viewport width.
+
+Country workspaces now stack the hero metrics, primary content, and right rail
+at phone widths. Tabs remain horizontally scrollable, card headings wrap, and
+mobile page padding is reduced without changing desktop layouts.
+
+## Sidebar restored on all country research pages
+
+Country research pages for discoverable Nextinations (every country except
+Portugal, e.g. Japan at `/nextinations/japan/v2/overview`) previously rendered
+without the workspace sidebar. `WorkspaceShell` intentionally omits its own
+chrome for `/nextinations/[slug]/v2` routes because the full `CountryTemplate`
+supplies its own top bar and sidebar, but the lighter `CountryResearchPage`
+supplied none, so those pages appeared with no navigation menu.
+
+A new `CountryResearchShell` client component now wraps `CountryResearchPage`
+in the same `country-template-root` frame (top bar + collapsible sidebar) used
+by `CountryTemplate`. Every country research workspace page now shows the
+sidebar menu at all breakpoints.
+
+| File | Change |
+|---|---|
+| `src/components/country-template/CountryResearchShell.tsx` | New client shell providing the top bar and sidebar chrome for research pages |
+| `src/app/(app)/(workspace)/nextinations/[countrySlug]/v2/[section]/page.tsx` | Wrap `CountryResearchPage` in `CountryResearchShell` |
+
+### Tests Run
+
+| Check | Result |
+|---|---|
+| TypeScript (`tsc --noEmit`) | ✅ Pass |
+| Lint (`eslint`) | ✅ No new errors (36 pre-existing errors unchanged) |
+| Production build (`next build`) | ✅ Pass |

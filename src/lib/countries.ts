@@ -45,3 +45,48 @@ export const COUNTRY_CODE_BY_NAME: Record<string, string> = Object.fromEntries(C
 export function countryFlag(code: string) {
   return code.toUpperCase().replace(/./g, (character) => String.fromCodePoint(127397 + character.charCodeAt(0)))
 }
+
+export type DiscoverableCountry = {
+  slug: string
+  name: string
+  code: string
+  city: string
+  region: 'Europe' | 'Asia' | 'North America' | 'Latin America' | 'Oceania'
+}
+
+export const DISCOVERABLE_COUNTRIES: DiscoverableCountry[] = [
+  { slug: 'mexico', name: 'Mexico', code: 'MX', city: 'Mexico City', region: 'Latin America' },
+  { slug: 'canada', name: 'Canada', code: 'CA', city: 'Toronto', region: 'North America' },
+  { slug: 'united-kingdom', name: 'United Kingdom', code: 'GB', city: 'London', region: 'Europe' },
+  { slug: 'germany', name: 'Germany', code: 'DE', city: 'Berlin', region: 'Europe' },
+  { slug: 'australia', name: 'Australia', code: 'AU', city: 'Melbourne', region: 'Oceania' },
+  { slug: 'south-korea', name: 'South Korea', code: 'KR', city: 'Seoul', region: 'Asia' },
+  { slug: 'france', name: 'France', code: 'FR', city: 'Paris', region: 'Europe' },
+  { slug: 'japan', name: 'Japan', code: 'JP', city: 'Tokyo', region: 'Asia' },
+  { slug: 'spain', name: 'Spain', code: 'ES', city: 'Barcelona', region: 'Europe' },
+  { slug: 'costa-rica', name: 'Costa Rica', code: 'CR', city: 'San José', region: 'Latin America' },
+  { slug: 'israel', name: 'Israel', code: 'IL', city: 'Tel Aviv', region: 'Asia' },
+  { slug: 'netherlands', name: 'Netherlands', code: 'NL', city: 'Amsterdam', region: 'Europe' },
+  { slug: 'ireland', name: 'Ireland', code: 'IE', city: 'Dublin', region: 'Europe' },
+  { slug: 'italy', name: 'Italy', code: 'IT', city: 'Rome', region: 'Europe' },
+  { slug: 'new-zealand', name: 'New Zealand', code: 'NZ', city: 'Auckland', region: 'Oceania' },
+  { slug: 'philippines', name: 'Philippines', code: 'PH', city: 'Manila', region: 'Asia' },
+  { slug: 'portugal', name: 'Portugal', code: 'PT', city: 'Lisbon', region: 'Europe' },
+  { slug: 'thailand', name: 'Thailand', code: 'TH', city: 'Chiang Mai', region: 'Asia' },
+  { slug: 'panama', name: 'Panama', code: 'PA', city: 'Panama City', region: 'Latin America' },
+  { slug: 'albania', name: 'Albania', code: 'AL', city: 'Tirana', region: 'Europe' },
+  { slug: 'bulgaria', name: 'Bulgaria', code: 'BG', city: 'Sofia', region: 'Europe' },
+  { slug: 'romania', name: 'Romania', code: 'RO', city: 'Bucharest', region: 'Europe' },
+  { slug: 'slovenia', name: 'Slovenia', code: 'SI', city: 'Ljubljana', region: 'Europe' },
+  { slug: 'malta', name: 'Malta', code: 'MT', city: 'Valletta', region: 'Europe' },
+  { slug: 'uruguay', name: 'Uruguay', code: 'UY', city: 'Montevideo', region: 'Latin America' },
+  { slug: 'paraguay', name: 'Paraguay', code: 'PY', city: 'Asunción', region: 'Latin America' },
+  { slug: 'belize', name: 'Belize', code: 'BZ', city: 'Belize City', region: 'Latin America' },
+  { slug: 'ecuador', name: 'Ecuador', code: 'EC', city: 'Quito', region: 'Latin America' },
+  { slug: 'georgia', name: 'Georgia', code: 'GE', city: 'Tbilisi', region: 'Europe' },
+  { slug: 'cambodia', name: 'Cambodia', code: 'KH', city: 'Phnom Penh', region: 'Asia' },
+]
+
+export function getDiscoverableCountry(slug: string) {
+  return DISCOVERABLE_COUNTRIES.find((country) => country.slug === slug) ?? null
+}

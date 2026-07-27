@@ -1,7 +1,7 @@
 /**
- * Rings & donuts (from the Nexit design handoff).
- *  - ScoreRing:  Nexit Score / Nexit Readiness / Pathway Match (gold arc on a track).
- *  - BudgetDonut: Nexit Budget breakdown via conic-gradient + legend.
+ * Rings & donuts (from the Kolmari design handoff).
+ *  - ScoreRing:  Kolmari Score / Kolmari Readiness / Pathway Match (gold arc on a track).
+ *  - BudgetDonut: Kolmari Budget breakdown via conic-gradient + legend.
  * Pure SVG/CSS, no deps. Server-component safe.
  */
 
@@ -66,16 +66,19 @@ export function BudgetDonut({ slices, total, size = 132 }: { slices: BudgetSlice
       </div>
       <ul className="flex flex-1 flex-col gap-2.5">
         {slices.map((s) => (
-          <li key={s.label} className="flex items-center gap-2 font-sans text-[12.5px] font-medium text-[#42536e]">
-            <span className="size-[11px] rounded-[3px]" style={{ background: s.color }} />
-            {s.label}
-            <b className="ml-auto text-navy">${s.amount.toLocaleString()}</b>
+          <li key={s.label} className="flex items-center justify-between text-sm">
+            <span className="flex items-center gap-2">
+              <span
+                className="size-2.5 rounded-full"
+                style={{ backgroundColor: s.color }}
+                aria-hidden="true"
+              />
+              {s.label}
+            </span>
+            <strong>${s.amount.toLocaleString()}</strong>
           </li>
         ))}
       </ul>
     </div>
   )
 }
-
-// Shared palette for budget slices (matches mockups).
-export const BUDGET_COLORS = ['#F3C516', '#17305B', '#7d9ccb', '#C99A00', '#c3cdda']

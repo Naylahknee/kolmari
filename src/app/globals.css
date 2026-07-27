@@ -50,9 +50,9 @@
   --radius-sidebar-row: 6px;
 
   /* ─── Typography ────────────────────────────────────── */
-  --font-sans: var(--font-geist-sans), "Geist", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), "Geist Mono", ui-monospace, monospace;
-  --font-display: var(--font-playfair), "Playfair Display", Georgia, serif;
+  --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
+  --font-display: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
 
   /* ─── Shadows ───────────────────────────────────────── */
   --shadow-card: 0 1px 3px 0 rgba(16, 34, 68, 0.08), 0 1px 2px -1px rgba(16, 34, 68, 0.06);
@@ -231,6 +231,20 @@ textarea:focus-visible {
 .nexit-region:hover .nexit-region-outline,
 .nexit-region:focus .nexit-region-outline { filter: drop-shadow(0 0 10px rgba(243, 197, 22, .9)); fill-opacity: .28; stroke-width: 5; }
 @keyframes nexit-region-drift { from { transform: scale(1.01) translateX(-.5%); } to { transform: scale(1.08) translateX(.5%); } }
+
+/* Keep workspace navigation scrollable without showing browser scrollbar chrome. */
+aside[aria-label="Workspace navigation"],
+aside[aria-label="Workspace navigation"] > div,
+#mobile-nav-drawer {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+aside[aria-label="Workspace navigation"]::-webkit-scrollbar,
+aside[aria-label="Workspace navigation"] > div::-webkit-scrollbar,
+#mobile-nav-drawer::-webkit-scrollbar {
+  display: none;
+}
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

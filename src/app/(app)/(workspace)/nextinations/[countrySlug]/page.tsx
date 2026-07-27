@@ -12,5 +12,5 @@ export default async function CountryWorkspaceIndexPage({
   const { countrySlug } = await params
   const sp = await searchParams
   const source = sp.source ? `?source=${sp.source}` : ''
-  redirect(`/nextinations/${countrySlug}/overview${source}`)
+  redirect(`/nextinations/${countrySlug}/v2/overview${source}`)
 }

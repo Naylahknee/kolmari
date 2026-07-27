@@ -1,4 +1,4 @@
-# Nexit
+# Kolmari
 
 A responsive relocation-planning app backed by Neon Postgres. It includes onboarding, a five-step visa wizard, country discovery, a move checklist, and a monthly cost calculator.
 
@@ -11,19 +11,36 @@ A responsive relocation-planning app backed by Neon Postgres. It includes onboar
 ```bash
 npm install
 npm run dev
-```
+Open http://localhost:3000.
 
-Open [http://localhost:3000](http://localhost:3000).
+For an existing Kolmari database, apply new migrations with npm run db:migrate.
 
-For an existing Nexit database, apply new migrations with `npm run db:migrate`.
-
-## Checks
-
-```bash
+Checks
+bash
 npm run lint
 npm run build
-```
-
 Visa recommendations are illustrative and are not legal advice. Confirm current eligibility rules with the relevant government authority.
 
 Country flags use free Unicode emoji, so no flag API key is required.
+
+Code
+
+---
+
+## **FILE 5: `public/brand/README.md`**
+
+```markdown
+# Kolmari brand assets
+
+These runtime assets are derived only from the owner-approved PNG artwork supplied for the app. No logo geometry was redrawn or AI-generated.
+
+- `kolmari-wordmark-light.png`: navy and gold wordmark for light surfaces.
+- `kolmari-wordmark-dark.png`: white and gold wordmark for dark surfaces.
+- `kolmari-wordmark-split.png`: retained alternate treatment; not used by default.
+- `kolmari-primary-dark.png`: detailed primary butterfly-globe on navy.
+- `kolmari-icon-dimensional-source.png`: approved dimensional icon source.
+- `kolmari-icon-flat.png`: retained flat icon alternative.
+- `app-icon-*.png`: opaque, full-bleed installable icon exports.
+- `favicon-*.png` and `favicon.ico`: transparent butterfly favicon exports.
+
+The composite brand board and favicon source sheet are references only and are intentionally excluded from runtime assets.

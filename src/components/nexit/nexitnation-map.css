@@ -1,6 +1,6 @@
-/* Nexitnation Mapbox dashboard map — dark-earth aesthetic + glassmorphic region badges. */
+/* KolmariNation Mapbox dashboard map — dark-earth aesthetic + glassmorphic region badges. */
 
-.nexit-mapbox {
+.kolmari-mapbox {
   position: relative;
   width: 100%;
   height: 560px;
@@ -10,13 +10,13 @@
   border: 1px solid rgba(229, 169, 60, 0.18);
 }
 
-.nexit-mapbox .mapboxgl-ctrl-group {
+.kolmari-mapbox .mapboxgl-ctrl-group {
   border-radius: 12px !important;
   overflow: hidden;
 }
 
-.nexit-mapbox .mapboxgl-ctrl-logo,
-.nexit-mapbox .mapboxgl-ctrl-attrib {
+.kolmari-mapbox .mapboxgl-ctrl-logo,
+.kolmari-mapbox .mapboxgl-ctrl-attrib {
   opacity: 0.5;
 }
 
@@ -30,12 +30,11 @@
   padding: 10px 14px;
   border: 0;
   border-radius: 16px;
-  background: rgba(9, 20, 44, 0.55);
+  background: transparent;
   backdrop-filter: blur(10px) saturate(140%);
   -webkit-backdrop-filter: blur(10px) saturate(140%);
-  border: 1px solid rgba(229, 169, 60, 0.55);
-  box-shadow: 0 0 0 1px rgba(229, 169, 60, 0.12), 0 8px 30px rgba(4, 11, 20, 0.6),
-    0 0 22px rgba(229, 169, 60, 0.25);
+  border: 1px solid transparent;
+  box-shadow: none;
   color: #ffffff;
   text-align: left;
   cursor: pointer;
@@ -45,6 +44,7 @@
 
 .custom-region-badge:hover,
 .custom-region-badge:focus-visible {
+  background: rgba(9, 20, 44, 0.72);
   transform: translateY(-2px);
   border-color: var(--badge-accent);
   box-shadow: 0 0 0 1px rgba(229, 169, 60, 0.3), 0 12px 36px rgba(4, 11, 20, 0.7),
@@ -52,8 +52,18 @@
   outline: none;
 }
 
+.custom-region-badge > span {
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.custom-region-badge:hover > span,
+.custom-region-badge:focus-visible > span {
+  opacity: 1;
+}
+
 .custom-region-badge__name {
-  font-family: var(--font-display, Georgia, serif);
+  font-family: var(--font-display, "Geist", ui-sans-serif, system-ui, sans-serif);
   font-size: 17px;
   font-weight: 700;
   line-height: 1.05;
@@ -74,7 +84,7 @@
 
 /* Responsive: scale down cleanly on small viewports. */
 @media (max-width: 600px) {
-  .nexit-mapbox {
+  .kolmari-mapbox {
     height: 420px;
     border-radius: 18px;
   }

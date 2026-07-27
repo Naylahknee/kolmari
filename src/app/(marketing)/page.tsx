@@ -4,46 +4,49 @@ import {
   ArrowRight,
   Calculator,
   CheckCircle2,
-  FileCheck2,
-  Globe2,
   MapPinned,
   MessageCircleMore,
   Sparkles,
   UsersRound,
 } from 'lucide-react'
 import { MarketingMobileNav } from '@/components/nexit/marketing-mobile-nav'
-import { Wordmark } from '@/components/nexit/wordmark'
-import { MiniExperienceTrigger } from '@/components/nexit/landing-mini-experiences'
+import { MarketingLogo } from '@/components/nexit/marketing-logo'
+import { QuestionsSection } from '@/components/nexit/questions-section'
 
 const steps = [
   {
     image: '/images/journey-globe-pins.png',
-    title: 'Find your Destination',
-    copy: 'Compare Destinations, Pathways, and monthly costs side by side.',
-    action: 'Explore Destinations',
-    experience: 'starting-places' as const,
+    title: 'Choose a Nextination',
+    copy: 'Compare Nextinations, Pathways, and monthly costs side by side.',
   },
   {
     image: '/images/passport-visa-documents.png',
     title: 'View your Pathways',
     copy: 'Answer focused questions and get a practical starting shortlist.',
-    action: 'View My Pathways',
-    experience: 'pathways' as const,
   },
   {
     image: '/images/luggage-tropical-coast.png',
     title: 'Build your Move Plan',
     copy: 'Track documents, budget, and the tasks that turn a plan into a departure.',
-    action: 'Start Your Move Plan',
-    experience: 'nexit-stage' as const,
   },
 ]
 
-const stats = [
-  { value: '50+', label: 'Countries', icon: Globe2 },
-  { value: '120+', label: 'Pathways', icon: FileCheck2 },
-  { value: '20K+', label: 'Planners', icon: UsersRound },
-]
+function MarketingWordmark({ compact = false }: { compact?: boolean }) {
+  const width = compact ? 120 : 152
+  const height = compact ? 32 : 40
+  return (
+    <Link href="/" aria-label="Nexit home" className="inline-flex shrink-0 items-center">
+      <Image
+        src="/brand/nexit-wordmark-dark.png"
+        alt="Nexit"
+        width={width}
+        height={height}
+        className="h-auto w-auto object-contain"
+        priority
+      />
+    </Link>
+  )
+}
 
 export default function LandingPage() {
   return (
@@ -61,14 +64,14 @@ export default function LandingPage() {
           <div className="absolute inset-0 bg-[linear-gradient(90deg,#0d1b39_0%,#0d1b39_35%,rgba(13,27,57,.82)_49%,rgba(13,27,57,.12)_76%)]" />
 
           <header className="relative z-20 flex items-center justify-between px-5 py-5 sm:px-8 lg:px-11">
-            <Wordmark dark />
+            <MarketingLogo />
             <nav className="hidden items-center gap-7 text-sm font-semibold text-white/75 md:flex" aria-label="Landing navigation">
               <a href="#how-it-works" className="transition hover:text-white">How it works</a>
               <a href="#features" className="transition hover:text-white">Features</a>
               <a href="#destinations" className="transition hover:text-white">Destinations</a>
               <a href="#community" className="transition hover:text-white">Community</a>
               <Link href="/login" className="transition hover:text-white">Sign in</Link>
-              <Link href="/signup?next=%2Fnexitnation" className="gold-button !min-h-10 !px-4">Build My Move Plan</Link>
+              <Link href="/quiz" className="gold-button !min-h-10 !px-4">Start Your Nexit</Link>
             </nav>
             <MarketingMobileNav />
           </header>
@@ -84,7 +87,7 @@ export default function LandingPage() {
                 Compare Destinations, review Pathways, and build a realistic Move Plan — without piecing it together across a dozen tabs.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="/signup?next=%2Fnexitnation" className="gold-button">Build My Move Plan <ArrowRight size={17} /></Link>
+                <Link href="/quiz" className="gold-button">Start Your Nexit <ArrowRight size={17} /></Link>
                 <Link href="#how-it-works" className="inline-flex min-h-12 items-center rounded-xl border border-white/25 px-5 font-bold text-white transition hover:bg-white/8">
                   See how it works
                 </Link>
@@ -122,42 +125,14 @@ export default function LandingPage() {
                 <div className="p-6">
                   <h3 className="text-xl font-extrabold text-navy">{item.title}</h3>
                   <p className="mt-2 min-h-12 text-sm leading-6 text-muted">{item.copy}</p>
-                  <MiniExperienceTrigger
-                    experience={item.experience}
-                    label={item.action}
-                    className="mt-5 inline-flex items-center gap-2 text-sm font-extrabold text-gold-deep focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-gold/50 focus-visible:rounded"
-                  />
                 </div>
               </article>
             ))}
           </div>
         </section>
-
-        <section className="pb-16">
-          <div className="relative grid min-h-44 items-center overflow-hidden rounded-[26px] bg-navy px-7 py-8 text-white sm:grid-cols-[120px_1fr_210px] sm:px-10">
-            <div className="hidden size-24 rounded-full border-[3px] border-gold/60 sm:block" aria-hidden />
-            <div className="relative z-10">
-              <blockquote className="font-display text-2xl font-bold italic leading-relaxed sm:text-[1.65rem]">
-                &ldquo;Kolmari gave me a clear plan and the confidence to finally make my move.&rdquo;
-              </blockquote>
-              <p className="mt-4 text-sm font-extrabold text-gold">— Early Kolmari user</p>
-            </div>
-            <Image src="/images/airplane.png" alt="" width={440} height={278} className="pointer-events-none absolute -right-5 bottom-0 w-64 opacity-65 brightness-0 invert sm:relative sm:right-auto sm:w-[210px]" />
-          </div>
-        </section>
       </div>
 
-      <section className="w-full bg-navy-deep py-10 text-white" aria-label="Kolmari at a glance">
-        <div className="mx-auto grid max-w-[1180px] grid-cols-3 gap-y-9 px-5 text-center lg:px-0">
-          {stats.map(({ value, label, icon: Icon }, index) => (
-            <div key={label} className={`px-4 ${index < stats.length - 1 ? 'border-r border-white/10' : ''}`}>
-              <Icon className="mx-auto text-gold" size={25} />
-              <p className="mt-3 font-display text-3xl font-extrabold">{value}</p>
-              <p className="mt-1 text-xs font-semibold text-[#9fb2d1]">{label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <QuestionsSection />
 
       <section id="community" className="mx-auto max-w-[1236px] px-4 py-20 sm:px-6 lg:px-7">
         <div className="mb-9 max-w-2xl">
@@ -196,13 +171,13 @@ export default function LandingPage() {
           <div className="mx-auto w-full max-w-[1180px] px-5">
             <h2 className="max-w-xl font-display text-4xl font-extrabold">Your next chapter deserves a real plan.</h2>
             <p className="mt-3 text-white/75">Compare clearly. Prepare practically. Move with confidence.</p>
-            <Link href="/signup?next=%2Fnexitnation" className="gold-button mt-6">Build My Move Plan <ArrowRight size={17} /></Link>
+            <Link href="/quiz" className="gold-button mt-6">Start Your Nexit <ArrowRight size={17} /></Link>
           </div>
         </div>
         <div className="border-t border-white/10 px-5 py-5">
           <div className="mx-auto flex max-w-[1180px] flex-col items-center justify-between gap-4 text-center text-xs text-white/55 sm:flex-row sm:text-left">
-            <Wordmark dark compact />
-            <p>© 2026 Kolmari. Pathway recommendations are planning guidance, not legal advice.</p>
+            <MarketingLogo compact />
+            <p>© 2026 Nexit. Visa recommendations are planning guidance, not legal advice.</p>
           </div>
         </div>
       </footer>
