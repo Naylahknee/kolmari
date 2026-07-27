@@ -694,3 +694,32 @@ sidebar menu at all breakpoints.
 | TypeScript (`tsc --noEmit`) | ✅ Pass |
 | Lint (`eslint`) | ✅ No new errors (36 pre-existing errors unchanged) |
 | Production build (`next build`) | ✅ Pass |
+
+## Country card artwork matches the Portugal Nextination hero
+
+Region pages (`/nexitnation/[region]`) previously rendered each country card
+image as a bold solid-gold silhouette with a plain "{city} · {code}" pill.
+`CountryShapePanel` now mirrors the Portugal country page hero style: a warm
+navy-to-earth wash, the faint diamond-grid brand pattern, a low-opacity white
+country silhouette, and a gold butterfly location pin (navy teardrop, gold
+edge, gold glow, butterfly mark) sitting on the shape's centre.
+
+The pin's primary label is the featured city (gold); the sub-label is the
+country name (muted), **not** "Capital". The Portugal hero can say "Capital"
+because Lisbon is the capital, but region cards feature cities that are not
+always the national capital (e.g. Barcelona), so asserting capital status
+would fabricate a country fact. The country-name sub-label keeps the same
+two-line visual treatment while staying truthful.
+
+| File | Change |
+|---|---|
+| `src/components/nexit/CountryShapePanel.tsx` | Rebuilt card artwork to match the Portugal hero (warm wash, brand pattern, faint outline, gold butterfly capital pin, city/country label) |
+
+### Tests Run
+
+| Check | Result |
+|---|---|
+| TypeScript (`tsc --noEmit`) | ✅ Pass |
+| Lint (`eslint` on changed file) | ✅ Pass |
+| Production build (`next build`) | ✅ Pass |
+| Visual check (headless Chromium render of 8 countries) | ✅ Matches Portugal hero style |
