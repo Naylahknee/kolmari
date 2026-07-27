@@ -27,7 +27,7 @@ export function CountryTemplate({ slug, active, hero, children }:
             <TabBar slug={slug} active={active} />
             <div className="cols">
               <div>{children}</div>
-              <RightRail />
+              <RightRail slug={slug} />
             </div>
           </main>
         </div>

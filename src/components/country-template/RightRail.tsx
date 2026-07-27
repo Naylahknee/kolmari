@@ -2,8 +2,12 @@
 import Link from 'next/link'
 import { toggleAcc, toggleStep } from './client/behaviours'
 
-/* Converted from the approved index.html mockup. Markup verbatim. */
-export function RightRail({}: Record<string, never>) {
+/* Right rail. Portugal keeps the approved mockup verbatim (its figures are real
+   Portugal data). Other countries get an honest, country-neutral rail: no
+   fabricated Match Score (per DESIGN.md, a static score is never shown without
+   a completed profile) and no Portugal-specific steps. */
+export function RightRail({ slug }: { slug: string }) {
+  if (slug !== 'portugal') return <NeutralRail />
   return (
     <aside className="rightcol">
             <div className="card-surface">
@@ -33,7 +37,7 @@ export function RightRail({}: Record<string, never>) {
               </div>
               <div className="match-cta">
                 <Link className="gold-button btn-full" href="/nexit-plan">Build my Nexit Plan <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="14" height="14"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
-                <button className="btn btn-full">Compare with Spain</button>
+                <Link className="btn btn-full" href="/countries">Compare countries</Link>
               </div>
             </div>
 
@@ -69,5 +73,60 @@ export function RightRail({}: Record<string, never>) {
               </div>
             </div>
           </aside>
+  )
+}
+
+/* Country-neutral rail for countries without a personalized profile match or
+   authored country-specific action plan. No fabricated score; generic,
+   honest relocation guidance. */
+function NeutralRail() {
+  return (
+    <aside className="rightcol">
+      <div className="card-surface">
+        <div className="match">
+          <div className="match-top">
+            <div>
+              <div className="match-h">Nexit Match</div>
+              <div className="match-t">Complete your Nexit Profile</div>
+              <div className="match-s">Personalized match scores appear once your profile is complete. Nexit never shows a placeholder score.</div>
+            </div>
+          </div>
+        </div>
+        <div className="match-cta">
+          <Link className="gold-button btn-full" href="/profile-wizard">Complete your profile <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="14" height="14"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
+          <Link className="btn btn-full" href="/countries">Compare countries</Link>
+        </div>
+      </div>
+
+      <div className="card-surface">
+        <button className="acc-head" aria-expanded="true" onClick={(e) => toggleAcc(e.currentTarget)}>
+          <span className="ttl"><span className="k">Start here</span><span className="n2">Recommended first actions</span></span>
+          <span className="acc-count">0 / 5</span>
+          <svg className="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 9l6 6 6-6" /></svg>
+        </button>
+        <div className="acc-body">
+          <button className="step" onClick={(e) => toggleStep(e.currentTarget)}><span className="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" /></svg></span><span><span className="st-t">Confirm your residency route</span><span className="st-d">Review the routes matched to your profile in Nexit Pathways, then confirm requirements with official authorities.</span><span className="st-tag">Start</span></span></button>
+          <button className="step" onClick={(e) => toggleStep(e.currentTarget)}><span className="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" /></svg></span><span><span className="st-t">Get a local tax ID</span><span className="st-d">Most countries require a tax number before you can bank or rent. Check the Move There tab.</span><span className="st-tag">Early</span></span></button>
+          <button className="step" onClick={(e) => toggleStep(e.currentTarget)}><span className="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" /></svg></span><span><span className="st-t">Open a local bank account</span><span className="st-d">Often needs the tax ID first; a multi-currency account can bridge the gap.</span><span className="st-tag">Needs tax ID</span></span></button>
+          <button className="step" onClick={(e) => toggleStep(e.currentTarget)}><span className="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" /></svg></span><span><span className="st-t">Book your consulate appointment</span><span className="st-d">Appointment backlogs are often the bottleneck. Book before your documents are ready.</span><span className="st-tag">Do this early</span></span></button>
+          <button className="step" onClick={(e) => toggleStep(e.currentTarget)}><span className="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" /></svg></span><span><span className="st-t">Gather and apostille documents</span><span className="st-d">Background check, birth and marriage certificates, and certified translations.</span><span className="st-tag">6 to 10 weeks</span></span></button>
+        </div>
+      </div>
+
+      <div className="card-surface">
+        <button className="acc-head" aria-expanded="false" onClick={(e) => toggleAcc(e.currentTarget)}>
+          <span className="ttl"><span className="k">Before you commit</span><span className="n2">What could go wrong</span></span>
+          <span className="acc-count">3</span>
+          <svg className="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 9l6 6 6-6" /></svg>
+        </button>
+        <div className="acc-body" hidden>
+          <ul className="watch">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 9v4M12 17h.01" /><circle cx="12" cy="12" r="9" /></svg><span><b>Appointment backlogs</b> are a common cause of blown timelines. Much of the process waits on this.</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 9v4M12 17h.01" /><circle cx="12" cy="12" r="9" /></svg><span><b>Income thresholds and rules change.</b> Confirm current figures with official sources before relying on them.</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 9v4M12 17h.01" /><circle cx="12" cy="12" r="9" /></svg><span><b>Tax regimes change.</b> Do not build the move around a benefit that may not exist when you land.</span></li>
+          </ul>
+        </div>
+      </div>
+    </aside>
   )
 }
