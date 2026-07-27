@@ -1,9 +1,15 @@
-import type { CountryContent } from '@/lib/country-workspace/country-content'
+import { getCountryContent } from '@/lib/country-workspace/country-content'
+import type { SectionDisclosure } from '@/lib/country-workspace/country-content'
 
-/* Converted from the approved index.html mockup. Markup is verbatim.
-   Content is still literal Portugal copy: replace with `content.*` per
-   section as the model is extended. See README step 4. */
+/* Portugal keeps its approved, hand-authored mockup content verbatim (see the
+   `HealthcareTab` Portugal branch below). Every other country renders the
+   data-driven `HealthcareTabData` variant, whose markup, classNames, and icons
+   follow the approved mockup while sourcing every country-specific value from
+   `content.healthcare.*`. */
+
 export function HealthcareTab({ slug }: { slug: string }) {
+  if (slug !== 'portugal') return <HealthcareTabData slug={slug} />
+
   return (
       <div className="tabpanel on" id="p-health">
 
@@ -267,6 +273,153 @@ export function HealthcareTab({ slug }: { slug: string }) {
                   <a className="lnk" href="https://www.infarmed.pt" target="_blank" rel="noopener noreferrer">INFARMED medicines <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5" /></svg></a>
                 </div>
                 <div className="src"><span>Last verified: January 2026 · SNS, INFARMED, Instituto Nacional para a Reabilitação. This is planning information, not medical advice.</span><span className="sbadge rev">Editorially reviewed</span></div>
+              </section>
+            </div>
+  )
+}
+
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
+function formatVerified(iso: string): string {
+  const [year, month] = iso.split('-')
+  const label = MONTHS[Number(month) - 1]
+  return label ? `${label} ${year}` : iso
+}
+
+const STATUS_LABELS: Record<SectionDisclosure['status'], string> = {
+  placeholder: 'Placeholder',
+  editorially_reviewed: 'Editorially reviewed',
+  official_source_verified: 'Official source verified',
+  stale: 'Needs review',
+}
+
+function SourceLine({ disclosure }: { disclosure?: SectionDisclosure }) {
+  if (!disclosure) return null
+  const badgeClass = disclosure.status === 'official_source_verified' ? 'sbadge' : 'sbadge rev'
+  return (
+    <div className="src">
+      <span>Last verified: {formatVerified(disclosure.lastVerified)} · {disclosure.sourceNote}</span>
+      <span className={badgeClass}>{STATUS_LABELS[disclosure.status]}</span>
+    </div>
+  )
+}
+
+/* Data-driven per country. Markup, classNames, and icons follow the approved
+   mockup; every country-specific value is sourced from `content.healthcare.*`.
+   Elements from the original mockup that carried Portugal-only facts with no
+   backing field (KPI stats, price/wait tables, the registration ladder,
+   national emergency numbers, named hospital groups and portals) are omitted
+   rather than shown for another country — see /docs/nexit/08-CONTENT-STANDARDS.md
+   ("Never invent content"). Advice callouts that are true for any relocation
+   are kept in neutral, country-agnostic phrasing. */
+function HealthcareTabData({ slug }: { slug: string }) {
+  const content = getCountryContent(slug)
+  if (!content) return null
+  const healthcare = content.healthcare
+
+  return (
+      <div className="tabpanel on" id="p-health">
+
+              {/* 1. SYSTEM OVERVIEW */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">1</span><h2>Healthcare System Overview</h2></div></div>
+                <p className="lead">Most residents weigh a public system entitlement against a private tier used for speed and choice. The two summaries below describe how each works here; eligibility, access, prescriptions, mental health, and accessibility follow in the sections after. We never collect health diagnoses in this experience.</p>
+                <div className="two" style={{marginTop: '18px'}}>
+                  <div>
+                    <div className="subh"><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 21V8l8-4 8 4v13" /><path d="M12 9v6M9 12h6" /></svg></span>Public system</div>
+                    <p className="rd-p">{healthcare.publicSystem}</p>
+                  </div>
+                  <div>
+                    <div className="subh"><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M17 6H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" /></svg></span>Private system</div>
+                    <p className="rd-p">{healthcare.privateSystem}</p>
+                  </div>
+                </div>
+                <SourceLine disclosure={healthcare.disclosure} />
+              </section>
+
+              {/* 2. PUBLIC */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">2</span><h2>Public Healthcare System</h2></div></div>
+                <p className="lead">{healthcare.primaryCare}</p>
+              </section>
+
+              {/* 3. PRIVATE */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">3</span><h2>Private Healthcare and Insurance</h2></div></div>
+                <p className="lead">{healthcare.insuranceRequirement}</p>
+                <div className="two">
+                  <div>
+                    <div className="subh"><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /></svg></span>Estimated private insurance</div>
+                    <p className="rd-p">{healthcare.estimatedInsuranceRange}</p>
+                    <p className="note">Planning estimate only. Actual premiums depend on age, coverage level, and provider — request quotes directly from insurers.</p>
+                  </div>
+                  <div>
+                    <div className="callout warn">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 9v4M12 17h.01" /><circle cx="12" cy="12" r="9" /></svg>
+                      <span><b>Buy before you need it.</b> Pre-existing conditions are commonly excluded from private policies, and many insurers will not write a new policy past a certain age. If private cover matters to your plan, take it out early rather than later.</span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* 4. ELIGIBILITY AND REGISTRATION */}
+              <section className="card-surface sec">
+                <div className="sec-head">
+                  <div className="sec-title"><span className="sec-num">4</span><h2>Eligibility and Health Registration Requirements</h2></div>
+                  <a className="sec-link" href={`/nextinations/${slug}/v2/move-there`}>See the residency steps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="13" height="13"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+                </div>
+                <p className="lead">{healthcare.eligibility}</p>
+                <div className="callout info">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-5M12 8h.01" /></svg>
+                  <span><b>Emergency care does not wait for paperwork.</b> Emergency departments treat anyone who needs urgent care regardless of registration status. Eligibility and registration govern routine and ongoing care, not a crisis.</span>
+                </div>
+              </section>
+
+              {/* 5. ACCESS */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">5</span><h2>Access to Primary Care, Specialists, and Emergency Care</h2></div></div>
+                <p className="lead">{healthcare.emergencyCare}</p>
+              </section>
+
+              {/* 6. PRESCRIPTIONS */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">6</span><h2>Prescription Medication</h2></div></div>
+                <p className="lead">{healthcare.prescriptions}</p>
+                <div className="callout warn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 9v4M12 17h.01" /><circle cx="12" cy="12" r="9" /></svg>
+                  <span><b>Bring a documented supply and a doctor&apos;s letter.</b> Carry medications in their original labelled packaging with a letter listing the generic (not brand) names and dosages. It clears customs questions and gives your first local doctor something to prescribe against before your records transfer. If you depend on a specific medication, confirm its availability and local naming before you commit to the move.</span>
+                </div>
+              </section>
+
+              {/* 7. MENTAL HEALTH */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">7</span><h2>Mental Health Services</h2></div></div>
+                <p className="lead">{healthcare.mentalHealth}</p>
+                <div className="two">
+                  <div>
+                    <div className="subh"><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20.8 5.6a5.5 5.5 0 00-7.8 0L12 6.6l-1-1a5.5 5.5 0 00-7.8 7.8l8.8 8.8 8.8-8.8a5.5 5.5 0 000-7.8z" /></svg></span>Planning ahead</div>
+                    <p className="rd-p">Relocation is itself a significant stressor, and the first year abroad is when people most often need support and least often have it arranged. If you are already in care, the practical move is to <b>keep your current provider for telehealth continuity</b> across the transition, then build local care in parallel rather than switching cold.</p>
+                    <p className="rd-p" style={{marginTop: '10px'}}>If you take psychiatric medication, confirm availability and local naming before you move. That check is the single most common gap people hit.</p>
+                  </div>
+                  <div>
+                    <div className="callout info">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-5M12 8h.01" /></svg>
+                      <span><b>Know the local crisis numbers before you need them.</b> Save your destination&apos;s emergency number on arrival. Many countries also run a free health-advice or triage line — confirm the numbers that apply where you settle.</span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* 8. ACCESSIBILITY */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">8</span><h2>Accessibility and Disability Services</h2></div></div>
+                <p className="lead">{healthcare.accessibilityNotes}</p>
+                <div className="callout warn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 9v4M12 17h.01" /><circle cx="12" cy="12" r="9" /></svg>
+                  <span><b>Visit before you sign a lease if mobility matters.</b> Listings rarely mention that a building has no lift, that the entrance has steps, or that the street is steep or uneven. In older housing stock these are common, and none of it shows in photographs.</span>
+                </div>
+                <p className="note">{healthcare.disclaimer} This is planning information, not medical advice.</p>
+                <SourceLine disclosure={healthcare.disclosure} />
               </section>
             </div>
   )

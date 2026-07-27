@@ -1,10 +1,13 @@
 import Link from 'next/link'
-import type { CountryContent } from '@/lib/country-workspace/country-content'
+import { COUNTRIES } from '@/lib/countries'
+import { getCountryContent } from '@/lib/country-workspace/country-content'
 
-/* Converted from the approved index.html mockup. Markup is verbatim.
-   Content is still literal Portugal copy: replace with `content.*` per
-   section as the model is extended. See README step 4. */
-export function MoveThereTab({}: Record<string, never>) {
+/* Ways In / residency pathways. The detailed, authored route data currently
+   exists only for Portugal. Other countries show an honest "being verified"
+   state that points to Nexit Pathways and official sources rather than
+   presenting unverified visa eligibility. */
+export function MoveThereTab({ slug }: { slug: string }) {
+  if (slug !== 'portugal') return <MoveThereResearchState slug={slug} />
   return (
       <div className="tabpanel on" id="p-move">
 
@@ -365,5 +368,53 @@ export function MoveThereTab({}: Record<string, never>) {
                 </div>
               </section>
             </div>
+  )
+}
+
+/* Honest state for countries without authored residency-route data. */
+function MoveThereResearchState({ slug }: { slug: string }) {
+  const name = COUNTRIES.find((country) => country.slug === slug)?.name ?? 'this Nextination'
+  const officialResources = (getCountryContent(slug)?.resources ?? []).filter(
+    (resource) => resource.category === 'immigration' || resource.type === 'official',
+  ).slice(0, 4)
+
+  return (
+    <div className="tabpanel on" id="p-move">
+      <section className="card-surface sec">
+        <div className="sec-head">
+          <div className="sec-title"><span className="sec-num">1</span><h2>Ways In</h2></div>
+        </div>
+        <p className="lead">
+          Detailed residency pathways for {name} are being verified. Nexit does not present unverified
+          visa eligibility, income thresholds, or processing times. Review your Nexit Pathways for routes
+          matched to your profile, and confirm current requirements with official authorities before you act.
+        </p>
+        <div className="pull" style={{ marginTop: '14px' }}>
+          <b>Why this is blank:</b> route-level detail (income proof, processing time, where each route leads)
+          is published per country only once it is sourced and reviewed. It is available for Portugal today and
+          is being extended to {name}.
+        </div>
+        <div className="badges" style={{ marginTop: '16px' }}>
+          <Link className="gold-button" href="/pathways">Review Nexit Pathways</Link>
+        </div>
+      </section>
+
+      {officialResources.length > 0 && (
+        <section className="card-surface sec">
+          <div className="sec-head">
+            <div className="sec-title"><span className="sec-num">2</span><h2>Official sources</h2></div>
+          </div>
+          <p className="lead">Confirm current visa categories and residence rights directly with the authorities for {name}.</p>
+          <div className="badges" style={{ marginTop: '12px', flexWrap: 'wrap' }}>
+            {officialResources.map((resource) => (
+              <a key={resource.url} className="btn" href={resource.url} target="_blank" rel="noopener noreferrer">
+                {resource.organization}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5" /></svg>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
   )
 }

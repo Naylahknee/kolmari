@@ -91,10 +91,11 @@ export function getDiscoverableCountry(slug: string) {
   return DISCOVERABLE_COUNTRIES.find((country) => country.slug === slug) ?? null
 }
 
-/* A discoverable Nextination renders the lightweight CountryResearchPage inside
-   the shared workspace chrome — except Portugal, which uses the full
-   CountryTemplate with its own chrome. The page and the WorkspaceShell both
-   call this so they agree on which chrome wraps the route. */
+/* Countries in COUNTRIES have full verified datasets (facts + content), so they
+   render the tabbed CountryTemplate. Discoverable-only Nextinations have no full
+   dataset yet, so they render the lightweight CountryResearchPage inside the
+   shared workspace chrome. The page and the WorkspaceShell both call this so
+   they agree on which chrome wraps the route. */
 export function usesResearchPage(slug: string) {
-  return slug !== 'portugal' && getDiscoverableCountry(slug) !== null
+  return !COUNTRIES.some((country) => country.slug === slug) && getDiscoverableCountry(slug) !== null
 }

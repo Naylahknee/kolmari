@@ -1,9 +1,183 @@
-import type { CountryContent } from '@/lib/country-workspace/country-content'
+import type { SectionDisclosure } from '@/lib/country-workspace/country-content'
+import { getCountryContent } from '@/lib/country-workspace/country-content'
+
+/* Portugal keeps its approved, hand-authored content verbatim (see the
+   `portugal` branch below). Every other country renders the data-driven
+   version in `WorkStudyTabData`, where markup and design tokens are preserved
+   from the approved index.html mockup and only the copy is sourced from
+   `content.*`. Data points with no matching field render an honest neutral
+   state rather than another country's figures (see AGENTS.md: never fabricate
+   country data). */
+
+const STATUS_META: Record<string, { label: string; badge: string }> = {
+  official_source_verified: { label: 'Official source verified', badge: 'sbadge' },
+  editorially_reviewed: { label: 'Editorially reviewed', badge: 'sbadge rev' },
+  placeholder: { label: 'Research in progress', badge: 'sbadge rev' },
+  stale: { label: 'Update pending', badge: 'sbadge rev' },
+}
+
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
+function formatVerified(iso: string): string {
+  const [y, m] = iso.split('-')
+  const mi = Number(m) - 1
+  return MONTHS[mi] ? `${MONTHS[mi]} ${y}` : iso
+}
+
+function SourceLine({ disclosure }: { disclosure?: SectionDisclosure }) {
+  if (!disclosure) return null
+  const meta = STATUS_META[disclosure.status] ?? STATUS_META.editorially_reviewed
+  return (
+    <div className="src">
+      <span>Last verified: {formatVerified(disclosure.lastVerified)} · {disclosure.sourceNote}</span>
+      <span className={meta.badge}>{meta.label}</span>
+    </div>
+  )
+}
+
+function WorkStudyTabData({ slug }: { slug: string }) {
+  const content = getCountryContent(slug)
+  if (!content) return null
+
+  const employment = content.employment
+  const education = content.education
+  const economic = content.economic
+  const countryName = slug.charAt(0).toUpperCase() + slug.slice(1)
+
+  return (
+      <div className="tabpanel on" id="p-work">
+
+              {/* 1. EMPLOYMENT MARKET */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">1</span><h2>Employment Market</h2></div></div>
+                <div className="kpis">
+                  <div className="kpi"><div className="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2" /></svg>Unemployment</div><div className="v">{economic.unemployment?.value ?? 'Not available'}</div><div className="n">{economic.unemployment ? <>{economic.unemployment.source} · {economic.unemployment.period}</> : 'Data not yet available'}</div></div>
+                  <div className="kpi"><div className="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /></svg>Average wage</div><div className="v">{economic.avgMonthlyWage?.value ?? 'Not available'}</div><div className="n">{economic.avgMonthlyWage ? <>{economic.avgMonthlyWage.source} · {economic.avgMonthlyWage.period}</> : 'Data not yet available'}</div></div>
+                  <div className="kpi"><div className="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M17 6H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" /></svg>Minimum wage</div><div className="v">{economic.minimumWage?.value ?? 'Not available'}</div><div className="n">{economic.minimumWage ? <>{economic.minimumWage.source} · {economic.minimumWage.period}</> : 'Data not yet available'}</div></div>
+                  <div className="kpi"><div className="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 17l6-6 4 4 8-8" /><path d="M21 7v6h-6" /></svg>Job growth</div><div className="v">{economic.growingSectors[0] ?? 'Varies'}</div><div className="n">{economic.growingSectors.length > 1 ? economic.growingSectors.slice(1, 3).join(', ') : 'Growing sectors'}</div></div>
+                </div>
+                {economic.personalInterpretation ? (
+                  <div className="callout warn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 9v4M12 17h.01" /><circle cx="12" cy="12" r="9" /></svg>
+                    <span>{economic.personalInterpretation}</span>
+                  </div>
+                ) : null}
+                <SourceLine disclosure={economic.disclosure} />
+              </section>
+
+              {/* 2. INDUSTRIES AND SALARIES */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">2</span><h2>In-Demand Industries and Average Salaries</h2></div></div>
+                <p className="lead">{employment.avgSalaryRange}</p>
+                <table className="tbl">
+                  <thead><tr><th>Industry</th><th className="num">Demand</th><th className="num">Gross monthly</th><th>English viable</th></tr></thead>
+                  <tbody>
+                    {employment.topSectors.map((sector) => (
+                      <tr key={sector}><td>{sector}</td><td className="num">—</td><td className="num">—</td><td>—</td></tr>
+                    ))}
+                  </tbody>
+                </table>
+                <p className="note">Sector-level demand, salary, and language detail is not yet broken out for {countryName}. The average salary range above summarises pay across sectors.</p>
+                <div className="subh" style={{marginTop: '22px'}}><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 17l6-6 4 4 8-8" /></svg></span>Sectors adding jobs fastest</div>
+                <div className="route-req" style={{borderTop: 'none', paddingTop: '0'}}>
+                  {economic.growingSectors.map((sector) => (
+                    <span key={sector} className="req met"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" /></svg>{sector}</span>
+                  ))}
+                </div>
+              </section>
+
+              {/* 3. JOB SEARCH AND WORK AUTHORIZATION */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">3</span><h2>Job Search and Work Authorization</h2></div></div>
+                <div className="two">
+                  <div>
+                    <div className="subh"><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg></span>Where people actually search</div>
+                    <div className="links">
+                      {employment.jobBoards.map((board) => (
+                        <a key={board.url} className="lnk" href={board.url} target="_blank" rel="noopener noreferrer">{board.name} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5" /></svg></a>
+                      ))}
+                    </div>
+                    <p className="note">Public employment portals and professional networks list many roles, including some open to newcomers and non-nationals.</p>
+                  </div>
+                  <div>
+                    <div className="subh"><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 10h18" /></svg></span>How you become allowed to work</div>
+                    <ul className="rd-list">
+                      <li className="c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></svg>Work authorization depends on your residence permit or visa route. Most permits that allow residence also allow work, but the specifics vary by pathway — confirm the route that matches your situation.</li>
+                    </ul>
+                    <div className="callout ok">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" /></svg>
+                      <span>On your matched route, work authorization may come with residency. <a href={`/nextinations/${slug}/v2/move-there`} style={{textDecoration: 'underline', fontWeight: '700'}}>See the pathway detail</a>.</span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* 4. REMOTE WORK AND WORKING CONDITIONS */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">4</span><h2>Remote Work and Working Conditions</h2></div></div>
+                <div className="det-grid">
+                  <div className="det"><div className="h">Remote-work environment</div><div className="b">{employment.remoteEnvironment}</div></div>
+                  <div className="det"><div className="h">Networking and community</div><div className="b">{employment.networkingGroups}</div></div>
+                  <div className="det"><div className="h">Language at work</div><div className="b">{employment.languageExpectation}</div></div>
+                  <div className="det"><div className="h">Work culture</div><div className="b">{employment.workCulture}</div></div>
+                  <div className="det"><div className="h">Tax position</div><div className="b">Spending enough time in country can make you tax resident on worldwide income. See the Tax &amp; Money tab before you commit.</div></div>
+                  <div className="det"><div className="h">Connectivity and coworking</div><div className="b">Broadband quality and coworking supply vary by city and region. Confirm options for your specific destination.</div></div>
+                </div>
+                <SourceLine disclosure={employment.disclosure} />
+              </section>
+
+              {/* 5. UNIVERSITIES */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">5</span><h2>Universities and Study Opportunities</h2></div></div>
+                <p className="lead">{education.universities}</p>
+                {education.studyPathways ? <p className="note">{education.studyPathways}</p> : null}
+                <div className="callout info">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-5M12 8h.01" /></svg>
+                  <span><b>Enrolling in a recognised degree program can itself support a student residence route.</b> For anyone whose income does not clear an income-based visa threshold, a study pathway is often an underused door. Check the pathway detail for {countryName}.</span>
+                </div>
+                <SourceLine disclosure={education.disclosure} />
+              </section>
+
+              {/* 6. TUITION */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">6</span><h2>Tuition Overview</h2></div></div>
+                <p className="lead">{education.tuitionRange}</p>
+                <p className="note">Living costs are usually the larger line item for most students. See Cost &amp; Housing for city-by-city figures.</p>
+              </section>
+
+              {/* 7. FUNDED PROGRAMS */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">7</span><h2>Funded Programs, Scholarships, and Exchanges</h2></div></div>
+                <div className="callout info">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-5M12 8h.01" /></svg>
+                  <span>Nexit does not yet track funded programs, scholarships, and exchange routes for {countryName}. Check official government, education-ministry, and national scholarship sources for current openings, stipends, and eligibility windows.</span>
+                </div>
+              </section>
+
+              {/* 8. CREDENTIAL RECOGNITION */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">8</span><h2>Degree and Professional Credential Recognition</h2></div></div>
+                <p className="lead">Recognising a degree and being licensed to practise a regulated profession are two separate processes. Most people only need the first.</p>
+                <div className="det-grid">
+                  <div className="det"><div className="h">Recognition process</div><div className="b">{employment.credentialRecognition}</div></div>
+                  <div className="det"><div className="h">Regulated professions</div><div className="b">Regulated fields such as medicine, nursing, law, and teaching typically require registration with the relevant professional body plus local language competence, on top of academic recognition. Budget extra time.</div></div>
+                  <div className="det"><div className="h">Documents needed</div><div className="b">Expect to provide your degree certificate and transcript, apostilled and officially translated. Prepare these alongside your visa paperwork so the apostille pipeline is done once.</div></div>
+                </div>
+                <div className="callout ok">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" /></svg>
+                  <span><b>If you work remotely for clients outside your destination country, you generally do not need credential recognition at all.</b> It matters for local employment, further study, and regulated professions only. Do not let it block your timeline if none of those apply.</span>
+                </div>
+                <SourceLine disclosure={employment.disclosure} />
+              </section>
+            </div>
+  )
+}
 
 /* Converted from the approved index.html mockup. Markup is verbatim.
-   Content is still literal Portugal copy: replace with `content.*` per
-   section as the model is extended. See README step 4. */
+   Content is literal Portugal copy: this approved content is preserved
+   as-is for Portugal. All other countries use WorkStudyTabData above. */
 export function WorkStudyTab({ slug }: { slug: string }) {
+  if (slug !== 'portugal') return <WorkStudyTabData slug={slug} />
   return (
       <div className="tabpanel on" id="p-work">
 

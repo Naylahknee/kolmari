@@ -1,9 +1,51 @@
-import type { CountryContent } from '@/lib/country-workspace/country-content'
+import { getCountryContent } from '@/lib/country-workspace/country-content'
+import type { ContentStatus, SectionDisclosure } from '@/lib/country-workspace/country-content'
 
-/* Converted from the approved index.html mockup. Markup is verbatim.
-   Content is still literal Portugal copy: replace with `content.*` per
-   section as the model is extended. See README step 4. */
+/* Converted from the approved index.html mockup. Markup and classNames are
+   preserved verbatim. Prose is driven from `content.legalTaxes` / `content.economic`
+   so it renders per country. Portugal-specific numeric widgets (the estimator band
+   bar, the VAT / property rate table, the banking-difficulty meters, and the
+   Portugal-named setup sequence) have no backing field in the content model, so they
+   render only for Portugal — where the figures are real and sourced — and other
+   countries get an honest, content-driven fallback. Tax figures are legally
+   sensitive: no country ever shows another country's hardcoded numbers. */
+
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
+function formatMonthYear(iso: string): string {
+  const parts = iso.split('-')
+  const mi = Number(parts[1]) - 1
+  return MONTHS[mi] ? `${MONTHS[mi]} ${parts[0]}` : iso
+}
+
+const STATUS_BADGE: Record<ContentStatus, { cls: string; label: string }> = {
+  official_source_verified: { cls: 'sbadge', label: 'Official source verified' },
+  editorially_reviewed: { cls: 'sbadge rev', label: 'Editorially reviewed' },
+  placeholder: { cls: 'sbadge rev', label: 'Research in progress' },
+  stale: { cls: 'sbadge rev', label: 'Needs re-verification' },
+}
+
+/* Data-driven source/disclosure footer. `note` carries the section's plain-language
+   caution or legal disclaimer, which content standards require to stay visible. */
+function SourceFooter({ disclosure, note }: { disclosure?: SectionDisclosure; note: string }) {
+  const badge = disclosure ? STATUS_BADGE[disclosure.status] : STATUS_BADGE.editorially_reviewed
+  return (
+    <div className="src">
+      <span>{disclosure ? `Last verified ${formatMonthYear(disclosure.lastVerified)} · ${disclosure.sourceNote}. ` : ''}{note}</span>
+      <span className={badge.cls}>{badge.label}</span>
+    </div>
+  )
+}
+
 export function TaxMoneyTab({ slug }: { slug: string }) {
+  const content = getCountryContent(slug)
+  if (!content) return null
+  const tax = content.legalTaxes
+  const economic = content.economic
+
+  const isPortugal = slug === 'portugal'
+  const countryLabel = slug.split('-').map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : w)).join(' ')
+
   return (
       <div className="tabpanel on" id="p-money">
 
@@ -15,6 +57,7 @@ export function TaxMoneyTab({ slug }: { slug: string }) {
                 </div>
                 <p className="lead">Move the slider and pick your situation. Everything below updates live. These are planning estimates built on published rates, not a tax return.</p>
 
+                {isPortugal ? (
                 <div className="calc">
                   <div>
                     <div className="ctrl">
@@ -79,25 +122,42 @@ export function TaxMoneyTab({ slug }: { slug: string }) {
                     <div className="callout info nu" id="tmUs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-5M12 8h.01" /></svg><span></span></div>
                   </div>
                 </div>
-                <div className="src"><span>Rates indexed annually and shown for illustration. Confirm current bands with a cross-border accountant before acting on any figure here.</span><span className="sbadge rev">Editorially reviewed</span></div>
+                ) : (
+                <>
+                <div className="det-grid">
+                  <div className="det"><div className="h">Average monthly wage</div><div className="b">{economic.avgMonthlyWage ? `${economic.avgMonthlyWage.value} · ${economic.avgMonthlyWage.source}, ${economic.avgMonthlyWage.period}` : 'Not yet verified for this country.'}</div></div>
+                  <div className="det"><div className="h">Minimum wage</div><div className="b">{economic.minimumWage ? `${economic.minimumWage.value} · ${economic.minimumWage.source}, ${economic.minimumWage.period}` : 'Not yet verified for this country.'}</div></div>
+                </div>
+                <div className="callout info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-5M12 8h.01" /></svg><span>{`An interactive tax estimator is not yet available for ${countryLabel}. The wage figures above give local-earning context; see the income-tax breakdown below for ${countryLabel}'s current rates and special regimes. Treat everything here as planning context and confirm figures with a cross-border accountant.`}</span></div>
+                </>
+                )}
+                <SourceFooter disclosure={tax.disclosure} note="Rates are indexed and shown for illustration only. Confirm current bands with a qualified cross-border accountant before acting on any figure here." />
               </section>
 
               {/* 2. TAX RESIDENCY */}
               <section className="card-surface sec">
                 <div className="sec-head"><div className="sec-title"><span className="sec-num">2</span><h2>Tax Residency</h2></div></div>
                 <p className="lead">Residency for immigration and residency for tax are two different tests, and confusing them is the most expensive mistake on this page.</p>
+                {isPortugal ? (
                 <div className="ladder">
                   <div className="lad"><div className="lad-rail"><span className="lad-dot">1</span><span className="lad-line"></span></div><div className="lad-body"><div className="lad-when">Under 183 days</div><div className="lad-t">Non-resident</div><div className="lad-d">Portugal taxes only Portuguese-source income. Your worldwide income stays outside the Portuguese net.</div></div></div>
                   <div className="lad"><div className="lad-rail"><span className="lad-dot">2</span><span className="lad-line"></span></div><div className="lad-body"><div className="lad-when">183 days or more</div><div className="lad-t">Tax resident</div><div className="lad-d">Portugal taxes your <b>worldwide income</b>, wherever it is earned or held. Days do not need to be consecutive.</div><div className="lad-tags"><span className="lad-tag">Rolling 12 months</span></div></div></div>
                   <div className="lad"><div className="lad-rail"><span className="lad-dot">3</span><span className="lad-line"></span></div><div className="lad-body"><div className="lad-when">Alternative test</div><div className="lad-t">Habitual residence</div><div className="lad-d">Fewer than 183 days can still make you resident if you keep a home here in a way that implies you intend to live in it.</div></div></div>
                   <div className="lad goal"><div className="lad-rail"><span className="lad-dot"><svg width="13" height="13" strokeWidth="2.6" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" /></svg></span></div><div className="lad-body"><div className="lad-when">Either way</div><div className="lad-t">The US still wants a return</div><div className="lad-d">Citizenship-based taxation means you file with the IRS every year regardless of where you live or what Portugal collects.</div><div className="lad-tags"><span className="lad-tag">Every year</span><span className="lad-tag">No exceptions</span></div></div></div>
                 </div>
+                ) : (
+                <div className="det-grid">
+                  <div className="det"><div className="h">When you become a tax resident</div><div className="b">{tax.taxResidency}</div></div>
+                  <div className="det"><div className="h">The US still wants a return</div><div className="b">Citizenship-based taxation means you file with the IRS every year regardless of where you live or what {countryLabel} collects.</div></div>
+                </div>
+                )}
                 <div className="callout warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 9v4M12 17h.01" /><circle cx="12" cy="12" r="9" /></svg><span><b>The arrival-year split matters.</b> Landing in July rather than June can change whether your first calendar year is taxed as resident or non-resident, and with it how a large one-off payment is treated. If you have a bonus, a sale, or an exercise coming, get advice on the date before you book the flight.</span></div>
               </section>
 
               {/* 3. INCOME TAX */}
               <section className="card-surface sec">
                 <div className="sec-head"><div className="sec-title"><span className="sec-num">3</span><h2>Income Tax and Special Regimes</h2></div></div>
+                {isPortugal ? (
                 <div className="two">
                   <div>
                     <div className="subh">How Portuguese IRS works</div>
@@ -116,6 +176,19 @@ export function TaxMoneyTab({ slug }: { slug: string }) {
                     <div className="callout warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 9v4M12 17h.01" /><circle cx="12" cy="12" r="9" /></svg><span><b>Do not build your budget on IFICI until someone has confirmed you qualify.</b> Toggle it off in the estimator above to see what standard rates actually look like, and treat that as your baseline.</span></div>
                   </div>
                 </div>
+                ) : (
+                <div className="two">
+                  <div>
+                    <div className="subh">How income tax works</div>
+                    <p className="rd-p">{tax.incomeTax}</p>
+                  </div>
+                  <div>
+                    <div className="subh">Contributions and special regimes</div>
+                    <p className="rd-p">{tax.socialSecurity}</p>
+                    <div className="callout warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 9v4M12 17h.01" /><circle cx="12" cy="12" r="9" /></svg><span>{`Do not build your budget on any reduced or special tax regime until a qualified adviser confirms you qualify for it in ${countryLabel}. Treat standard rates as your baseline.`}</span></div>
+                  </div>
+                </div>
+                )}
               </section>
 
               {/* 4. US OBLIGATIONS */}
@@ -138,21 +211,21 @@ export function TaxMoneyTab({ slug }: { slug: string }) {
                   <div className="gb"><div className="h">Foreign Tax Credit</div>
                     <div className="dual-row"><span className="dl">Simplicity</span><span className="meter" data-scale="pos" data-lvl="2" role="img" aria-label="Fiddly"><i></i><i></i><i></i><i></i></span><span className="mlab">Fiddly</span></div>
                     <div className="dual-row"><span className="dl">Cost to you</span><span className="meter" data-scale="pos" data-lvl="4" role="img" aria-label="Large relief"><i></i><i></i><i></i><i></i></span><span className="mlab">Large relief</span></div>
-                    <div className="b">Credits Portuguese tax paid against US tax owed. Often better than the exclusion.</div>
+                    <div className="b">{isPortugal ? 'Credits Portuguese tax paid against US tax owed. Often better than the exclusion.' : `Credits ${countryLabel} tax paid against US tax owed. Often better than the exclusion.`}</div>
                     <button className="more-btn" aria-expanded="false"><span className="ml">More detail</span><svg className="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M6 9l6 6 6-6" /></svg></button>
-                    <div className="route-detail" hidden><p className="rd-p">Because Portuguese rates commonly exceed US rates at the same income, the credit frequently wipes out the US liability entirely and can build a carryforward. It also works on passive and pension income, where the exclusion does not, which is why retirees usually rely on it instead.</p></div></div>
+                    <div className="route-detail" hidden><p className="rd-p">{isPortugal ? 'Because Portuguese rates commonly exceed US rates at the same income, the credit frequently wipes out the US liability entirely and can build a carryforward. It also works on passive and pension income, where the exclusion does not, which is why retirees usually rely on it instead.' : 'Where local rates exceed US rates at the same income, the credit can wipe out the US liability entirely and build a carryforward. It also works on passive and pension income, where the exclusion does not, which is why retirees often rely on it instead.'}</p></div></div>
                   <div className="gb"><div className="h">Self-employment tax</div>
                     <div className="dual-row"><span className="dl">Simplicity</span><span className="meter" data-scale="pos" data-lvl="2" role="img" aria-label="Fiddly"><i></i><i></i><i></i><i></i></span><span className="mlab">Fiddly</span></div>
                     <div className="dual-row"><span className="dl">Cost to you</span><span className="meter" data-scale="pos" data-lvl="4" role="img" aria-label="Often eliminated"><i></i><i></i><i></i><i></i></span><span className="mlab">Often eliminated</span></div>
-                    <div className="b">The US and Portugal have a totalization agreement, which prevents paying into both systems.</div>
+                    <div className="b">{isPortugal ? 'The US and Portugal have a totalization agreement, which prevents paying into both systems.' : `Where the US and ${countryLabel} have a totalization agreement, it prevents paying into both systems. Confirm whether one applies to you.`}</div>
                     <button className="more-btn" aria-expanded="false"><span className="ml">More detail</span><svg className="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M6 9l6 6 6-6" /></svg></button>
-                    <div className="route-detail" hidden><p className="rd-p">Without an agreement, self-employed Americans abroad owe 15.3% US self-employment tax even when the FEIE zeroes their income tax. The totalization agreement means paying into Portuguese social security exempts you, but you need a certificate of coverage as evidence.</p></div></div>
+                    <div className="route-detail" hidden><p className="rd-p">{isPortugal ? 'Without an agreement, self-employed Americans abroad owe 15.3% US self-employment tax even when the FEIE zeroes their income tax. The totalization agreement means paying into Portuguese social security exempts you, but you need a certificate of coverage as evidence.' : 'Without an agreement, self-employed Americans abroad owe 15.3% US self-employment tax even when the FEIE zeroes their income tax. Where a totalization agreement applies, paying into the local social security system exempts you, but you need a certificate of coverage as evidence.'}</p></div></div>
                   <div className="gb"><div className="h">FBAR</div>
                     <div className="dual-row"><span className="dl">Simplicity</span><span className="meter" data-scale="pos" data-lvl="4" role="img" aria-label="Simple"><i></i><i></i><i></i><i></i></span><span className="mlab">Simple</span></div>
                     <div className="dual-row"><span className="dl">Cost to you</span><span className="meter" data-scale="pos" data-lvl="4" role="img" aria-label="No cost, high penalty"><i></i><i></i><i></i><i></i></span><span className="mlab">No cost, high penalty</span></div>
                     <div className="b">Report foreign accounts if the combined peak balance passes $10,000 at any point.</div>
                     <button className="more-btn" aria-expanded="false"><span className="ml">More detail</span><svg className="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M6 9l6 6 6-6" /></svg></button>
-                    <div className="route-detail" hidden><p className="rd-p">It is an information report, not a tax, and it is filed separately from your return. The threshold is aggregate across all accounts and it is measured at the highest balance during the year, not on 31 December. Penalties for missing it are severe and wildly out of proportion to the effort of filing.</p></div></div>
+                    <div className="route-detail" hidden><p className="rd-p">{tax.foreignAccountReporting}</p></div></div>
                   <div className="gb"><div className="h">State residency<span className="gapflag">Gap</span></div>
                     <div className="dual-row"><span className="dl">Simplicity</span><span className="meter" data-scale="pos" data-lvl="1" role="img" aria-label="Messy"><i></i><i></i><i></i><i></i></span><span className="mlab">Messy</span></div>
                     <div className="dual-row"><span className="dl">Cost to you</span><span className="meter" data-scale="pos" data-lvl="2" role="img" aria-label="Can be costly"><i></i><i></i><i></i><i></i></span><span className="mlab">Can be costly</span></div>
@@ -165,6 +238,8 @@ export function TaxMoneyTab({ slug }: { slug: string }) {
               {/* 5. EVERYDAY TAXES */}
               <section className="card-surface sec">
                 <div className="sec-head"><div className="sec-title"><span className="sec-num">5</span><h2>Everyday and Property Taxes</h2></div></div>
+                {isPortugal ? (
+                <>
                 <table className="tbl">
                   <thead><tr><th>Tax</th><th className="num">Rate</th><th>When it hits you</th></tr></thead>
                   <tbody>
@@ -179,11 +254,21 @@ export function TaxMoneyTab({ slug }: { slug: string }) {
                   </tbody>
                 </table>
                 <div className="callout ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" /></svg><span><b>Sales tax is already in the price.</b> The shelf price is the price you pay, and restaurant bills carry no expected tip on top. After the US, this makes everyday spending feel more predictable than the headline VAT rate suggests.</span></div>
+                </>
+                ) : (
+                <>
+                <div className="det-grid">
+                  <div className="det"><div className="h">Buying and owning property</div><div className="b">{tax.propertyOwnership}</div></div>
+                </div>
+                <div className="callout info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-5M12 8h.01" /></svg><span>{`Research in progress. A full breakdown of ${countryLabel}'s everyday and property tax rates — VAT, transfer taxes, and annual property tax — is still being verified. Confirm current rates with a local tax adviser and the official resources for ${countryLabel}.`}</span></div>
+                </>
+                )}
               </section>
 
               {/* 6. BANKING */}
               <section className="card-surface sec">
                 <div className="sec-head"><div className="sec-title"><span className="sec-num">6</span><h2>Banking, Currency, and Moving Money</h2></div></div>
+                {isPortugal ? (
                 <div className="two">
                   <div>
                     <div className="subh">Opening an account</div>
@@ -211,11 +296,29 @@ export function TaxMoneyTab({ slug }: { slug: string }) {
                     </ul>
                   </div>
                 </div>
+                ) : (
+                <div className="two">
+                  <div>
+                    <div className="subh">Opening an account</div>
+                    <p className="rd-p">{tax.banking}</p>
+                  </div>
+                  <div>
+                    <div className="subh">Currency and transfers</div>
+                    <ul className="rd-list">
+                      <li className="n"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 9v4M12 17h.01" /><circle cx="12" cy="12" r="9" /></svg><b>Never let your US bank do the conversion.</b> Wire transfers with built-in FX routinely cost 3 to 4%, hidden inside the exchange rate.</li>
+                      <li className="y"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" /></svg><b>Use a dedicated FX provider</b> for anything large. Wise, Revolut, and specialist brokers quote a visible spread instead of hiding it in the rate.</li>
+                      <li className="c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></svg><b>Credit works differently.</b> Local lending leans on income documentation and an existing banking relationship rather than a score. Your US credit history does not travel.</li>
+                      <li className="c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></svg><b>Keep one US account open.</b> Useful for IRS refunds, US card payments, and anything that refuses a foreign IBAN.</li>
+                    </ul>
+                  </div>
+                </div>
+                )}
               </section>
 
               {/* 7. RETIREMENT */}
               <section className="card-surface sec">
                 <div className="sec-head"><div className="sec-title"><span className="sec-num">7</span><h2>Retirement, Pensions, and Social Security</h2></div></div>
+                {isPortugal ? (
                 <div className="det-grid">
                   <div className="det"><div className="h">US Social Security abroad</div><div className="b">Benefits are <b>payable into a Portuguese account</b> and are not reduced for living overseas. Portugal may tax them as resident income, and the tax treaty determines which country has the primary claim.</div></div>
                   <div className="det"><div className="h">Totalization agreement</div><div className="b">The US and Portugal have one. It stops you contributing to both systems on the same income and lets you <b>combine credits from both</b> when qualifying for a benefit in either.</div></div>
@@ -224,6 +327,16 @@ export function TaxMoneyTab({ slug }: { slug: string }) {
                   <div className="det"><div className="h">Portuguese social security</div><div className="b">Employees contribute 11% with the employer adding 23.75%. Self-employed residents pay a rate applied to a portion of income, with an <b>exemption in the first twelve months</b> of activity.</div></div>
                   <div className="det"><div className="h">Qualifying for a Portuguese pension</div><div className="b">Requires a contributions record built over years. Most people arriving mid-career or later will draw primarily on their home system, using totalization to bridge gaps.</div></div>
                 </div>
+                ) : (
+                <div className="det-grid">
+                  <div className="det"><div className="h">US Social Security abroad</div><div className="b">{`Benefits are payable into a local account and are not reduced for living overseas. ${countryLabel} may tax them as resident income, and the applicable tax treaty determines which country has the primary claim.`}</div></div>
+                  <div className="det"><div className="h">Tax treaties</div><div className="b">{tax.doubleTaxationTreaties}</div></div>
+                  <div className="det"><div className="h">401(k) and IRA</div><div className="b">{`Distributions are generally taxable in your country of residence once you are resident. ${countryLabel} may not mirror US tax-advantaged status, so the treatment can differ from what you planned around.`}</div></div>
+                  <div className="det"><div className="h">Roth accounts</div><div className="b">{`The tax-free character is a US concept. Whether ${countryLabel} recognises it is not automatic, and this is a common unpleasant surprise for retirees. `}<b>Get this checked specifically.</b></div></div>
+                  <div className="det"><div className="h">Social security</div><div className="b">{tax.socialSecurity}</div></div>
+                  <div className="det"><div className="h">Qualifying for a local pension</div><div className="b">{`Qualifying for a ${countryLabel} pension requires a contributions record built over years. Most people arriving mid-career or later will draw primarily on their home system, using a totalization agreement, where one exists, to bridge gaps.`}</div></div>
+                </div>
+                )}
                 <div className="callout warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 9v4M12 17h.01" /><circle cx="12" cy="12" r="9" /></svg><span><b>Retirees have the harder tax position, not the easier one.</b> The Foreign Earned Income Exclusion does not touch pensions, dividends, or capital gains, so the foreign tax credit carries the whole load. If your income is mostly passive, model it properly before you commit to a move date.</span></div>
               </section>
 
@@ -231,9 +344,11 @@ export function TaxMoneyTab({ slug }: { slug: string }) {
               <section className="card-surface sec">
                 <div className="sec-head">
                   <div className="sec-title"><span className="sec-num">8</span><h2>Financial Setup Sequence</h2></div>
-                  <span className="acc-count" id="finCount">0 / 8 done</span>
+                  {isPortugal && <span className="acc-count" id="finCount">0 / 8 done</span>}
                 </div>
                 <p className="lead">In order. Each step unlocks the next, and skipping ahead is what causes the delays people blame on bureaucracy.</p>
+                {isPortugal ? (
+                <>
                 <div className="doc-g">
                   <button className="step"><span className="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" /></svg></span><span><span className="st-t">Get your NIF</span><span className="st-d">Portuguese tax number. Obtainable remotely through a fiscal representative.</span><span className="st-tag">Do this first</span></span></button>
                   <button className="step"><span className="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" /></svg></span><span><span className="st-t">Open a Portuguese bank account</span><span className="st-d">Millennium BCP, Santander, or a digital bridge like Revolut.</span><span className="st-tag">Needs NIF</span></span></button>
@@ -253,7 +368,17 @@ export function TaxMoneyTab({ slug }: { slug: string }) {
                   <a className="lnk" href="https://www.irs.gov/individuals/international-taxpayers" target="_blank" rel="noopener noreferrer">IRS international taxpayers <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5" /></svg></a>
                   <a className="lnk" href="https://bsaefiling.fincen.treas.gov" target="_blank" rel="noopener noreferrer">FBAR e-filing <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5" /></svg></a>
                 </div>
-                <div className="src"><span>Last verified: January 2026 · Autoridade Tributária, Segurança Social, IRS Publication 54, US-Portugal totalization agreement. Planning information, not tax advice.</span><span className="sbadge">Official source verified</span></div>
+                </>
+                ) : (
+                <>
+                <div className="det-grid">
+                  <div className="det"><div className="h">Registering as a resident and taxpayer</div><div className="b">{tax.residencyObligations}</div></div>
+                  <div className="det"><div className="h">Working and registering a business</div><div className="b">{tax.businessRegistration}</div></div>
+                </div>
+                <div className="callout info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-5M12 8h.01" /></svg><span>{`Research in progress. A step-by-step financial setup sequence and the official portal links for ${countryLabel} are still being verified. In the meantime, confirm the order of steps with a local certified accountant.`}</span></div>
+                </>
+                )}
+                <SourceFooter disclosure={tax.disclosure} note={tax.disclaimer} />
               </section>
             </div>
   )

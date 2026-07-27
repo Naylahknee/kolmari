@@ -1,9 +1,32 @@
-import type { CountryContent } from '@/lib/country-workspace/country-content'
+import { getCountryContent } from '@/lib/country-workspace/country-content'
 
-/* Converted from the approved index.html mockup. Markup is verbatim.
-   Content is still literal Portugal copy: replace with `content.*` per
-   section as the model is extended. See README step 4. */
+/* Portugal keeps its approved, hand-authored mockup content verbatim.
+   Every other country renders the data-driven version below, sourced from
+   the country content model (content.familyPets / content.education). Where
+   the model has no matching field, a neutral honest phrasing or a clear
+   unavailable state is shown — Portugal-specific values are never rendered
+   for another country. */
+
+const STATUS_LABEL: Record<string, string> = {
+  placeholder: 'Not yet verified',
+  editorially_reviewed: 'Editorially reviewed',
+  official_source_verified: 'Official source verified',
+  stale: 'Needs review',
+}
+
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
+function formatVerified(iso?: string) {
+  if (!iso) return 'Not yet verified'
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso)
+  if (!m) return iso
+  const month = MONTHS[Number(m[2]) - 1]
+  return month ? `${month} ${m[1]}` : iso
+}
+
 export function FamilySchoolsTab({ slug }: { slug: string }) {
+  if (slug !== 'portugal') return <FamilySchoolsTabData slug={slug} />
+
   return (
       <div className="tabpanel on" id="p-family">
 
@@ -385,6 +408,270 @@ export function FamilySchoolsTab({ slug }: { slug: string }) {
                   <a className="lnk" href="https://www.aphis.usda.gov/pet-travel" target="_blank" rel="noopener noreferrer">USDA APHIS pet travel <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5" /></svg></a>
                 </div>
                 <div className="src"><span>Last verified: January 2026 · Eurydice Portugal, Segurança Social, Decreto-Lei 54/2018, USDA APHIS</span><span className="sbadge">Official source verified</span></div>
+              </section>
+            </div>
+  )
+}
+
+/* Data-driven per country. Markup, classNames, and icons follow the approved
+   index.html mockup. Every visible value is sourced from the country content
+   model (content.familyPets / content.education). Where the model has no
+   matching field, a neutral honest phrasing or a clear unavailable state is
+   shown — Portugal-specific values are never rendered for another country. */
+function FamilySchoolsTabData({ slug }: { slug: string }) {
+  const content = getCountryContent(slug)
+  if (!content) return null
+  const family = content.familyPets
+  const education = content.education
+
+  const eduDisclosure = education.disclosure
+  const familyDisclosure = family.disclosure
+
+  return (
+      <div className="tabpanel on" id="p-family">
+
+              {/* 1. OVERVIEW */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">1</span><h2>Family-Friendliness Overview</h2></div></div>
+                <div className="kpis">
+                  <div className="kpi"><div className="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2l8 3.6v6.1c0 4.6-3.3 8.7-8 10.3-4.7-1.6-8-5.7-8-10.3V5.6z" /></svg>Child safety</div><div className="v">See profile</div><div className="n">Safety metrics live in the country overview</div></div>
+                  <div className="kpi"><div className="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="8" r="3.2" /><path d="M2 20a7 7 0 0114 0" /></svg>Childcare 0 to 3</div><div className="v">See below</div><div className="n">Detailed in section 2</div></div>
+                  <div className="kpi"><div className="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10L12 5 2 10l10 5z" /><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5" /></svg>Pre-school</div><div className="v">See below</div><div className="n">Detailed in section 2</div></div>
+                  <div className="kpi"><div className="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M17 6H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" /></svg>International school</div><div className="v">See below</div><div className="n">Detailed in section 4</div></div>
+                </div>
+                <div className="two" style={{marginTop: '18px'}}>
+                  <div>
+                    <div className="subh"><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" /></svg></span>Family life</div>
+                    <ul className="rd-list">
+                      <li className="y"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" /></svg>{family.multigenerational}</li>
+                      <li className="y"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" /></svg>{family.familyBenefits}</li>
+                      <li className="y"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" /></svg>{family.childcare}</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <div className="subh"><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 6L6 18M6 6l12 12" /></svg></span>What to plan around</div>
+                    <ul className="rd-list">
+                      <li className="n"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 6L6 18M6 6l12 12" /></svg>{education.enrollment}</li>
+                      <li className="n"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 6L6 18M6 6l12 12" /></svg>{education.specialEducation}</li>
+                      <li className="n"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 6L6 18M6 6l12 12" /></svg>{family.parentalLeave}</li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="src"><span>Last verified: {formatVerified(eduDisclosure?.lastVerified)} · {eduDisclosure?.sourceNote ?? 'Sources under review'}</span><span className="sbadge">{STATUS_LABEL[eduDisclosure?.status ?? 'placeholder']}</span></div>
+              </section>
+
+              {/* 2. CHILDCARE */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">2</span><h2>Childcare and Early Years</h2></div></div>
+                <p className="lead">Early-years childcare structures, costs, and availability differ by country. The summary below reflects what has been verified for this country.</p>
+                <table className="tbl">
+                  <thead><tr><th>Stage</th><th className="num">Ages</th><th className="num">Cost to you</th><th>How it works</th></tr></thead>
+                  <tbody>
+                    <tr><td colSpan={4}>{family.childcare}</td></tr>
+                  </tbody>
+                </table>
+                <div className="callout warn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 9v4M12 17h.01" /><circle cx="12" cy="12" r="9" /></svg>
+                  <span><b>Availability can differ from cost.</b> Waitlists, subsidies, and places vary by area and change over time. Confirm current availability with providers in your target neighbourhood before you plan around childcare.</span>
+                </div>
+                <div className="subh" style={{marginTop: '20px'}}><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14M13 6l6 6-6 6" /></svg></span>What you typically need first</div>
+                <ul className="rd-list">
+                  <li className="c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></svg>A local identification or social-security number for your child, as required by the enrolment system.</li>
+                  <li className="c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></svg>Proof of address, since placement is often based on where you live.</li>
+                  <li className="c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></svg>Your child&apos;s vaccination records, reviewed by a local health provider.</li>
+                </ul>
+              </section>
+
+              {/* 3. SYSTEM AND ENROLLMENT */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">3</span><h2>School System and Enrollment</h2></div></div>
+                <div className="two">
+                  <div>
+                    <div className="subh"><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10L12 5 2 10l10 5z" /></svg></span>How the system works</div>
+                    <p className="rd-p">{education.publicSchools}</p>
+                    <p className="rd-p">{education.languageOfInstruction}</p>
+                  </div>
+                  <div>
+                    <div className="subh"><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M8 8h8M8 12h6" /></svg></span>Enrollment</div>
+                    <p className="rd-p">{education.enrollment}</p>
+                    <table className="tbl" style={{marginTop: '12px'}}>
+                      <thead><tr><th>Year group</th><th className="num">Window</th></tr></thead>
+                      <tbody>
+                        <tr><td colSpan={2}>Enrolment calendars are set locally and change each year. Confirm the current windows with the education authority.</td></tr>
+                      </tbody>
+                    </table>
+                    <p className="note">Dates and procedures shift over time. Confirm the current calendar before you plan a move date around it.</p>
+                    <div className="subh" style={{marginTop: '18px'}}><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14M13 6l6 6-6 6" /></svg></span>Documents to have ready</div>
+                    <div className="route-req" style={{borderTop: 'none', paddingTop: '0'}}>
+                      <span className="req miss">Child&apos;s residence permit or visa</span><span className="req miss">Local ID or tax number</span><span className="req miss">Social-security number</span><span className="req miss">Proof of address</span><span className="req miss">Vaccination record</span><span className="req miss">Prior school transcripts, translated</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="callout info">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-5M12 8h.01" /></svg>
+                  <span><b>Placement is often tied to your address or a parent&apos;s workplace.</b> Where local systems work this way, it is a strong reason to research neighbourhoods before signing a lease. Confirm how placement works in your target area.</span>
+                </div>
+              </section>
+
+              {/* 4. CHOOSING A SCHOOL */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">4</span><h2>Choosing a School</h2></div></div>
+                <p className="lead">The main schooling routes below differ by cost, language, and fit. The choice usually comes down to your child&apos;s age and how permanent the move is.</p>
+                <table className="tbl">
+                  <thead><tr><th>Option</th><th className="num">Annual cost</th><th className="num">Language</th><th className="num">Best for</th><th>Notes</th></tr></thead>
+                  <tbody>
+                    <tr><td colSpan={5}>A standardised route-by-route comparison is not available for this country. See each option below and confirm current figures locally.</td></tr>
+                  </tbody>
+                </table>
+
+                <div style={{height: '1px', background: 'var(--line)', margin: '20px 0'}}></div>
+
+                <div className="route">
+                  <span className="ic i-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 21V8l8-4 8 4v13" /><path d="M9 21v-6h6v6" /></svg></span>
+                  <div className="route-main">
+                    <div className="route-top"><div><div className="route-name">Public school</div><div className="route-desc">Publicly funded schooling</div></div></div>
+                    <div className="route-detail">
+                      <div className="rd-h">How it works</div>
+                      <p className="rd-p">{education.publicSchools}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="route">
+                  <span className="ic i-gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 21h18M5 21V10h14v11M12 3l9 5H3z" /></svg></span>
+                  <div className="route-main">
+                    <div className="route-top"><div><div className="route-name">Private school</div><div className="route-desc">Fee-paying, often smaller classes</div></div></div>
+                    <div className="route-detail">
+                      <div className="rd-h">How it works</div>
+                      <p className="rd-p">{education.privateSchools}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="route">
+                  <span className="ic i-info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18" /></svg></span>
+                  <div className="route-main">
+                    <div className="route-top"><div><div className="route-name">International school</div><div className="route-desc">English-medium or foreign curriculum</div></div><span className="pill p-cx">Largest expense</span></div>
+                    <div className="route-detail">
+                      <div className="rd-h">How it works</div>
+                      <p className="rd-p">{education.internationalSchools}</p>
+                      <p className="rd-p">{education.tuitionRange}</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* 5. QUALITY AND LANGUAGE */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">5</span><h2>School Quality and the Language Transition</h2></div></div>
+                <p className="lead">{education.languageOfInstruction}</p>
+                <div className="two">
+                  <div>
+                    <div className="subh"><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 17l6-6 4 4 8-8" /></svg></span>Judging a school</div>
+                    <ul className="rd-list">
+                      <li className="c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></svg><b>Look at published results where they exist</b>, but treat them as a filter rather than a verdict, since they often track intake as much as teaching.</li>
+                      <li className="c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></svg><b>Visit in person.</b> Facilities and atmosphere can vary sharply between neighbouring schools.</li>
+                      <li className="c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></svg><b>Ask about teacher turnover.</b> A school that keeps its teachers is telling you something.</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <div className="subh"><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h10M8 4v2M10 6c0 4-3 8-7 9M6 11c1.5 3 4 5 7 6M13 20l4-11 4 11M14.5 16.5h5" /></svg></span>How hard the language transition is, by age</div>
+                    <table className="tbl">
+                      <thead><tr><th>Child&apos;s age</th><th className="num">Difficulty</th><th className="num">Typical fluency</th></tr></thead>
+                      <tbody>
+                        <tr className="hi"><td>Under 6</td><td className="num"><span className="meter" data-lvl="1"><i></i><i></i><i></i><i></i></span><span className="mlab">Minimal</span></td><td className="num">Under a year</td></tr>
+                        <tr><td>6 to 9</td><td className="num"><span className="meter" data-lvl="2"><i></i><i></i><i></i><i></i></span><span className="mlab">Moderate</span></td><td className="num">1 to 2 years</td></tr>
+                        <tr><td>10 to 12</td><td className="num"><span className="meter" data-lvl="3"><i></i><i></i><i></i><i></i></span><span className="mlab">Hard</span></td><td className="num">2 to 3 years</td></tr>
+                        <tr className="hi"><td>13 and over</td><td className="num"><span className="meter" data-lvl="4"><i></i><i></i><i></i><i></i></span><span className="mlab">Very hard</span></td><td className="num">Often incomplete</td></tr>
+                      </tbody>
+                    </table>
+                    <p className="note">Difficulty here means academic and social difficulty combined. An older child can learn the language and still struggle to enter established friendship groups. This applies wherever the language of instruction differs from your child&apos;s first language.</p>
+                  </div>
+                </div>
+                <div className="callout warn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 9v4M12 17h.01" /><circle cx="12" cy="12" r="9" /></svg>
+                  <span><b>Age is a strong predictor of how this goes.</b> Younger children usually integrate quickly through local schooling. For teenagers, an English-medium option can protect both academic progress and wellbeing during the transition, and the cost is worth taking seriously in your budget rather than resenting later.</span>
+                </div>
+              </section>
+
+              {/* 6. SPECIAL EDUCATION */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">6</span><h2>Special Education and Disability Accommodations</h2></div></div>
+                <p className="lead">Special-education frameworks and their real-world resourcing differ by country. The summary below reflects what has been verified for this country.</p>
+                <div className="det-grid">
+                  <div className="det"><div className="h">Local support</div><div className="b">{education.specialEducation}</div></div>
+                  <div className="det"><div className="h">Prior documentation may not transfer</div><div className="b">A support plan from another country generally has no automatic legal standing. Bring the documentation, translated, as evidence, but expect a fresh local assessment and a gap before supports are in place.</div></div>
+                  <div className="det"><div className="h">Assessment language</div><div className="b">Where evaluation is conducted in the local language, an independent assessment in your child&apos;s first language can be worth paying for to avoid a language artefact in the results.</div></div>
+                </div>
+                <div className="callout warn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 9v4M12 17h.01" /><circle cx="12" cy="12" r="9" /></svg>
+                  <span><b>Start this before you arrive, not after.</b> Get current evaluations translated, contact prospective schools directly to ask what they have actually delivered for similar children, and budget for private support during any gap. Families who wait until enrollment routinely lose time to the process.</span>
+                </div>
+                <div className="callout info">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-5M12 8h.01" /></svg>
+                      <span>For the adult disability certificate, benefits, and physical accessibility, see <a href={`/nextinations/${slug}/v2/healthcare`} style={{textDecoration: 'underline', fontWeight: '700'}}>Healthcare</a>.</span>
+                </div>
+              </section>
+
+              {/* 7. BENEFITS AND VISAS */}
+              <section className="card-surface sec">
+                <div className="sec-head">
+                  <div className="sec-title"><span className="sec-num">7</span><h2>Family Benefits, Parental Leave, and Visa Considerations</h2></div>
+                  <a className="sec-link" href={`/nextinations/${slug}/v2/move-there`}>See the pathways <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="13" height="13"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+                </div>
+                <div className="two">
+                  <div>
+                    <div className="subh"><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M17 6H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" /></svg></span>What you may be able to claim</div>
+                    <div className="det" style={{marginBottom: '9px'}}><div className="h">Child benefit</div><div className="b">{family.familyBenefits}</div></div>
+                    <div className="det" style={{marginBottom: '9px'}}><div className="h">Parental leave</div><div className="b">{family.parentalLeave}</div></div>
+                    <div className="det" style={{marginBottom: '9px'}}><div className="h">Tax relief</div><div className="b">Dependants and family-related expenses may affect your local tax liability. Confirm what applies with a local tax professional.</div></div>
+                    <div className="det"><div className="h">Childcare support</div><div className="b">{family.childcare}</div></div>
+                  </div>
+                  <div>
+                    <div className="subh"><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 10h18" /></svg></span>What a family adds to your filing</div>
+                    <table className="tbl">
+                      <thead><tr><th>Household member</th><th className="num">Adds to income requirement</th></tr></thead>
+                      <tbody>
+                        <tr><td colSpan={2}>Income thresholds and dependant multipliers are set per visa route. See the pathways for the figures that apply to this country.</td></tr>
+                      </tbody>
+                    </table>
+                    <p className="note">A household with dependants generally needs more than a solo applicant on the same visa. Confirm the current route thresholds in the pathways.</p>
+                    <ul className="rd-list" style={{marginTop: '14px'}}>
+                      <li className="y"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" /></svg><b>Dependants are usually included on your application.</b> They typically do not file separately, and their permits mirror yours. Confirm for your route.</li>
+                      <li className="c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></svg><b>Every dependent usually needs their own document set</b>, including apostilled birth certificates. This multiplies the apostille timeline, not the effort per document.</li>
+                      <li className="c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></svg><b>Family reunification usually exists</b> if one parent goes ahead alone, but it adds time and a second process. Filing together is often faster.</li>
+                      <li className="c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></svg><b>Shared custody needs documented consent</b> from the other parent to move a child abroad. Start this early, it is the item most likely to derail a timeline.</li>
+                    </ul>
+                  </div>
+                </div>
+              </section>
+
+              {/* 8. YOUTH ACTIVITIES AND PETS */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">8</span><h2>Youth Activities and Household Pets</h2></div></div>
+                <div className="two">
+                  <div>
+                    <div className="subh"><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 8v8M8 12h8" /></svg></span>Activities outside school</div>
+                    <p className="rd-p">In many countries extracurriculars run through municipal programmes and neighbourhood clubs rather than schools, which means you often have to seek them out rather than have them handed to you at enrollment.</p>
+                    <table className="tbl" style={{marginTop: '12px'}}>
+                      <thead><tr><th>Activity</th><th className="num">Typical cost</th></tr></thead>
+                      <tbody>
+                        <tr><td colSpan={2}>Youth activity options and costs vary locally and are not yet documented for this country. Ask your local municipality for what is running in your area.</td></tr>
+                      </tbody>
+                    </table>
+                    <p className="note">Your local municipal office is usually the first place to ask, and the one most newcomers never visit.</p>
+                  </div>
+                  <div>
+                    <div className="subh"><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10 5.5a2 2 0 11-4 0 2 2 0 014 0zM18 5.5a2 2 0 11-4 0 2 2 0 014 0zM6 11a2 2 0 11-4 0 2 2 0 014 0zM22 11a2 2 0 11-4 0 2 2 0 014 0z" /><path d="M12 11c-2.8 0-5 2.6-5 5.5 0 2 1.3 3 3 3 .9 0 1.4-.5 2-.5s1.1.5 2 .5c1.7 0 3-1 3-3 0-2.9-2.2-5.5-5-5.5z" /></svg></span>Bringing pets</div>
+                    <div className="det" style={{marginBottom: '9px'}}><div className="h">Import requirements</div><div className="b">{family.petImportRules}</div></div>
+                    <div className="det" style={{marginBottom: '9px'}}><div className="h">Quarantine</div><div className="b">{family.quarantine}</div></div>
+                    <div className="det" style={{marginBottom: '9px'}}><div className="h">Veterinary care</div><div className="b">{family.vetCare}</div></div>
+                    <div className="det"><div className="h">Pets and housing</div><div className="b">{family.petFriendlyHousing}</div></div>
+                  </div>
+                </div>
+                <div className="subh" style={{marginTop: '20px'}}><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14M13 6l6 6-6 6" /></svg></span>Official portals</div>
+                <p className="note">Official education, social-security, and pet-import portals differ by country. See the Resources section for verified links for this country.</p>
+                <div className="src"><span>Last verified: {formatVerified(familyDisclosure?.lastVerified)} · {familyDisclosure?.sourceNote ?? 'Sources under review'}</span><span className="sbadge">{STATUS_LABEL[familyDisclosure?.status ?? 'placeholder']}</span></div>
               </section>
             </div>
   )

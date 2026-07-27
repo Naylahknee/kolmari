@@ -1,10 +1,13 @@
 import Link from 'next/link'
-import type { CountryContent } from '@/lib/country-workspace/country-content'
+import { getCountryContent, type ContentStatus } from '@/lib/country-workspace/country-content'
 
-/* Converted from the approved index.html mockup. Markup is verbatim.
-   Content is still literal Portugal copy: replace with `content.*` per
-   section as the model is extended. See README step 4. */
+/* Portugal keeps its approved, hand-authored rich content verbatim (below).
+   Every other country is rendered from the per-country content model via
+   getCountryContent, with honest neutral states where a field has no backing
+   data (never another country's fabricated numbers, cities, or currency). */
+
 export function CostHousingTab({ slug }: { slug: string }) {
+  if (slug !== 'portugal') return <CostHousingTabData slug={slug} />
   return (
       <div className="tabpanel on" id="p-cost">
 
@@ -524,6 +527,309 @@ export function CostHousingTab({ slug }: { slug: string }) {
                   <span><b>Plan for roughly $29,000 available at filing</b> for a couple on the D8 route, of which about half is spent and half is held as proof of funds. The runway matters because your residence card can take months to arrive and some work and banking options stay closed until it does.</span>
                 </div>
                 <div className="src"><span>Last verified: January 2026 · Consular fee schedules, resident-reported relocation budgets</span><span className="sbadge rev">Editorially reviewed</span></div>
+              </section>
+            </div>
+  )
+}
+
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
+function fmt(n: number): string {
+  return n.toLocaleString('en-US')
+}
+
+function fmtVerified(iso?: string): string {
+  if (!iso) return 'Not yet verified'
+  const [y, m] = iso.split('-')
+  const mi = Number(m) - 1
+  return `${MONTHS[mi] ?? ''} ${y}`.trim()
+}
+
+function statusBadge(status?: ContentStatus): { label: string; cls: string } {
+  switch (status) {
+    case 'official_source_verified':
+      return { label: 'Official source verified', cls: 'sbadge' }
+    case 'editorially_reviewed':
+      return { label: 'Editorially reviewed', cls: 'sbadge rev' }
+    case 'stale':
+      return { label: 'Needs review', cls: 'sbadge rev' }
+    default:
+      return { label: 'Placeholder', cls: 'sbadge rev' }
+  }
+}
+
+function CostHousingTabData({ slug }: { slug: string }) {
+  const content = getCountryContent(slug)
+  if (!content) return null
+  const cost = content.costOfLiving
+  const housing = content.housing
+
+  const countryName = slug.charAt(0).toUpperCase() + slug.slice(1)
+  const rentalCurrency = housing.rentalRanges[0]?.currency ?? cost.currency
+  const maxHigh = Math.max(1, ...cost.categories.map((c) => c.soloHigh))
+  const barPalette = ['#c99a00', '#dfae0e', '#f3c516', '#f7d05a', '#f3c516', '#a87f00', '#fae19b']
+
+  const costSrc = statusBadge(cost.disclosure?.status)
+  const housingSrc = statusBadge(housing.disclosure?.status)
+
+  return (
+      <div className="tabpanel on" id="p-cost">
+
+              {/* 1. COST OF LIVING */}
+              <section className="card-surface sec">
+                <div className="sec-head">
+                  <div className="sec-title"><span className="sec-num">1</span><h2>Cost of Living</h2></div>
+                  <div className="seg" role="group" aria-label="Household size">
+                    <button data-mode="solo" aria-pressed="true">Solo</button>
+                    <button data-mode="couple" aria-pressed="false">Couple</button>
+                    <button data-mode="family" aria-pressed="false">Family of 4</button>
+                  </div>
+                </div>
+                <div className="kpis">
+                  <div className="kpi">
+                    <div className="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /></svg>Monthly total</div>
+                    <div className="v"><span className="nu" data-hh data-solo={`${cost.currency} ${fmt(cost.soloTotal.low)}–${fmt(cost.soloTotal.high)}`} data-family={cost.familyTotal ? `${cost.currency} ${fmt(cost.familyTotal.low)}–${fmt(cost.familyTotal.high)}` : undefined}>{cost.currency} {fmt(cost.soloTotal.low)}–{fmt(cost.soloTotal.high)}</span> <small>/ mo</small></div>
+                    <div className="n"><span className="nu" data-hh data-solo="Solo mover" data-family="Family of four">Solo mover</span> in {cost.topCity}</div>
+                  </div>
+                  <div className="kpi">
+                    <div className="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 17l6-6 4 4 8-8" /><path d="M21 7v6h-6" /></svg>Against your budget</div>
+                    <div className="v">—</div>
+                    <div className="n">Add your monthly budget in your Nexit Profile to compare</div>
+                  </div>
+                  <div className="kpi">
+                    <div className="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M17 6H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" /></svg>Against US median</div>
+                    <div className="v">—</div>
+                    <div className="n">Comparison data not yet available</div>
+                  </div>
+                  <div className="kpi">
+                    <div className="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M15 9.5a3.5 3.5 0 100 5M9 12h3" /></svg>Currency</div>
+                    <div className="v">{cost.currency}</div>
+                    <div className="n">Figures shown in local currency</div>
+                  </div>
+                </div>
+
+                <div className="callout ok">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" /></svg>
+                  <span>These are editorial planning ranges, not a guarantee. Add your household budget in your Nexit Profile to see how it compares against these figures.</span>
+                </div>
+
+                <div className="bars">
+                  {cost.categories.map((c, i) => (
+                    <div className="bcol" key={c.label} data-solo={String(c.soloHigh)} data-family={c.familyHigh != null ? String(c.familyHigh) : undefined}><span className="bval nu">{c.currency} {fmt(c.soloHigh)}</span><span className="bar" style={{ height: `${Math.round((c.soloHigh / maxHigh) * 100)}%`, background: barPalette[i % barPalette.length] }}></span><span className="blab">{c.label}</span></div>
+                  ))}
+                </div>
+                <p className="note">Cheaper alternatives to {cost.topCity} include {cost.budgetCities.join(', ')}.</p>
+                <div className="src"><span>Last verified: {fmtVerified(cost.disclosure?.lastVerified)} · {cost.disclosure?.sourceNote ?? 'Source in progress'}</span><span className={costSrc.cls}>{costSrc.label}</span></div>
+              </section>
+
+              {/* 2. TYPICAL MONTHLY BUDGET */}
+              <section className="card-surface sec">
+                <div className="sec-head">
+                  <div className="sec-title"><span className="sec-num">2</span><h2>Typical Monthly Budget</h2></div>
+                  <Link className="sec-link" href="/cost-calculator">Open cost calculator <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="13" height="13"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
+                </div>
+                <p className="lead">Line items for a solo mover in {cost.topCity}. Ranges reflect the gap between careful and comfortable, not between poverty and luxury.</p>
+                <table className="tbl">
+                  <thead><tr><th>Category</th><th>What it covers</th><th className="num">Low</th><th className="num">High</th></tr></thead>
+                  <tbody>
+                    {cost.categories.map((c, i) => (
+                      <tr className={i === 0 ? 'hi' : undefined} key={c.label}><td>{c.label}</td><td>{c.notes ?? '—'}</td><td className="num">{c.currency} {fmt(c.soloLow)}</td><td className="num">{c.currency} {fmt(c.soloHigh)}</td></tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                <div className="divider" style={{height: '1px', background: 'var(--line)', margin: '22px 0'}}></div>
+                <div className="subh"><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 21V9l8-5 8 5v12" /></svg></span>Same life, different city</div>
+                <table className="tbl">
+                  <thead><tr><th>City</th><th>Character</th><th className="num">2 bed rent</th><th className="num">Monthly total</th><th className="num">vs {cost.topCity}</th></tr></thead>
+                  <tbody>
+                    {housing.rentalRanges.map((r, i) => (
+                      <tr className={i === 0 ? 'hi' : undefined} key={r.city}><td>{r.city}</td><td>—</td><td className="num">{r.currency} {fmt(r.twoBedMin)}–{fmt(r.twoBedMax)}</td><td className="num">—</td><td className="num">{i === 0 ? 'baseline' : '—'}</td></tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="callout info">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-5M12 8h.01" /></svg>
+                  <span><b>Choosing a lower-cost city is one of the largest levers you have.</b> Cities such as {cost.budgetCities.join(', ')} generally cost less than {cost.topCity}, but weigh access to healthcare, international schools, and consular services before committing. See the Healthcare and Family tabs.</span>
+                </div>
+              </section>
+
+              {/* 3. RENT AND HOUSING AVAILABILITY */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">3</span><h2>Rent and Housing Availability</h2></div></div>
+                <div className="two">
+                  <div>
+                    <div className="subh"><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 21V9l8-5 8 5v12" /></svg></span>Monthly rental ranges</div>
+                    <table className="tbl">
+                      <thead><tr><th>City</th><th className="num">Studio / 1 bed</th><th className="num">2 bed</th><th className="num">3 bed</th></tr></thead>
+                      <tbody>
+                        {housing.rentalRanges.map((r, i) => (
+                          <tr className={i === 0 ? 'hi' : undefined} key={r.city}><td>{r.city}</td><td className="num">{fmt(r.studioMin)}–{fmt(r.studioMax)}</td><td className="num">{fmt(r.twoBedMin)}–{fmt(r.twoBedMax)}</td><td className="num">—</td></tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <p className="note">All figures in {rentalCurrency} per month, unfurnished, excluding utilities.</p>
+                  </div>
+                  <div>
+                    <div className="subh"><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 21V9l8-5 8 5v12" /></svg></span>Popular areas with newcomers</div>
+                    <div className="avail">
+                      {housing.popularAreas.map((area) => (
+                        <div key={area}><div className="g-top"><span className="g-l">{area}</span></div></div>
+                      ))}
+                    </div>
+                    <div className="subh" style={{marginTop: '20px'}}><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14M13 6l6 6-6 6" /></svg></span>Where people search</div>
+                    <div className="route-req" style={{borderTop: 'none', paddingTop: '0'}}>
+                      {housing.portals.map((p) => (
+                        <a className="req miss" key={p.url} href={p.url} target="_blank" rel="noreferrer">{p.name}</a>
+                      ))}
+                    </div>
+                    <p className="note">Local-language listings are often cheaper than English-facing expat listings for the same property.</p>
+                  </div>
+                </div>
+                <div className="callout warn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 9v4M12 17h.01" /><circle cx="12" cy="12" r="9" /></svg>
+                  <span><b>Signing from abroad is the hardest part of the whole move.</b> Most landlords will not hold a property for a tenant who cannot view it, and your residency filing usually needs a registered long-term lease. Budget for a short-term rental bridge or plan a scouting trip.</span>
+                </div>
+              </section>
+
+              {/* 4. RENTING REQUIREMENTS AND DEPOSITS */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">4</span><h2>Renting Requirements and Deposits</h2></div></div>
+                <p className="lead">What a landlord will ask for, and what you are entitled to in return.</p>
+                <div className="det-grid">
+                  <div className="det"><div className="h">Deposit<span className="dtag ap">Upfront</span></div><div className="b">{housing.depositMonths}</div></div>
+                  <div className="det"><div className="h">Guarantor</div><div className="b">Some landlords ask for a local guarantor or additional financial guarantees. Requirements vary by landlord and are usually higher for tenants without local income history.</div></div>
+                  <div className="det"><div className="h">Lease duration</div><div className="b">{housing.leaseDuration}</div></div>
+                  <div className="det"><div className="h">Documents landlords ask for</div><div className="b">Expect to provide identification, proof of income or an employment contract, and often recent bank statements. A local tax identification number is typically required.</div></div>
+                  <div className="det"><div className="h">Furnished vs unfurnished</div><div className="b">{housing.furnished}</div></div>
+                  <div className="det"><div className="h">Agency fees</div><div className="b">In many markets the landlord pays the agency fee. If an agency asks you for a finder&apos;s fee on a standard rental, treat that as a warning sign.</div></div>
+                  <div className="det"><div className="h">Tenant rights</div><div className="b">{housing.tenantRights}</div></div>
+                  <div className="det"><div className="h">Contract registration</div><div className="b">Many countries require the landlord to register the lease with the tax authority. An unregistered lease may not support your residency application, so confirm the local rule before you pay a deposit.</div></div>
+                </div>
+                <div className="callout warn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 9v4M12 17h.01" /><circle cx="12" cy="12" r="9" /></svg>
+                  <span><b>An unregistered lease is a common filing failure.</b> Some landlords prefer to keep rentals off the books. That saves them tax and can cost you your visa. Ask before you pay a deposit, not after.</span>
+                </div>
+                <div className="src"><span>Last verified: {fmtVerified(housing.disclosure?.lastVerified)} · {housing.disclosure?.sourceNote ?? 'Source in progress'}</span><span className={housingSrc.cls}>{housingSrc.label}</span></div>
+              </section>
+
+              {/* 5. SHARED LIVING AND ALTERNATIVES */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">5</span><h2>Shared Living and Housing Alternatives</h2></div></div>
+                <p className="lead">A long-term lease is not the only way to have somewhere to live. Co-living, shared flats, cooperatives, and community housing can cost less and commit you to less, but not all of them satisfy a residency filing on their own.</p>
+                <div className="callout info">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-5M12 8h.01" /></svg>
+                  <span>Detailed shared-living and alternative-housing options for {countryName} are not yet compiled. Where an arrangement does not produce a registered lease in your name, it usually will not serve as proof of address for a residency filing — confirm before you commit.</span>
+                </div>
+                <div className="src"><span>Last verified: {fmtVerified(housing.disclosure?.lastVerified)} · {housing.disclosure?.sourceNote ?? 'Source in progress'}</span><span className={housingSrc.cls}>{housingSrc.label}</span></div>
+              </section>
+
+              {/* 6. HOME OWNERSHIP */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">6</span><h2>Home Ownership and Buying Rules</h2></div></div>
+                <div className="callout info" style={{marginTop: '0', marginBottom: '16px'}}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-5M12 8h.01" /></svg>
+                  <span><b>Buying property does not automatically grant residency.</b> Buy because you want the home, not because you want the paperwork. See Move There for the routes that actually lead to residency.</span>
+                </div>
+                <div className="det-grid">
+                  <div className="det"><div className="h">Foreign buyer rules</div><div className="b">{housing.foreignBuyerRules}</div></div>
+                  <div className="det"><div className="h">Order of operations</div><div className="b">A local tax identification number and, usually, a local bank account come before purchase. Obtaining them remotely can take time, so start early.</div></div>
+                  <div className="det"><div className="h">Closing costs</div><div className="b">Transfer tax, notary, land registry, and legal fees are added on top of the purchase price. Confirm the current rates with a local lawyer.</div></div>
+                  <div className="det"><div className="h">Mortgages for non-residents</div><div className="b">Non-residents typically face lower loan-to-value limits and higher rates than residents. Confirm terms with local banks.</div></div>
+                  <div className="det"><div className="h">Annual property tax</div><div className="b">An annual municipal property tax usually applies and is set locally. Verify the current rate for your target area.</div></div>
+                  <div className="det"><div className="h">Short-term rental licensing</div><div className="b">Tourist-let licences are restricted or frozen in some cities. Do not assume you can offset a mortgage with short-term rentals.</div></div>
+                  <div className="det"><div className="h">Surveys and legal check</div><div className="b">Instruct an independent lawyer to verify title, permits, and that no debts attach to the property, since debts can follow the property.</div></div>
+                  <div className="det"><div className="h">Selling later</div><div className="b">Capital gains rules and any reinvestment relief vary, and non-residents are often taxed differently. Plan the exit before you buy.</div></div>
+                </div>
+                <div className="divider" style={{height: '1px', background: 'var(--line)', margin: '22px 0'}}></div>
+                <div className="subh"><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M17 6H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" /></svg></span>Typical purchase prices</div>
+                <table className="tbl">
+                  <thead><tr><th>Area</th><th className="num">2 bed apartment</th><th className="num">Price per m²</th><th className="num">Closing costs</th></tr></thead>
+                  <tbody>
+                    {housing.rentalRanges.map((r, i) => (
+                      <tr className={i === 0 ? 'hi' : undefined} key={r.city}><td>{r.city}</td><td className="num">—</td><td className="num">—</td><td className="num">—</td></tr>
+                    ))}
+                  </tbody>
+                </table>
+                <p className="note">Purchase-price data for {countryName} is not yet compiled. Confirm current prices with a local property portal or agent.</p>
+                <div className="src"><span>Last verified: {fmtVerified(housing.disclosure?.lastVerified)} · {housing.disclosure?.sourceNote ?? 'Source in progress'}</span><span className={housingSrc.cls}>{housingSrc.label}</span></div>
+              </section>
+
+              {/* 7. UTILITIES, INTERNET, TRANSPORT */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">7</span><h2>Utilities, Internet, and Transportation Costs</h2></div></div>
+                <p className="lead">Running costs for a household. Service quality and walkability are covered under Lifestyle &amp; Community, this section is the money only.</p>
+                <div className="two">
+                  <div>
+                    <div className="subh"><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M13 2L4 14h7l-1 8 9-12h-7z" /></svg></span>Utilities and connectivity</div>
+                    <table className="tbl">
+                      <thead><tr><th>Service</th><th>Notes</th><th className="num">Monthly</th></tr></thead>
+                      <tbody>
+                        <tr><td>Electricity</td><td>Costs rise in winter without central heating</td><td className="num">—</td></tr>
+                        <tr><td>Water</td><td>Billed by the municipality</td><td className="num">—</td></tr>
+                        <tr><td>Gas</td><td>Bottled or piped depending on the building</td><td className="num">—</td></tr>
+                        <tr><td>Building charge</td><td>Shared upkeep of the building</td><td className="num">—</td></tr>
+                        <tr className="hi"><td>Fibre internet</td><td>Widely available in urban areas</td><td className="num">—</td></tr>
+                        <tr><td>Mobile, per line</td><td>Generous data on most plans</td><td className="num">—</td></tr>
+                      </tbody>
+                    </table>
+                    <div className="callout warn">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 9v4M12 17h.01" /><circle cx="12" cy="12" r="9" /></svg>
+                      <span><b>Winter heating is a common surprise line item.</b> Where central heating is uncommon, households often run portable heaters and dehumidifiers in the colder months, so budget for higher winter electricity.</span>
+                    </div>
+                    <p className="note">Itemised utility costs for {countryName} are not yet compiled.</p>
+                  </div>
+                  <div>
+                    <div className="subh"><span className="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 16V9l2-4h12l2 4v7M4 16h16" /><circle cx="8" cy="13" r="1.2" /><circle cx="16" cy="13" r="1.2" /></svg></span>Getting around</div>
+                    <table className="tbl">
+                      <thead><tr><th>Mode</th><th>Notes</th><th className="num">Cost</th></tr></thead>
+                      <tbody>
+                        <tr className="hi"><td>Monthly transit pass</td><td>Metro, bus, tram in most metros</td><td className="num">—</td></tr>
+                        <tr><td>Single fare</td><td>Cheaper with a rechargeable card</td><td className="num">—</td></tr>
+                        <tr><td>Intercity rail</td><td>Booked ahead between major cities</td><td className="num">—</td></tr>
+                        <tr><td>Rideshare</td><td>Cross-town trip</td><td className="num">—</td></tr>
+                        <tr><td>Fuel</td><td>Per litre</td><td className="num">—</td></tr>
+                        <tr><td>Car ownership</td><td>Insurance, tax, tolls, parking, for one car</td><td className="num">—</td></tr>
+                      </tbody>
+                    </table>
+                    <div className="callout ok">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" /></svg>
+                      <span><b>Larger cities are often car-free livable.</b> Dropping a car is usually the easiest large cut available if you choose a well-connected city over a rural area.</span>
+                    </div>
+                    <p className="note">Itemised transport costs for {countryName} are not yet compiled.</p>
+                  </div>
+                </div>
+              </section>
+
+              {/* 8. UPFRONT MOVING COSTS */}
+              <section className="card-surface sec">
+                <div className="sec-head">
+                  <div className="sec-title"><span className="sec-num">8</span><h2>Common Upfront Moving Costs</h2></div>
+                  <a className="sec-link" href={`/nextinations/${slug}/v2/move-there`}>See the filing steps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="13" height="13"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+                </div>
+                <p className="lead">The one-time number is what most people underestimate. This is what you need saved <b>before</b> you file, not after you land.</p>
+                <table className="tbl">
+                  <thead><tr><th>Cost</th><th>What it covers</th><th className="num">Typical</th></tr></thead>
+                  <tbody>
+                    <tr><td>Visa fees and legalisation</td><td>Consulate fees, apostilles, certified translations</td><td className="num">—</td></tr>
+                    <tr><td>Immigration lawyer</td><td>Optional, flat fee for a residency filing</td><td className="num">—</td></tr>
+                    <tr><td>Flights</td><td>One way, off peak</td><td className="num">—</td></tr>
+                    <tr className="hi"><td>Rental deposit and first month</td><td>Upfront deposit plus first month is standard</td><td className="num">—</td></tr>
+                    <tr><td>Shipping or replacing goods</td><td>Most people replace rather than ship</td><td className="num">—</td></tr>
+                    <tr><td>First year health insurance</td><td>Often required for the filing</td><td className="num">—</td></tr>
+                    <tr><td>Proof of funds held in account</td><td>Not spent, but must sit in a local account</td><td className="num">—</td></tr>
+                    <tr><td>Pet relocation, if applicable</td><td>Vet, microchip, health certificate, cabin or cargo</td><td className="num">—</td></tr>
+                  </tbody>
+                </table>
+                <div className="tl-total">
+                  <span><span className="k">Cash actually spent</span><br /><span className="v">—</span></span>
+                  <span><span className="k">Plus funds that must be held</span><br /><span className="v">—</span></span>
+                  <span><span className="k">Six month landing runway</span><br /><span className="v">—</span></span>
+                </div>
+                <div className="callout warn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 9v4M12 17h.01" /><circle cx="12" cy="12" r="9" /></svg>
+                  <span><b>Plan for both spending and proof-of-funds at filing.</b> Some routes require you to hold funds in a local account on top of what you spend, and the runway matters because your residence card can take months to arrive. Itemised upfront costs for {countryName} are not yet compiled.</span>
+                </div>
               </section>
             </div>
   )

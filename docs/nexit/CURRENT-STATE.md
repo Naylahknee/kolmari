@@ -793,3 +793,83 @@ did originally, so its layout is intact.
 | Production build (`next build`) | ✅ Pass |
 | Cloudflare worker build (`opennextjs-cloudflare build`) | ✅ Pass |
 | Route smoke test (`next start` + curl) | ✅ /nextinations/uruguay/v2/overview redirects to /login like /dashboard (no 500) |
+
+## HealthcareTab converted to data-driven (per country)
+
+`src/components/country-template/tabs/HealthcareTab.tsx` was the first
+`country-template` tab converted from literal Portugal mockup copy to a
+`getCountryContent(slug)`-driven server component. Signature is now
+`HealthcareTab({ slug })`; it returns `null` when no content exists for the
+slug. All country-specific text is sourced from `content.healthcare.*`
+(`publicSystem`, `privateSystem`, `primaryCare`, `insuranceRequirement`,
+`estimatedInsuranceRange`, `eligibility`, `emergencyCare`, `prescriptions`,
+`mentalHealth`, `accessibilityNotes`, `disclaimer`, `disclosure`).
+
+The eight-section shell, `card-surface`/`sec` structure, headings, and icons
+are preserved. Mockup elements that carried Portugal-only facts with no backing
+field — KPI stat grids, the age-band and cash-price tables, the wait-time table
+and legend, the registration ladder, named hospital groups, national emergency
+numbers, and Portugal portal links — were omitted rather than shown for other
+countries, per `08-CONTENT-STANDARDS.md` ("Never invent content"). Advice
+callouts that hold for any relocation (insurance timing, medication documents,
+mental-health continuity, accessibility site visits) were kept in neutral,
+country-agnostic phrasing. Source footers render from `healthcare.disclosure`.
+
+The unused `src/components/country-workspace/tabs/HealthcareTab.tsx` (a
+separate props-based component) was left untouched.
+
+| File | Change |
+|---|---|
+| `src/components/country-template/tabs/HealthcareTab.tsx` | Rewritten as `getCountryContent(slug)`-driven server component; Portugal literals replaced with `content.healthcare.*`; unfielded Portugal-only data elements omitted |
+
+### Tests Run
+
+| Check | Result |
+|---|---|
+| TypeScript (`tsc --noEmit`, filtered to HealthcareTab) | ✅ No errors |
+
+## Country pages unified on the tabbed CountryTemplate (per-country, data-driven)
+
+All countries with a full dataset (Portugal, Spain, Greece, Estonia, Mexico —
+the `COUNTRIES` array) now render the tabbed `CountryTemplate` design, instead
+of only Portugal. `usesResearchPage(slug)` in `src/lib/countries.ts` now returns
+true only for discoverable-only Nextinations (no full dataset), which keep the
+lightweight research page; `WorkspaceShell` and the v2 route both use it.
+
+Each `country-template` tab now follows one pattern: **Portugal renders its
+original approved mockup content verbatim** (byte-for-byte from the prior
+commit — its figures are real, sourced Portugal data), and **every other
+country renders a data-driven variant** built only from that country's verified
+`getCountryContent(slug)` / `getCountryFacts(slug)` records, with honest
+empty/neutral states wherever the shared content model has no field. No country
+shows another country's figures; nothing is fabricated.
+
+- Hero (`CountryHero`) is a data-driven server component for all countries
+  (name, flag, region, Schengen/EU/climate badges, capital, and route/income/
+  cost/safety tiles from each country's `COUNTRIES` record). It intentionally
+  does not show a personalized Match Score or "you qualify" claims without a
+  completed profile, per `DESIGN.md`.
+- `MoveThereTab`: Portugal keeps its authored residency routes; other countries
+  show an honest "pathways being verified" state linking to Nexit Pathways and
+  that country's official sources (there is no per-country visa dataset yet).
+
+Known follow-up: the shared content model is prose-based, so non-Portugal pages
+are less dense than Portugal's bespoke mockup. Reaching Portugal-level density
+for other countries requires adding structured fields (wage/cost tables, visa
+routes, etc.) to the content model from real sources.
+
+| File | Change |
+|---|---|
+| `src/lib/countries.ts` | `usesResearchPage` now keys off the full-dataset `COUNTRIES` set |
+| `.../v2/[section]/page.tsx` | Route COUNTRIES to CountryTemplate; render data-driven `CountryHero` |
+| `CountryTemplate.tsx` | Accept server-rendered `hero` node; frame-only |
+| `CountryHero.tsx` | Rewritten data-driven server component |
+| `tabs/*.tsx` (all 8) | Portugal verbatim + per-country data-driven variant |
+
+### Tests Run
+
+| Check | Result |
+|---|---|
+| TypeScript (`tsc --noEmit`) | ✅ Pass |
+| Production build (`next build`) | ✅ Pass |
+| Lint (`eslint`) | ✅ No new errors (36 pre-existing `<a>`-link errors in verbatim Portugal content, unchanged) |

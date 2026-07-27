@@ -1,7 +1,9 @@
 import { notFound } from 'next/navigation'
 import { COUNTRIES, getDiscoverableCountry } from '@/lib/countries'
+import { getCountryFacts } from '@/lib/country-workspace/country-facts'
 import { CountryResearchPage } from '@/components/nexit/CountryResearchPage'
 import { CountryTemplate } from '@/components/country-template/CountryTemplate'
+import { CountryHero } from '@/components/country-template/CountryHero'
 import { TAB_SLUGS, type TabSlug } from '@/components/country-template/TabBar'
 import { OverviewTab } from '@/components/country-template/tabs/OverviewTab'
 import { MoveThereTab } from '@/components/country-template/tabs/MoveThereTab'
@@ -25,20 +27,22 @@ export async function generateMetadata({ params }: Props) {
   return { title: `${country.name} \u2014 ${label} | Nexit` }
 }
 
-export default async function CountryV2Page({ params, searchParams }: Props) {
+export default async function CountryV2Page({ params }: Props) {
   const { countrySlug, section } = await params
   const country = COUNTRIES.find((c) => c.slug === countrySlug)
   const discoverableCountry = getDiscoverableCountry(countrySlug)
   if (!country && !discoverableCountry) notFound()
-  if (discoverableCountry && countrySlug !== 'portugal') return <CountryResearchPage country={discoverableCountry} />
+  // Countries with a full dataset render the tabbed CountryTemplate; discoverable-only
+  // Nextinations (no full dataset yet) render the lightweight research page.
+  if (!country && discoverableCountry) return <CountryResearchPage country={discoverableCountry} />
+  if (!country) notFound()
 
   const active = (TAB_SLUGS.includes(section as TabSlug) ? section : 'overview') as TabSlug
-  const source = (await searchParams).source
-  const fromQuiz = source === 'quiz'
+  const facts = getCountryFacts(countrySlug)
 
   const tab = {
     'overview': <OverviewTab slug={countrySlug} />,
-    'move-there': <MoveThereTab />,
+    'move-there': <MoveThereTab slug={countrySlug} />,
     'cost-housing': <CostHousingTab slug={countrySlug} />,
     'work-study': <WorkStudyTab slug={countrySlug} />,
     'healthcare': <HealthcareTab slug={countrySlug} />,
@@ -48,7 +52,7 @@ export default async function CountryV2Page({ params, searchParams }: Props) {
   }[active]
 
   return (
-    <CountryTemplate slug={countrySlug} active={active} fromQuiz={fromQuiz}>
+    <CountryTemplate slug={countrySlug} active={active} hero={<CountryHero slug={countrySlug} country={country} facts={facts} />}>
       {tab}
     </CountryTemplate>
   )

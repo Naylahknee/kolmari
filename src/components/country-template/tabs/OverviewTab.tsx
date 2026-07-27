@@ -1,10 +1,16 @@
 import Link from 'next/link'
-import type { CountryContent } from '@/lib/country-workspace/country-content'
+import { getCountryFacts } from '@/lib/country-workspace/country-facts'
+import type { SnapshotIcon, MoveReasonIcon, ClimateStat } from '@/lib/country-workspace/country-facts'
+import { getCountryContent } from '@/lib/country-workspace/country-content'
+import { COUNTRIES } from '@/lib/countries'
 
-/* Converted from the approved index.html mockup. Markup is verbatim.
-   Content is still literal Portugal copy: replace with `content.*` per
-   section as the model is extended. See README step 4. */
+/* Portugal keeps its approved, hand-authored rich overview verbatim (real
+   Portugal data: locator map, editorial timeline/gauges, city cards, visa
+   chips). Every other country renders the data-driven OverviewTabData, which
+   reads getCountryFacts/getCountryContent and shows honest neutral states where
+   per-country data does not exist — never another country's values. */
 export function OverviewTab({ slug }: { slug: string }) {
+  if (slug !== 'portugal') return <OverviewTabData slug={slug} />
   return (
       <div className="tabpanel on" id="p-overview">
 
@@ -215,6 +221,180 @@ export function OverviewTab({ slug }: { slug: string }) {
                   <button className="chip"><span className="ic i-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 21V8l8-5 8 5v13" /><path d="M9 21v-6h6v6" /></svg></span><span><span className="t">Buy property</span><span className="d">No longer a visa route</span></span></button>
                   <button className="chip"><span className="ic i-violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="8" r="3" /><circle cx="17" cy="9" r="2.5" /><path d="M3 20a6 6 0 0112 0M15 20a5 5 0 016-4.6" /></svg></span><span><span className="t">Co-living &amp; shared</span><span className="d">EUR 480 to 900 / mo</span></span></button>
                   <button className="chip"><span className="ic i-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 3v18M3 12h18" /></svg></span><span><span className="t">Housing co-ops</span><span className="d">Cooperativa de habitação</span></span></button>
+                </div>
+              </section>
+            </div>
+  )
+}
+
+// Icon SVGs keyed by data icon strings, reused verbatim from the mockup.
+const snapshotIcons: Record<SnapshotIcon, React.JSX.Element> = {
+  capital: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6" /></svg>,
+  population: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="8" r="3.2" /><path d="M2 20a7 7 0 0114 0M16 5.5a3 3 0 010 5.6M17.5 20a5.5 5.5 0 00-1-3.2" /></svg>,
+  currency: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M15 9.5a3.5 3.5 0 100 5M9 12h3" /></svg>,
+  language: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h10M8 4v2M10 6c0 4-3 8-7 9M6 11c1.5 3 4 5 7 6M13 20l4-11 4 11M14.5 16.5h5" /></svg>,
+  government: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 21h18M4 21V10h16v11M12 3l9 5H3z" /></svg>,
+  timezone: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>,
+  driving: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 16V9l2-4h12l2 4v7M4 16h16M4 16v2M20 16v2" /><circle cx="8" cy="13" r="1.2" /><circle cx="16" cy="13" r="1.2" /></svg>,
+  schengen: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2l8 3.6v6.1c0 4.6-3.3 8.7-8 10.3-4.7-1.6-8-5.7-8-10.3V5.6z" /><path d="M9 12l2 2 4-4" /></svg>,
+  eu: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18" /></svg>,
+  climate: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="4.5" /><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19" /></svg>,
+}
+
+const climateIcons: Record<ClimateStat['icon'], React.JSX.Element> = {
+  winter: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M4 6l16 12M20 6L4 18" /></svg>,
+  summer: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="4.5" /><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19" /></svg>,
+  timeDifference: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>,
+}
+
+const reasonIcons: Record<MoveReasonIcon, React.JSX.Element> = {
+  affordable: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M14.5 9.5a2.6 2.6 0 00-2.5-1.5c-1.4 0-2.5.8-2.5 2s1.1 2 2.5 2 2.5.8 2.5 2-1.1 2-2.5 2a2.6 2.6 0 01-2.5-1.5M12 6v12" /></svg>,
+  weather: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="4.5" /><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19" /></svg>,
+  community: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="8" r="3" /><circle cx="17" cy="9" r="2.5" /><path d="M2 20a7 7 0 0114 0M15 20a5.5 5.5 0 016-4.8" /></svg>,
+  healthcare: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 21V8l8-4 8 4v13" /><path d="M12 9v6M9 12h6" /></svg>,
+  remote: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12.5a10 10 0 0114 0M8.5 16a5.5 5.5 0 017 0M12 19.5h.01" /></svg>,
+  culture: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 21h18M5 21V10h14v11M12 3l9 5H3z" /><path d="M9 21v-5h6v5" /></svg>,
+}
+
+// Neutral, non-geographic decorative shape reused for every city card. It is
+// deliberately generic (a wave over water) and encodes no country/city geometry.
+const cityDecoration = (
+  <svg viewBox="0 0 240 98" aria-hidden="true"><rect width="240" height="98" fill="#cfe6f5" /><path d="M0 58 Q60 40 120 54 T240 50 L240 98 L0 98 Z" fill="#e9eee6" /><path d="M0 58 Q60 40 120 54 T240 50" stroke="#bcd3e3" strokeWidth="1.4" fill="none" /><circle cx="120" cy="50" r="5.5" fill="#f3c516" stroke="#fff" strokeWidth="2" /></svg>
+)
+
+const arrow = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="13" height="13"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+
+function isMemberValue(icon: SnapshotIcon, value: string): boolean {
+  const v = value.trim().toLowerCase()
+  if (icon === 'schengen') return v === 'yes'
+  if (icon === 'eu') return v === 'member'
+  return false
+}
+
+/* Data-driven overview for every country except Portugal. Markup, classNames,
+   and section numbering mirror the approved mockup; only the data that fills
+   them is swapped per country. Where no per-country data exists (locator map
+   geometry, editorial timeline/gauges, visa chips), an honest neutral state is
+   shown — never another country's values. */
+function OverviewTabData({ slug }: { slug: string }) {
+  const facts = getCountryFacts(slug)
+  const country = COUNTRIES.find((c) => c.slug === slug)
+  if (!facts || !country) return null
+  const content = getCountryContent(slug)
+
+  const dl = content?.dailyLife
+  const lifeLines: { label: string; value: string }[] = dl
+    ? [
+        { label: 'Pace of life', value: dl.paceOfLife },
+        { label: 'Weather', value: dl.weather },
+        { label: 'Safety', value: dl.safety },
+        { label: 'Cultural etiquette', value: dl.culturalEtiquette },
+        { label: 'Recreation', value: dl.recreation },
+      ].filter((line) => Boolean(line.value))
+    : []
+
+  return (
+      <div className="tabpanel on" id="p-overview">
+
+              {/* 1. COUNTRY SNAPSHOT */}
+              <section className="card-surface sec">
+                <div className="sec-head">
+                  <div className="sec-title"><span className="sec-num">1</span><h2>Country Snapshot</h2></div>
+                  <Link className="sec-link" href={`/nextinations/${slug}/v2/lifestyle-community`}>Full daily life {arrow}</Link>
+                </div>
+                <div className="snap-top">
+                  <div className="narrative">
+                    <p className="eyebrow">What {country.name} is like</p>
+                    <p className="body">{country.summary}</p>
+                  </div>
+                  <div className="map-col">
+                    <div className="env">
+                      {facts.climate.map((stat) => (
+                        <div className="env-row" key={stat.icon}>{climateIcons[stat.icon]}<span><span className="l">{stat.label}</span><span className="v">{stat.value}</span></span></div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="facts">
+                  {facts.snapshot.map((fact) => (
+                    <div className={isMemberValue(fact.icon, fact.value) ? 'fact yes' : 'fact'} key={fact.icon}>
+                      {snapshotIcons[fact.icon]}
+                      <div><div className="l">{fact.label}</div><div className="v">{fact.value}</div></div>
+                    </div>
+                  ))}
+                </div>
+                <div className="src"><span>Last verified: {facts.disclosure.lastVerified} · {facts.disclosure.sourceNote}</span><span className="sbadge">Official source verified</span></div>
+              </section>
+
+              {/* 2. TOP CITIES */}
+              <section className="card-surface sec" id="top-cities">
+                <div className="sec-head">
+                  <div className="sec-title"><span className="sec-num">2</span><h2>Top Cities to Live</h2></div>
+                  <Link className="sec-link" href={`/nextinations/${slug}/v2/overview#top-cities`}>View all cities {arrow}</Link>
+                </div>
+                <div className="cities">
+                  {facts.cities.map((city) => (
+                    <article className="city" key={city.name}>
+                      <div className="city-map">
+                        {cityDecoration}
+                        <span className="city-flag"><span className="flag sm" role="img" aria-label={country.name}><img src={`https://flagcdn.com/${country.code.toLowerCase()}.svg`} alt="" /></span></span>
+                      </div>
+                      <div className="city-body">
+                        <div className="city-name">{city.name}</div><div className="city-sub">{city.region}</div>
+                        <div className="city-rows">
+                          <div className="city-row"><span className="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="8" r="3.2" /><path d="M2 20a7 7 0 0114 0" /></svg>Population</span><span className="val">{city.population}</span></div>
+                          <div className="city-row"><span className="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 21V9l8-5 8 5v12" /><path d="M9 21v-6h6v6" /></svg>Average rent</span><span className="val">{city.avgRent}</span></div>
+                          <div className="city-row"><span className="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M13 4l-2 6h4l-2 10" /><circle cx="12" cy="12" r="9" /></svg>Walk score</span><span className="val">{city.walkScore} / 100</span></div>
+                          <div className="city-row"><span className="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M8 8h8M8 12h6" /></svg>Data status</span><span className="val soft">{city.researchStatus}</span></div>
+                        </div>
+                        <Link className="city-cta" href={`/nextinations/${slug}/v2/overview#top-cities`}>View {city.name} details <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
+
+              {/* 3. WHY PEOPLE MOVE */}
+              <section className="card-surface sec">
+                <div className="sec-head"><div className="sec-title"><span className="sec-num">3</span><h2>Why People Move to {country.name}</h2></div></div>
+                <div className="reasons">
+                  {facts.reasons.map((reason, i) => (
+                    <article className={`reason r${i + 1}`} key={reason.icon}><span className="ic">{reasonIcons[reason.icon]}</span><h3>{reason.title}</h3><p>{reason.description}</p></article>
+                  ))}
+                </div>
+              </section>
+
+              {/* 4. LIFESTYLE SUMMARY */}
+              <section className="card-surface sec">
+                <div className="sec-head">
+                  <div className="sec-title"><span className="sec-num">4</span><h2>General Lifestyle Summary</h2></div>
+                  <Link className="sec-link" href={`/nextinations/${slug}/v2/lifestyle-community`}>Full daily life detail {arrow}</Link>
+                </div>
+                <div className="life">
+                  <div>
+                    <p className="eyebrow">Daily life in {country.name}</p>
+                    {lifeLines.length > 0 ? (
+                      lifeLines.map((line) => (
+                        <p className="body" key={line.label}><b>{line.label}:</b> {line.value}</p>
+                      ))
+                    ) : (
+                      <p className="body">Daily-life detail for {country.name} is being verified. <Link href={`/nextinations/${slug}/v2/lifestyle-community`}>See lifestyle &amp; community</Link>.</p>
+                    )}
+                  </div>
+                </div>
+                <div className="src"><span>Daily-life summary · editorially reviewed</span><span className="sbadge rev">Editorially reviewed</span></div>
+              </section>
+
+              {/* 5. WAYS IN */}
+              <section className="card-surface sec">
+                <div className="sec-head">
+                  <div className="sec-title"><span className="sec-num">5</span><h2>Your Ways In</h2></div>
+                  <Link className="sec-link" href={`/nextinations/${slug}/v2/move-there`}>See all pathways {arrow}</Link>
+                </div>
+                <p className="note" style={{margin: '0 0 14px', color: 'var(--muted)'}}>Residency routes are matched to your profile in Nexit Pathways; confirm details with official authorities.</p>
+                <div className="ways-links">
+                  <Link className="sec-link" href={`/nextinations/${slug}/v2/move-there`}>See all pathways {arrow}</Link>
+                  <Link className="sec-link" href="/pathways">Nexit Pathways {arrow}</Link>
                 </div>
               </section>
             </div>

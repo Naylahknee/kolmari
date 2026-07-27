@@ -1,19 +1,15 @@
 'use client'
-import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { UnitsProvider } from './client/UnitsControl'
 import { TopBar } from './TopBar'
 import { Sidebar } from './Sidebar'
-import { CountryHero } from './CountryHero'
 import { TabBar, type TabSlug } from './TabBar'
 import { RightRail } from './RightRail'
 
-/* Frame only. The active tab body is passed in as children so each tab can
-   stay a server component and ship no JavaScript of its own. */
-export function CountryTemplate({ slug, active, fromQuiz = false, children }:
-  { slug: string; active: TabSlug; fromQuiz?: boolean; children: React.ReactNode }) {
-  const router = useRouter()
-  const go = (s: string) => router.push(`/nextinations/${slug}/v2/${s}`)
+/* Frame only. The hero and the active tab body are passed in as server-rendered
+   nodes so each stays a server component and ships no JavaScript of its own. */
+export function CountryTemplate({ slug, active, hero, children }:
+  { slug: string; active: TabSlug; hero: React.ReactNode; children: React.ReactNode }) {
   const toggleRail = () => document.body.classList.toggle('rail-collapsed')
   useEffect(() => {
     if (window.innerWidth <= 900) document.body.classList.remove('rail-collapsed')
@@ -27,7 +23,7 @@ export function CountryTemplate({ slug, active, fromQuiz = false, children }:
           <button type="button" className="rail-backdrop" onClick={toggleRail} aria-label="Close navigation" />
           <Sidebar />
           <main className="main">
-            <CountryHero go={go} fromQuiz={fromQuiz} />
+            {hero}
             <TabBar slug={slug} active={active} />
             <div className="cols">
               <div>{children}</div>

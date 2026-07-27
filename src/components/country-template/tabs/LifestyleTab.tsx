@@ -1,10 +1,27 @@
-import type { CountryContent } from '@/lib/country-workspace/country-content'
+import { getCountryContent } from '@/lib/country-workspace/country-content'
 
-/* Converted from the approved index.html mockup. Markup is verbatim.
-   Content is still literal Portugal copy: replace with `content.*` per
-   section as the model is extended. See README step 4. */
+/* Data-driven Lifestyle & Community tab.
+
+   Portugal retains the approved index.html mockup verbatim: its month-by-month
+   climate bars, per-city walkability meters, dual-scored inclusion grid, A2
+   timeline and euro price tables are REAL Portugal figures held in the editorial
+   model. No other country has that structured data, and the shared content model
+   (DailyLifeContent / TransportationContent / GreenbookSection) only carries prose
+   fields — so those widgets cannot be re-driven per country without fabricating
+   numbers. Per AGENTS.md we never fabricate country data.
+
+   Every other country therefore renders an honest layout built strictly from the
+   prose fields that exist in `content`. Structured widgets with no backing field
+   are omitted rather than shown with Portugal's values. */
 export function LifestyleTab({ slug }: { slug: string }) {
-  return (
+  const content = getCountryContent(slug)
+  if (!content) return null
+  const daily = content.dailyLife
+  const transport = content.transportation
+  const greenbook = content.greenbook
+
+  if (content.slug === 'portugal') {
+    return (
       <div className="tabpanel on" id="p-life">
 
               {/* 1. THE CULTURE SHIFT */}
@@ -398,6 +415,158 @@ export function LifestyleTab({ slug }: { slug: string }) {
                 <div className="src"><span>Last verified: January 2026 · Global Peace Index, CICDR, Council of Europe ECRI monitoring, ILGA Europe. Community-reported experience is scored separately from legal fact.</span><span className="sbadge rev">Editorially reviewed</span></div>
               </section>
             </div>
+
+    )
+  }
+
+  // ─── Every other country: honest, prose-only layout from the content model ──
+  // Only fields that exist in DailyLifeContent / TransportationContent /
+  // GreenbookSection are rendered. Chart-, meter- and score-based widgets have
+  // no backing field and are omitted rather than shown with fabricated values.
+  return (
+    <div className="tabpanel on" id="p-life">
+
+            {/* 1. THE CULTURE SHIFT */}
+            <section className="card-surface sec">
+              <div className="sec-head">
+                <div className="sec-title"><span className="sec-num">1</span><h2>The Culture Shift</h2></div>
+                <a className="sec-link" href={`/nextinations/${slug}/v2/overview`}>Lifestyle summary <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+              </div>
+              <p className="lead">The everyday habits and social rhythms that tend to land differently for new arrivals.</p>
+              <div className="callout info">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-5M12 8h.01" /></svg>
+                <span><b>Cultural etiquette.</b> {daily.culturalEtiquette}</span>
+              </div>
+              <div className="callout info">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-5M12 8h.01" /></svg>
+                <span><b>Pace of life.</b> {daily.paceOfLife}</span>
+              </div>
+            </section>
+
+            {/* 2. CLIMATE */}
+            <section className="card-surface sec">
+              <div className="sec-head"><div className="sec-title"><span className="sec-num">2</span><h2>Climate Through the Year</h2></div></div>
+              <p className="lead">What the weather is like across the year.</p>
+              <p className="rd-p">{daily.weather}</p>
+            </section>
+
+            {/* 3. GETTING AROUND */}
+            <section className="card-surface sec">
+              <div className="sec-head">
+                <div className="sec-title"><span className="sec-num">3</span><h2>Getting Around</h2></div>
+                <a className="sec-link" href={`/nextinations/${slug}/v2/cost-housing`}>Transport costs <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+              </div>
+              <table className="tbl">
+                <thead><tr><th>Getting around</th><th>What to expect</th></tr></thead>
+                <tbody>
+                  <tr className="hi"><td>Public transit</td><td>{transport.publicTransit}</td></tr>
+                  <tr><td>Walkability</td><td>{transport.walkability}</td></tr>
+                  <tr><td>Rail</td><td>{transport.rail}</td></tr>
+                  <tr><td>Domestic travel</td><td>{transport.domesticTravel}</td></tr>
+                  <tr><td>International connections</td><td>{transport.internationalConnections}</td></tr>
+                  <tr><td>Car ownership</td><td>{transport.carOwnership}</td></tr>
+                  <tr><td>Rideshare</td><td>{transport.rideshare}</td></tr>
+                  <tr><td>Cycling</td><td>{transport.cycling}</td></tr>
+                  <tr><td>Accessibility</td><td>{transport.accessibility}</td></tr>
+                  <tr><td>Driver&apos;s licence</td><td>{transport.driverLicenseConversion}</td></tr>
+                </tbody>
+              </table>
+            </section>
+
+            {/* 4. THE RHYTHM OF A WEEK */}
+            <section className="card-surface sec">
+              <div className="sec-head"><div className="sec-title"><span className="sec-num">4</span><h2>Food and the Rhythm of a Week</h2></div></div>
+              <div className="two">
+                <div>
+                  <div className="subh">Groceries and daily shopping</div>
+                  <p className="rd-p">{daily.groceryShopping}</p>
+                </div>
+                <div>
+                  <div className="subh">Eating out</div>
+                  <p className="rd-p">{daily.dining}</p>
+                </div>
+              </div>
+              <div className="callout info">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-5M12 8h.01" /></svg>
+                <span><b>Public holidays.</b> {daily.holidays}</span>
+              </div>
+            </section>
+
+            {/* 5. MAKING FRIENDS */}
+            <section className="card-surface sec">
+              <div className="sec-head"><div className="sec-title"><span className="sec-num">5</span><h2>Social Life and Making Friends</h2></div></div>
+              <p className="lead">{greenbook.communityFit}</p>
+              <p className="rd-p">{greenbook.culturalBelonging}</p>
+            </section>
+
+            {/* 6. COMMUNITIES */}
+            <section className="card-surface sec">
+              <div className="sec-head"><div className="sec-title"><span className="sec-num">6</span><h2>Where to Find Your People</h2></div></div>
+              <div className="subh">Neighbourhoods and areas</div>
+              <p className="rd-p">{greenbook.neighborhoodInsights}</p>
+              <div className="subh" style={{marginTop: '16px'}}>Faith communities</div>
+              <p className="rd-p">{greenbook.faithCommunities}</p>
+            </section>
+
+            {/* 7. SAFETY & INCLUSION */}
+            <section className="card-surface sec">
+              <div className="sec-head"><div className="sec-title"><span className="sec-num">7</span><h2>Safety &amp; Inclusion</h2></div></div>
+              <div className="gb-head">
+                <div className="eb">Safety &amp; Inclusion</div>
+                <h3>Community-reported experience and available context</h3>
+                <p>Legal protection and lived experience are different things. These notes combine editorial research with community-reported experience. You never have to disclose anything to read this.</p>
+              </div>
+
+              <div className="subh">Everyday safety</div>
+              <div className="kpis" style={{gridTemplateColumns: '1fr'}}>
+                <div className="kpi"><div className="k">Safety overview</div><div className="v">Community-reported</div><div className="n">{daily.safety}</div></div>
+              </div>
+
+              <div className="subh" style={{marginTop: '22px'}}>Identity and lived experience</div>
+              <div className="gb-grid">
+                <div className="gb">
+                  <div className="h">Black diaspora and community</div>
+                  <div className="b">{greenbook.blackDiaspora}</div>
+                </div>
+                <div className="gb">
+                  <div className="h">LGBTQ+</div>
+                  <div className="b">{greenbook.lgbtq}</div>
+                </div>
+                <div className="gb">
+                  <div className="h">Women&apos;s experience</div>
+                  <div className="b">{greenbook.womenSafety}</div>
+                </div>
+                <div className="gb">
+                  <div className="h">Disability access</div>
+                  <div className="b">{greenbook.disabilityAccess}</div>
+                </div>
+              </div>
+
+              {greenbook.communityOrgs.length > 0 && (
+                <>
+                  <div className="subh" style={{marginTop: '22px'}}>Community organisations</div>
+                  <ul className="rd-list">
+                    {greenbook.communityOrgs.map((org) => (
+                      <li className="c" key={org.name}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></svg>
+                        <b>
+                          {org.url ? (
+                            <a href={org.url} target="_blank" rel="noopener noreferrer" style={{textDecoration: 'underline'}}>{org.name}</a>
+                          ) : (
+                            org.name
+                          )}
+                          .
+                        </b>{' '}
+                        {org.description}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+
+              <div className="src"><span>{greenbook.disclaimer}</span><span className="sbadge rev">Editorially reviewed</span></div>
+            </section>
+          </div>
 
   )
 }
