@@ -154,6 +154,18 @@ body.rail-collapsed .sb-tree,
 body.rail-collapsed .sb-div,
 body.rail-collapsed .readiness { display: none; }
 body.rail-collapsed .sb-item { justify-content: center; padding: 10px 0; gap: 0; }
+body.rail-collapsed .sb-item {
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  min-height: 40px;
+  margin-inline: auto;
+}
+body.rail-collapsed .sb-item .ic {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+}
 
 @media (max-width: 900px) {
   .rail { position: fixed; left: 0; z-index: 50; box-shadow: var(--shadow-shell); }

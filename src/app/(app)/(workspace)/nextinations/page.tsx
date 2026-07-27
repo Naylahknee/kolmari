@@ -12,6 +12,5 @@ export default async function NextinationsIndexPage() {
   const ranked = rankNextinations(profile)
   if (!ranked.length) redirect('/profile-wizard')
   const countrySlug = ranked[0].country.slug
-  const templatePath = countrySlug === 'portugal' ? '/v2/overview' : ''
-  redirect(`/nextinations/${countrySlug}${templatePath}?source=quiz`)
+  redirect(`/nextinations/${countrySlug}/v2/overview?source=quiz`)
 }

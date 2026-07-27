@@ -568,7 +568,8 @@ body.rail-collapsed .country-template-root .sb-item .chev,
 body.rail-collapsed .country-template-root .sb-tree,
 body.rail-collapsed .country-template-root .sb-div,
 body.rail-collapsed .country-template-root .readiness{display:none}
-body.rail-collapsed .country-template-root .sb-item{justify-content:center;padding:10px 0;gap:0}
+body.rail-collapsed .country-template-root .sb-item{justify-content:center;padding:0;gap:0;width:40px;min-width:40px;height:40px;min-height:40px;margin-inline:auto}
+body.rail-collapsed .country-template-root .sb-item .ic{width:18px;height:18px;min-width:18px}
 
 /* ══ tax estimator ══ */
 .country-template-root .calc{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:24px;align-items:start}
