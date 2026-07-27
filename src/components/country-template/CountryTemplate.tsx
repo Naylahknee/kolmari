@@ -17,7 +17,7 @@ export function CountryTemplate({ slug, active, fromQuiz = false, children }:
 
   return (
     <UnitsProvider>
-      <div>
+      <div className="country-template-root">
         <TopBar onToggleRail={toggleRail} />
         <div className="shell">
           <Sidebar onToggleRail={toggleRail} />
