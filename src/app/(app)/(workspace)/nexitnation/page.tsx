@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { NexitWorldBoard } from '@/components/nexit/NexitWorldBoard'
+import { KolmariWorldBoard } from '@/components/nexit/KolmariWorldBoard'
 import { requireCurrentUser } from '@/lib/auth'
 import { getProfile } from '@/lib/profile'
 import { calculateRegionMatches } from '@/lib/userProfile'
@@ -13,5 +13,5 @@ export default async function NexitWorldPage() {
   const user = await requireCurrentUser()
   const profile = await getProfile(user.id)
   const regionMatches = calculateRegionMatches(profile)
-  return <NexitWorldBoard profileComplete={profile.wizard_status === 'completed'} regionMatches={regionMatches} />
+  return <KolmariWorldBoard profileComplete={profile.wizard_status === 'completed'} regionMatches={regionMatches} />
 }
