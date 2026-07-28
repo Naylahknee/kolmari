@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import { CheckCircle2 } from 'lucide-react'
-import { WelcomeActions } from '@/components/nexit/welcome-actions'
+import { WelcomeActions } from '@/components/kolmari/welcome-actions'
 import { requireCurrentUser } from '@/lib/auth'
 import { getProfile } from '@/lib/profile'
 

@@ -1,680 +1,830 @@
 # Kolmari Design-to-Code Inventory
 
-**Status:** Initial inventory — Phase 1 complete  
-**Branch:** `migration/01-kolmari-foundation` (target)  
-**Date produced:** 2026-07-27  
-**Prepared by:** Bob (Plan mode — inventory only, no code changed)
+**Created:** 2025-01-07
+**Branch:** migration/02-kolmari-terminology
+**Status:** Initial inventory — no application code changed
 
 ---
 
-## 0. Prerequisite notes
+## Critical notice: design reference files are absent
 
-### Design reference files — NOT PRESENT in this workspace
-
-The following files described in the Kolmari migration instructions are **not present** in the local workspace:
+The Claude Design files listed in the migration instructions **do not exist in the repository**:
 
 | Expected path | Status |
 |---|---|
+| `design-reference/claude-design/Kolmari-App-Reference.html` | **MISSING** |
 | `design-reference/claude-design/Kolmari App.dc.html` | **MISSING** |
 | `design-reference/claude-design/image-slot.js` | **MISSING** |
 | `design-reference/claude-design/kolmari-map.js` | **MISSING** |
 | `design-reference/claude-design/support.js` | **MISSING** |
 | `design-reference/claude-design/assets/kolmari-butterfly.png` | **MISSING** |
-| `docs/kolmari/` directory | **CREATED NOW** (was absent) |
+| `design-reference/` directory | **MISSING** |
 
-The `design-reference/` directory does not exist. The Claude Design project at  
-`https://claude.ai/design/p/70604ab3-6b97-44f7-83c1-87f7f5fd2df0` has not yet been exported  
-to the local workspace. The migration instruction states these files must be present  
-before Phase 1 inventory can be finalized.
+This inventory was produced entirely from the existing application source code and Kolmari documentation files. It cannot include a screen-by-screen design-to-code comparison without the HTML design file. That mapping must be completed once the design reference is added to the repository.
 
-**This inventory documents what can be determined from the existing codebase.**  
-The design-to-code mapping for each Kolmari screen must be completed once the  
-`Kolmari App.dc.html` export is placed in `design-reference/claude-design/`.
+**Action required:** Add the Claude Design export to `design-reference/claude-design/` and re-run this inventory pass to complete the design-to-code mapping sections.
 
-### Kolmari documentation files — NOT PRESENT
+---
 
-The following Kolmari docs are referenced in the migration instructions but do not yet exist:
+## 1. Repository state summary
 
-| File | Status |
+### Foundation work status (Milestone 1)
+
+The following Milestone 1 deliverables are confirmed present and correct:
+
+| Item | File | Status |
+|---|---|---|
+| Brand configuration | `src/config/brand.ts` | ✅ Present |
+| Product copy configuration | `src/config/product-copy.ts` | ✅ Present |
+| Brand assets configuration | `src/config/brand-assets.ts` | ✅ Present |
+| Kolmari lexicon | `src/lib/lexicon.ts` | ✅ Present |
+| Kolmari app-shell boundary | `src/components/layout/kolmari-app-shell.tsx` | ✅ Present |
+| Workspace layout using Kolmari shell | `src/app/(app)/(workspace)/layout.tsx` | ✅ Present |
+| AppShell with Kolmari sidebar labels | `src/components/nexit/app-shell.tsx` | ✅ Present |
+| Migration documentation | `docs/kolmari/` | ✅ Present |
+| Legacy compatibility exports | `src/lib/lexicon.ts` (`NEXIT_LEXICON`, `NEXIT_STORY`) | ✅ Present |
+| Sidebar collapse localStorage migration shim | `src/components/nexit/app-shell.tsx` | ✅ Present |
+
+### Milestone 1 validation checks outstanding
+
+| Check | Status |
 |---|---|
-| `docs/kolmari/00-README.md` | **MISSING** |
-| `docs/kolmari/01-DESIGN.md` | **MISSING** |
-| `docs/kolmari/02-DESIGN-TOKENS.md` | **MISSING** |
-| `docs/kolmari/03-COMPONENTS.md` | **MISSING** |
-| `docs/kolmari/04-LAYOUTS.md` | **MISSING** |
-| `docs/kolmari/05-PAGE-TEMPLATES.md` | **MISSING** |
-| `docs/kolmari/06-ADAPTIVE-WORKSPACE.md` | **MISSING** |
-| `docs/kolmari/07-DATA-MODEL.md` | **MISSING** |
-| `docs/kolmari/08-CONTENT-STANDARDS.md` | **MISSING** |
-| `docs/kolmari/09-IMPLEMENTATION-RULES.md` | **MISSING** |
-| `docs/kolmari/10-LLM-RULES.md` | **MISSING** |
-| `docs/kolmari/REBRAND-MIGRATION.md` | **MISSING** |
-| `docs/kolmari/REPLACEMENT-MATRIX.md` | **MISSING** |
-| `docs/kolmari/ROUTE-MIGRATION.md` | **MISSING** |
-| `docs/kolmari/HTML-INTEGRATION.md` | **MISSING** |
-| `docs/kolmari/MIGRATION-CHECKLIST.md` | **MISSING** |
-| `docs/kolmari/LEGACY-REFERENCE-AUDIT.md` | **MISSING** |
-
-The only Kolmari documentation that currently exists is this file, produced during Phase 1.
-
-### GitHub repository status
-
-The remote repository `Naylahknee/kolmari` and branch `migration/01-kolmari-foundation`  
-(PR #19) have not been inspected from this local workspace (no git remote connection confirmed).  
-The git status shows only the local workspace on branch `main` with no pending changes  
-other than `public/icons/` untracked.
+| `npm run typecheck` | ⬜ Not run |
+| `npm run lint` | ⬜ Not run |
+| `npm run test` | ⬜ Not run |
+| `npm run build` | ⬜ Not run |
+| `npx opennextjs-cloudflare build` | ⬜ Not run |
 
 ---
 
-## 1. Existing application — full route inventory
+## 2. Application route inventory
 
-### 1a. Public and authentication routes
+### Public routes
 
-| Route | File | Component | Description |
-|---|---|---|---|
-| `/` | `src/app/(marketing)/page.tsx` | `LandingPage` | Marketing landing page |
-| `/[seoSlug]` | `src/app/(marketing)/[seoSlug]/page.tsx` | `SeoPage` | 10 public SEO pages |
-| `/signup` | `src/app/(auth)/signup/page.tsx` | `SignupPage` | User registration |
-| `/login` | `src/app/(auth)/login/page.tsx` | `LoginPage` | User login |
+| Route | File | Component | Purpose | Kolmari copy status |
+|---|---|---|---|---|
+| `/` | `src/app/(marketing)/page.tsx` | Inline (`LandingPage`) | Marketing landing page | ✅ Kolmari terms in use |
+| `/quiz` | `src/app/(marketing)/quiz/page.tsx` | Inline (`NexitQuizPage`) | 8-question move planning quiz | ⚠️ Function name `NexitQuizPage` still legacy; `nexit-quiz-result` localStorage key is legacy |
+| `/[seoSlug]` | `src/app/(marketing)/[seoSlug]/page.tsx` | Not inspected | 10 public SEO pages | ⬜ Not inspected |
+| `/login` | `src/app/(auth)/login/page.tsx` | `AuthForm`, `Wordmark` | Login | ✅ Kolmari terms in copy |
+| `/signup` | `src/app/(auth)/signup/page.tsx` | `AuthForm`, `Wordmark` | Signup | ✅ Kolmari terms in copy |
 
-### 1b. Protected workspace routes
+### Compatibility redirect routes
 
-| Route | File | Component/Notes | Kolmari nav label |
-|---|---|---|---|
-| `/welcome` | `src/app/(app)/welcome/page.tsx` | Onboarding gate | — |
-| `/profile-wizard` | `src/app/(app)/profile-wizard/page.tsx` | `ProfileWizard` | Profile |
-| `/onboarding` | `src/app/(app)/onboarding/page.tsx` | Redirects → `/welcome` | — |
-| `/dashboard` | `src/app/(app)/(workspace)/dashboard/page.tsx` | Dashboard page | Dashboard |
-| `/nexitnation` | `src/app/(app)/(workspace)/nexitnation/page.tsx` | `NexitWorldWorkspace` | Your World |
-| `/nexitnation/[region]` | `src/app/(app)/(workspace)/nexitnation/[region]/page.tsx` | Region detail | Your World |
-| `/countries` | `src/app/(app)/(workspace)/countries/page.tsx` | Redirects → `/nexitnation?view=countries` | — |
-| `/nextinations` | `src/app/(app)/(workspace)/nextinations/page.tsx` | Redirects → top match | — |
-| `/nextinations/[countrySlug]` | `src/app/(app)/(workspace)/nextinations/[countrySlug]/page.tsx` | Redirects → `/overview` | Destinations |
-| `/nextinations/[countrySlug]/[section]` | `src/app/(app)/(workspace)/nextinations/[countrySlug]/[section]/page.tsx` | `CountryWorkspace` | Destination detail |
-| `/pathways` | `src/app/(app)/(workspace)/pathways/page.tsx` | `PathwaysResults` | Pathways |
-| `/nexit-plan` | `src/app/(app)/(workspace)/nexit-plan/page.tsx` | `NexitPlanWorkspace` | My Plan |
-| `/checklist` | `src/app/(app)/(workspace)/checklist/page.tsx` | Redirects → `/nexit-plan#checklist` | — |
-| `/visa-wizard` | `src/app/(app)/(workspace)/visa-wizard/page.tsx` | Redirects → `/profile-wizard` | — |
-| `/cost-calculator` | `src/app/(app)/(workspace)/cost-calculator/page.tsx` | `CostCalculator` | Cost Calculator |
-| `/greenbook` | `src/app/(app)/(workspace)/greenbook/page.tsx` | Greenbook page | Greenbook |
-| `/community` | `src/app/(app)/(workspace)/community/page.tsx` | Coming soon | Kolmari Klub |
-| `/saved` | `src/app/(app)/(workspace)/saved/page.tsx` | `SavedNextinations` | Destinations |
-| `/documents` | `src/app/(app)/(workspace)/documents/page.tsx` | `DocumentsManager` | Documents |
-| `/settings` | `src/app/(app)/(workspace)/settings/page.tsx` | `SettingsForm` | Settings |
-| `/settings/privacy` | `src/app/(app)/(workspace)/settings/privacy/page.tsx` | `PrivacyAccountPage` | Settings → Privacy |
-
-### 1c. API routes
-
-| Route | File | Method(s) |
+| Route | File | Destination |
 |---|---|---|
-| `/api/login` | `src/app/api/login/route.ts` | POST |
-| `/api/logout` | `src/app/api/logout/route.ts` | POST |
-| `/api/profile` | `src/app/api/profile/route.ts` | GET, PUT |
-| `/api/plan` | `src/app/api/plan/route.ts` | GET, PUT |
-| `/api/countries` | `src/app/api/countries/route.ts` | GET |
-| `/api/account/change-password` | `src/app/api/account/change-password/route.ts` | POST |
-| `/api/account/data-export` | `src/app/api/account/data-export/route.ts` | GET |
-| `/api/account/deletion-request` | `src/app/api/account/deletion-request/route.ts` | POST |
-| `/api/account/sign-out-all` | `src/app/api/account/sign-out-all/route.ts` | POST |
+| `/onboarding` | `src/app/(app)/onboarding/page.tsx` | Redirects → `/welcome` |
+| `/checklist` | `src/app/(app)/(workspace)/checklist/page.tsx` | Redirects → `/nexit-plan#checklist` |
+
+### Protected workspace routes
+
+| Route | File | Primary component | Data source | Kolmari copy status |
+|---|---|---|---|---|
+| `/welcome` | `src/app/(app)/welcome/page.tsx` | `WelcomeActions` | `getProfile()` | ✅ Kolmari copy |
+| `/profile-wizard` | `src/app/(app)/profile-wizard/page.tsx` | `ProfileWizard` | `getProfile()` | ⬜ Not inspected |
+| `/dashboard` | `src/app/(app)/(workspace)/dashboard/page.tsx` | Inline page + `ScoreRing`, `BudgetDonut` | `getProfile()`, `getNexitPlan()`, `evaluatePathways()` | ⚠️ Some legacy refs (link to `/nexit-plan`) |
+| `/nexitnation` | `src/app/(app)/(workspace)/nexitnation/page.tsx` | `NexitWorldBoard` (via `KolmariWorldBoard`) | `getProfile()`, `calculateRegionMatches()` | ⚠️ Metadata still "Nexit World \| Nexit"; uses `NexitWorldBoard` import which doesn't exist |
+| `/nexitnation/[region]` | `src/app/(app)/(workspace)/nexitnation/[region]/page.tsx` | Inline page + `CountryShapePanel` | `getProfile()`, `calculateRegionMatches()`, `regions[]` | ✅ Mostly Kolmari; uses `NEXIT_LEXICON` for labels |
+| `/saved` | `src/app/(app)/(workspace)/saved/page.tsx` | `SavedNextinations` | localStorage (`kolmari-saves`) | ✅ Page header uses "Destinations" |
+| `/countries` | `src/app/(app)/(workspace)/countries/page.tsx` | Not inspected | `COUNTRIES` data | ⬜ Not inspected |
+| `/countries/[slug]` | `src/app/(app)/(workspace)/countries/[slug]/page.tsx` | `SaveNextinationButton` | `COUNTRIES[]`, `getProfile()` | ⚠️ Uses "Nextination" in UI comments only; copy is mostly Kolmari |
+| `/pathways` | `src/app/(app)/(workspace)/pathways/page.tsx` | `PathwaysResults` | `getProfile()`, `evaluatePathways()`, `PATHWAYS` | ✅ Kolmari metadata |
+| `/nexit-plan` | `src/app/(app)/(workspace)/nexit-plan/page.tsx` | `NexitPlanWorkspace` | `getProfile()`, `getNexitPlan()`, `COUNTRIES`, `PATHWAYS` | ✅ Kolmari metadata |
+| `/flutter` | `src/app/(app)/(workspace)/flutter/page.tsx` | `NexitPlanWorkspace` (defaultTab="checklist") | Same as `/nexit-plan` | ✅ Kolmari metadata |
+| `/documents` | `src/app/(app)/(workspace)/documents/page.tsx` | `DocumentsManager` | Client state (no backend yet) | ⬜ Not inspected |
+| `/community` | `src/app/(app)/(workspace)/community/page.tsx` | `KlubHeader`, `KlubEmptyState`, `KlubTabs` | None (empty state) | ✅ Kolmari Klub copy |
+| `/cost-calculator` | `src/app/(app)/(workspace)/cost-calculator/page.tsx` | `CostCalculator` | `getProfile()` (income) | ⬜ Not inspected |
+| `/greenbook` | `src/app/(app)/(workspace)/greenbook/page.tsx` | Inline page + `GREENBOOK_ENTRIES` | `GREENBOOK_ENTRIES` static data | ⚠️ Uses "Nextination" in one prompt string |
+| `/settings` | `src/app/(app)/(workspace)/settings/page.tsx` | `SettingsForm` | `getProfile()` | ⬜ Not inspected |
+| `/settings/privacy` | `src/app/(app)/(workspace)/settings/privacy/page.tsx` | Not inspected | API calls | ⬜ Not inspected |
+| `/nextinations` | `src/app/(app)/(workspace)/nextinations/page.tsx` | Not inspected | `COUNTRIES` | ⬜ Not inspected |
+| `/nextinations/[slug]` | `src/app/(app)/(workspace)/nextinations/[slug]/page.tsx` | Redirect → `/nextinations/[slug]/v2/overview` | — | — |
+| `/nextinations/[slug]/v2/[section]` | `src/app/(app)/(workspace)/nextinations/[countrySlug]/v2/[section]/page.tsx` | `CountryTemplate`, `CountryResearchPage` | Country content lib | ⚠️ Metadata uses "Nexit" |
+| `/visa-wizard` | `src/app/(app)/(workspace)/visa-wizard/page.tsx` | Not inspected | — | ⬜ Not inspected |
+
+### API routes
+
+| Route | File | Purpose |
+|---|---|---|
+| `POST /api/login` | `src/app/api/login/route.ts` | Authentication |
+| `POST /api/logout` | `src/app/api/logout/route.ts` | Session termination |
+| `GET/PUT /api/profile` | `src/app/api/profile/route.ts` | Profile read/write |
+| `GET/POST /api/plan` | `src/app/api/plan/route.ts` | Plan read/write |
+| `GET /api/countries` | `src/app/api/countries/route.ts` | Country data |
+| `POST /api/account/change-password` | `src/app/api/account/change-password/route.ts` | Account security |
+| `POST /api/account/data-export` | `src/app/api/account/data-export/route.ts` | Data portability |
+| `POST /api/account/deletion-request` | `src/app/api/account/deletion-request/route.ts` | Account deletion |
+| `POST /api/account/sign-out-all` | `src/app/api/account/sign-out-all/route.ts` | Session management |
 
 ---
 
-## 2. Existing component inventory
+## 3. Screen and component inventory
 
-### 2a. Shell and navigation
+### 3.1 Shared shell (KolmariAppShell)
 
-| Component | File | Type | Notes |
-|---|---|---|---|
-| `AppShell` | `src/components/nexit/app-shell.tsx` | Client | Full sidebar, top bar, mobile nav, user menu, search |
-| `Wordmark` | `src/components/nexit/wordmark.tsx` | Server | Renders `NexitWordMark.svg`; `dark` prop deprecated but present for call-site compat |
-| `MarketingMobileNav` | `src/components/nexit/marketing-mobile-nav.tsx` | Client | Marketing page mobile nav |
+**Route protection:** All workspace routes use `KolmariAppShell` via `src/app/(app)/(workspace)/layout.tsx`.
 
-#### AppShell sidebar structure (current)
+**Architecture:**
+- `KolmariAppShell` (`src/components/layout/kolmari-app-shell.tsx`) — thin boundary wrapper
+- delegates to `WorkspaceShell` (`src/components/nexit/workspace-shell.tsx`) — routes conditionally to country-template chrome or the new AppShell
+- `AppShell` (`src/components/nexit/app-shell.tsx`) — full client component, the real implementation
+
+**AppShell capabilities:**
+- Desktop collapsible sidebar (248px expanded / 60px collapsed)
+- localStorage persistence of collapse state (`kolmari:sidebar-collapsed`, migrates from `nexit:sidebar-collapsed`)
+- Mobile drawer with focus trap and Escape key close
+- Top bar with notifications dropdown and user account menu
+- Logout via `POST /api/logout`
+- Profile readiness footer panel in sidebar
+- Country section sub-tree (collapsible per saved country)
+- Saved destinations sourced from `useNextinationBoard()` (localStorage)
+
+**Current sidebar navigation structure (as implemented):**
 
 ```
-DISCOVER
-  Dashboard           → /dashboard
-  Nexit World         → /nexitnation
+[Wordmark: /brand/NexitWordMark.svg — legacy filename]
 
-MY NEXIT
-  My Nextinations     → /nextinations (collapsible tree)
-    [country flags]
-    [country sections]
+Dashboard                → /dashboard
 
-PLANNING
-  Nexit Pathways      → /pathways
-  Nexit Plan          → /nexit-plan
-  Cost Calculator     → /cost-calculator
-  Greenbook           → /greenbook
-  Documents           → /documents
+[EXPLORE group label]
+[NAV_EXPLORE — REFERENCE BUG: array does not exist; likely intended as NAV_DISCOVER]
+  Dashboard              → /dashboard  (duplicated)
 
-(bottom)
-  Settings            → /settings
-  Profile             → /profile-wizard
+Your World               → /nexitnation  (expandable, shows region sub-list)
+
+[MY NEXIT group label — legacy terminology]
+  My Nextinations        → collapsible, shows saved country tree
+
+[TOOLS group label]
+  Cost Calculator        → /cost-calculator
+  Greenbook              → /greenbook
+
+[Bottom / Settings group]
+  Settings               → /settings
+  Profile                → /profile-wizard
 ```
 
-#### AppShell top bar structure (current)
-
-- Wordmark (collapsed: icon only; expanded: wordmark)
-- Sidebar collapse/expand toggle
-- Global search form
-- Notifications bell (modal)
-- User account menu (email, logout)
-
-#### Mobile nav (bottom bar)
-
-- Dashboard, Nexit World, Nexit Pathways, Nexit Plan (4 primary items)
-
-### 2b. Core page components
-
-| Component | File | Type | Notes |
-|---|---|---|---|
-| `NexitWorldWorkspace` | `src/components/nexit/nexit-world.tsx` | Client | Map/countries toggle, region match display |
-| `NexitnationMap` | `src/components/nexit/NexitnationMap.tsx` | Client | SVG world map with 6 region links |
-| `NexitnationMapbox` | `src/components/nexit/NexitnationMapbox.tsx` | Client | Mapbox detailed map |
-| `NexitnationMapLoader` | `src/components/nexit/NexitnationMapLoader.tsx` | Client | Loader for Mapbox |
-| `CountriesBrowser` | `src/components/nexit/countries-browser.tsx` | Client | Country list, search, filter |
-| `ProfileWizard` | `src/components/nexit/profile-wizard.tsx` | Client | Multi-step wizard |
-| `PathwaysResults` | `src/components/nexit/pathways-results.tsx` | Client | Pathway evaluations with accordion |
-| `NexitPlanWorkspace` | `src/components/nexit/nexit-plan-workspace.tsx` | Client | Full plan CRUD workspace |
-| `CostCalculator` | `src/components/nexit/cost-calculator.tsx` | Client | Budget builder with BudgetDonut |
-| `DocumentsManager` | `src/components/nexit/documents-manager.tsx` | Client | File upload and list (local state) |
-| `SettingsForm` | `src/components/nexit/settings-form.tsx` | Client | Profile/account settings |
-| `PrivacyAccountPage` | `src/components/nexit/privacy-account-page.tsx` | Client | Data export, password, deletion |
-| `AuthForm` | `src/components/nexit/auth-form.tsx` | Client | Shared login/signup form |
-| `WelcomeActions` | `src/components/nexit/welcome-actions.tsx` | Client | Welcome page wizard/skip CTAs |
-| `SavedNextinations` | `src/components/nexit/saved-nextinations.tsx` | Client | Saved country list (localStorage) |
-| `CountryWorkspace` | `src/components/country-workspace/CountryWorkspace.tsx` | Client | Persistent country workspace with tabs |
-| `MiniExperienceTrigger` | `src/components/nexit/landing-mini-experiences.tsx` | Client | Landing page interactive demos |
-| `PassportIndexLink` | `src/components/nexit/PassportIndexLink.tsx` | Server | External passport index link |
-| `MapboxMap` | `src/components/nexit/MapboxMap.tsx` | Client | Generic Mapbox wrapper |
-
-### 2c. Display components (server-safe)
-
-| Component | File | Notes |
-|---|---|---|
-| `ScoreRing` | `src/components/nexit/rings.tsx` | SVG ring for readiness/match |
-| `BudgetDonut` | `src/components/nexit/rings.tsx` | Conic-gradient budget chart |
-
-### 2d. Country workspace tab components
-
-All in `src/components/country-workspace/tabs/`:
-
-`OverviewTab` (implied), `CompareTab`, `CostOfLivingTab`, `DailyLifeTab`,
-`EconomicProfileTab`, `EducationTab`, `EmploymentTab`, `FamilyPetsTab`,
-`GreenbookTab`, `HealthcareTab`, `HousingTab`, `LegalTaxesTab`,
-`ResourcesTab`, `SourceFooter`, `TransportationTab`
-
----
-
-## 3. Existing data model and persistence
-
-### 3a. Database tables (Neon Postgres)
-
-| Table | Key fields | Access layer |
-|---|---|---|
-| `users` | `id`, `email`, `password_hash` | `src/lib/db.ts` + `src/app/api/login/` |
-| `profiles` | `user_id` (FK), `wizard_status`, 28+ profile fields, `completed_tasks`, `goals[]` (JSONB), `preferred_regions[]` (JSONB) | `src/lib/profile.ts` |
-| `nexit_plans` | `user_id` (FK), `timeline_stage`, `checklist[]`, `budget` (JSONB), `documents[]` | `src/lib/nexit-plan.ts` |
-
-### 3b. Authentication
-
-- Session cookie: `nexit_session` (httpOnly, SameSite=Lax)
-- Token: JOSE HS256 JWT (7-day expiry), issuer `nexit`, audience `nexit-web`
-- `requireCurrentUser()` → server-side guard used in all protected layouts/pages
-
-### 3c. Persistence flags (legacy key names — must not be blindly renamed)
-
-| Key | Location | Type | Status |
-|---|---|---|---|
-| `nexit_session` | Cookie | Auth session | **Active — do not rename without compatibility layer** |
-| `nexit:sidebar-collapsed` | localStorage | Sidebar state | **Active — compatibility alias needed on rename** |
-| `nexit-saves` | localStorage | Saved countries (via `useSavedNextinations`) | **Active — compatibility read required** |
-| `nexit_session` | AUTH_CONSTANTS `SESSION_COOKIE` | Auth constant | **Active** |
-| `TOKEN_ISSUER = 'nexit'` | `src/lib/auth-constants.ts` | JWT issuer | **Active** |
-| `TOKEN_AUDIENCE = 'nexit-web'` | `src/lib/auth-constants.ts` | JWT audience | **Active** |
-
-### 3d. Static data libraries
-
-| Library | File | Contains |
-|---|---|---|
-| `COUNTRIES` | `src/lib/countries.ts` | 5 countries with slug, name, code, city, region, visaType, safety, cost, match, summary |
-| `PATHWAYS` | `src/lib/pathways.ts` | 10+ pathway definitions with official source URLs and lastVerified dates |
-| `GREENBOOK_ENTRIES` | `src/lib/greenbook.ts` | 5+ editorial planning prompts |
-| `regions` | `src/lib/nexitnation-data.ts` | 6 region configs with country previews and images |
-| `NEXIT_LEXICON` | `src/lib/lexicon.ts` | Brand vocabulary object (needs Kolmari equivalents) |
-| `SEO_PAGES` | `src/lib/seoContent.ts` | 10 public SEO page definitions |
-
----
-
-## 4. Legacy terminology classification
-
-This classification must guide migration decisions. Do **not** blindly rename any of these.
-
-### 4a. Terminology by occurrence category
-
-#### Public UI copy (safe to migrate on page conversion)
-
-| Legacy term | Current UI location | Kolmari equivalent |
-|---|---|---|
-| `Nexit` | Brand label throughout UI | `Kolmari` |
-| `Nexitnation` | Sidebar label, page heading, breadcrumbs | `Your World` |
-| `Nextination(s)` | Cards, headings, labels | `Destination(s)` |
-| `Nexit Plan` | Sidebar, dashboard, page headings | `My Plan` |
-| `Nexit Profile` | Dashboard, welcome, settings | `Kolmari Profile` |
-| `Nexit Pathways` | Sidebar, dashboard | `Pathways` |
-| `Nexit Tracker` | Dashboard | `Progress Tracker` |
-| `Nexit Readiness` | Readiness score UI | `Move Readiness` |
-| `Nexit Timeline` | Dashboard | `Move Timeline` |
-| `Nexicution Mode` / `Nexiters` / `Nexicution` | Dashboard CTA, community page | `Flutter Mode` / `Kolmari Klub` members |
-| `Nexit Budget` | Dashboard section heading | (removed or → `Budget`) |
-| `Nexit World` | Sidebar label | `Your World` |
-| `Community Fit` | Country cards | Retained: `Community Fit` |
-| `Match Score` | Country cards | Retained: `Match Score` |
-| `Greenbook Insights` | Greenbook page | Retained: `Greenbook Insights` |
-| `Greenbook Layer` | In lexicon | Retained: `Greenbook Layer` |
-
-#### Component filenames (internal — rename carefully, not on UI)
-
-| File/component | Notes |
-|---|---|
-| `src/components/nexit/app-shell.tsx` | Internal; can be migrated to `kolmari-shell.tsx` in separate phase |
-| `src/components/nexit/nexit-plan-workspace.tsx` | Internal; keep until route migrated |
-| `src/components/nexit/nexit-world.tsx` | Internal; keep until route migrated |
-| `src/lib/nexit-plan.ts` | Contains `NexitPlan`, `emptyNexitPlan()` — DB table name `nexit_plans` |
-| `src/lib/lexicon.ts` | `NEXIT_LEXICON` — needs a `KOLMARI_LEXICON` parallel (do not delete existing) |
-
-#### Routes (maintain with redirects — do not rename without separate phase)
-
-| Current route | Kolmari canonical | Migration phase |
-|---|---|---|
-| `/nexitnation` | `/world` | Future |
-| `/nexitnation/[region]` | `/destinations/[slug]` | Future |
-| `/nexit-plan` | `/plan` | Future |
-| `/checklist` | `/flutter` (already redirects to nexit-plan) | Future |
-| `/community` | `/klub` | Future |
-| `/nextinations/[slug]` | `/destinations/[slug]` | Future |
-| `/saved` | `/destinations` (consolidate) | Future |
-
-#### Database fields (MUST NOT be renamed without a separate migration task)
-
-| Field / table | Contains "nexit" | Risk |
-|---|---|---|
-| `nexit_plans` table | Table name | HIGH — do not rename |
-| `profiles.completed_tasks` | Field name is neutral | Low risk |
-| `profiles.wizard_status` | Neutral | No change |
-| API route `/api/plan` | Neutral URL | No change |
-
-#### Cookie and localStorage keys (require compatibility reads on rename)
-
-| Key | Recommendation |
-|---|---|
-| `nexit_session` | Keep until new cookie name verified with auth system |
-| `nexit:sidebar-collapsed` | Read old key → write new key in compatibility pass |
-| `nexit-saves` (localStorage saved countries) | Read old → write new `kolmari-saves` with migration shim |
-
-#### Metadata, SEO, and `site.ts`
-
-| Location | Current value | Proposed |
-|---|---|---|
-| `src/lib/site.ts` | `FALLBACK_SITE_URL = 'https://nexit.madincrease.workers.dev'` | Update to Kolmari domain when ready |
-| `src/app/layout.tsx` | `title: 'Nexit | Build your Nexit Plan'` | Migrate when branding is confirmed |
-| `src/lib/auth-constants.ts` | `TOKEN_ISSUER = 'nexit'`, `SESSION_COOKIE = 'nexit_session'` | Keep for now; change only with auth migration |
-| `package.json` | `"name": "nexit"` | Low risk; update in separate cleanup |
-
----
-
-## 5. Design-to-code screen mapping
-
-The following table maps the **expected** Kolmari screens (based on the approved Kolmari  
-terminology and product structure) to the existing application routes and components.  
-This will need to be verified against `Kolmari App.dc.html` when the file is available.
-
-### 5a. Screen inventory (inferred from Kolmari product spec)
-
-| # | Kolmari screen | Expected sections | Current route | Current components | Client? |
-|---|---|---|---|---|---|
-| 1 | Dashboard | Welcome header, Move Readiness ring, Destination summary, Next Steps, Plan progress, Budget snapshot, Pathways signal | `/dashboard` | `dashboard/page.tsx`, `rings.tsx` | Partial (server page, client sub-components) |
-| 2 | Your World (map) | Region map, region cards, search, country browser | `/nexitnation` | `NexitWorldWorkspace`, `NexitnationMap` | Yes |
-| 3 | Destinations (list) | Country grid/list, search, filter, Match Score | `/nexitnation?view=countries` → `countries-browser.tsx` | `CountriesBrowser` | Yes |
-| 4 | Destination detail | Hero, tabs: Overview, Why You, Cost, Pathways, Healthcare, Housing, Greenbook, etc. | `/nextinations/[slug]/[section]` | `CountryWorkspace` + 15 tabs | Yes |
-| 5 | Pathways | Pathway list, filters, accordion evaluations, strong/possible/missing | `/pathways` | `PathwaysResults` | Yes |
-| 6 | My Plan | Stage selector, Destination picker, Pathway picker, checklist, budget, documents, notes | `/nexit-plan` | `NexitPlanWorkspace` | Yes |
-| 7 | Flutter Mode | Execution checklist, task prioritization, deadlines, progress summary | `/checklist` (redirects → `/nexit-plan#checklist`) | `NexitPlanWorkspace` (checklist section) | Yes |
-| 8 | Documents | File upload, document list, delete | `/documents` | `DocumentsManager` | Yes |
-| 9 | Kolmari Klub | Community page — currently "coming soon" with related links | `/community` | `community/page.tsx` | No (server) |
-| 10 | Cost Calculator | Budget builder, BudgetDonut, income context | `/cost-calculator` | `CostCalculator` | Yes |
-| 11 | Greenbook | Planning prompts, provenance legend, community-reported empty state | `/greenbook` | `greenbook/page.tsx` | No (server) |
-| 12 | Settings | Display name, current location, timeline, priority, notifications | `/settings` | `SettingsForm` | Yes |
-| 13 | Privacy & Account | Data export, password change, sign out all, deletion request | `/settings/privacy` | `PrivacyAccountPage` | Yes |
-| 14 | Profile Wizard | Multi-step: name, citizenship, income, work, household, regions, goals, climate, timeline | `/profile-wizard` | `ProfileWizard` | Yes |
-| 15 | Welcome / Onboarding | Benefits list, Start/Skip CTAs | `/welcome` | `welcome/page.tsx`, `WelcomeActions` | Partial |
-| 16 | Landing page | Hero, features bar, how-it-works, stats, community, footer | `/` | `(marketing)/page.tsx` | Partial |
-| 17 | Auth — Signup | Wordmark, form, next-path preservation | `/signup` | `signup/page.tsx`, `AuthForm` | Partial |
-| 18 | Auth — Login | Wordmark, form, next-path preservation | `/login` | `login/page.tsx`, `AuthForm` | Partial |
-| 19 | SEO pages (×10) | Country/topic content, CTAs | `/[seoSlug]` | `[seoSlug]/page.tsx` | No (server) |
-| 20 | Region detail | Hero image, country cards with Match Score, Pathways/Greenbook CTAs | `/nexitnation/[region]` | `[region]/page.tsx` | No (server) |
-| 21 | Saved Destinations | Saved country cards, remove action | `/saved` | `SavedNextinations` | Yes |
-
-### 5b. Shared components across screens
-
-| Component | Used on screens |
-|---|---|
-| App shell (sidebar + top bar + mobile nav) | All protected workspace screens (1–13, 20–21) |
-| `Wordmark` | Shell, auth screens, landing, marketing |
-| `ScoreRing` | Dashboard (readiness/timeline), region pages |
-| `BudgetDonut` | Dashboard, Cost Calculator |
-| `PathwaysResults` (or sub-parts) | Pathways, My Plan (pathway picker) |
-| `CountryWorkspace` + tab system | Destination detail (screen 4) |
-
----
-
-## 6. Interaction and behavior inventory
-
-### 6a. Client-only interactions (require `'use client'`)
-
-| Interaction | Current component | Kolmari screen |
-|---|---|---|
-| Sidebar collapse/expand, mobile drawer | `AppShell` | All protected |
-| User menu dropdown | `AppShell` | All protected |
-| Notifications modal | `AppShell` | All protected |
-| Global search (form submit → redirect) | `AppShell` | All protected |
-| Country tree expand/collapse in sidebar | `SidebarNav` | All protected |
-| Map region selection | `NexitnationMap` | Your World |
-| Country browser search + filter | `CountriesBrowser` | Destinations |
-| Map/Countries toggle | `NexitWorldWorkspace` | Your World |
-| Wizard step navigation | `ProfileWizard` | Profile Wizard |
-| Pathway accordion expand/collapse | `PathwaysResults` | Pathways |
-| Plan stage selector, checklist CRUD, budget fields | `NexitPlanWorkspace` | My Plan |
-| File upload drag-and-drop | `DocumentsManager` | Documents |
-| Budget form + donut update | `CostCalculator` | Cost Calculator |
-| Tab navigation in country workspace | `CountryWorkspace` | Destination detail |
-| Saved country management | `SavedNextinations` | Saved / Sidebar |
-| Settings form save | `SettingsForm` | Settings |
-| Password change, data export, deletion | `PrivacyAccountPage` | Privacy & Account |
-| Auth form (login/signup) | `AuthForm` | Auth screens |
-| Mini experience modals | `MiniExperienceTrigger` | Landing |
-| Marketing mobile nav | `MarketingMobileNav` | Landing |
-
-### 6b. Map behavior
-
-| Map | Technology | Status | Notes |
-|---|---|---|---|
-| Nexitnation world map | SVG (accessible) | Production | 6 region links, no Mapbox token required |
-| Region detail / country detail | Mapbox GL | Available | Requires client token; used in `NexitnationMapbox` |
-
-No `kolmari-map.js` has been inspected (file absent from local workspace).
-
-### 6c. Missing behavior (current state)
-
-| Feature | Current state | Priority for Kolmari |
-|---|---|---|
-| Kolmari Klub / community | Placeholder ("coming soon") | High — pilot page |
-| Community posting, moderation | Not built | Future |
-| Flutter Mode as distinct route/page | Redirects to nexit-plan#checklist | High — needs own route/page |
-| Notifications (bell) | Modal shell exists; no real notification data | Low |
-| Document persistence | Local state only (no backend storage) | Medium |
-| Mapbox in destination detail | Available but may not be wired to Destination detail pages | Medium |
-
----
-
-## 7. Mock data and fabrication risks
-
-| Location | Risk | Description |
-|---|---|---|
-| `src/lib/countries.ts` | LOW | `match` field is a static number (92, 90, etc.) — not calculated from profile. Must not be displayed as a real Match Score without profile completion. |
-| `src/app/(marketing)/page.tsx` | MEDIUM | Stats (`50+`, `120+`, `20K+`, `4.8/5`) appear fabricated. Must carry appropriate disclaimer or be removed. Testimonial from "Maya R." is fabricated. |
-| `src/app/(app)/(workspace)/nexitnation/[region]/page.tsx` | LOW | `region.countryCount` is a static number. |
-| `GREENBOOK_ENTRIES` | LOW | Clearly labeled as editorial prompts, not testimonials. Provenance system is in place. |
-| `PATHWAYS` | LOW | `lastVerified` dates are present. Disclaimer system `RESEARCH_DISCLAIMER` exists in pathways.ts. |
-
----
-
-## 8. Brand asset inventory (current state)
-
-### 8a. Production assets (in `public/brand/`)
-
-| File | Current usage |
-|---|---|
-| `NexitWordMark.svg` | Wordmark component — used on auth, shell, landing |
-| `nexit-app-icon.png` | App icon |
-| `faviconNexit.svg` | SVG favicon |
-| `favicon-16.png`, `favicon-32.png`, `favicon-48.png`, `favicon-512.png`, `favicon.ico` | Favicon family |
-
-### 8b. Kolmari butterfly asset
-
-The `kolmari-butterfly.png` referenced in the migration instructions is **absent** from the workspace.
-
-Proposed placement once received:
-```
-public/brand/kolmari-butterfly.png
-```
-
-A centralized brand-assets configuration should be created at:
-```
-src/config/brand-assets.ts
-```
-
-### 8c. Design token alignment
-
-Current Nexit tokens (`src/app/globals.css`) match the Kolmari palette from the migration instructions:
-
-| Token | Current value | Kolmari spec |
-|---|---|---|
-| `--color-navy` | `#17305b` | `#17305B` ✓ |
-| `--color-navy-deep` | `#0d1b39` | `#0D1B39` ✓ |
-| `--color-gold` | `#f3c516` | `#F8C21A` (slight difference — migration doc uses `#F8C21A`) ⚠️ |
-| `--color-canvas` | `#f4f6f9` | `#F4F6F9` ✓ |
-| `--color-muted` | `#6b7a92` | `#6B7A90` (small difference) ⚠️ |
-
-**Note:** The Kolmari migration spec lists `Gold: #F8C21A` while the current implementation uses `#F3C516`. This discrepancy must be confirmed with the owner before any token changes. Do not change without explicit approval.
-
----
-
-## 9. Missing Kolmari brand configuration files
-
-The following files do not exist and must be created during Phase 2 (Foundation Verification):
-
-| File | Purpose |
-|---|---|
-| `src/config/brand.ts` | Centralized `BRAND` object (`name`, `communityName`, `tagline`, `description`) |
-| `src/config/product-copy.ts` | Centralized Kolmari navigation labels and CTA strings |
-| `src/config/brand-assets.ts` | Centralized asset path references |
-
-Expected content of `src/config/brand.ts`:
-
-```ts
-export const BRAND = {
-  name: 'Kolmari',
-  communityName: 'Kolmari Klub',
-  tagline: 'Build a life without borders.',
-  description:
-    'Kolmari helps people discover countries, understand relocation pathways, and build a practical plan for life abroad.',
-} as const
-```
-
-The existing `src/lib/lexicon.ts` (`NEXIT_LEXICON`) must be preserved for compatibility and extended  
-with a parallel `KOLMARI_LEXICON` object. Do not delete `NEXIT_LEXICON` until all references are migrated.
-
----
-
-## 10. Proposed Kolmari sidebar structure (target)
+**Sidebar defects identified:**
+1. `NAV_EXPLORE` array is referenced at line 265 but never defined — only `NAV_DISCOVER` exists (defines `Dashboard`). This is a bug that will cause a runtime error.
+2. The group label at line 313 still reads `"My Nexit"` — should be updated to the approved Kolmari navigation.
+3. The approved sidebar from `docs/kolmari/04-LAYOUTS.md` specifies a PLAN group (`Pathways`, `My Plan`, `Flutter Mode`, `Documents`) and a CONNECT group (`Kolmari Klub`). None of these are rendered from the NAV arrays.
+4. The wordmark image points to `/brand/NexitWordMark.svg` — this is an asset that may not exist; the brand assets config lists `/brand/KolmariWordMark.svg` as the target.
+
+**Approved sidebar (not yet implemented):**
 
 ```
 Dashboard
 
 EXPLORE
-  Your World          → /nexitnation   (future: /world)
-  Destinations        → /saved         (future: /destinations)
+  Your World      → /nexitnation
+  Destinations    → /saved
 
 PLAN
-  Pathways            → /pathways
-  My Plan             → /nexit-plan    (future: /plan)
-  Flutter Mode        → /nexit-plan#checklist  (future: /flutter)
-  Documents           → /documents
+  Pathways        → /pathways
+  My Plan         → /nexit-plan
+  Flutter Mode    → /flutter
+  Documents       → /documents
 
 CONNECT
-  Kolmari Klub        → /community     (future: /klub)
+  Kolmari Klub    → /community
 
 TOOLS
-  Cost Calculator     → /cost-calculator
-  Greenbook           → /greenbook
-  Settings            → /settings
+  Cost Calculator → /cost-calculator
+  Greenbook       → /greenbook
+  Settings        → /settings
 ```
 
-Currently the `AppShell` has groups: DISCOVER, MY NEXIT, PLANNING.  
-The Kolmari spec requires: EXPLORE, PLAN, CONNECT, TOOLS.
+---
+
+### 3.2 Dashboard
+
+**Route:** `/dashboard`
+**File:** `src/app/(app)/(workspace)/dashboard/page.tsx`
+**Rendering:** Server component
+**Data sources:**
+- `getProfile(user.id)` → display name, wizard status
+- `getNexitPlan(user.id)` → plan stage, checklist, budget
+- `evaluatePathways(profile)` → Pathways signal count
+- `COUNTRIES[]` → first 3 countries for discovery section
+
+**Sections:**
+1. Page header — user first name, primary CTA (Enter Flutter Mode / Build My Move Plan)
+2. Profile incomplete notice (conditional)
+3. Stat cards row — Kolmari Profile, Pathways signals, Plan stage, Saved tasks
+4. Destinations to explore — first 3 from `COUNTRIES`, link to `/nexitnation?view=countries`
+5. Move Timeline card — `ScoreRing` with plan progress, links to `/flutter`
+6. Budget snapshot card — `BudgetDonut`, links to `/cost-calculator`
+7. Pathways section — strong match list or profile-incomplete state
+
+**Existing components reused:**
+- `ScoreRing` (`src/components/nexit/rings.tsx`)
+- `BudgetDonut` (`src/components/nexit/rings.tsx`)
+
+**Kolmari copy status:** ✅ Mostly Kolmari. One remaining legacy internal link: `href="/nexit-plan"` on the Plan stage stat card.
+
+**Empty states:** ✅ Present for plan, budget, Pathways
+
+**Mock data risk:** None — all data is live from server
 
 ---
 
-## 11. Proposed migration order
+### 3.3 Your World (Nexitnation)
 
-This order is recommended based on risk level and dependency:
+**Route:** `/nexitnation`
+**File:** `src/app/(app)/(workspace)/nexitnation/page.tsx`
+**Primary component:** `KolmariWorldBoard` (`src/components/nexit/KolmariWorldBoard.tsx`)
+**Map component:** `DestinationMap` (`src/components/nexit/DestinationMap.tsx`)
+**Data sources:**
+- `getProfile(user.id)` → profile completion, `wizard_status`
+- `calculateRegionMatches(profile)` → per-region match percentages
+- `useNextinationBoard()` hook → saved destinations from localStorage
 
-### Foundation (Phase 2 — no page migration)
+**Features:**
+- Interactive SVG world map (6 clickable region polygons) — server-safe, no Mapbox
+- Add destination search (city/country lookup from `src/lib/world-places.ts`)
+- Status chips (Researching / Shortlisted)
+- Saved destinations row
+- Per-destination detail panel with notes, status update, remove
 
-1. Create `src/config/brand.ts`
-2. Create `src/config/product-copy.ts`
-3. Create `src/config/brand-assets.ts`
-4. Add `KOLMARI_LEXICON` to `src/lib/lexicon.ts` (keep `NEXIT_LEXICON`)
-5. Update sidebar labels in `AppShell` to Kolmari terminology
-6. Update top bar and mobile nav labels
-7. Update `src/app/layout.tsx` metadata (title/description → Kolmari)
-8. Create migration documentation files under `docs/kolmari/`
-9. Place `kolmari-butterfly.png` in `public/brand/`
-10. Verify token discrepancy (`gold: #F3C516` vs `#F8C21A`)
-
-### Pilot page (Phase 3, step 1)
-
-11. **Kolmari Klub** (`/community`) — lowest risk, currently a placeholder
-    - Komponente: `src/components/community/klub-header.tsx`, `klub-tabs.tsx`, etc.
-    - Real data: none yet (community is not built) → honest empty state
-    - Goal: test full shell integration, new terminology, responsive behavior
-
-### Lower-risk pages (Phase 3, steps 2–4)
-
-12. **Settings** (`/settings` + `/settings/privacy`)
-13. **Dashboard** (`/dashboard`)
-14. **Cost Calculator** (`/cost-calculator`)
-
-### Core planning pages (Phase 3, steps 5–9)
-
-15. **Destinations / Saved** (`/saved`)
-16. **Documents** (`/documents`)
-17. **Pathways** (`/pathways`)
-18. **My Plan** (`/nexit-plan`)
-19. **Flutter Mode** (needs new route `/flutter` or distinct section in `/nexit-plan`)
-
-### Higher-risk pages (Phase 3, steps 10–12)
-
-20. **Destination detail** (`/nextinations/[slug]/[section]`)
-21. **Your World + map** (`/nexitnation`)
-22. **Profile wizard** (`/profile-wizard`)
-
-### Marketing and launch (Phase 4)
-
-23. Landing page (`/`)
-24. Auth screens (signup, login)
-25. SEO pages (`/[seoSlug]`)
-26. Route redirects (old → new canonical Kolmari routes)
-27. Domain and metadata cleanup
+**Defects identified:**
+1. The page imports `NexitWorldBoard` which does not exist in the repository. The actual component is `KolmariWorldBoard`. This will cause a build/runtime error.
+2. Page metadata still reads `"Nexit World | Nexit"` — should be `"Your World | Kolmari"`.
+3. `DestinationMap.tsx` imports from `'@/lib/Destination-data'` which does not exist (should be `nexitnation-data`). This is a broken import.
+4. `KolmariWorldBoard.tsx` contains broken imports: `'Destination/link'`, `'@/components/Kolmari/DestinationMapLoader'`, `'@/lib/Destinationination-board'`, `'@/lib/Destination-data'`. This file appears to have been partially migrated and contains corrupted import paths.
 
 ---
 
-## 12. Recommended pilot page
+### 3.4 Your World — Region page
 
-**Kolmari Klub (`/community`)** is the recommended pilot for these reasons:
+**Route:** `/nexitnation/[region]`
+**File:** `src/app/(app)/(workspace)/nexitnation/[region]/page.tsx`
+**Data sources:**
+- `getProfile(user.id)`
+- `calculateRegionMatches(profile)`
+- `regions[slug]` from `src/lib/nexitnation-data.ts`
 
-1. **Lowest data risk** — currently a placeholder with honest empty state; no real community data to break
-2. **Tests full shell** — exercises the Kolmari app shell, new nav labels, sidebar active state
-3. **Tests Kolmari terminology** — "Kolmari Klub" label, teal color usage, community CTAs
-4. **Tests componentization** — must be split into reusable components per spec
-5. **No business-logic risk** — no scoring, no profile logic, no database mutations
-6. **Responsive** — can test card layout, tabs, mobile behavior
+**Sections:**
+1. Breadcrumb: Your World → Region name
+2. Region hero image with match score chip and indicators
+3. Countries grid — `CountryShapePanel` cards
+4. Pathways and Greenbook CTA sections
+5. Passport Index link (external research resource, outbound only)
+6. Full-width CTA to Flutter Mode
 
-Pilot completion criteria (from migration spec section 10):
-- Converted to TSX with named components
-- Split into: `klub-header.tsx`, `klub-tabs.tsx`, `chatter-feed.tsx`, `discover-klubs.tsx`, `my-klubs.tsx`
-- Real community data: none available — show honest "in development" state
-- Tab behavior works
-- Mobile layout works
-- Sidebar active state shows Kolmari Klub as active
-- No public "Nexit" copy on the page
-- typecheck passes, lint passes, build passes
+**Kolmari copy status:** ✅ Mostly Kolmari. Uses `NEXIT_LEXICON` (compatibility alias) for labels — this resolves to Kolmari terms correctly.
 
 ---
 
-## 13. Accessibility concerns
+### 3.5 Destinations (Saved)
 
-| Issue | Location | Risk |
+**Route:** `/saved`
+**File:** `src/app/(app)/(workspace)/saved/page.tsx`
+**Component:** `SavedNextinations` (`src/components/nexit/saved-nextinations.tsx`)
+**Data source:** localStorage (`kolmari-saves` with fallback read from `nexit-saves`)
+**Kolmari copy status:** ✅ Page header uses "Destinations"
+
+---
+
+### 3.6 Country detail (legacy `/countries/[slug]`)
+
+**Route:** `/countries/[slug]`
+**File:** `src/app/(app)/(workspace)/countries/[slug]/page.tsx`
+**Data sources:**
+- `COUNTRIES[]` — static country data
+- `getProfile(user.id)` — profile completion state
+**Features:** Hero, Pathways card, "Why it could fit" card, comparison CTA rail, `SaveNextinationButton`, `PassportIndexLink`
+
+**Kolmari copy status:** ✅ Copy is clean. Uses "Destination" and "Pathways" language correctly.
+
+---
+
+### 3.7 Country workspace (full `/nextinations/[slug]/v2/[section]`)
+
+**Route:** `/nextinations/[countrySlug]/v2/[section]`
+**File:** `src/app/(app)/(workspace)/nextinations/[countrySlug]/v2/[section]/page.tsx`
+**Components:**
+- `CountryTemplate` (`src/components/country-template/CountryTemplate.tsx`)
+- `CountryResearchPage` (`src/components/nexit/CountryResearchPage.tsx`)
+- `CountryResearchShell` (`src/components/country-template/CountryResearchShell.tsx`)
+- Tab components: `OverviewTab`, `MoveThereTab`, `CostHousingTab`, `WorkStudyTab`, `HealthcareTab`, `FamilySchoolsTab`, `LifestyleTab`, `TaxMoneyTab`
+
+**Available sections (v2 template):** overview, move-there, cost-housing, work-study, healthcare, family-schools, lifestyle-community, tax-money
+
+**Tab system (full workspace, `src/lib/country-workspace/tabs.ts`):** 16 sections — overview, why-you, economic-profile, cost-of-living, pathways, healthcare, greenbook, housing, legal-taxes, employment, transportation, daily-life, education, family-pets, resources, compare
+
+**Defect:** Metadata still uses "Nexit" in `generateMetadata` (`"Nextination Not Found | Nexit"`, `"[country] — [label] | Nexit"`).
+
+---
+
+### 3.8 Pathways
+
+**Route:** `/pathways`
+**File:** `src/app/(app)/(workspace)/pathways/page.tsx`
+**Component:** `PathwaysResults` (`src/components/nexit/pathways-results.tsx`)
+**Data sources:** `getProfile()`, `evaluatePathways()`, `PATHWAYS[]`
+**Kolmari copy status:** ✅ Metadata uses "Kolmari"
+
+---
+
+### 3.9 My Plan
+
+**Route:** `/nexit-plan`
+**File:** `src/app/(app)/(workspace)/nexit-plan/page.tsx`
+**Component:** `NexitPlanWorkspace` (`src/components/nexit/nexit-plan-workspace.tsx`)
+**Data sources:** `getProfile()`, `getNexitPlan()`, `COUNTRIES[]`, `PATHWAYS[]`
+**DB table:** `nexit_plans` — do not rename
+**Kolmari copy status:** ✅ Metadata uses "My Plan | Kolmari"
+
+---
+
+### 3.10 Flutter Mode
+
+**Route:** `/flutter`
+**File:** `src/app/(app)/(workspace)/flutter/page.tsx`
+**Component:** `NexitPlanWorkspace` (same as My Plan, `defaultTab="checklist"`)
+**Data sources:** Same as My Plan
+**Kolmari copy status:** ✅ Metadata uses "Flutter Mode | Kolmari"
+
+**Note:** Flutter Mode and My Plan currently share the same `NexitPlanWorkspace` component. A future milestone may create a dedicated Flutter Mode component with a more focused execution view.
+
+---
+
+### 3.11 Documents
+
+**Route:** `/documents`
+**File:** `src/app/(app)/(workspace)/documents/page.tsx`
+**Component:** `DocumentsManager` (`src/components/nexit/documents-manager.tsx`)
+**Data source:** Client state only — no backend storage yet
+**Kolmari copy status:** ⬜ Not inspected
+
+---
+
+### 3.12 Kolmari Klub (Community)
+
+**Route:** `/community`
+**File:** `src/app/(app)/(workspace)/community/page.tsx`
+**Components:**
+- `KlubHeader` (`src/components/community/klub-header.tsx`) — Server-safe
+- `KlubEmptyState` (`src/components/community/klub-header.tsx`) — Server-safe
+- `KlubTabs` (`src/components/community/klub-tabs.tsx`) — Client component
+
+**Data source:** None — all tabs show honest empty states
+**Kolmari copy status:** ✅ Full Kolmari copy throughout
+**Tab panels:** Chatter (empty), Discover Klubs (empty), My Klubs (empty)
+
+**Pilot readiness:**
+- ✅ KlubHeader implemented
+- ✅ KlubEmptyState implemented
+- ✅ KlubTabs with accessible role/aria attributes
+- ✅ Three tab panels with honest empty states
+- ✅ Related actions section (Greenbook Insights, Your World)
+- ⚠️ `KlubHeader` is marked `'use client'` unnecessarily — it has no client state
+
+---
+
+### 3.13 Cost Calculator
+
+**Route:** `/cost-calculator`
+**File:** `src/app/(app)/(workspace)/cost-calculator/page.tsx`
+**Component:** `CostCalculator` (`src/components/nexit/cost-calculator.tsx`)
+**Data source:** `getProfile()` (income only)
+**Kolmari copy status:** ⬜ Not inspected
+
+---
+
+### 3.14 Greenbook
+
+**Route:** `/greenbook`
+**File:** `src/app/(app)/(workspace)/greenbook/page.tsx`
+**Data source:** `GREENBOOK_ENTRIES` (`src/lib/greenbook.ts`) — static data
+**Rendering:** `'use client'` (full page — tag filter requires state)
+**Kolmari copy status:** ⚠️ One legacy copy: "Apply context to a specific Nextination" — should be "Destination"
+
+**Note:** The entire page is a client component due to tag filtering. Consider extracting only the filter button group as a client component and rendering the entry grid server-side.
+
+---
+
+### 3.15 Settings
+
+**Route:** `/settings`
+**File:** `src/app/(app)/(workspace)/settings/page.tsx`
+**Component:** `SettingsForm` (`src/components/nexit/settings-form.tsx`)
+**Data source:** `getProfile()`, `requireCurrentUser()`
+**Kolmari copy status:** ⬜ Not inspected
+
+---
+
+### 3.16 Welcome (onboarding entry)
+
+**Route:** `/welcome`
+**File:** `src/app/(app)/welcome/page.tsx`
+**Component:** `WelcomeActions` (`src/components/nexit/welcome-actions.tsx`)
+**Data source:** `getProfile()`, redirects by wizard_status
+**Kolmari copy status:** ✅ "Welcome to Kolmari", "Build Your Move Plan", "Kolmari Profile" language
+
+---
+
+### 3.17 Profile wizard
+
+**Route:** `/profile-wizard`
+**File:** `src/app/(app)/profile-wizard/page.tsx`
+**Component:** `ProfileWizard` (`src/components/nexit/profile-wizard.tsx`)
+**Data source:** `getProfile()`
+**Kolmari copy status:** ⬜ Not inspected
+
+---
+
+### 3.18 Landing page (marketing)
+
+**Route:** `/`
+**File:** `src/app/(marketing)/page.tsx`
+**Components:** `MarketingLogo`, `MarketingMobileNav`, `QuestionsSection`
+**Data source:** Static — no server data
+**Kolmari copy status:** ✅ Kolmari language throughout
+
+---
+
+### 3.19 Quiz (marketing)
+
+**Route:** `/quiz`
+**File:** `src/app/(marketing)/quiz/page.tsx`
+**Rendering:** `'use client'`
+**Data source:** localStorage (`nexit-quiz-result` — legacy key)
+**Kolmari copy status:** ⚠️ Function still named `NexitQuizPage`; localStorage key is `nexit-quiz-result`
+
+---
+
+### 3.20 Authentication pages
+
+| Route | Kolmari copy |
+|---|---|
+| `/login` | ✅ "Continue your Move Plan", "Progress Tracker" |
+| `/signup` | ✅ "Build My Move Plan", "Kolmari workspace" |
+
+---
+
+## 4. Reusable component inventory
+
+### Existing components (src/components/nexit/)
+
+| Component file | Purpose | Server/Client | Migration priority |
+|---|---|---|---|
+| `app-shell.tsx` | Full workspace shell — sidebar, topbar, mobile drawer | Client | 🔴 Has bugs (NAV_EXPLORE undefined, group labels) |
+| `workspace-shell.tsx` | Routes between country-template chrome and AppShell | Client | ⬜ Low |
+| `wordmark.tsx` | Renders brand SVG/PNG | Server | ⬜ Low |
+| `rings.tsx` | `ScoreRing`, `BudgetDonut` | Server | ⬜ Low |
+| `profile-wizard.tsx` | Multi-step profile wizard | Client | 🟡 Medium |
+| `nexit-plan-workspace.tsx` | Move Plan + Flutter Mode workspace | Client | 🟡 Medium |
+| `pathways-results.tsx` | Pathways evaluation display | Mixed | 🟡 Medium |
+| `saved-nextinations.tsx` | Destinations list + save/remove | Client | 🟡 Medium |
+| `settings-form.tsx` | Account settings | Client | ⬜ Low |
+| `documents-manager.tsx` | Document upload/list | Client | ⬜ Low |
+| `checklist.tsx` | Checklist items | Client | ⬜ Low |
+| `cost-calculator.tsx` | Budget calculator | Client | ⬜ Low |
+| `auth-form.tsx` | Login/signup form | Client | ⬜ Low |
+| `welcome-actions.tsx` | Welcome page CTA actions | Client | ⬜ Low |
+| `countries-browser.tsx` | Country search and browse | Client | ⬜ Low |
+| `KolmariWorldBoard.tsx` | World board + map + saved destinations | Client | 🔴 Has broken imports |
+| `DestinationMap.tsx` | SVG world map | Server | 🔴 Has broken import |
+| `NexitnationMapbox.tsx` | Mapbox map | Client | ⬜ Low |
+| `NexitnationMapLoader.tsx` | Async Mapbox loader | Client | ⬜ Low |
+| `CountryResearchPage.tsx` | Country research shell | Mixed | ⬜ Low |
+| `CountryShapePanel.tsx` | Country shape artwork | Server | ⬜ Low |
+| `MapboxMap.tsx` | Mapbox integration | Client | ⬜ Low |
+| `marketing-logo.tsx` | Marketing page logo | Server | ⬜ Low |
+| `marketing-mobile-nav.tsx` | Marketing mobile nav | Client | ⬜ Low |
+| `questions-section.tsx` | Landing page Q&A section | Server | ⬜ Low |
+| `landing-mini-experiences.tsx` | Landing features | Server | ⬜ Low |
+| `privacy-account-page.tsx` | Privacy/account settings | Client | ⬜ Low |
+| `PassportIndexLink.tsx` | Outbound passport research link | Server | ⬜ Low |
+| `nexit-world.tsx` | World exploration (legacy) | Client | ⬜ Low |
+| `use-saved-nextinations.ts` | Saved nextinations hook | Client | ⬜ Low |
+
+### Community components (src/components/community/) — Milestone 2 deliverables
+
+| Component | Purpose | Server/Client | Status |
+|---|---|---|---|
+| `klub-header.tsx` | Kolmari Klub page header + empty state | Incorrectly `'use client'` | ✅ Implemented |
+| `klub-tabs.tsx` | Tab navigation for Klub sections | Client (correct) | ✅ Implemented |
+
+**Gap:** `docs/kolmari/03-COMPONENTS.md` lists `DiscoverKlubs`, `MyKlubs`, `ChatterFeed` as separate components in `src/components/community/`. These are currently inline functions inside `klub-tabs.tsx`.
+
+### Country workspace components (src/components/country-workspace/)
+
+Full 16-tab workspace used for `/nextinations/[slug]` routes. Status: existing and functional, legacy "Nexit" terminology may remain in tab content copy.
+
+### Country template components (src/components/country-template/)
+
+Alternative template layout (v2) with fewer tabs (8 sections), hero, sidebar, tab bar, right rail. Used for Portugal and other v2-enabled countries.
+
+---
+
+## 5. Data source and persistence inventory
+
+### Database (Neon Postgres — do not rename)
+
+| Table | Key fields | Used by |
 |---|---|---|
-| `SavedNextinations` uses localStorage-only state | Client component | Works but not SSR-accessible |
-| `DocumentsManager` has no backend persistence | Client state | File names lost on refresh |
-| `CostCalculator` — save to plan may fail silently | Client fetch | Needs status announcement |
-| Marketing page stats are fabricated | `(marketing)/page.tsx` | User trust issue |
-| Testimonial "Maya R." is fabricated | `(marketing)/page.tsx` | Must be removed or clearly labeled |
-| `AppShell` search — empty query behavior | No validation message | Accessibility |
-| `CountryWorkspace` tabs | Needs `aria-selected` and `role="tab"` audit | Accessibility |
-| Map SVG — region click areas | Need minimum 44px touch targets on mobile | Mobile accessibility |
+| `users` | `id`, `email`, `password_hash` | Auth everywhere |
+| `profiles` | `user_id`, `wizard_status`, 28+ fields | Profile wizard, dashboard, pathways, regions |
+| `nexit_plans` | `user_id`, `timeline_stage`, `checklist`, `budget`, `documents`, etc. | My Plan, Flutter Mode, dashboard |
 
----
+### Authentication
 
-## 14. Risks and blockers
-
-| Risk | Level | Description |
+| Item | Value | Safe to rename? |
 |---|---|---|
-| `Kolmari App.dc.html` not present | **BLOCKER** | Cannot complete screen-by-screen design mapping without the Claude Design export |
-| `kolmari-butterfly.png` not present | HIGH | New brand asset required before wordmark/icon migration |
-| Kolmari `docs/kolmari/` docs not present | HIGH | All 10 required documentation files are absent |
-| PR #19 / `migration/01-kolmari-foundation` not inspectable locally | HIGH | Cannot verify completed foundation work without remote access |
-| Gold token discrepancy (`#F3C516` vs `#F8C21A`) | MEDIUM | Requires owner confirmation before changing |
-| `TOKEN_ISSUER = 'nexit'` in JWT | MEDIUM | Changing this invalidates all existing sessions — must be a separate auth migration |
-| `nexit_session` cookie name | MEDIUM | Must be renamed with compatibility layer, not casually |
-| `nexit_plans` database table name | MEDIUM | Do not rename without a formal DB migration task |
-| `nexit-saves` localStorage key | LOW-MEDIUM | Must read old key → write new key with migration shim |
-| Community features not built | LOW | Honest empty state already in place; pilot can proceed |
-| Document persistence is local-only | LOW | Backend document storage is a separate feature request |
-| Fabricated marketing stats and testimonial | MEDIUM | Must be addressed before launch |
+| JWT issuer | `'nexit'` (in `src/lib/auth-constants.ts`) | No — invalidates all sessions |
+| Session cookie | `nexit_session` | No — invalidates all sessions |
+| Auth routes | `/api/login`, `/api/logout`, `/api/profile` | No |
+
+### localStorage keys
+
+| Key | Purpose | Migration status |
+|---|---|---|
+| `kolmari:sidebar-collapsed` | Sidebar collapse state | ✅ New key, reads legacy `nexit:sidebar-collapsed` |
+| `nexit:sidebar-collapsed` | Legacy sidebar collapse | ✅ Removed after migration |
+| `kolmari-saves` | Saved destinations (board) | ✅ New key (via `useNextinationBoard`) |
+| `nexit-saves` | Legacy saved nextinations | ⬜ Compatibility read needed |
+| `nexit-quiz-result` | Quiz answers | ⚠️ Legacy key — should migrate to `kolmari-quiz-result` with shim |
+
+### Static data files
+
+| File | Purpose |
+|---|---|
+| `src/lib/countries.ts` | COUNTRIES array — all destinations |
+| `src/lib/nexitnation-data.ts` | Region configs, shapes, labels |
+| `src/lib/pathways.ts` | PATHWAYS array |
+| `src/lib/greenbook.ts` | GREENBOOK_ENTRIES |
+| `src/lib/world-places.ts` | Searchable cities/countries |
+| `src/lib/regionData.ts` | Region data |
+| `src/lib/seoContent.ts` | SEO page content |
+| `public/data/continents.geojson` | Map polygon data |
 
 ---
 
-## 15. Required actions before code can begin
+## 6. Critical defects found during inventory
 
-1. **Place `Kolmari App.dc.html`** in `design-reference/claude-design/`
-2. **Place `kolmari-butterfly.png`** in `design-reference/claude-design/assets/` (then copy to `public/brand/`)
-3. **Provide `image-slot.js`, `kolmari-map.js`, `support.js`** for behavior classification
-4. **Confirm gold token value** — `#F3C516` (current) vs `#F8C21A` (spec)
-5. **Confirm Kolmari domain** for `src/lib/site.ts` update
-6. **Create `docs/kolmari/` documentation files** (00-README through 10-LLM-RULES)
-7. **Review PR #19** to avoid duplicating completed foundation work
-8. **Receive explicit approval** before any page migration begins
+These are **bugs** (not just migration tasks) that affect the application:
+
+### Bug 1: `NAV_EXPLORE` undefined in app-shell.tsx
+
+**File:** `src/components/nexit/app-shell.tsx` line 265
+**Problem:** `NAV_EXPLORE.map(...)` is called but `NAV_EXPLORE` is never defined. Only `NAV_DISCOVER` exists and contains only `Dashboard`. This will cause a runtime `ReferenceError` when the sidebar renders.
+**Severity:** 🔴 Critical — will break the workspace shell
+
+### Bug 2: `NexitWorldBoard` import doesn't exist
+
+**File:** `src/app/(app)/(workspace)/nexitnation/page.tsx` line 2
+**Problem:** `import { NexitWorldBoard } from '@/components/nexit/NexitWorldBoard'` — this file does not exist. The actual component is `KolmariWorldBoard` in `KolmariWorldBoard.tsx`.
+**Severity:** 🔴 Critical — will break the Your World route
+
+### Bug 3: Broken imports in `KolmariWorldBoard.tsx`
+
+**File:** `src/components/nexit/KolmariWorldBoard.tsx`
+**Problem:** Multiple import paths are corrupted with "Destination" substitutions that don't match the actual file system:
+- `import Link from 'Destination/link'` — should be `'next/link'`
+- `import { DestinationMapLoader } from '@/components/Kolmari/DestinationMapLoader'` — file does not exist
+- `import { ... } from '@/lib/Destinationination-board'` — should be `@/lib/nextination-board`
+- `import type { RegionSlug } from '@/lib/Destination-data'` — should be `@/lib/nexitnation-data`
+**Severity:** 🔴 Critical — will break build
+
+### Bug 4: Broken import in `DestinationMap.tsx`
+
+**File:** `src/components/nexit/DestinationMap.tsx` line 3
+**Problem:** `import { ... } from '@/lib/Destination-data'` — file does not exist (should be `nexitnation-data`)
+**Severity:** 🔴 Critical — will break build
+
+### Bug 5: Syntax errors in `SidebarNav` (app-shell.tsx)
+
+**File:** `src/components/nexit/app-shell.tsx` around lines 330–342
+**Problem:** The `SidebarNav` function has unclosed JSX: a `<>` fragment opened inside the My Nextinations button is never closed, and there are duplicate `savedCountries` / `savedItems` variable references suggesting the code was partially merged or partially edited.
+**Severity:** 🔴 Critical — will break TypeScript compilation
 
 ---
 
-## 16. Summary
+## 7. Legacy terminology remaining in source code
 
-This inventory was produced from inspection of the **local workspace only** (no Claude Design  
-project access, no remote repository access to `Naylahknee/kolmari`).
+The following legacy terms were observed during inspection. They are classified below.
 
-**What is documented here:**
-- Full route inventory (21 protected workspace routes + APIs)
-- Full component inventory (25+ components)
-- Data model (3 tables, auth system, localStorage keys)
-- Legacy terminology classification by category
-- Kolmari-to-Nexit screen mapping (inferred from product spec, not design file)
-- Brand asset gaps
-- Missing configuration files
-- Proposed migration order
-- Recommended pilot page (Kolmari Klub)
-- Risks and blockers
+### Visible public copy (page-level)
 
-**What cannot be documented until design files arrive:**
-- Screen-by-screen design component hierarchy
-- Exact visual layout differences between Kolmari design and current implementation
-- New components required that don't exist in current codebase
-- Image placeholder behavior from `image-slot.js`
-- Map interaction prototype from `kolmari-map.js`
-- UI animation/support behavior from `support.js`
-- Color/spacing deviations from `Kolmari App.dc.html`
+| File | Legacy term | Location | Priority |
+|---|---|---|---|
+| `src/app/(app)/(workspace)/nexitnation/page.tsx` | "Nexit World \| Nexit" | Metadata title | 🟡 Medium |
+| `src/app/(app)/(workspace)/nextinations/[countrySlug]/v2/[section]/page.tsx` | "Nextination Not Found \| Nexit", "[country] \| Nexit" | Metadata | 🟡 Medium |
+| `src/app/(app)/(workspace)/greenbook/page.tsx` | "Nextination" | Prompt string line 99 | 🟡 Medium |
+| `src/app/(marketing)/quiz/page.tsx` | `NexitQuizPage` (function name) | Export | 🟢 Low |
 
-**No application code was changed during this inventory.**
+### Route paths (intentional compatibility — do not rename)
+
+- `/nexitnation`, `/nexitnation/[region]` — future target: `/world`
+- `/nexit-plan` — future target: `/plan`
+- `/nextinations/[slug]` — future target: `/destinations/[slug]`
+
+### Component file and function names (internal identifiers)
+
+- `src/components/nexit/` directory — entire directory
+- `NexitPlanWorkspace`, `PathwaysResults`, `SavedNextinations`, etc. — internal names
+- `getNexitPlan`, `saveNexitPlan`, `emptyNexitPlan` — lib functions
+- `NexitPlan` type in `src/lib/nexit-plan.ts`
+
+### Database and API (must not rename)
+
+- `nexit_plans` table
+- `nexit_session` cookie
+- `TOKEN_ISSUER = 'nexit'`
+
+### Documentation (intentional historical references)
+
+- `DESIGN.md` — legacy Nexit design document (to be superseded by `docs/kolmari/01-DESIGN.md`)
+- `docs/nexit/` directory — entire legacy documentation tree
+
+---
+
+## 8. Missing features and gaps
+
+| Feature | Status | Notes |
+|---|---|---|
+| Community / Kolmari Klub (real data) | Not implemented | Honest empty state shown |
+| Document backend storage | Not implemented | Client state only |
+| Move Readiness score calculation | Partial | `calculateReadiness()` exists but dashboard shows profile complete/not started only |
+| Greenbook community-reported entries | Not implemented | Empty state shown |
+| Kolmari butterfly brand asset | `/brand/kolmari-butterfly.png` — not confirmed present | Referenced in `brand-assets.ts` |
+| Kolmari wordmark SVG | `/brand/KolmariWordMark.svg` — not confirmed present | Sidebar still uses `/brand/NexitWordMark.svg` |
+| Flutter Mode dedicated UI | Partial | Same component as My Plan with defaultTab |
+| Route redirects (legacy → new) | Not implemented | Phase deferred |
+
+---
+
+## 9. Assets inventory
+
+### Public brand assets (src/config/brand-assets.ts references)
+
+| Asset | Path | Present? |
+|---|---|---|
+| Kolmari wordmark | `/brand/KolmariWordMark.svg` | ⬜ Not confirmed |
+| Kolmari wordmark (fallback) | `/brand/NexitWordMark.svg` | Likely present (used in sidebar) |
+| Kolmari butterfly | `/brand/kolmari-butterfly.png` | ⬜ Not confirmed |
+| App icon | `/brand/nexit-app-icon.png` | Likely present |
+| Favicon SVG | `/brand/faviconNexit.svg` | Likely present |
+| Favicon 32px | `/brand/favicon-32.png` | Present (used in quiz) |
+| Favicon 16px | `/brand/favicon-16.png` | Likely present |
+| Favicon ICO | `/brand/favicon.ico` | Likely present |
+
+### Scene imagery
+
+All listed in `BRAND_ASSETS.ts` — relocation imagery is brand-neutral and retained.
+
+---
+
+## 10. Recommended migration order
+
+Based on risk, data complexity, and existing state:
+
+### Immediate (bug fixes — not migration tasks)
+
+1. **Fix `NAV_EXPLORE` undefined** in `app-shell.tsx` — critical runtime bug
+2. **Fix `NexitWorldBoard` import** in nexitnation page — critical build bug
+3. **Fix broken imports** in `KolmariWorldBoard.tsx` and `DestinationMap.tsx`
+4. **Fix `SidebarNav` JSX syntax** in `app-shell.tsx`
+5. **Fix `KlubHeader` client directive** — remove unnecessary `'use client'`
+6. **Run typecheck, lint, and build** to confirm zero errors before proceeding
+
+### Phase 2 — Pilot (Kolmari Klub, after bug fixes pass)
+
+7. Confirm `/community` page meets all pilot criteria from the migration plan
+8. Extract `ChatterFeed`, `DiscoverKlubs`, `MyKlubs` into `src/components/community/` per `03-COMPONENTS.md`
+
+### Phase 3 — Low-risk pages
+
+9. Dashboard — add missing Kolmari copy tweaks, fix `/nexit-plan` link to `/nexit-plan` (intentional for now — route not yet migrated)
+10. Settings — inspect and update copy
+11. Cost Calculator — inspect and update copy
+12. Documents — inspect and update copy
+
+### Phase 4 — Core planning pages
+
+13. Greenbook — fix "Nextination" → "Destination" copy, extract client filter component
+14. Pathways — inspect and update copy
+15. My Plan (`/nexit-plan`) — inspect component copy
+16. Flutter Mode — consider dedicated component
+17. Destinations (`/saved`) — inspect component copy
+
+### Phase 5 — Higher-risk pages
+
+18. Your World (`/nexitnation`) — fix all bugs first, then migrate metadata
+19. Destination detail pages (`/nextinations/[slug]`) — fix metadata, align copy
+20. Profile wizard
+21. Quiz (`/quiz`) — fix localStorage key, update function name
+
+### Phase 6 — Routes, SEO, marketing
+
+22. Route redirects (legacy → Kolmari canonical)
+23. Metadata and SEO cleanup
+24. Landing page review
+25. Documentation cleanup
+
+---
+
+## 11. Recommended pilot page assessment
+
+**Kolmari Klub (`/community`) is the most advanced page for a pilot**, per the migration plan:
+
+| Criterion | Status |
+|---|---|
+| Converted to TSX with named components | ✅ |
+| Real data connected | N/A — honest empty state |
+| No public "Nexit" copy | ✅ |
+| Accessible tabs with role/aria | ✅ |
+| Empty states | ✅ |
+| Mobile-responsive | ⬜ Not verified |
+| Sidebar active state | ⬜ Depends on sidebar fix |
+| typecheck passes | ⬜ Pending (blocked by critical bugs) |
+| lint passes | ⬜ Pending |
+| Build passes | ⬜ Blocked by critical bugs in shell/world |
+
+**Blocker:** The critical bugs in `app-shell.tsx` and `KolmariWorldBoard.tsx` must be fixed before any page can pass a production build check.
+
+---
+
+## 12. Files inspected
+
+| File | Purpose |
+|---|---|
+| `DESIGN.md` | Legacy Nexit design reference |
+| `docs/kolmari/00-README.md` | Kolmari product overview |
+| `docs/kolmari/01-DESIGN.md` | Kolmari design system |
+| `docs/kolmari/02-DESIGN-TOKENS.md` | Token reference |
+| `docs/kolmari/03-COMPONENTS.md` | Component contracts |
+| `docs/kolmari/04-LAYOUTS.md` | Layout specifications |
+| `docs/kolmari/05-PAGE-TEMPLATES.md` | Page templates |
+| `docs/kolmari/06-ADAPTIVE-WORKSPACE.md` | Country workspace rules |
+| `docs/kolmari/07-DATA-MODEL.md` | Data and persistence |
+| `docs/kolmari/08-CONTENT-STANDARDS.md` | Content standards |
+| `docs/kolmari/09-IMPLEMENTATION-RULES.md` | Implementation rules |
+| `docs/kolmari/10-LLM-RULES.md` | AI contributor rules |
+| `docs/kolmari/REBRAND-MIGRATION.md` | Migration strategy |
+| `docs/kolmari/REPLACEMENT-MATRIX.md` | Term mapping |
+| `docs/kolmari/ROUTE-MIGRATION.md` | Route plan |
+| `docs/kolmari/HTML-INTEGRATION.md` | HTML integration rules |
+| `docs/kolmari/MIGRATION-CHECKLIST.md` | Phase checklist |
+| `docs/kolmari/LEGACY-REFERENCE-AUDIT.md` | Legacy audit |
+| `src/config/brand.ts` | Kolmari brand config |
+| `src/config/product-copy.ts` | Product copy config |
+| `src/config/brand-assets.ts` | Asset paths |
+| `src/lib/lexicon.ts` | Kolmari lexicon + compatibility aliases |
+| `src/lib/nexit-plan.ts` | Plan lib + DB schema |
+| `src/lib/nexitnation-data.ts` | Region data |
+| `src/lib/profile.ts` | Profile types and DB access |
+| `src/components/layout/kolmari-app-shell.tsx` | Kolmari shell boundary |
+| `src/components/nexit/app-shell.tsx` | AppShell implementation |
+| `src/components/nexit/workspace-shell.tsx` | Workspace routing shell |
+| `src/components/nexit/KolmariWorldBoard.tsx` | World board component |
+| `src/components/nexit/DestinationMap.tsx` | SVG world map |
+| `src/components/nexit/welcome-actions.tsx` | Welcome CTA actions |
+| `src/components/community/klub-header.tsx` | Klub header + empty state |
+| `src/components/community/klub-tabs.tsx` | Klub tab navigation |
+| `src/app/(app)/(workspace)/layout.tsx` | Workspace layout |
+| `src/app/(app)/(workspace)/dashboard/page.tsx` | Dashboard page |
+| `src/app/(app)/(workspace)/nexitnation/page.tsx` | Your World page |
+| `src/app/(app)/(workspace)/nexitnation/[region]/page.tsx` | Region page |
+| `src/app/(app)/(workspace)/community/page.tsx` | Kolmari Klub page |
+| `src/app/(app)/(workspace)/saved/page.tsx` | Destinations page |
+| `src/app/(app)/(workspace)/countries/[slug]/page.tsx` | Country detail |
+| `src/app/(app)/(workspace)/pathways/page.tsx` | Pathways page |
+| `src/app/(app)/(workspace)/nexit-plan/page.tsx` | My Plan page |
+| `src/app/(app)/(workspace)/flutter/page.tsx` | Flutter Mode page |
+| `src/app/(app)/(workspace)/documents/page.tsx` | Documents page |
+| `src/app/(app)/(workspace)/greenbook/page.tsx` | Greenbook page |
+| `src/app/(app)/(workspace)/cost-calculator/page.tsx` | Cost Calculator |
+| `src/app/(app)/(workspace)/settings/page.tsx` | Settings page |
+| `src/app/(app)/(workspace)/checklist/page.tsx` | Checklist redirect |
+| `src/app/(app)/(workspace)/nextinations/[countrySlug]/page.tsx` | Country redirect |
+| `src/app/(app)/(workspace)/nextinations/[countrySlug]/v2/page.tsx` | Country v2 index |
+| `src/app/(app)/(workspace)/nextinations/[countrySlug]/v2/[section]/page.tsx` | Country v2 sections |
+| `src/app/(app)/layout.tsx` | App layout |
+| `src/app/(app)/welcome/page.tsx` | Welcome page |
+| `src/app/(app)/profile-wizard/page.tsx` | Profile wizard |
+| `src/app/(app)/onboarding/page.tsx` | Onboarding redirect |
+| `src/app/(marketing)/page.tsx` | Landing page |
+| `src/app/(marketing)/quiz/page.tsx` | Quiz page |
+| `src/app/(auth)/login/page.tsx` | Login page |
+| `src/app/(auth)/signup/page.tsx` | Signup page |
+
+---
+
+## 13. Next recommended assignment
+
+**Fix the five critical bugs before proceeding to any page migration.**
+
+The application will not build or run correctly until these are resolved:
+
+1. `NAV_EXPLORE` undefined in `src/components/nexit/app-shell.tsx`
+2. `NexitWorldBoard` import in `src/app/(app)/(workspace)/nexitnation/page.tsx`
+3. Broken imports in `src/components/nexit/KolmariWorldBoard.tsx`
+4. Broken import in `src/components/nexit/DestinationMap.tsx`
+5. `SidebarNav` JSX syntax issues in `src/components/nexit/app-shell.tsx`
+
+After fixes: run `npm run typecheck`, `npm run lint`, `npm run build`, and verify the workspace shell renders before marking Milestone 1 complete.
+
+Do not begin the Kolmari Klub pilot or any page migration until the build is clean.

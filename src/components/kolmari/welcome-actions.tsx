@@ -31,9 +31,9 @@ export function WelcomeActions() {
 
   return (
     <div className="mt-8 grid gap-3">
-      <Link href="/profile-wizard" className="gold-button w-full">Start Nexit Profile Wizard <ArrowRight size={17} /></Link>
+      <Link href="/profile-wizard" className="gold-button w-full">Start Profile Wizard <ArrowRight size={17} /></Link>
       <button type="button" onClick={skip} disabled={skipping} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/20 px-5 font-bold text-white transition hover:border-gold hover:text-gold disabled:opacity-60">
-        {skipping ? <LoaderCircle size={16} className="animate-spin" /> : null}{skipping ? 'Opening Nexitnation…' : 'Skip for now and explore'}
+        {skipping ? <LoaderCircle size={16} className="animate-spin" /> : null}{skipping ? 'Opening Kolmarination…' : 'Skip for now and explore'}
       </button>
       {error ? <p role="alert" className="text-sm font-semibold text-danger">{error}</p> : null}
     </div>

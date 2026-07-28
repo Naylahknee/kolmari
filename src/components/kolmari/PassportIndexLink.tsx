@@ -44,7 +44,7 @@ export function PassportIndexLink({
           <span className="mt-1 block text-sm leading-6 text-white/70">
             Review passport strength, mobility rankings, and visa-free access directly on Passport Index.
           </span>
-          <span className="mt-2 block text-[11px] text-white/45">External service · Nexit is not affiliated with Passport Index.</span>
+          <span className="mt-2 block text-[11px] text-white/45">External service · Kolmari is not affiliated with Passport Index.</span>
         </span>
         <span className="inline-flex min-h-11 items-center justify-center gap-2 rounded-field bg-gold px-4 text-sm font-extrabold text-navy transition group-hover:bg-[#ffd83d]">
           Open Passport Index <ExternalLink size={15} />

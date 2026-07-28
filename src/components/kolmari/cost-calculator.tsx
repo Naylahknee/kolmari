@@ -127,7 +127,7 @@ export function CostCalculator({
     const url = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' }))
     const a = document.createElement('a')
     a.href = url
-    a.download = 'nexit-cost-research.csv'
+    a.download = 'kolmari-cost-research.csv'
     a.click()
     URL.revokeObjectURL(url)
     setMessage('Cost research exported.')
@@ -143,7 +143,7 @@ export function CostCalculator({
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Planning tool</p>
           <h1 className="mt-1 font-display text-3xl font-bold leading-tight text-navy sm:text-4xl">Cost Calculator</h1>
-          <p className="mt-1 text-sm text-muted">Enter your own figures. Nexit does not preload a sample budget.</p>
+          <p className="mt-1 text-sm text-muted">Enter your own figures. Kolmari does not preload a sample budget.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
@@ -198,7 +198,7 @@ export function CostCalculator({
               className="mt-3 inline-flex items-center gap-2 text-xs font-bold text-gold-deep disabled:opacity-60"
             >
               {saving ? <LoaderCircle size={15} className="animate-spin" aria-hidden="true" /> : <Save size={15} aria-hidden="true" />}
-              {saving ? 'Saving…' : 'Save to Nexit Profile'}
+              {saving ? 'Saving…' : 'Save to Kolmari Profile'}
             </button>
           )}
         </section>
@@ -271,7 +271,7 @@ export function CostCalculator({
         {/* Donut chart */}
         {slices.length > 0 ? (
           <section className="card-surface p-6" aria-labelledby="snapshot-heading">
-            <h2 id="snapshot-heading" className="text-xs font-bold uppercase tracking-widest text-gold-deep">Nexit Cost Snapshot</h2>
+            <h2 id="snapshot-heading" className="text-xs font-bold uppercase tracking-widest text-gold-deep">Cost Snapshot</h2>
             <p className="mt-1 font-semibold text-navy">Monthly breakdown</p>
             <div className="mt-5">
               <BudgetDonut slices={slices} total={total} />
@@ -280,7 +280,7 @@ export function CostCalculator({
         ) : (
           <section className="card-surface flex min-h-[420px] flex-col p-6" aria-label="Cost snapshot">
             <div className="text-left">
-              <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Nexit Cost Snapshot</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Cost Snapshot</p>
               <p className="mt-1 font-semibold text-navy">Monthly breakdown</p>
             </div>
             <div className="flex flex-1 items-center justify-center text-center">
@@ -296,7 +296,7 @@ export function CostCalculator({
 
       {/* Methodology note */}
       <p className="text-xs text-muted" aria-label="Methodology">
-        Figures are your own planning estimates. Nexit does not verify them and they are not official cost data.
+        Figures are your own planning estimates. Kolmari does not verify them and they are not official cost data.
       </p>
 
       {/* Status message */}

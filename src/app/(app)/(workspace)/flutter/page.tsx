@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
-import { NexitPlanWorkspace } from '@/components/nexit/nexit-plan-workspace'
+import { NexitPlanWorkspace } from '@/components/kolmari/nexit-plan-workspace'
 import { requireCurrentUser } from '@/lib/auth'
 import { COUNTRIES } from '@/lib/countries'
-import { emptyNexitPlan, getNexitPlan } from '@/lib/nexit-plan'
+import { emptyNexitPlan, getNexitPlan } from '@/lib/kolmari-plan'
 import { PATHWAYS } from '@/lib/pathways'
 import { getProfile } from '@/lib/profile'
 

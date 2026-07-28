@@ -25,7 +25,7 @@ export function CountryHero({ go, fromQuiz = false }: { go: (s: string) => void;
             {fromQuiz && (
           <p className="hero-quizpill">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><path d="M12 3l2.1 4.9 5.4.5-4.1 3.6 1.2 5.3L12 14.6 7.4 17.3l1.2-5.3L4.5 8.4l5.4-.5z" /></svg>
-            Your top Nextination from the Nexit Match Quiz
+            Your top Destination from the Kolmari Match Quiz
           </p>
         )}
         <div className="hero-eyebrow">Western Europe · Atlantic coast</div>

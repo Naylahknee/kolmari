@@ -9,15 +9,15 @@ import {
   Sparkles,
   UsersRound,
 } from 'lucide-react'
-import { MarketingMobileNav } from '@/components/nexit/marketing-mobile-nav'
-import { MarketingLogo } from '@/components/nexit/marketing-logo'
-import { QuestionsSection } from '@/components/nexit/questions-section'
+import { MarketingMobileNav } from '@/components/kolmari/marketing-mobile-nav'
+import { MarketingLogo } from '@/components/kolmari/marketing-logo'
+import { QuestionsSection } from '@/components/kolmari/questions-section'
 
 const steps = [
   {
     image: '/images/journey-globe-pins.png',
-    title: 'Choose a Nextination',
-    copy: 'Compare Nextinations, Pathways, and monthly costs side by side.',
+    title: 'Choose a Destination',
+    copy: 'Compare Destinations, Pathways, and monthly costs side by side.',
   },
   {
     image: '/images/passport-visa-documents.png',
@@ -35,10 +35,10 @@ function MarketingWordmark({ compact = false }: { compact?: boolean }) {
   const width = compact ? 120 : 152
   const height = compact ? 32 : 40
   return (
-    <Link href="/" aria-label="Nexit home" className="inline-flex shrink-0 items-center">
+    <Link href="/" aria-label="Kolmari home" className="inline-flex shrink-0 items-center">
       <Image
         src="/brand/nexit-wordmark-dark.png"
-        alt="Nexit"
+        alt="Kolmari"
         width={width}
         height={height}
         className="h-auto w-auto object-contain"
@@ -71,7 +71,7 @@ export default function LandingPage() {
               <a href="#destinations" className="transition hover:text-white">Destinations</a>
               <a href="#community" className="transition hover:text-white">Community</a>
               <Link href="/login" className="transition hover:text-white">Sign in</Link>
-              <Link href="/quiz" className="gold-button !min-h-10 !px-4">Start Your Nexit</Link>
+              <Link href="/quiz" className="gold-button !min-h-10 !px-4">Build Your Kolmari Plan</Link>
             </nav>
             <MarketingMobileNav />
           </header>
@@ -87,7 +87,7 @@ export default function LandingPage() {
                 Compare Destinations, review Pathways, and build a realistic Move Plan — without piecing it together across a dozen tabs.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="/quiz" className="gold-button">Start Your Nexit <ArrowRight size={17} /></Link>
+                <Link href="/quiz" className="gold-button">Build Your Kolmari Plan <ArrowRight size={17} /></Link>
                 <Link href="#how-it-works" className="inline-flex min-h-12 items-center rounded-xl border border-white/25 px-5 font-bold text-white transition hover:bg-white/8">
                   See how it works
                 </Link>
@@ -171,13 +171,13 @@ export default function LandingPage() {
           <div className="mx-auto w-full max-w-[1180px] px-5">
             <h2 className="max-w-xl font-display text-4xl font-extrabold">Your next chapter deserves a real plan.</h2>
             <p className="mt-3 text-white/75">Compare clearly. Prepare practically. Move with confidence.</p>
-            <Link href="/quiz" className="gold-button mt-6">Start Your Nexit <ArrowRight size={17} /></Link>
+            <Link href="/quiz" className="gold-button mt-6">Build Your Kolmari Plan <ArrowRight size={17} /></Link>
           </div>
         </div>
         <div className="border-t border-white/10 px-5 py-5">
           <div className="mx-auto flex max-w-[1180px] flex-col items-center justify-between gap-4 text-center text-xs text-white/55 sm:flex-row sm:text-left">
             <MarketingLogo compact />
-            <p>© 2026 Nexit. Visa recommendations are planning guidance, not legal advice.</p>
+            <p>© 2026 Kolmari. Visa recommendations are planning guidance, not legal advice.</p>
           </div>
         </div>
       </footer>

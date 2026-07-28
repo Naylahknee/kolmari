@@ -1,4 +1,4 @@
-import { ProfileWizard } from '@/components/nexit/profile-wizard'
+import { ProfileWizard } from '@/components/kolmari/profile-wizard'
 import { requireCurrentUser } from '@/lib/auth'
 import { getProfile } from '@/lib/profile'
 

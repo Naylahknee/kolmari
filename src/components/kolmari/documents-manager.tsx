@@ -30,7 +30,7 @@ export function DocumentsManager() {
           <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Document organizer</p>
           <h1 className="mt-1 text-2xl font-bold text-navy sm:text-3xl">My Documents</h1>
           <p className="mt-1 text-sm text-muted">
-            Keep a local working list of the documents your move may require. Files are not uploaded to Nexit servers.
+            Keep a local working list of the documents your move may require. Files are not uploaded to Kolmari servers.
           </p>
         </div>
         <button
@@ -52,7 +52,7 @@ export function DocumentsManager() {
 
       {/* Privacy notice */}
       <p className="mt-4 rounded-[var(--radius-field)] bg-canvas px-4 py-3 text-xs text-muted">
-        Files added here are stored in your browser session only. They are not sent to Nexit servers and will be cleared when you close or refresh the page.
+        Files added here are stored in your browser session only. They are not sent to Kolmari servers and will be cleared when you close or refresh the page.
       </p>
 
       {/* Document list */}
@@ -93,7 +93,7 @@ export function DocumentsManager() {
                 <FilePlus2 className="mx-auto text-gold-deep" aria-hidden="true" />
                 <p className="mt-3 font-semibold text-navy">No documents added yet</p>
                 <p className="mt-1 text-sm text-muted">
-                  Select files from your device to build a working list for your Nexit Plan.
+                  Select files from your device to build a working list for your Move Plan.
                 </p>
                 <p className="mt-2 text-xs text-muted">Files stay in this session only.</p>
               </span>

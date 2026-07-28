@@ -89,8 +89,8 @@ const startingPlacesExperience: Experience = {
         title: 'You may want to start with:',
         items: [
           `Countries researched for ${priority.toLowerCase()} — compare Europe and Latin America as starting regions`,
-          'Building a short starting list of 3–5 Nextinations before narrowing further',
-          'Exploring the Nexitnation map to compare regional costs and Pathway categories',
+          'Building a short starting list of 3–5 Destinations before narrowing further',
+          'Exploring the Kolmarination map to compare regional costs and Pathway categories',
         ],
       }
     }
@@ -175,11 +175,11 @@ const pathwaysExperience: Experience = {
   },
 }
 
-// ─── Experience 3: Discover Your Nexit Stage ─────────────────────────────────
+// ─── Experience 3: Discover Your Move Stage ──────────────────────────────────
 
 const nexitStageExperience: Experience = {
   id: 'nexit-stage',
-  name: 'Discover Your Nexit Stage',
+  name: 'Discover Your Move Stage',
   steps: [
     {
       id: 'country-in-mind',
@@ -233,17 +233,17 @@ const nexitStageExperience: Experience = {
       'Discovery Stage': {
         explanation: 'You are still orienting — narrowing the possibilities is the most useful place to begin.',
         firstStep: 'Your first step is to narrow the world into a manageable starting list.',
-        reason: 'Nexit helps you compare regions and filter Nextinations by what matters to you.',
+        reason: 'Kolmari helps you compare regions and filter Destinations by what matters to you.',
       },
       'Research Stage': {
         explanation: 'You have some direction and are ready to go deeper on real countries and realistic Pathways.',
         firstStep: 'Your first step is to compare countries and explore realistic Pathway categories.',
-        reason: 'Nexit organizes country data, costs, and Pathway categories in one place.',
+        reason: 'Kolmari organizes country data, costs, and Pathway categories in one place.',
       },
       'Planning Stage': {
         explanation: 'You have a target and a timeline — the work now is organizing your documents, budget, and tasks.',
         firstStep: 'Your first step is to organize your timeline, documents, and relocation budget.',
-        reason: 'Nexit tracks documents, costs, and the steps between research and departure.',
+        reason: 'Kolmari tracks documents, costs, and the steps between research and departure.',
       },
     }
 
@@ -381,9 +381,9 @@ function TeaserScreen({
 function FinalScreen({ onClose }: { onClose: () => void }) {
   const benefits = [
     'Save your results',
-    'Compare Nextinations',
+    'Compare Destinations',
     'Explore Pathways in more detail',
-    'Build your Nexit Plan',
+    'Build Your Kolmari Plan',
     'Track documents, costs, and next steps',
   ]
 
@@ -392,10 +392,10 @@ function FinalScreen({ onClose }: { onClose: () => void }) {
       <div>
         <p className="text-xs font-extrabold uppercase tracking-widest text-gold-deep">You are ready to begin</p>
         <h3 className="mt-2 font-display text-2xl font-bold text-navy sm:text-3xl">
-          Your Nexit starting point is ready.
+          Your Kolmari starting point is ready.
         </h3>
         <p className="mt-3 text-sm leading-6 text-muted">
-          Create a free Nexit account to save your result and see the full picture.
+          Create a free Kolmari account to save your result and see the full picture.
         </p>
       </div>
 

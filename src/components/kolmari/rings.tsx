@@ -42,6 +42,14 @@ export function ScoreRing({
   )
 }
 
+export const BUDGET_COLORS = [
+  '#F3C516', // gold — housing
+  '#1F9D94', // teal — food
+  '#17305B', // navy — transport
+  '#3b82d4', // blue — healthcare
+  '#6B7A92', // slate — other
+] as const
+
 export type BudgetSlice = { label: string; amount: number; color: string }
 
 export function BudgetDonut({ slices, total, size = 132 }: { slices: BudgetSlice[]; total: number; size?: number }) {

@@ -1,6 +1,6 @@
 'use client'
 
-import { WorkspaceShell } from '@/components/nexit/workspace-shell'
+import { WorkspaceShell } from '@/components/kolmari/workspace-shell'
 import type { WizardStatus } from '@/lib/profile'
 
 /**

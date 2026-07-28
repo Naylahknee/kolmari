@@ -7,7 +7,7 @@ export function CountryResearchPage({ country }: { country: DiscoverableCountry 
   return (
     <div className="space-y-6">
       <nav className="text-sm text-muted" aria-label="Breadcrumb">
-        <Link href="/nexitnation" className="hover:text-navy">Nexit World</Link>
+        <Link href="/nexitnation" className="hover:text-navy">Kolmarination</Link>
         <span className="px-2">/</span>
         <span className="font-semibold text-navy">{country.name}</span>
       </nav>
@@ -15,7 +15,7 @@ export function CountryResearchPage({ country }: { country: DiscoverableCountry 
       <section className="hero-grid overflow-hidden rounded-card bg-navy-deep p-7 text-white sm:p-10">
         <div className="max-w-2xl">
           <Image src={`https://flagcdn.com/${country.code.toLowerCase()}.svg`} alt={`${country.name} flag`} width={80} height={48} className="h-12 w-20 rounded-sm object-cover shadow-card" />
-          <p className="mt-6 text-xs font-bold uppercase tracking-widest text-gold">Explore this Nextination</p>
+          <p className="mt-6 text-xs font-bold uppercase tracking-widest text-gold">Explore this Destination</p>
           <h1 className="mt-2 text-4xl font-bold sm:text-5xl">{country.name}</h1>
           <p className="mt-4 max-w-xl leading-7 text-white/75">
             Begin your relocation research with official sources, city-level comparisons, and Pathway questions tailored to your circumstances.
@@ -27,7 +27,7 @@ export function CountryResearchPage({ country }: { country: DiscoverableCountry 
         <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Country research workspace</p>
         <h2 className="mt-1 text-3xl font-bold text-navy">Start with {country.city}</h2>
         <p className="mt-2 max-w-3xl text-muted">
-          This page is available from Nexit World, but it is not automatically added to My Nextinations. Save it only when you want to compare or plan around it.
+          This page is available from Kolmarination, but it is not automatically added to your Destinations. Save it only when you want to compare or plan around it.
         </p>
         <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {[
@@ -51,10 +51,10 @@ export function CountryResearchPage({ country }: { country: DiscoverableCountry 
       <section className="rounded-card border border-line bg-white p-6 shadow-card">
         <h2 className="text-xl font-bold text-navy">Research status</h2>
         <p className="mt-2 text-sm leading-6 text-muted">
-          Detailed country facts, costs, and visa guidance are being verified. Nexit does not preload unverified figures or present editorial popularity as personal eligibility.
+          Detailed country facts, costs, and visa guidance are being verified. Kolmari does not preload unverified figures or present editorial popularity as personal eligibility.
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
-          <Link href="/pathways" className="gold-button">Review Nexit Pathways <ArrowRight size={15} /></Link>
+          <Link href="/pathways" className="gold-button">Review Pathways <ArrowRight size={15} /></Link>
           <Link href="/cost-calculator" className="inline-flex min-h-11 items-center rounded-[var(--radius-btn)] border border-line px-5 text-sm font-bold text-navy">Open Cost Calculator</Link>
         </div>
       </section>

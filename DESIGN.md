@@ -1,8 +1,8 @@
-# Nexit Design System and Brand Asset Standard
+# Kolmari Design System and Brand Asset Standard
 
-This document is the repository-level source of truth for Nexit identity, language, visual design, interface patterns, and brand assets. Nexit is a relocation decision system—not a travel app.
+This document is the repository-level source of truth for Kolmari identity, language, visual design, interface patterns, and brand assets. Kolmari is a relocation decision system—not a travel app.
 
-**Current stack:** Next.js 16 App Router, React 19, TypeScript, Tailwind CSS 4, Geist, Playfair Display, Neon Postgres, Route Handlers, bcrypt, JOSE JWT, Mapbox GL, Cloudflare Workers, and the `Naylahknee/nexit` repository.
+**Current stack:** Next.js 16 App Router, React 19, TypeScript, Tailwind CSS 4, Geist, Playfair Display, Neon Postgres, Route Handlers, bcrypt, JOSE JWT, Mapbox GL, Cloudflare Workers, and the `Naylahknee/Kolmari` repository.
 
 ## 1. Source-of-truth hierarchy
 
@@ -19,8 +19,8 @@ References guide appearance, spacing, composition, and mood. Rebuild them as acc
 
 ### Layer 1 — Identity (locked)
 
-- Nexit is a relocation decision system, not a vacation, booking, or generic travel product.
-- Nexit helps people evaluate relocation, choose a viable place, build a plan, and act.
+- Kolmari is a relocation decision system, not a vacation, booking, or generic travel product.
+- Kolmari helps people evaluate relocation, choose a viable place, build a plan, and act.
 - Tone is direct, practical, informed, confident, and human.
 - Avoid generic SaaS language and aspirational filler.
 - Changes require explicit owner approval.
@@ -35,7 +35,7 @@ References guide appearance, spacing, composition, and mood. Rebuild them as acc
 
 ### Layer 3 — UX patterns (semi-locked)
 
-- The Nexit Profile Wizard presents one primary question per step.
+- The Kolmari Profile Wizard presents one primary question per step.
 - The dashboard is structured and action-oriented, not an open-ended discovery surface.
 - Mobile screens prioritize one primary action.
 - Interfaces must not become cluttered, form-heavy, or multi-action without review.
@@ -43,9 +43,9 @@ References guide appearance, spacing, composition, and mood. Rebuild them as acc
 ### Layer 4 — Feature structure (flexible)
 
 - Greenbook Insights
-- Nexit Profile Wizard and Nexit Pathways output
-- Nexitnation and Nextination evaluation
-- Nexit Tracker
+- Kolmari Profile Wizard and Kolmari Pathways output
+- Kolmarination and Destination evaluation
+- Kolmari Tracker
 - Cost calculator and document tools
 
 Features may expand while preserving Layers 1–3.
@@ -53,14 +53,14 @@ Features may expand while preserving Layers 1–3.
 ### Layer 5 — Logic (flexible)
 
 - Match Score calculations
-- Nexit Readiness calculations
-- Nextination recommendations
+- Kolmari Readiness calculations
+- Destination recommendations
 - Pathways matching
 
 ### Layer 6 — Content (flexible)
 
 - Editorial copy
-- Nextination information
+- Destination information
 - Sourced Greenbook summaries
 - Verified community submissions
 
@@ -84,41 +84,41 @@ Use these terms consistently in navigation, headings, buttons, onboarding, metad
 
 | Approved term | Meaning | Primary placement |
 | --- | --- | --- |
-| **Nexit** | The intentional act of leaving the United States to build a life elsewhere | Brand and identity |
-| **Nexitnation** | The global map and comparison interface | Map title and navigation |
-| **Nextination** | A country or region being evaluated | Cards and detail pages |
-| **Nexit Profile** | The user's income, work, family, timing, and lifestyle inputs | Onboarding and sidebar |
-| **Nexit Plan** | The user's structured relocation plan | Dashboard |
-| **Match Score** | Compatibility between a Nexit Profile and a Nextination | Nextination cards |
-| **Pathways** | Applicable visa and residence options | Wizard and Nextination detail |
-| **Nexit Readiness** | The user's current preparation level | Dashboard and score UI |
-| **Nexit Timeline** | Relocation actions organized over time | Plan view |
-| **Greenbook Insights** | Sourced lived-experience and context summaries | High on Nextination pages |
+| **Kolmari** | The intentional act of leaving the United States to build a life elsewhere | Brand and identity |
+| **Kolmarination** | The global map and comparison interface | Map title and navigation |
+| **Destination** | A country or region being evaluated | Cards and detail pages |
+| **Kolmari Profile** | The user's income, work, family, timing, and lifestyle inputs | Onboarding and sidebar |
+| **Kolmari Plan** | The user's structured relocation plan | Dashboard |
+| **Match Score** | Compatibility between a Kolmari Profile and a Destination | Destination cards |
+| **Pathways** | Applicable visa and residence options | Wizard and Destination detail |
+| **Kolmari Readiness** | The user's current preparation level | Dashboard and score UI |
+| **Kolmari Timeline** | Relocation actions organized over time | Plan view |
+| **Greenbook Insights** | Sourced lived-experience and context summaries | High on Destination pages |
 | **Community Fit** | A qualitative belonging and daily-life consideration | Cards and Greenbook Insights |
-| **Nexicution Mode** | The transition from research to action | Primary dashboard action |
-| **Nexit Tracker** | Checklist and progress system | Dashboard and tracker route |
+| **Flutter Mode** | The transition from research to action | Primary dashboard action |
+| **Kolmari Tracker** | Checklist and progress system | Dashboard and tracker route |
 
 Exact interface copy:
 
-- `Start Your Nexit`
-- `Choose Your Nexitnation`
-- `Explore This Nextination`
+- `Start Your Kolmari`
+- `Choose Your Kolmarination`
+- `Explore This Destination`
 - `Review Your Pathways`
-- `Build Your Nexit Plan`
-- `Enter Nexicution Mode`
+- `Build Your Kolmari Plan`
+- `Enter Flutter Mode`
 
 Product story:
 
 ```text
-Start Your Nexit
-→ Choose Your Nexitnation
-→ Explore a Nextination
+Start Your Kolmari
+→ Choose Your Kolmarination
+→ Explore a Destination
 → Review Your Pathways
-→ Build Your Nexit Plan
-→ Enter Nexicution Mode
+→ Build Your Kolmari Plan
+→ Enter Flutter Mode
 ```
 
-Do not substitute generic **destination**, **journey**, **travel**, or **explore** language for the approved system terms. Exceptions are official names, factual requirements such as “travel insurance,” and the approved phrase **Explore This Nextination**. Preserve official names such as **Destination Thailand Visa** verbatim.
+Do not substitute generic **destination**, **journey**, **travel**, or **explore** language for the approved system terms. Exceptions are official names, factual requirements such as “travel insurance,” and the approved phrase **Explore This Destination**. Preserve official names such as **Destination Thailand Visa** verbatim.
 
 ## 4. Brand identity system
 
@@ -134,9 +134,9 @@ The primary symbol is a precise geometric butterfly whose wings form a world map
 - Form is balanced, structured, sharp, and symmetrical; it must not feel soft, whimsical, or organic.
 - Geography is an identity cue, not a cartographic claim. Simplify it enough to scale cleanly.
 
-### 4.2 Wordmark — geometric NEXIT arrow
+### 4.2 Wordmark — geometric Kolmari arrow
 
-The approved wordmark is uppercase `NEXIT` in a custom geometric sans-serif construction.
+The approved wordmark is uppercase `Kolmari` in a custom geometric sans-serif construction.
 
 - The E/X transition forms a forward-facing gold arrow.
 - The arrow may subtly suggest a roofline or directional home symbol, but must remain immediately readable.
@@ -203,14 +203,14 @@ Approved production assets live in `public/brand/`. Scene imagery remains in `pu
 
 | Asset | Runtime filename | Approved source | Usage | Status |
 | --- | --- | --- | --- | --- |
-| Light-surface wordmark | `nexit-wordmark-light.png` | `6.png` | White cards, auth, and light mobile headers | Integrated |
-| Dark-surface wordmark | `nexit-wordmark-dark.png` | `5.png` | Hero, sidebar, SEO header, and footers | Integrated |
-| Butterfly wordmark | `nexit-butterfly-wordmark.png` | `3.png` | Protected workspace sidebar | Integrated |
-| Split wordmark alternate | `nexit-wordmark-split.png` | `7.png` | Retained alternate; no default placement | Approved |
-| High-resolution wordmark | `nexit-wordmark-master-light.png` | `NEXIT WORD LOGO.png` | Owner-approved master reference | Approved |
-| Primary butterfly globe | `nexit-primary-dark.png` | `Nexit Logo dark bg.png` | Detailed dark-background identity asset | Approved |
-| Dimensional app icon | `nexit-icon-dimensional-source.png` | `NexitLogo1.png` | Official installable icon source | Integrated |
-| Flat app icon alternate | `nexit-icon-flat.png` | `Nexit Logo.png` | Retained alternate | Approved |
+| Light-surface wordmark | `Kolmari-wordmark-light.png` | `6.png` | White cards, auth, and light mobile headers | Integrated |
+| Dark-surface wordmark | `Kolmari-wordmark-dark.png` | `5.png` | Hero, sidebar, SEO header, and footers | Integrated |
+| Butterfly wordmark | `Kolmari-butterfly-wordmark.png` | `3.png` | Protected workspace sidebar | Integrated |
+| Split wordmark alternate | `Kolmari-wordmark-split.png` | `7.png` | Retained alternate; no default placement | Approved |
+| High-resolution wordmark | `Kolmari-wordmark-master-light.png` | `Kolmari WORD LOGO.png` | Owner-approved master reference | Approved |
+| Primary butterfly globe | `Kolmari-primary-dark.png` | `Kolmari Logo dark bg.png` | Detailed dark-background identity asset | Approved |
+| Dimensional app icon | `Kolmari-icon-dimensional-source.png` | `KolmariLogo1.png` | Official installable icon source | Integrated |
+| Flat app icon alternate | `Kolmari-icon-flat.png` | `Kolmari Logo.png` | Retained alternate | Approved |
 | App icon exports | `app-icon-1024.png`, `app-icon-512.png`, `app-icon-192.png`, `app-icon-180.png` | Dimensional app icon | Browser, PWA, and Apple metadata | Integrated |
 | Favicon exports | `favicon-512.png`, `favicon-48.png`, `favicon-32.png`, `favicon-16.png`, `favicon.ico` | `Favicons.png` | Browser favicon family | Integrated |
 
@@ -278,20 +278,20 @@ Component filenames may preserve compatibility, but user-facing names follow the
 
 | Code component or legacy URL | Approved user-facing role | Notes |
 | --- | --- | --- |
-| `Wordmark` | NEXIT geometric arrow wordmark | Replace only after the logo family is approved |
+| `Wordmark` | Kolmari geometric arrow wordmark | Replace only after the logo family is approved |
 | `Button` | Primary, ghost, and outline actions | Gold only for the primary action |
 | `Card` | Structured content surface | White, `border-line`, restrained shadow |
-| `StatCard` | Nexit Plan metric | One key measure and one supporting action |
-| `ScoreRing` | Nexit Readiness | Accessible text must accompany the SVG |
+| `StatCard` | Kolmari Plan metric | One key measure and one supporting action |
+| `ScoreRing` | Kolmari Readiness | Accessible text must accompany the SVG |
 | `MatchRing` | Match Score | Never imply scientific certainty without evidence |
 | `BudgetDonut` | Budget overview | Pair color with labels and values |
-| `ChecklistRow` | Nexit Tracker item | Clear complete, pending, warning, and blocked states |
-| `CountryTile` / `CountryRow` | Nextination card or row | Name, location, Pathways, Match Score, Community Fit |
+| `ChecklistRow` | Kolmari Tracker item | Clear complete, pending, warning, and blocked states |
+| `CountryTile` / `CountryRow` | Destination card or row | Name, location, Pathways, Match Score, Community Fit |
 | `Sidebar` | Workspace navigation | Navy; active item may use Gold |
 | `TopBar` | Search, alerts, and account controls | Keep compact and task-oriented |
 | `BottomNav` | Responsive workspace navigation | Five or fewer primary destinations |
-| `ProfileWizardStep` | Nexit Profile Wizard step | One primary question per step |
-| `CtaBanner` | Nexicution Mode action | One primary CTA |
+| `ProfileWizardStep` | Kolmari Profile Wizard step | One primary question per step |
+| `CtaBanner` | Flutter Mode action | One primary CTA |
 
 Legacy URLs such as `/visa-wizard` and `/checklist` may remain as redirects for compatibility. Do not expose them as permanent product navigation.
 
@@ -331,10 +331,10 @@ src/app/(app)/
   onboarding/page.tsx                  → compatibility redirect
   (workspace)/
     dashboard/page.tsx
-    nexitnation/page.tsx
-    nexitnation/[region]/page.tsx
+    Kolmarination/page.tsx
+    Kolmarination/[region]/page.tsx
     pathways/page.tsx
-    nexit-plan/page.tsx
+    Kolmari-plan/page.tsx
     visa-wizard/page.tsx                → compatibility redirect
     countries/page.tsx
     countries/[slug]/page.tsx
@@ -349,26 +349,26 @@ src/app/(app)/
 
 Approved UI labels:
 
-- `/nexitnation` → **Choose Your Nexitnation**
-- `/nexitnation/[region]` → **Explore This Nextination**
-- `/profile-wizard` → **Nexit Profile Wizard**
-- `/pathways` → **Nexit Pathways**
-- `/nexit-plan` → **Nexit Plan**
-- `/countries` → **Nextinations**
-- `/checklist` → **Nexit Tracker**
+- `/Kolmarination` → **Choose Your Kolmarination**
+- `/Kolmarination/[region]` → **Explore This Destination**
+- `/profile-wizard` → **Kolmari Profile Wizard**
+- `/pathways` → **Kolmari Pathways**
+- `/Kolmari-plan` → **Kolmari Plan**
+- `/countries` → **Destinations**
+- `/checklist` → **Kolmari Tracker**
 - `/greenbook` → **Greenbook Insights**
-- `/community` → **Nexiters Community**
-- `/saved` → **Saved Nextinations**
+- `/community` → **Kolmariers Community**
+- `/saved` → **Saved Destinations**
 
 Keep `/countries`, `/visa-wizard`, and `/checklist` URLs for compatibility unless a separate migration is approved.
 
-### Nexitnation interaction
+### Kolmarination interaction
 
-- `/nexitnation` uses a responsive illustrated SVG world map with six accessible region links, image `clipPath` masks, Navy overlays, Gold outlines, and restrained motion.
+- `/Kolmarination` uses a responsive illustrated SVG world map with six accessible region links, image `clipPath` masks, Navy overlays, Gold outlines, and restrained motion.
 - The main discovery map must not require Mapbox or a client token. Mapbox remains available for detailed country, city, neighborhood, and Greenbook location maps.
-- Before profile completion, maps and cards show **Complete your Nexit Profile to see personalized matches** and never substitute a static score or match label.
-- A region selection routes to `/nexitnation/[region]`; the map does not replace the protected App Shell.
-- Region pages use the typed registry in `src/lib/nexitnation-data.ts` and retain **Match Score**, **Pathways**, **Community Fit**, and **Explore This Nextination** language.
+- Before profile completion, maps and cards show **Complete your Kolmari Profile to see personalized matches** and never substitute a static score or match label.
+- A region selection routes to `/Kolmarination/[region]`; the map does not replace the protected App Shell.
+- Region pages use the typed registry in `src/lib/Kolmarination-data.ts` and retain **Match Score**, **Pathways**, **Community Fit**, and **Explore This Destination** language.
 - Passport Index is an outbound research resource only. Never scrape, embed, proxy, or reproduce its passport-strength and mobility data.
 
 ## 10. Authentication and continuation flow
@@ -377,13 +377,13 @@ Keep `/countries`, `/visa-wizard`, and `/checklist` URLs for compatibility unles
 - The JWT is stored in a secure, `httpOnly`, `SameSite=Lax` session cookie in production.
 - Current Route Handlers are `POST /api/login`, `POST /api/logout`, and `/api/profile` for profile reads and writes.
 - Do not document or introduce an alternate authentication-handler namespace.
-- Landing entry actions use **Start Your Nexit**.
+- Landing entry actions use **Start Your Kolmari**.
 - Logged-out access to an intended protected route uses `/signup?next=<safe-internal-route>` or `/login?next=<safe-internal-route>`.
 - Preserve validated internal `next` paths through signup and login.
 - Reject absolute external URLs, protocol-relative URLs beginning with `//`, backslashes, and control characters.
 - The `(app)` workspace is protected by the Next.js 16 `src/proxy.ts` convention and server-side layout validation. Keep both layers.
-- New accounts continue to `/welcome`. Users may start `/profile-wizard` or skip to `/nexitnation` without placeholder profile values.
-- Completing the wizard persists the real Nexit Profile and continues to `/pathways`.
+- New accounts continue to `/welcome`. Users may start `/profile-wizard` or skip to `/Kolmarination` without placeholder profile values.
+- Completing the wizard persists the real Kolmari Profile and continues to `/pathways`.
 - Existing sign-ins continue to the validated internal `next` path; use `/dashboard` as the fallback.
 - Empty personal fields remain `NULL` in Neon until the user supplies them.
 
@@ -399,10 +399,10 @@ Current relocation imagery lives in `public/images/`:
 - `footer-beach-ocean.png` — full-width footer atmosphere.
 - `travel-route-pin.png` and `airplane.png` — minimal route motifs.
 
-- `regions/*.webp` — six navy-and-gold geographic region artworks for Nexitnation map patterns, mobile cards, and region heroes.
-- `countries/*.webp` — geographic country-card artwork used by the initial Europe Nextination previews.
+- `regions/*.webp` — six navy-and-gold geographic region artworks for Kolmarination map patterns, mobile cards, and region heroes.
+- `countries/*.webp` — geographic country-card artwork used by the initial Europe Destination previews.
 
-The Nexitnation polygons in `public/data/continents.geojson` are derived from Natural Earth 1:110m Admin 0 boundaries. Keep the source note in `public/data/README.md` with the data file.
+The Kolmarination polygons in `public/data/continents.geojson` are derived from Natural Earth 1:110m Admin 0 boundaries. Keep the source note in `public/data/README.md` with the data file.
 
 Despite legacy filenames, UI copy must follow the locked lexicon. Imagery should communicate movement, global transition, decision-making, preparation, and a credible new life. It must not resemble a resort campaign, booking site, travel agency, or generic stock-photo collage.
 
@@ -430,7 +430,7 @@ Final identity assets belong in `public/brand/`; do not mix logo masters into `p
 
 Before shipping an identity-asset change:
 
-- Confirm exact spelling of `NEXIT` and `YOUR NEXT MOVE. YOUR NEXT LIFE.`
+- Confirm exact spelling of `Kolmari` and `YOUR NEXT MOVE. YOUR NEXT LIFE.`
 - Confirm the E/X connection reads as a forward arrow without obscuring the word.
 - Confirm the approved supplied geometry has not been redrawn or recolored.
 - Inspect the detailed butterfly at large size and the simplified favicon at 16px and 32px.

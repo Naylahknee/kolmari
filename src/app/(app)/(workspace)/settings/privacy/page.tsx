@@ -1,5 +1,5 @@
 import { requireCurrentUser } from '@/lib/auth'
-import { PrivacyAccountPage } from '@/components/nexit/privacy-account-page'
+import { PrivacyAccountPage } from '@/components/kolmari/privacy-account-page'
 
 export const metadata = { title: 'Privacy & Account — Kolmari' }
 

@@ -124,7 +124,7 @@ export function CountriesView({ initialQuery = '', profileComplete }: { initialQ
                 </div>
                 <div className="mt-4 grid gap-2">
                   <Link href={`/nextinations/${detail.slug}/overview`} className="gold-button w-full">
-                    View Nextination <ArrowRight size={16} />
+                    View Destination <ArrowRight size={16} />
                   </Link>
                   <SaveNextinationButton slug={detail.slug} className="w-full" />
                 </div>
@@ -145,7 +145,7 @@ export function CountriesBrowser({ initialQuery = '', profileComplete }: { initi
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Nextination directory</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Destination directory</p>
         <h1 className="mt-1 text-2xl font-bold text-navy sm:text-3xl">Research countries and Pathways.</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
           Compare general Pathway and cost information. Personalized matches require a completed Kolmari Profile.

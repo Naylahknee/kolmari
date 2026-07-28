@@ -377,7 +377,7 @@ const portugal: CountryContent = {
       { name: 'APAV', description: 'Victim support including domestic violence and gender-based violence assistance.', url: 'https://apav.pt' },
       { name: 'SOS Racismo', description: 'Anti-racism advocacy and reporting resource.', url: 'https://sosracismo.pt' },
     ],
-    disclaimer: 'Greenbook insights are a combination of editorially reviewed information and community-reported experiences. Verified resources and community-reported insights are presented separately. Individual experiences vary. Nexit does not present anecdotes as universal facts.',
+    disclaimer: 'Greenbook insights are a combination of editorially reviewed information and community-reported experiences. Verified resources and community-reported insights are presented separately. Individual experiences vary. Kolmari does not present anecdotes as universal facts.',
   },
   resources: [
     { title: 'AIMA — Residence and immigration', organization: 'AIMA (Agência para a Integração, Migrações e Asilo)', description: 'Official immigration authority replacing SEF. Handles residence permits, renewals, and visa matters.', type: 'official', url: 'https://aima.gov.pt', lastChecked: '2026-01-01', category: 'immigration' },

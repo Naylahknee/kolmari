@@ -7,7 +7,7 @@ export type GreenbookEntry = {
   context: string
   note: string
   tags: string[]
-  sourceLabel: 'Nexit editorial planning prompt'
+  sourceLabel: 'Kolmari editorial planning prompt'
   verifiedMemberStory: false
 }
 
@@ -28,49 +28,49 @@ export const GREENBOOK_ENTRIES: GreenbookEntry[] = [
     id: 'lisbon-first-month', regionSlug: 'europe', location: 'Lisbon, Portugal',
     context: 'First-month planning prompt',
     note: 'Choose a neighborhood around the errands you repeat, not only the view. Compare groceries, transit, healthcare, and workday noise before signing a longer lease.',
-    tags: ['Neighborhoods', 'Daily life'], sourceLabel: 'Nexit editorial planning prompt', verifiedMemberStory: false,
+    tags: ['Neighborhoods', 'Daily life'], sourceLabel: 'Kolmari editorial planning prompt', verifiedMemberStory: false,
   },
   {
     id: 'valencia-paperwork', regionSlug: 'europe', location: 'Valencia, Spain',
     context: 'Paperwork planning prompt',
     note: 'Keep printed and encrypted cloud copies of appointment confirmations. Organize documents in the order requested by the responsible consulate.',
-    tags: ['Documents', 'Arrival'], sourceLabel: 'Nexit editorial planning prompt', verifiedMemberStory: false,
+    tags: ['Documents', 'Arrival'], sourceLabel: 'Kolmari editorial planning prompt', verifiedMemberStory: false,
   },
   {
     id: 'merida-seasons', regionSlug: 'americas', location: 'Merida, Mexico',
     context: 'Climate planning prompt',
     note: 'Complete a scouting stay during the hottest or wettest season before committing. Climate can materially change housing and transport needs.',
-    tags: ['Climate', 'Housing'], sourceLabel: 'Nexit editorial planning prompt', verifiedMemberStory: false,
+    tags: ['Climate', 'Housing'], sourceLabel: 'Kolmari editorial planning prompt', verifiedMemberStory: false,
   },
   {
     id: 'medellin-budget', regionSlug: 'americas', location: 'Medellin, Colombia',
     context: 'Budget planning prompt',
     note: 'Short-term furnished rent can distort a long-term budget. Keep a higher arrival-month estimate and compare longer leases after learning neighborhoods in person.',
-    tags: ['Budget', 'Housing'], sourceLabel: 'Nexit editorial planning prompt', verifiedMemberStory: false,
+    tags: ['Budget', 'Housing'], sourceLabel: 'Kolmari editorial planning prompt', verifiedMemberStory: false,
   },
   {
     id: 'kl-connectivity', regionSlug: 'asia-pacific', location: 'Kuala Lumpur, Malaysia',
     context: 'Workday planning prompt',
     note: 'Verify call quality from the specific building before signing. Building-level connectivity can differ even when listings advertise similar speeds.',
-    tags: ['Remote work', 'Housing'], sourceLabel: 'Nexit editorial planning prompt', verifiedMemberStory: false,
+    tags: ['Remote work', 'Housing'], sourceLabel: 'Kolmari editorial planning prompt', verifiedMemberStory: false,
   },
   {
     id: 'chiang-mai-air', regionSlug: 'asia-pacific', location: 'Chiang Mai, Thailand',
     context: 'Seasonal planning prompt',
-    note: 'Research seasonal air quality before choosing dates or a neighborhood, and include alternate locations or indoor air measures in the Nexit Plan.',
-    tags: ['Climate', 'Health'], sourceLabel: 'Nexit editorial planning prompt', verifiedMemberStory: false,
+    note: 'Research seasonal air quality before choosing dates or a neighborhood, and include alternate locations or indoor air measures in the Move Plan.',
+    tags: ['Climate', 'Health'], sourceLabel: 'Kolmari editorial planning prompt', verifiedMemberStory: false,
   },
   {
     id: 'accra-community', regionSlug: 'africa-middle-east', location: 'Accra, Ghana',
     context: 'Community planning prompt',
     note: 'Contact local professional and community groups before moving. Specific introductions can improve housing research and the first weeks after arrival.',
-    tags: ['Community', 'Work'], sourceLabel: 'Nexit editorial planning prompt', verifiedMemberStory: false,
+    tags: ['Community', 'Work'], sourceLabel: 'Kolmari editorial planning prompt', verifiedMemberStory: false,
   },
   {
     id: 'mauritius-car', regionSlug: 'africa-middle-east', location: 'Grand Baie, Mauritius',
     context: 'Transport planning prompt',
     note: 'Test the time to groceries, healthcare, and workspaces at normal commuting hours before choosing a lease.',
-    tags: ['Transport', 'Daily life'], sourceLabel: 'Nexit editorial planning prompt', verifiedMemberStory: false,
+    tags: ['Transport', 'Daily life'], sourceLabel: 'Kolmari editorial planning prompt', verifiedMemberStory: false,
   },
 ]
 
@@ -78,7 +78,7 @@ export const PUBLISHED_GREENBOOK_INSIGHTS: PublishedGreenbookInsight[] = [
   {
     countrySlug: 'portugal', communityFit: 'Strong starting signal',
     bestAreas: ['Lisbon', 'Porto'], watchAreas: ['Central-city housing pressure', 'Petty theft in crowded areas'],
-    summary: 'Portugal can offer a practical base for remote professionals, but Community Fit still depends on neighborhood, housing access, and the communities a person builds. General safety guidance does not measure the experience of Black Americans, so Nexit recommends community-specific research and a scouting stay.',
+    summary: 'Portugal can offer a practical base for remote professionals, but Community Fit still depends on neighborhood, housing access, and the communities a person builds. General safety guidance does not measure the experience of Black Americans, so Kolmari recommends community-specific research and a scouting stay.',
     sourceTitle: 'U.S. Department of State — Portugal Travel Advisory',
     sourceUrl: 'https://travel.state.gov/en/international-travel/travel-advisories/portugal.html',
     lastReviewed: '2026-07-21',

@@ -94,7 +94,7 @@ export const PATHWAYS: PathwayDefinition[] = [
   },
 ]
 
-export const RESEARCH_DISCLAIMER = 'Nexit provides research information, not legal advice or an eligibility decision. Requirements, fees, and processing times can change. Confirm every detail with the linked government authority before applying.'
+export const RESEARCH_DISCLAIMER = 'Kolmari provides research information, not legal advice or an eligibility decision. Requirements, fees, and processing times can change. Confirm every detail with the linked government authority before applying.'
 
 // Planning-guide thresholds per pathway (USD-equivalent, approximate — clearly
 // labelled as planning guides, not official figures). Amounts are compared to
@@ -137,7 +137,7 @@ function profileSignals(profile: RelocationProfile, pathway: PathwayDefinition) 
   const met: string[] = []
   const missing: string[] = []
   const selected = profile.goals.includes(pathway.category)
-  if (selected) met.push(`${pathway.category} selected in your Nexit Profile`)
+  if (selected) met.push(`${pathway.category} selected in your Kolmari Profile`)
   else missing.push(`Add ${pathway.category} as a profile goal`)
 
   // Citizenship signal — EU/EEA free movement often removes the need for a visa.

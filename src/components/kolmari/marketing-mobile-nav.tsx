@@ -33,17 +33,17 @@ export function MarketingMobileNav() {
           {[
             ['How it works', '#how-it-works'],
             ['Features', '#features'],
-            ['Nextinations', '#nextinations'],
+            ['Destinations', '#nextinations'],
             ['Community', '#community'],
             ['Sign in', '/login'],
-            ['Start Your Nexit', '/quiz'],
+            ['Build Your Kolmari Plan', '/quiz'],
           ].map(([label, href]) => (
             <Link
               key={href}
               href={href}
               onClick={() => setOpen(false)}
               className={`block rounded-xl px-4 py-3 text-sm font-bold ${
-                label === 'Build My Move Plan'
+                label === 'Build Your Kolmari Plan'
                   ? 'mt-1 bg-gold text-navy'
                   : 'text-white/80 hover:bg-white/5'
               }`}

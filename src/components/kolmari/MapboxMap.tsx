@@ -51,7 +51,7 @@ export function MapboxMap({ regions, activeSlug }: MapboxMapProps) {
       markerButton.type = 'button'
       markerButton.className = 'nexit-map-marker'
       markerButton.dataset.active = String(region.slug === activeSlug)
-      markerButton.setAttribute('aria-label', `Explore This Nextination: ${region.name}`)
+      markerButton.setAttribute('aria-label', `Explore ${region.name}`)
 
       const dot = document.createElement('span')
       dot.className = 'nexit-map-marker__dot'

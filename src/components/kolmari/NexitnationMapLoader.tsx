@@ -1,7 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import type { RegionSlug } from '@/lib/nexitnation-data'
+import type { RegionSlug } from '@/lib/destinations-data'
 
 type Props = {
   profile: { complete: boolean; matches: Record<RegionSlug, number> | null }

@@ -1,4 +1,4 @@
-import { getPublishedGreenbookInsight, type PublishedGreenbookInsight } from './greenbook'
+﻿import { getPublishedGreenbookInsight, type PublishedGreenbookInsight } from './greenbook'
 import { REGIONS, type RegionDestination, type RegionSlug } from './regionData'
 
 export type SeoPageKind = 'country' | 'persona' | 'pathway' | 'comparison'
@@ -68,7 +68,7 @@ const sources = {
     publisher: 'U.S. Department of State', accessed: REVIEWED,
   },
   thailandVisa: {
-    title: 'Thailand Electronic Visa — Destination Thailand Visa', url: 'https://thaievisa.go.th/',
+    title: 'Thailand Electronic Visa â€” Destination Thailand Visa', url: 'https://thaievisa.go.th/',
     publisher: 'Ministry of Foreign Affairs of the Kingdom of Thailand', accessed: REVIEWED,
   },
   thailandSafety: {
@@ -90,7 +90,7 @@ function findPlace(slug: string) {
     const place = region.destinations.find((item) => item.slug === slug)
     if (place) return { place, regionSlug: region.slug }
   }
-  throw new Error(`Missing Nextination data for ${slug}`)
+  throw new Error(`Missing Destination data for ${slug}`)
 }
 
 function card(place: RegionDestination, regionSlug: RegionSlug): SeoCountryCard {
@@ -137,16 +137,16 @@ function countryPage(config: {
     title: `Move to ${place.country} from the US (2026 Guide)`,
     description: `Evaluate the cost, Pathways, Community Fit, and practical steps for moving from the US to ${place.country} in 2026.`,
     keywords: [`move to ${place.country} from US`, `${place.country} visa for Americans`, `${place.country} cost of living`, `Black Americans in ${place.country}`],
-    eyebrow: 'Nextination guide',
+    eyebrow: 'Destination guide',
     h1: `Move to ${place.country} from the US`,
-    intro: `${place.country} may be a strong Nextination for Americans who want ${config.goodFit}. This guide combines Nexit planning estimates with official Pathways and general safety sources. Requirements change, so verify every application with the responsible authority before acting.`,
+    intro: `${place.country} may be a strong Destination for Americans who want ${config.goodFit}. This guide combines Kolmari planning estimates with official Pathways and general safety sources. Requirements change, so verify every application with the responsible authority before acting.`,
     lastReviewed: REVIEWED,
     mapHref: planHref,
     countryCards: [card(place, regionSlug)],
     costHeading: `What does it cost to live in ${place.country}?`,
     costIntro: `${config.costContext} The figures below are planning baselines, not quotes or guarantees, and should be replaced with a personal housing and healthcare budget.`,
     costItems: [
-      { label: 'Monthly planning baseline', value: `$${place.monthlyBudget.toLocaleString()}`, detail: `Nexit estimate for one adult near ${place.city}; housing choices can materially change it.` },
+      { label: 'Monthly planning baseline', value: `$${place.monthlyBudget.toLocaleString()}`, detail: `Kolmari estimate for one adult near ${place.city}; housing choices can materially change it.` },
       { label: 'Arrival buffer', value: `$${(place.monthlyBudget * 3).toLocaleString()}`, detail: 'Three baseline months before flights, deposits, legal help, or emergencies.' },
       { label: 'Review cycle', value: 'Every 90 days', detail: 'Recheck rent, exchange rates, insurance, taxes, and application fees.' },
     ],
@@ -154,15 +154,15 @@ function countryPage(config: {
     greenbook,
     faqs: [
       { question: `Is ${place.country} a good place to move from the US?`, answer: `${config.goodFit} can make ${place.country} worth evaluating. The decision should still account for taxes, healthcare, legal status, housing, and the specific city rather than a country-level impression.` },
-      { question: `What Pathways are available in ${place.country}?`, answer: `${place.pathways.join(' and ')} are useful starting points in the Nexit Profile. Eligibility and supporting documents depend on current official rules and the applicant's circumstances.` },
-      { question: `What is the cost of living in ${place.country}?`, answer: `Nexit uses about $${place.monthlyBudget.toLocaleString()} per month as a planning baseline for one adult near ${place.city}. Treat it as a comparison signal and build a local budget before committing.` },
+      { question: `What Pathways are available in ${place.country}?`, answer: `${place.pathways.join(' and ')} are useful starting points in the Kolmari Profile. Eligibility and supporting documents depend on current official rules and the applicant's circumstances.` },
+      { question: `What is the cost of living in ${place.country}?`, answer: `Kolmari uses about $${place.monthlyBudget.toLocaleString()} per month as a planning baseline for one adult near ${place.city}. Treat it as a comparison signal and build a local budget before committing.` },
       { question: `Is ${place.country} safe for Black Americans?`, answer: `Official safety guidance does not measure the experience of Black Americans, and no single rating can represent every city or person. Review the current advisory, speak with Black residents in the exact area, research discrimination and healthcare access, and complete a scouting stay when possible.` },
     ],
     steps: [
-      { name: 'Build your Nexit Profile', text: 'Record income, remote-work status, family needs, healthcare needs, and timeline.' },
+      { name: 'Build your Kolmari Profile', text: 'Record income, remote-work status, family needs, healthcare needs, and timeline.' },
       { name: 'Verify your Pathways', text: `Read the current ${visaSource.publisher} guidance and identify which route fits your circumstances.` },
       { name: 'Validate Community Fit', text: `Research ${greenbook.bestAreas.join(' and ')}, contact local communities, and plan a scouting stay.` },
-      { name: 'Build your Nexit Plan', text: 'Create a document list, personal budget, tax checklist, housing plan, and decision date.' },
+      { name: 'Build your Move Plan', text: 'Create a document list, personal budget, tax checklist, housing plan, and decision date.' },
     ],
     sources: [visaSource, safetySource],
   }
@@ -196,29 +196,29 @@ function comparisonGreenbook(primary: 'portugal' | 'spain' | 'thailand' | 'mexic
 const editorialPages: SeoPage[] = [
   {
     slug: 'best-countries-for-black-expats', kind: 'persona',
-    title: 'Best Countries for Black Expats (2026 Nexit Guide)',
+    title: 'Best Countries for Black Expats (2026 Kolmari Guide)',
     description: 'Compare Community Fit, Pathways, budgets, and research questions for Black Americans evaluating a move abroad.',
     keywords: ['best countries for Black expats', 'Black Americans moving abroad', 'Black expat countries'],
-    eyebrow: 'Nexit Profile guide', h1: 'Best countries for Black expats',
-    intro: 'There is no universal “best” country for Black expats. Nexit starts with Pathways, budget, and general safety, then treats Community Fit as a separate research question shaped by city, neighborhood, identity, and local relationships.',
+    eyebrow: 'Kolmari Profile guide', h1: 'Best countries for Black expats',
+    intro: 'There is no universal â€œbestâ€ country for Black expats. Kolmari starts with Pathways, budget, and general safety, then treats Community Fit as a separate research question shaped by city, neighborhood, identity, and local relationships.',
     lastReviewed: REVIEWED, mapHref: '/nexitnation',
     countryCards: [card(portugal.place, portugal.regionSlug), card(ghana.place, ghana.regionSlug), card(mexico.place, mexico.regionSlug)],
     costHeading: 'Compare the planning baselines',
     costIntro: 'Use these figures to narrow a shortlist, then replace them with neighborhood-level housing, healthcare, tax, and schooling research.',
     costItems: [
-      { label: 'Portugal', value: '$2,450/month', detail: 'One-adult Nexit baseline near Lisbon.' },
-      { label: 'Ghana', value: '$2,100/month', detail: 'One-adult Nexit baseline near Accra.' },
-      { label: 'Mexico', value: '$1,950/month', detail: 'One-adult Nexit baseline near Merida.' },
+      { label: 'Portugal', value: '$2,450/month', detail: 'One-adult Kolmari baseline near Lisbon.' },
+      { label: 'Ghana', value: '$2,100/month', detail: 'One-adult Kolmari baseline near Accra.' },
+      { label: 'Mexico', value: '$1,950/month', detail: 'One-adult Kolmari baseline near Merida.' },
     ],
     pathways: [
       { name: 'Portugal remote-work residence', detail: 'For qualifying remote professionals; verify current requirements with AIMA.', sourceUrl: sources.portugalVisa.url },
       { name: 'Ghana residence permit', detail: 'Requirements depend on the basis for residence and must be checked with Ghanaian authorities.' },
       { name: 'Mexico temporary residence', detail: 'For stays longer than 180 days and up to four years under qualifying circumstances.', sourceUrl: sources.mexicoVisa.url },
     ],
-    greenbook: comparisonGreenbook('portugal', 'Community Fit cannot be inferred from a national diversity statistic. Nexit recommends city-specific conversations with Black residents, a housing and healthcare review, and a scouting stay before selecting a Nextination.'),
+    greenbook: comparisonGreenbook('portugal', 'Community Fit cannot be inferred from a national diversity statistic. Kolmari recommends city-specific conversations with Black residents, a housing and healthcare review, and a scouting stay before selecting a Destination.'),
     faqs: [
-      { question: 'What makes a country a strong Nextination for Black expats?', answer: 'A workable legal route and budget are only the beginning. Community Fit also includes daily treatment, professional opportunity, healthcare, housing access, hair care, social connection, and the experience of other Black residents in the exact area.' },
-      { question: 'Does Nexit give countries a safety score for Black Americans?', answer: 'No. Official advisories cover general risks and do not measure racialized experience. Nexit keeps general safety sources and Community Fit research separate.' },
+      { question: 'What makes a country a strong Destination for Black expats?', answer: 'A workable legal route and budget are only the beginning. Community Fit also includes daily treatment, professional opportunity, healthcare, housing access, hair care, social connection, and the experience of other Black residents in the exact area.' },
+      { question: 'Does Kolmari give countries a safety score for Black Americans?', answer: 'No. Official advisories cover general risks and do not measure racialized experience. Kolmari keeps general safety sources and Community Fit research separate.' },
       { question: 'How should I compare Community Fit?', answer: 'Use several current sources, speak directly with residents who share relevant identities, compare neighborhoods, and validate assumptions in person before a long-term commitment.' },
     ],
     steps: [
@@ -233,8 +233,8 @@ const editorialPages: SeoPage[] = [
     title: 'Best Countries for Single Women Moving Abroad (2026)',
     description: 'Compare Pathways, budgets, city life, and practical safety research for single women evaluating a move abroad.',
     keywords: ['best countries for single women', 'women moving abroad alone', 'safe countries for solo women expats'],
-    eyebrow: 'Nexit Profile guide', h1: 'Best countries for single women moving abroad',
-    intro: 'A strong shortlist balances legal status, a sustainable budget, healthcare, transport, social connection, and city-specific safety research. Nexit treats official advisories as a starting point rather than a personal guarantee.',
+    eyebrow: 'Kolmari Profile guide', h1: 'Best countries for single women moving abroad',
+    intro: 'A strong shortlist balances legal status, a sustainable budget, healthcare, transport, social connection, and city-specific safety research. Kolmari treats official advisories as a starting point rather than a personal guarantee.',
     lastReviewed: REVIEWED, mapHref: '/nexitnation',
     countryCards: [card(portugal.place, portugal.regionSlug), card(spain.place, spain.regionSlug), card(costaRica.place, costaRica.regionSlug)],
     costHeading: 'Plan for independence, not only rent',
@@ -253,7 +253,7 @@ const editorialPages: SeoPage[] = [
     faqs: [
       { question: 'What should single women compare before moving abroad?', answer: 'Compare legal status, secure housing, healthcare, transport, emergency support, professional options, and the local experience of women with similar identities.' },
       { question: 'Is a national safety level enough?', answer: 'No. National advisories are useful, but neighborhood, routine, language access, and individual identity all affect daily experience.' },
-      { question: 'How much emergency savings should I plan?', answer: 'Nexit begins with a three-month local baseline plus return transportation, deposits, insurance deductibles, and legal or document costs.' },
+      { question: 'How much emergency savings should I plan?', answer: 'Kolmari begins with a three-month local baseline plus return transportation, deposits, insurance deductibles, and legal or document costs.' },
     ],
     sources: [sources.portugalSafety, sources.spainSafety, sources.portugalVisa, sources.spainVisa],
   },
@@ -262,8 +262,8 @@ const editorialPages: SeoPage[] = [
     title: 'Best Countries for American Families Moving Abroad (2026)',
     description: 'Compare family budgets, Pathways, healthcare, schooling, and Community Fit for an international move.',
     keywords: ['best countries for families moving abroad', 'move abroad with children', 'family expat countries'],
-    eyebrow: 'Family Nexit Profile guide', h1: 'Best countries for families moving abroad',
-    intro: 'Families need a Nextination that works for every member. The right shortlist accounts for legal status, dependent eligibility, schooling, healthcare, housing, transport, language, and a larger arrival buffer.',
+    eyebrow: 'Family Kolmari Profile guide', h1: 'Best countries for families moving abroad',
+    intro: 'Families need a Destination that works for every member. The right shortlist accounts for legal status, dependent eligibility, schooling, healthcare, housing, transport, language, and a larger arrival buffer.',
     lastReviewed: REVIEWED, mapHref: '/nexitnation',
     countryCards: [card(spain.place, spain.regionSlug), card(portugal.place, portugal.regionSlug), card(mexico.place, mexico.regionSlug)],
     costHeading: 'Turn the one-adult baseline into a family budget',
@@ -271,7 +271,7 @@ const editorialPages: SeoPage[] = [
     costItems: [
       { label: 'Housing', value: 'Price by bedrooms', detail: 'Compare school access and commuting alongside rent.' },
       { label: 'School and childcare', value: 'Research locally', detail: 'Public, private, and international options have very different costs and admissions.' },
-      { label: 'Arrival buffer', value: '4–6 months', detail: 'A larger buffer helps cover deposits, school setup, and dependent paperwork.' },
+      { label: 'Arrival buffer', value: '4â€“6 months', detail: 'A larger buffer helps cover deposits, school setup, and dependent paperwork.' },
     ],
     pathways: [
       { name: 'Spain telework family visas', detail: 'The official guidance describes eligible accompanying family members.', sourceUrl: sources.spainVisa.url },
@@ -292,15 +292,15 @@ const editorialPages: SeoPage[] = [
     description: 'Compare remote-work Pathways in Portugal, Spain, and Thailand with official application sources.',
     keywords: ['digital nomad visas for Americans', 'remote work visas 2026', 'best digital nomad visa'],
     eyebrow: 'Pathways guide', h1: 'Digital nomad visas for Americans',
-    intro: 'Remote-work Pathways vary in income tests, professional history, insurance, tax exposure, dependents, and permitted work. Use Nexit to build a shortlist, then treat the official authority as the application source of truth.',
+    intro: 'Remote-work Pathways vary in income tests, professional history, insurance, tax exposure, dependents, and permitted work. Use Kolmari to build a shortlist, then treat the official authority as the application source of truth.',
     lastReviewed: REVIEWED, mapHref: '/nexitnation',
     countryCards: [card(portugal.place, portugal.regionSlug), card(spain.place, spain.regionSlug), card(thailand.place, thailand.regionSlug)],
-    costHeading: 'Compare the whole Nexit Plan',
+    costHeading: 'Compare the whole Move Plan',
     costIntro: 'The cheapest monthly baseline is not automatically the best Pathway. Include tax advice, insurance, document preparation, application fees, and renewal requirements.',
     costItems: [
-      { label: 'Portugal baseline', value: '$2,450/month', detail: 'Nexit one-adult planning estimate near Lisbon.' },
-      { label: 'Spain baseline', value: '$2,600/month', detail: 'Nexit one-adult planning estimate near Valencia.' },
-      { label: 'Thailand baseline', value: '$1,550/month', detail: 'Nexit one-adult planning estimate near Chiang Mai.' },
+      { label: 'Portugal baseline', value: '$2,450/month', detail: 'Kolmari one-adult planning estimate near Lisbon.' },
+      { label: 'Spain baseline', value: '$2,600/month', detail: 'Kolmari one-adult planning estimate near Valencia.' },
+      { label: 'Thailand baseline', value: '$1,550/month', detail: 'Kolmari one-adult planning estimate near Chiang Mai.' },
     ],
     pathways: [
       { name: 'Portugal remote-work residence', detail: 'For remote work performed for entities outside Portugal; verify current evidence and residence steps.', sourceUrl: sources.portugalVisa.url },
@@ -317,7 +317,7 @@ const editorialPages: SeoPage[] = [
       { name: 'Document your work arrangement', text: 'Gather contracts, employer permissions, service agreements, and professional-history evidence.' },
       { name: 'Compare official Pathways', text: 'Check income, insurance, criminal-record, housing, dependent, and renewal rules.' },
       { name: 'Review tax exposure', text: 'Ask a qualified adviser how the proposed dates and income sources affect tax residency.' },
-      { name: 'Enter Nexicution Mode', text: 'Choose one Pathway and build a dated document and application checklist.' },
+      { name: 'Enter Flutter Mode', text: 'Choose one Pathway and build a dated document and application checklist.' },
     ],
     sources: [sources.portugalVisa, sources.spainVisa, sources.thailandVisa],
   },
@@ -327,7 +327,7 @@ const editorialPages: SeoPage[] = [
     description: 'A practical comparison of residence Pathways for Americans, including remote-work and temporary-residence options.',
     keywords: ['easiest visas for US citizens', 'easy residence visa Americans', 'move abroad visa options'],
     eyebrow: 'Pathways comparison', h1: 'Easiest residence visas for US citizens to compare',
-    intro: '“Easy” should mean compatible with your documented circumstances, not free of requirements. Nexit compares Pathways by work arrangement, finances, dependents, paperwork, and the Nexit Timeline.',
+    intro: 'â€œEasyâ€ should mean compatible with your documented circumstances, not free of requirements. Kolmari compares Pathways by work arrangement, finances, dependents, paperwork, and the Kolmari Timeline.',
     lastReviewed: REVIEWED, mapHref: '/nexitnation',
     countryCards: [card(portugal.place, portugal.regionSlug), card(spain.place, spain.regionSlug), card(mexico.place, mexico.regionSlug)],
     costHeading: 'Budget beyond the income threshold',
@@ -342,16 +342,16 @@ const editorialPages: SeoPage[] = [
       { name: 'Spain telework visa', detail: 'A formal route for qualifying international teleworkers.', sourceUrl: sources.spainVisa.url },
       { name: 'Mexico temporary resident visa', detail: 'A route for qualifying stays longer than 180 days and up to four years.', sourceUrl: sources.mexicoVisa.url },
     ],
-    greenbook: comparisonGreenbook('mexico', 'A manageable application does not guarantee Community Fit. Keep legal eligibility, sustainable cost, and lived experience as three separate decisions in the Nexit Plan.'),
+    greenbook: comparisonGreenbook('mexico', 'A manageable application does not guarantee Community Fit. Keep legal eligibility, sustainable cost, and lived experience as three separate decisions in the Move Plan.'),
     faqs: [
-      { question: 'What makes a visa easier for a US citizen?', answer: 'Clear compatibility with the applicant’s work, finances, family situation, documents, and timeline. A route can be straightforward for one person and unavailable to another.' },
+      { question: 'What makes a visa easier for a US citizen?', answer: 'Clear compatibility with the applicantâ€™s work, finances, family situation, documents, and timeline. A route can be straightforward for one person and unavailable to another.' },
       { question: 'Does visa-free entry allow long-term residence or remote work?', answer: 'Not automatically. Visitor entry, residence permission, work permission, and tax status are different questions.' },
       { question: 'Where should I verify requirements?', answer: 'Use the responsible government or consular authority for the application location and check again immediately before applying.' },
     ],
     steps: [
       { name: 'Eliminate incompatible Pathways', text: 'Compare your documented income and work structure with official eligibility.' },
       { name: 'Compare total effort', text: 'List documents, translations, appointments, processing, family needs, and renewals.' },
-      { name: 'Choose the best-fit route', text: 'Select the Pathway that supports the complete Nexit Plan, not only the first application.' },
+      { name: 'Choose the best-fit route', text: 'Select the Pathway that supports the complete Move Plan, not only the first application.' },
     ],
     sources: [sources.portugalVisa, sources.spainVisa, sources.mexicoVisa],
   },
@@ -360,15 +360,15 @@ const editorialPages: SeoPage[] = [
     title: 'Portugal vs Spain for Expats Moving from the US (2026)',
     description: 'Compare Portugal and Spain by monthly planning baseline, Pathways, Community Fit, and city tradeoffs.',
     keywords: ['Portugal vs Spain expats', 'move to Portugal or Spain', 'Portugal Spain cost of living'],
-    eyebrow: 'Nextination comparison', h1: 'Portugal vs Spain for Americans moving abroad',
-    intro: 'Portugal and Spain both offer formal routes for qualifying remote professionals, but the better Nextination depends on work structure, city, language, housing, taxes, and Community Fit.',
+    eyebrow: 'Destination comparison', h1: 'Portugal vs Spain for Americans moving abroad',
+    intro: 'Portugal and Spain both offer formal routes for qualifying remote professionals, but the better Destination depends on work structure, city, language, housing, taxes, and Community Fit.',
     lastReviewed: REVIEWED, mapHref: '/nexitnation/europe',
     countryCards: [card(portugal.place, portugal.regionSlug), card(spain.place, spain.regionSlug)],
     costHeading: 'Portugal vs Spain planning baseline',
-    costIntro: 'These Nexit figures compare Lisbon and Valencia starting points. City and housing selection can outweigh the country-level difference.',
+    costIntro: 'These Kolmari figures compare Lisbon and Valencia starting points. City and housing selection can outweigh the country-level difference.',
     costItems: [
-      { label: 'Portugal', value: '$2,450/month', detail: 'Nexit one-adult baseline near Lisbon.' },
-      { label: 'Spain', value: '$2,600/month', detail: 'Nexit one-adult baseline near Valencia.' },
+      { label: 'Portugal', value: '$2,450/month', detail: 'Kolmari one-adult baseline near Lisbon.' },
+      { label: 'Spain', value: '$2,600/month', detail: 'Kolmari one-adult baseline near Valencia.' },
       { label: 'Difference', value: '$150/month', detail: 'A comparison signal, not a forecast; rent can reverse the difference.' },
     ],
     pathways: [
@@ -377,7 +377,7 @@ const editorialPages: SeoPage[] = [
     ],
     greenbook: comparisonGreenbook('portugal', 'Portugal may feel smaller and more Atlantic; Spain offers a wider range of large-city contexts. Community Fit should be compared at the city and neighborhood level rather than assigned nationally.'),
     faqs: [
-      { question: 'Is Portugal cheaper than Spain for expats?', answer: 'Not always. Nexit’s Lisbon and Valencia baselines differ modestly, while actual rent, neighborhood, household size, and lifestyle can reverse the comparison.' },
+      { question: 'Is Portugal cheaper than Spain for expats?', answer: "Not always. Kolmari's Lisbon and Valencia baselines differ modestly, while actual rent, neighborhood, household size, and lifestyle can reverse the comparison." },
       { question: 'Which country has the better remote-work Pathway?', answer: 'Both have formal routes. The better fit depends on employment structure, income evidence, professional history, dependents, tax exposure, and preferred timeline.' },
       { question: 'Which has stronger Community Fit?', answer: 'That cannot be answered reliably at country level. Compare the exact city, neighborhood, communities, language needs, and services important to you.' },
     ],
@@ -388,15 +388,15 @@ const editorialPages: SeoPage[] = [
     title: 'Thailand vs Mexico Cost of Living for Americans (2026)',
     description: 'Compare Thailand and Mexico planning baselines, Pathways, Community Fit, and location-specific tradeoffs.',
     keywords: ['Thailand vs Mexico cost of living', 'Thailand or Mexico expat', 'move to Thailand vs Mexico'],
-    eyebrow: 'Nextination comparison', h1: 'Thailand vs Mexico cost of living',
-    intro: 'Thailand has the lower Nexit baseline in this comparison, while Mexico offers closer US time zones and shorter routes home. The right Nextination depends on city, work hours, healthcare, legal status, and Community Fit.',
+    eyebrow: 'Destination comparison', h1: 'Thailand vs Mexico cost of living',
+    intro: 'Thailand has the lower Kolmari baseline in this comparison, while Mexico offers closer US time zones and shorter routes home. The right Destination depends on city, work hours, healthcare, legal status, and Community Fit.',
     lastReviewed: REVIEWED, mapHref: '/nexitnation',
     countryCards: [card(thailand.place, thailand.regionSlug), card(mexico.place, mexico.regionSlug)],
     costHeading: 'Thailand vs Mexico monthly baseline',
     costIntro: 'This compares Chiang Mai and Merida planning baselines for one adult. Bangkok, Mexico City, resort areas, healthcare, and imported goods can change the result.',
     costItems: [
-      { label: 'Thailand', value: '$1,550/month', detail: 'Nexit one-adult baseline near Chiang Mai.' },
-      { label: 'Mexico', value: '$1,950/month', detail: 'Nexit one-adult baseline near Merida.' },
+      { label: 'Thailand', value: '$1,550/month', detail: 'Kolmari one-adult baseline near Chiang Mai.' },
+      { label: 'Mexico', value: '$1,950/month', detail: 'Kolmari one-adult baseline near Merida.' },
       { label: 'Difference', value: '$400/month', detail: 'A comparison signal before flights, tax advice, and individual healthcare.' },
     ],
     pathways: [
@@ -405,9 +405,9 @@ const editorialPages: SeoPage[] = [
     ],
     greenbook: comparisonGreenbook('thailand', 'The lower baseline does not settle Community Fit. Compare time zones, language access, seasonal air quality, state or regional advisories, healthcare, flight distance, and the exact communities available.'),
     faqs: [
-      { question: 'Is Thailand cheaper than Mexico?', answer: 'Nexit’s Chiang Mai baseline is lower than its Merida baseline, but the result changes by city, housing, healthcare, imported goods, and how often you return to the United States.' },
+      { question: 'Is Thailand cheaper than Mexico?', answer: "Kolmari's Chiang Mai baseline is lower than its Merida baseline, but the result changes by city, housing, healthcare, imported goods, and how often you return to the United States." },
       { question: 'Which is better for US working hours?', answer: 'Mexico generally aligns more closely with US time zones. Thailand may require evening or overnight work depending on the team.' },
-      { question: 'How do the Pathways differ?', answer: 'Thailand’s DTV and Mexico’s temporary residence system have different purposes, evidence, durations, and follow-up requirements. Verify current rules directly with each authority.' },
+      { question: 'How do the Pathways differ?', answer: 'Thailandâ€™s DTV and Mexicoâ€™s temporary residence system have different purposes, evidence, durations, and follow-up requirements. Verify current rules directly with each authority.' },
     ],
     sources: [sources.thailandVisa, sources.mexicoVisa, sources.thailandSafety, sources.mexicoSafety],
   },
@@ -420,3 +420,4 @@ export const SEO_SLUGS = SEO_PAGES.map((page) => page.slug)
 export function getSeoPage(slug: string) {
   return SEO_PAGES.find((page) => page.slug === slug)
 }
+
