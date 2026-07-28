@@ -1,6 +1,6 @@
 import { getRequestUser } from '@/lib/auth'
 import { getProfile } from '@/lib/profile'
-import { getNexitPlan } from '@/lib/nexit-plan'
+import { getNexitPlan } from '@/lib/kolmari-plan'
 import { getSql } from '@/lib/db'
 
 export async function POST(request: Request) {

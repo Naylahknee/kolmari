@@ -1,12 +1,12 @@
 import type { Metadata } from 'next'
-import { NexitPlanWorkspace } from '@/components/nexit/nexit-plan-workspace'
+import { NexitPlanWorkspace } from '@/components/kolmari/nexit-plan-workspace'
 import { requireCurrentUser } from '@/lib/auth'
 import { COUNTRIES } from '@/lib/countries'
-import { emptyNexitPlan, getNexitPlan } from '@/lib/nexit-plan'
+import { emptyNexitPlan, getNexitPlan } from '@/lib/kolmari-plan'
 import { PATHWAYS } from '@/lib/pathways'
 import { getProfile } from '@/lib/profile'
 
-export const metadata: Metadata = { title: 'My Plan | Kolmari', description: 'Your private move planning workspace.' }
+export const metadata: Metadata = { title: 'Kolmari Plan | Kolmari', description: 'Your private move planning workspace.' }
 
 export default async function NexitPlanPage() {
   const user = await requireCurrentUser()

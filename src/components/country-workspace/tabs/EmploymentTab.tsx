@@ -8,7 +8,7 @@ export function EmploymentTab({ content, countryName }: { content: EmploymentCon
     <div className="space-y-5">
       <section className="card-surface p-6">
         <h2 className="font-display text-2xl font-bold text-navy">Employment in {countryName}</h2>
-        <p className="mt-2 text-sm text-muted">Local job market overview. Personalization for your specific occupation is available when your Nexit Profile is complete.</p>
+        <p className="mt-2 text-sm text-muted">Local job market overview. Personalization for your specific occupation is available when your Kolmari Profile is complete.</p>
       </section>
 
       <div className="grid gap-4 md:grid-cols-2">

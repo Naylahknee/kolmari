@@ -22,7 +22,7 @@ export default function GreenbookPage() {
         <p className="text-[10px] font-bold uppercase tracking-[.18em] text-teal-deep">Community context</p>
         <h1 className="mt-1 font-display text-3xl font-bold leading-tight text-navy sm:text-4xl">Greenbook Insights</h1>
         <p className="mt-1 max-w-xl text-sm leading-5 text-muted">
-          Practical prompts for researching daily life, neighborhoods, documents, and Community Fit before committing to a Nextination.
+          Practical prompts for researching daily life, neighborhoods, documents, and Community Fit before committing to a Destination.
         </p>
       </div>
 
@@ -96,7 +96,7 @@ export default function GreenbookPage() {
         <div className="flex items-start gap-4">
           <BookOpen size={20} className="mt-0.5 shrink-0 text-gold" aria-hidden="true" />
           <div>
-            <h2 className="font-display text-xl font-bold">Apply context to a specific Nextination</h2>
+            <h2 className="font-display text-xl font-bold">Apply context to a specific Destination</h2>
             <p className="mt-1 text-xs text-white/75">Review country details alongside official sources before making a decision.</p>
           </div>
         </div>

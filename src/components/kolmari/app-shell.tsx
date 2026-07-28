@@ -28,7 +28,7 @@ import {
 import { Wordmark } from './wordmark'
 import { countryWorkspaceSlug, useNextinationBoard } from '@/lib/nextination-board'
 import { countryFlag } from '@/lib/countries'
-import { regionList } from '@/lib/nexitnation-data'
+import { regionList } from '@/lib/destinations-data'
 import type { WizardStatus } from '@/lib/profile'
 
 // A saved-destination row for the sidebar tree. `slug` is the country-workspace
@@ -38,9 +38,17 @@ type SavedItem = { id: string; name: string; code: string; slug: string | null }
 
 // ─── Sidebar structure ───────────────────────────────────────────────────────
 
-// DISCOVER group
-const NAV_DISCOVER = [
-  { href: '/dashboard',   label: 'Dashboard',   icon: LayoutDashboard },
+// EXPLORE group (Kolmarination is rendered inline with collapsible regions)
+const NAV_EXPLORE_SAVED = [
+  { href: '/saved', label: 'Destinations', icon: Compass },
+] as const
+
+// PLAN group
+const NAV_PLAN = [
+  { href: '/pathways',   label: 'Pathways',     icon: Route },
+  { href: '/nexit-plan', label: 'Kolmari Plan',  icon: NotebookTabs },
+  { href: '/flutter',    label: 'Flutter Mode',  icon: Zap },
+  { href: '/documents',  label: 'Documents',     icon: FileText },
 ] as const
 
 // CONNECT group
@@ -66,7 +74,7 @@ const COUNTRY_SECTIONS = [
   { id: 'why-you',            label: 'Why This Matches You' },
   { id: 'economic-profile',   label: 'Economic Profile' },
   { id: 'cost-of-living',     label: 'Cost of Living' },
-  { id: 'pathways',           label: 'Nexit Pathways' },
+  { id: 'pathways',           label: 'Pathways' },
   { id: 'healthcare',         label: 'Healthcare' },
   { id: 'greenbook',          label: 'Greenbook' },
   { id: 'housing',            label: 'Housing' },
@@ -213,16 +221,13 @@ function GroupLabel({ label, collapsed }: { label: string; collapsed: boolean })
 }
 
 // ─── Sidebar nav ──────────────────────────────────────────────────────────────
-// Implements the exact §18 IA:
+// Implements the Kolmari sidebar IA:
 //
-//   [ungrouped] Home · Search · Updates
-//   DISCOVER    Dashboard · Nexitnation · Countries
-//   MY NEXIT    My Nextinations
-//                 ↳ Portugal (saved, collapsible)
-//                     ↳ Overview · Economic Profile · …
-//                 ↳ Spain
-//   PLANNING    Nexit Pathways · Nexit Plan · Cost Calculator · Documents
-//   [ungrouped] Settings · Profile
+//   [ungrouped] Dashboard
+//   EXPLORE     Kolmarination · Countries
+//   MY PLAN     Destinations · Pathways · Kolmari Plan · Flutter Mode · Documents
+//   CONNECT     Kolmari Klub
+//   TOOLS       Cost Calculator · Greenbook · Settings
 
 function SidebarNav({
   pathname,
@@ -253,6 +258,8 @@ function SidebarNav({
     })
   }
 
+  const myDestinationsActive = pathname.startsWith('/nextinations') || pathname === '/saved'
+
   return (
     <nav aria-label="Main navigation" className="space-y-0.5">
 
@@ -262,13 +269,10 @@ function SidebarNav({
 
       {/* ── EXPLORE ───────────────────────────────────────────────────── */}
       <GroupLabel label="Explore" collapsed={collapsed} />
-      {NAV_EXPLORE.map(({ href, label, icon }) => (
-        <SidebarItem key={href} href={href} label={label} icon={icon}
-          active={isActive(pathname, href)} collapsed={collapsed} />
-      ))}
 
+      {/* Kolmarination — expandable with region sub-list */}
       {collapsed ? (
-        <SidebarItem href="/nexitnation" label="Nexit World" icon={Globe2}
+        <SidebarItem href="/nexitnation" label="Kolmarination" icon={Globe2}
           active={isActive(pathname, '/nexitnation')} collapsed />
       ) : (
         <div>
@@ -280,12 +284,12 @@ function SidebarNav({
           ].join(' ')}>
             <Link href="/nexitnation" className="flex min-w-0 flex-1 items-center gap-3 px-3 py-2 text-sm font-medium">
               <Globe2 size={16} aria-hidden="true" className="shrink-0" />
-              <span>Nexit World</span>
+              <span>Kolmarination</span>
             </Link>
             <button
               type="button"
               onClick={() => toggleCountry('__nexit-world__')}
-              aria-label="Toggle continents"
+              aria-label="Toggle regions"
               aria-expanded={openCountries.has('__nexit-world__')}
               className="mr-1 grid size-8 place-items-center rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold"
             >
@@ -298,6 +302,7 @@ function SidebarNav({
                 <li key={region.slug}>
                   <Link
                     href={`/nexitnation/${region.slug}`}
+                    aria-current={isActive(pathname, `/nexitnation/${region.slug}`) ? 'page' : undefined}
                     className="block rounded-[var(--radius-sidebar-row)] px-2 py-1.5 text-xs font-medium text-[#7a91b0] transition-colors hover:bg-white/5 hover:text-white"
                   >
                     {region.name}
@@ -309,102 +314,72 @@ function SidebarNav({
         </div>
       )}
 
-      {/* ── MY NEXIT ──────────────────────────────────────────────────── */}
-      <GroupLabel label="My Nexit" collapsed={collapsed} />
+      {/* Destinations (saved) */}
+      {NAV_EXPLORE_SAVED.map(({ href, label, icon }) => (
+        <SidebarItem key={href} href={href} label={label} icon={icon}
+          active={isActive(pathname, href)} collapsed={collapsed} />
+      ))}
 
-      {/* My Nextinations — parent row, collapsible, shows saved tree when open */}
-      <div>
-        <button
-          type="button"
-          onClick={() => toggleCountry('__my-nextinations__')}
-          aria-expanded={openCountries.has('__my-nextinations__')}
-          title={collapsed ? 'My Nextinations' : undefined}
-          className={[
-            'flex w-full items-center gap-3 rounded-[var(--radius-sidebar-row)] px-3 py-2 text-sm font-medium transition-colors',
-            collapsed ? 'justify-center px-2' : '',
-            myNextinationsActive
-              ? 'bg-gold-soft/25 text-white font-semibold'
-              : 'text-[#9fb0cc] hover:bg-white/5 hover:text-white',
-          ].join(' ')}
-        >
-          <Compass size={16} aria-hidden="true" className="shrink-0" />
-          {!collapsed && (
-            <>
-              <span className="flex-1 text-left">My Nextinations</span>
-              {savedItems.length > 0 && (
-                <ChevronDown
-                  size={13}
-                  aria-hidden="true"
-                  className={`shrink-0 text-[#9fb0cc] transition-transform duration-[var(--duration-standard)] ${openCountries.has('__my-destinations__') ? 'rotate-180' : ''}`}
-                />
-              </>
-            )}
-          </button>
+      {/* ── PLAN ──────────────────────────────────────────────────────── */}
+      <GroupLabel label="Plan" collapsed={collapsed} />
+      {NAV_PLAN.map(({ href, label, icon }) => (
+        <SidebarItem key={href} href={href} label={label} icon={icon}
+          active={isActive(pathname, href)} collapsed={collapsed} />
+      ))}
 
-          {!collapsed && openCountries.has('__my-destinations__') && (
-            <ul className="mt-0.5 border-l border-white/10 pl-3 ml-4 space-y-0.5">
-              {savedCountries.map((c) => (
-                <CountryTreeItem
-                  key={c.slug}
-                  countrySlug={c.slug}
-                  countryName={c.name}
-                  countryCode={c.code}
-                  open={openCountries.has(c.slug)}
-                  onToggle={() => toggleCountry(c.slug)}
-                  pathname={pathname}
-                  collapsed={false}
-                />
-              ))}
-            </ul>
-          )}
+      {/* ── CONNECT ───────────────────────────────────────────────────── */}
+      <GroupLabel label="Connect" collapsed={collapsed} />
+      {NAV_CONNECT.map(({ href, label, icon }) => (
+        <SidebarItem key={href} href={href} label={label} icon={icon}
+          active={isActive(pathname, href)} collapsed={collapsed} />
+      ))}
 
-        {/* Saved destinations — indented one level under My Nextinations */}
-        {!collapsed && savedItems.length > 0 && openCountries.has('__my-nextinations__') && (
-          <ul className="mt-0.5 border-l border-white/10 pl-3 ml-4 space-y-0.5">
-            {savedItems.map((item) =>
-              item.slug ? (
-                <CountryTreeItem
-                  key={item.id}
-                  countrySlug={item.slug}
-                  countryName={item.name}
-                  countryCode={item.code}
-                  open={openCountries.has(item.id)}
-                  onToggle={() => toggleCountry(item.id)}
-                  pathname={pathname}
-                  collapsed={false}
-                />
-              ) : (
-                <li key={item.id}>
-                  <Link
-                    href="/nexitnation"
-                    className="flex items-center gap-2.5 rounded-[var(--radius-sidebar-row)] px-3 py-2 text-sm font-medium text-[#9fb0cc] transition-colors hover:bg-white/5 hover:text-white"
-                  >
-                    <span className="shrink-0 text-base leading-none" aria-hidden="true">{countryFlag(item.code)}</span>
-                    <span className="flex-1 truncate">{item.name}</span>
-                  </Link>
-                </li>
-              ),
-            )}
-          </ul>
-        )}
-
-        {/* When sidebar is collapsed, show destination flags as icon rows */}
-        {collapsed && savedItems.length > 0 && (
-          <ul className="mt-0.5 space-y-0.5">
-            {savedItems.map((item) => (
+      {/* ── Saved destinations sub-tree (under Destinations) ─────────── */}
+      {!collapsed && myDestinationsActive && savedItems.length > 0 && (
+        <ul className="mt-0.5 border-l border-white/10 pl-3 ml-4 space-y-0.5">
+          {savedItems.map((item) =>
+            item.slug ? (
+              <CountryTreeItem
+                key={item.id}
+                countrySlug={item.slug}
+                countryName={item.name}
+                countryCode={item.code}
+                open={openCountries.has(item.id)}
+                onToggle={() => toggleCountry(item.id)}
+                pathname={pathname}
+                collapsed={false}
+              />
+            ) : (
               <li key={item.id}>
                 <Link
-                  href={item.slug ? `/nextinations/${item.slug}/overview` : '/nexitnation'}
-                  title={item.name}
-                  className="flex justify-center rounded-[var(--radius-sidebar-row)] px-2 py-2 text-base leading-none text-[#9fb0cc] hover:bg-white/5"
+                  href="/nexitnation"
+                  className="flex items-center gap-2.5 rounded-[var(--radius-sidebar-row)] px-3 py-2 text-sm font-medium text-[#9fb0cc] transition-colors hover:bg-white/5 hover:text-white"
                 >
-                  {countryFlag(item.code)}
+                  <span className="shrink-0 text-base leading-none" aria-hidden="true">{countryFlag(item.code)}</span>
+                  <span className="flex-1 truncate">{item.name}</span>
                 </Link>
               </li>
-            ))}
-          </ul>
-        )}
-      </div>
+            ),
+          )}
+        </ul>
+      )}
+
+      {/* Collapsed: show saved destination flags as icon rows */}
+      {collapsed && savedItems.length > 0 && (
+        <ul className="mt-0.5 space-y-0.5">
+          {savedItems.map((item) => (
+            <li key={item.id}>
+              <Link
+                href={item.slug ? `/nextinations/${item.slug}/overview` : '/nexitnation'}
+                title={item.name}
+                className="flex justify-center rounded-[var(--radius-sidebar-row)] px-2 py-2 text-base leading-none text-[#9fb0cc] hover:bg-white/5"
+              >
+                {countryFlag(item.code)}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
 
       {/* ── TOOLS ─────────────────────────────────────────────────────── */}
       <GroupLabel label="Tools" collapsed={collapsed} />
@@ -549,7 +524,7 @@ export function AppShell({
         {/* Profile readiness footer */}
         {!collapsed && (
           <div className="mx-2 mb-4 rounded-[var(--radius-card)] border border-white/10 bg-navy-card p-4 text-center">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[#cdd7e8]">Move Readiness</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#cdd7e8]">Kolmari Readiness</p>
             <p className="mt-2 text-sm font-bold text-white">
               {profileComplete ? 'Profile complete' : 'Not started'}
             </p>
@@ -725,7 +700,7 @@ export function AppShell({
         />
 
         <div className="mx-1 mt-4 rounded-[var(--radius-card)] border border-white/10 bg-navy-card p-4">
-          <p className="text-xs font-semibold uppercase tracking-widest text-[#cdd7e8]">Move Readiness</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-[#cdd7e8]">Kolmari Readiness</p>
           <p className="mt-1 text-sm font-bold text-white">
             {profileComplete ? 'Profile complete' : 'Not started'}
           </p>

@@ -1,4 +1,4 @@
-import { SettingsForm } from '@/components/nexit/settings-form'
+import { SettingsForm } from '@/components/kolmari/settings-form'
 import { requireCurrentUser } from '@/lib/auth'
 import { getProfile } from '@/lib/profile'
 

@@ -17,7 +17,7 @@ export function RightRail({}: Record<string, never>) {
                     <div className="ring-n"><div><div className="v">87%</div><div className="l">match</div></div></div>
                   </div>
                   <div>
-                    <div className="match-h">Nexit Match</div>
+                    <div className="match-h">Kolmari Match</div>
                     <div className="match-t">Excellent match</div>
                     <div className="match-s">Ranked #1 of your 8 countries</div>
                   </div>
@@ -32,7 +32,7 @@ export function RightRail({}: Record<string, never>) {
                 </div>
               </div>
               <div className="match-cta">
-                <Link className="gold-button btn-full" href="/nexit-plan">Build my Nexit Plan <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="14" height="14"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
+                <Link className="gold-button btn-full" href="/nexit-plan">Build Your Kolmari Plan <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="14" height="14"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
                 <button className="btn btn-full">Compare with Spain</button>
               </div>
             </div>

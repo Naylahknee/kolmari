@@ -1,3 +1,3 @@
-import { DocumentsManager } from '@/components/nexit/documents-manager'
+import { DocumentsManager } from '@/components/kolmari/documents-manager'
 
 export default function DocumentsPage() { return <DocumentsManager /> }

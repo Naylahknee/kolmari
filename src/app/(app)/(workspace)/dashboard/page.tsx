@@ -2,10 +2,10 @@ import Link from 'next/link'
 import { ArrowRight, CheckCircle2, Globe2, ListChecks, NotebookTabs, Route, UserRound, Wallet } from 'lucide-react'
 import { requireCurrentUser } from '@/lib/auth'
 import { COUNTRIES, countryFlag } from '@/lib/countries'
-import { getNexitPlan, PLAN_STAGES, type PlanBudget } from '@/lib/nexit-plan'
+import { getNexitPlan, PLAN_STAGES, type PlanBudget } from '@/lib/kolmari-plan'
 import { evaluatePathways } from '@/lib/pathways'
 import { getProfile, hasCompletedProfile } from '@/lib/profile'
-import { BudgetDonut, BUDGET_COLORS, ScoreRing, type BudgetSlice } from '@/components/nexit/rings'
+import { BudgetDonut, BUDGET_COLORS, ScoreRing, type BudgetSlice } from '@/components/kolmari/rings'
 
 const BUDGET_LABELS: Record<keyof PlanBudget, string> = {
   housing: 'Housing',
@@ -48,7 +48,7 @@ export default async function DashboardPage() {
           href={complete ? '/flutter' : '/profile-wizard'}
           className="gold-button"
         >
-          {complete ? 'Enter Flutter Mode' : 'Build My Move Plan'} <ArrowRight size={16} />
+          {complete ? 'Enter Flutter Mode' : 'Build Your Kolmari Plan'} <ArrowRight size={16} />
         </Link>
       </div>
 
@@ -75,12 +75,12 @@ export default async function DashboardPage() {
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard icon={UserRound}   label="Kolmari Profile"       value={complete ? 'Complete' : 'Not started'} href="/profile-wizard" action={complete ? 'Edit profile' : 'Start Wizard'} />
           <StatCard icon={Route}       label="Strong Pathway signals" value={complete ? String(strong.length) : '—'}     href="/pathways"      action="Review Pathways" />
-          <StatCard icon={NotebookTabs} label="Plan stage"            value={plan?.timeline_stage ?? 'Not started'} href="/nexit-plan"     action="Open My Plan" />
+          <StatCard icon={NotebookTabs} label="Plan stage"            value={plan?.timeline_stage ?? 'Not started'} href="/nexit-plan"     action="Open Kolmari Plan" />
           <StatCard icon={CheckCircle2} label="Saved plan tasks"      value={plan ? String(plan.checklist.length) : '0'} href="/flutter" action="Open Flutter Mode" />
         </div>
       </section>
 
-      {/* ── Section 2 — Your Nextinations ────────────────────────────────── */}
+      {/* ── Section 2 — Your Destinations ───────────────────────────────── */}
       <section aria-labelledby="nextinations-heading">
         <div className="mb-3 flex items-center justify-between">
           <h2 id="nextinations-heading" className="text-xs font-bold uppercase tracking-widest text-muted">
@@ -116,13 +116,13 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      {/* ── Section 3 — Your Nexit Plan ──────────────────────────────────── */}
+      {/* ── Section 3 — Your Kolmari Plan ────────────────────────────────── */}
       <div className="grid gap-5 lg:grid-cols-2">
         <section className="card-surface p-6" aria-labelledby="plan-heading">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Progress Tracker</p>
-              <h2 id="plan-heading" className="mt-1 text-lg font-bold text-navy">Move Timeline</h2>
+              <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Kolmari Tracker</p>
+              <h2 id="plan-heading" className="mt-1 text-lg font-bold text-navy">Kolmari Timeline</h2>
             </div>
             <span className="grid size-10 place-items-center rounded-[var(--radius-field)] bg-gold-soft" aria-hidden="true">
               <ListChecks size={17} />
@@ -144,7 +144,7 @@ export default async function DashboardPage() {
             <div className="mt-4 rounded-[var(--radius-field)] bg-canvas p-4 text-sm text-muted">
               Start your Move Plan to track your relocation timeline.
               <Link href="/nexit-plan" className="mt-2 flex items-center gap-1 text-xs font-bold text-gold-deep">
-                Open My Plan <ArrowRight size={12} />
+                Open Kolmari Plan <ArrowRight size={12} />
               </Link>
             </div>
           )}
@@ -218,7 +218,7 @@ export default async function DashboardPage() {
           href={complete ? '/pathways' : '/profile-wizard'}
           className="gold-button mt-5 inline-flex items-center gap-2"
         >
-          {complete ? 'View My Pathways' : 'Build My Move Plan'} <ArrowRight size={15} />
+          {complete ? 'View My Pathways' : 'Build Your Kolmari Plan'} <ArrowRight size={15} />
         </Link>
       </section>
     </div>

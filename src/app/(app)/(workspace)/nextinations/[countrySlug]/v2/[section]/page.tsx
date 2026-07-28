@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { COUNTRIES, getDiscoverableCountry } from '@/lib/countries'
-import { CountryResearchPage } from '@/components/nexit/CountryResearchPage'
+import { CountryResearchPage } from '@/components/kolmari/CountryResearchPage'
 import { CountryResearchShell } from '@/components/country-template/CountryResearchShell'
 import { CountryTemplate } from '@/components/country-template/CountryTemplate'
 import { TAB_SLUGS, type TabSlug } from '@/components/country-template/TabBar'
@@ -21,9 +21,9 @@ type Props = {
 export async function generateMetadata({ params }: Props) {
   const { countrySlug, section } = await params
   const country = COUNTRIES.find((c) => c.slug === countrySlug) ?? getDiscoverableCountry(countrySlug)
-  if (!country) return { title: 'Nextination Not Found | Nexit' }
+  if (!country) return { title: 'Destination Not Found | Kolmari' }
   const label = section.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
-  return { title: `${country.name} \u2014 ${label} | Nexit` }
+  return { title: `${country.name} \u2014 ${label} | Kolmari` }
 }
 
 export default async function CountryV2Page({ params, searchParams }: Props) {

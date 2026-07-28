@@ -1,4 +1,4 @@
-import { CostCalculator } from '@/components/nexit/cost-calculator'
+import { CostCalculator } from '@/components/kolmari/cost-calculator'
 import { requireCurrentUser } from '@/lib/auth'
 import { getProfile } from '@/lib/profile'
 

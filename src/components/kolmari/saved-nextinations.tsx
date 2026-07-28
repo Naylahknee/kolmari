@@ -44,7 +44,7 @@ export function SaveNextinationButton({ slug, className = '' }: { slug: string; 
   return (
     <button type="button" onClick={toggle} aria-pressed={saved} className={`inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-line bg-white px-4 text-sm font-bold text-navy transition hover:border-gold ${className}`}>
       <Heart size={17} fill={saved ? 'currentColor' : 'none'} className={saved ? 'text-gold-deep' : ''} />
-      {saved ? 'Saved' : 'Save Nextination'}
+      {saved ? 'Saved' : 'Save Destination'}
     </button>
   )
 }
@@ -69,15 +69,15 @@ export function SavedNextinations() {
 
   const countries = COUNTRIES.filter((country) => slugs.includes(country.slug))
 
-  if (!ready) return <div className="card-surface mt-7 h-40 animate-pulse" aria-label="Loading saved Nextinations" />
+  if (!ready) return <div className="card-surface mt-7 h-40 animate-pulse" aria-label="Loading saved destinations" />
 
   if (!countries.length) {
     return (
       <section className="card-surface mt-7 p-8 text-center sm:p-12">
         <Heart className="mx-auto text-gold-deep" size={30} />
-        <h2 className="mt-4 text-xl font-extrabold">No saved Nextinations yet</h2>
+        <h2 className="mt-4 text-xl font-extrabold">No saved Destinations yet</h2>
         <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted">Save countries while comparing them, then return here to keep your shortlist in one place.</p>
-        <Link href="/countries" className="gold-button mt-6">Compare Nextinations <ArrowRight size={16} /></Link>
+        <Link href="/countries" className="gold-button mt-6">Compare Destinations <ArrowRight size={16} /></Link>
       </section>
     )
   }
@@ -92,7 +92,7 @@ export function SavedNextinations() {
           </div>
           <p className="mt-4 text-sm leading-6 text-muted">{country.summary}</p>
           <div className="mt-5 grid gap-2">
-            <Link href={`/nextinations/${country.slug}`} className="gold-button w-full">Explore This Nextination <ArrowRight size={16} /></Link>
+            <Link href={`/nextinations/${country.slug}`} className="gold-button w-full">Explore This Destination <ArrowRight size={16} /></Link>
             <SaveNextinationButton slug={country.slug} className="w-full" />
           </div>
         </article>

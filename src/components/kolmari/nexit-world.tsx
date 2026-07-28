@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic'
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Globe2, LayoutGrid } from 'lucide-react'
-import { type RegionSlug } from '@/lib/nexitnation-data'
+import { type RegionSlug } from '@/lib/destinations-data'
 import { CountriesView } from './countries-browser'
 
 type View = 'map' | 'countries'
@@ -42,7 +42,7 @@ const MapboxCanvas = dynamic(
   },
 )
 
-// ─── Unified Your World workspace ─────────────────────────────────────────────
+// ─── Unified Kolmarination workspace ──────────────────────────────────────────
 
 export function NexitWorldWorkspace({ profileComplete, regionMatches, initialView, initialQuery }: Props) {
   const router = useRouter()

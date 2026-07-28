@@ -106,7 +106,7 @@ export function QuestionsSection() {
           </div>
 
           <p className="text-lg leading-8 text-white/80 sm:text-xl">
-            Nexit brings the scattered answers into one place—so you can{' '}
+            Kolmari brings the scattered answers into one place—so you can{' '}
             <span className="font-medium text-[#F3C516]">
               research, compare and plan
             </span>{' '}
@@ -118,7 +118,7 @@ export function QuestionsSection() {
               href="/quiz"
               className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#F3C516] px-7 py-3 font-medium text-[#0D1B39] transition hover:bg-[#FFD52E]"
             >
-              Create My Nexit Plan
+              Build Your Kolmari Plan
             </Link>
 
             <span className="text-sm text-white/55">

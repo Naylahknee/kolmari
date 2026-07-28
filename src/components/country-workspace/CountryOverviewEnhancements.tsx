@@ -17,7 +17,7 @@ export function CountryOverviewEnhancements({
       <section className="card-surface p-6" aria-labelledby="readiness-heading">
         <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Planning status</p>
         <div className="mt-1 flex flex-wrap items-end justify-between gap-4">
-          <h2 id="readiness-heading" className="text-xl font-bold text-navy">Nexit Readiness</h2>
+          <h2 id="readiness-heading" className="text-xl font-bold text-navy">Kolmari Readiness</h2>
           {readiness.overall !== null && (
             <p className="text-3xl font-extrabold leading-none text-navy">{readiness.overall}% complete</p>
           )}
@@ -25,13 +25,13 @@ export function CountryOverviewEnhancements({
 
         {readiness.overall === null ? (
           <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
-            Complete your profile and begin your research to calculate Nexit Readiness. Documents and meaningful research activity are not yet assessed, so Nexit will not manufacture an overall percentage.
+            Complete your profile and begin your research to calculate Kolmari Readiness. Documents and meaningful research activity are not yet assessed, so Kolmari will not manufacture an overall percentage.
           </p>
         ) : (
           <div
             className="mt-5 h-4 overflow-hidden rounded-full bg-line"
             role="progressbar"
-            aria-label="Overall Nexit Readiness"
+            aria-label="Overall Kolmari Readiness"
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={readiness.overall}
@@ -67,7 +67,7 @@ export function CountryOverviewEnhancements({
         </div>
 
         <Link href="/nexit-plan" className="gold-button mt-5">
-          Continue building your Nexit Plan <ArrowRight size={16} />
+          Continue building your Move Plan <ArrowRight size={16} />
         </Link>
       </section>
     </div>

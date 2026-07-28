@@ -6,7 +6,7 @@ import mapboxgl from 'mapbox-gl'
 import { ArrowRight, MapPinned } from 'lucide-react'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import './nexitnation-map.css'
-import { regionList, type RegionSlug } from '@/lib/nexitnation-data'
+import { regionList, type RegionSlug } from '@/lib/destinations-data'
 
 type Props = {
   profile: { complete: boolean; matches: Record<RegionSlug, number> | null }
@@ -32,7 +32,7 @@ function RegionGrid({ profile }: Props) {
               <span className="mt-1 block text-xs text-white/70">
                 {region.countryCount} countries
                 {profile.complete && matchValue !== undefined
-                  ? ` · Nexit Match ${matchValue}%`
+                  ? ` · Kolmari Match ${matchValue}%`
                   : profile.complete
                     ? ''
                     : ' · Complete your profile for match data'}
@@ -50,14 +50,14 @@ function RegionGrid({ profile }: Props) {
 function RegionFallback({ profile }: Props) {
   const router = useRouter()
   return (
-    <section className="hero-grid rounded-[24px] bg-navy-deep p-6 text-white sm:p-8" aria-label="Nexitnation regions">
+    <section className="hero-grid rounded-[24px] bg-navy-deep p-6 text-white sm:p-8" aria-label="Kolmarination regions">
       <div className="max-w-md">
         <span className="grid size-12 place-items-center rounded-xl bg-gold text-navy" aria-hidden="true">
           <MapPinned size={22} />
         </span>
         <h2 className="mt-5 font-display text-2xl font-bold">Explore all regions below.</h2>
         <p className="mt-2 text-sm text-white/65">
-          Select a region to open its full Nextination guide. Set{' '}
+          Select a region to open its full Destination guide. Set{' '}
           <code className="rounded bg-white/10 px-1.5 py-0.5">NEXT_PUBLIC_MAPBOX_TOKEN</code> to also unlock
           the live map.
         </p>
@@ -77,7 +77,7 @@ function RegionFallback({ profile }: Props) {
                 <strong className="block text-sm">{region.name}</strong>
                 <span className="text-xs text-white/60">
                   {region.countryCount} countries
-                  {profile.complete && value !== undefined ? ` · Nexit Match ${value}%` : ''}
+                  {profile.complete && value !== undefined ? ` · Kolmari Match ${value}%` : ''}
                 </span>
               </span>
               <ArrowRight size={16} className="text-gold" aria-hidden="true" />
@@ -141,7 +141,7 @@ export function NexitnationMapbox({ profile }: Props) {
         if (profile.complete && matchValue !== undefined) {
           const matchEl = document.createElement('span')
           matchEl.className = 'custom-region-badge__match'
-          matchEl.textContent = `Nexit Match ${matchValue}%`
+          matchEl.textContent = `Kolmari Match ${matchValue}%`
           el.appendChild(matchEl)
         }
 
@@ -193,7 +193,7 @@ export function NexitnationMapbox({ profile }: Props) {
         <div ref={containerRef} className="absolute inset-0" />
       </div>
       {/* Non-map path: always rendered, keyboard and screen-reader accessible */}
-      <section aria-label="Nexitnation regions">
+      <section aria-label="Kolmarination regions">
         <h2 className="mt-8 text-lg font-bold text-navy">All regions</h2>
         <RegionGrid profile={profile} />
       </section>

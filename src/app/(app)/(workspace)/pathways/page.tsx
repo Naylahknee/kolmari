@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { PathwaysResults, type Fit, type Pathway } from '@/components/nexit/pathways-results'
+import { PathwaysResults, type Fit, type Pathway } from '@/components/kolmari/pathways-results'
 import { requireCurrentUser } from '@/lib/auth'
 import { getProfile } from '@/lib/profile'
 import { evaluatePathways, PATHWAYS } from '@/lib/pathways'

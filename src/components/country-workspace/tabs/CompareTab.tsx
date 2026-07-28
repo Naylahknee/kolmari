@@ -28,7 +28,7 @@ const METRIC_LABELS: { key: keyof CompareCountrySummary | 'matchScore'; label: s
   { key: 'incomeRequired', label: 'Income guide' },
   { key: 'cost', label: 'Relative cost' },
   { key: 'safety', label: 'Safety signal' },
-  { key: 'matchScore', label: 'Nexit Match' },
+  { key: 'matchScore', label: 'Kolmari Match' },
 ]
 
 function formatValue(key: keyof CompareCountrySummary | 'matchScore', country: CompareCountrySummary, match: MatchData | null): string {
@@ -50,7 +50,7 @@ export function CompareTab({ current, others }: Props) {
   if (!compareTo) {
     return (
       <section className="card-surface p-8 text-center">
-        <p className="font-extrabold text-navy">No other Nextinations available to compare</p>
+        <p className="font-extrabold text-navy">No other Destinations available to compare</p>
         <p className="mt-1 text-sm text-muted">Add more countries to your workspace to compare them here.</p>
       </section>
     )
@@ -59,7 +59,7 @@ export function CompareTab({ current, others }: Props) {
   return (
     <div className="space-y-5">
       <section className="card-surface p-6">
-        <h2 className="font-display text-2xl font-bold text-navy">Compare Nextinations</h2>
+        <h2 className="font-display text-2xl font-bold text-navy">Compare Destinations</h2>
         <p className="mt-2 text-sm text-muted">Side-by-side comparison. All figures are planning guides — not official requirements.</p>
 
         {/* Country picker */}
@@ -136,7 +136,7 @@ export function CompareTab({ current, others }: Props) {
         </div>
       )}
 
-      <p className="text-xs text-muted">Comparison is based on your Nexit Profile and editorial planning data. Not a financial or legal assessment.</p>
+      <p className="text-xs text-muted">Comparison is based on your Kolmari Profile and editorial planning data. Not a financial or legal assessment.</p>
     </div>
   )
 }

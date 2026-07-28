@@ -52,7 +52,7 @@ const TAB_DEFS: TabDef[] = [
     adjust: (c) => b(c.careerPriority, 10) + b(c.localEmployment, 10) + b(c.businessInterest, 10) + b(c.selfEmployed, 8) + b(c.passiveIncome, 5) },
   { id: 'cost-of-living', label: 'Cost of Living', shortLabel: 'Cost', group: 'Reality', base: 90, alwaysVisible: true, hideWhenIrrelevant: false,
     adjust: (c) => b(c.affordabilityPriority, 20) + b(c.familyHousehold, 5) + b(c.passiveIncome, 5) },
-  { id: 'pathways', label: 'Nexit Pathways', shortLabel: 'Pathways', group: 'Entry & Work', base: 90, alwaysVisible: true, hideWhenIrrelevant: false,
+  { id: 'pathways', label: 'Pathways', shortLabel: 'Pathways', group: 'Entry & Work', base: 90, alwaysVisible: true, hideWhenIrrelevant: false,
     adjust: (c) => b(c.moveWithin12mo, 15) + b(c.remote, 10) + b(c.localEmployment, 10) + b(c.studyInterest, 10) + b(c.businessInterest, 10) + b(c.passiveIncome, 10) },
   { id: 'healthcare', label: 'Healthcare', shortLabel: 'Health', group: 'Life & Services', base: 75, alwaysVisible: true, hideWhenIrrelevant: false,
     adjust: (c) => b(c.passiveIncome, 10) + b(c.familyHousehold, 8) },

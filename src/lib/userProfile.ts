@@ -1,7 +1,7 @@
 import 'server-only'
 
 import { getProfile, hasCompletedProfile, type PathwayGoal, type RelocationProfile } from './profile'
-import { REGION_SLUGS, type RegionSlug } from './nexitnation-data'
+import { REGION_SLUGS, type RegionSlug } from './destinations-data'
 import { evaluatePathways } from './pathways'
 import { COUNTRIES, type CountryDetail } from './countries'
 import { calculateNexitReadiness } from './readiness'
@@ -85,7 +85,7 @@ export function calculateCountryMatch(profile: RelocationProfile, country: Count
   const strong = evaluations.filter((item) => item.status === 'Strong Match').length
   const possible = evaluations.filter((item) => item.status === 'Possible Match').length
   score += Math.min(25, strong * 14 + possible * 5)
-  if (strong > 0) reasons.push(`${strong} Nexit Pathway${strong > 1 ? 's' : ''} may support your move`)
+  if (strong > 0) reasons.push(`${strong} Pathway${strong > 1 ? 's' : ''} may support your move`)
 
   if (profile.remote && /nomad|remote|d7/i.test(country.visaType)) {
     score += 10

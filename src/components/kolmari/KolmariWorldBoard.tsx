@@ -1,14 +1,14 @@
 'use client'
 
-import Link from 'Destination/link'
+import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { ArrowRight, Check, ExternalLink, Plus, Search, Star, Trash2, X } from 'lucide-react'
-import { DestinationMapLoader } from '@/components/Kolmari/DestinationMapLoader'
+import { NexitnationMapLoader } from '@/components/kolmari/NexitnationMapLoader'
 import { searchPlaces, flagEmoji, type WorldPlace } from '@/lib/world-places'
-import { countryWorkspaceSlug, STATUS_META, STATUS_ORDER, useDestinationinationBoard, type DestinationinationStatus, type SavedDestinationination } from '@/lib/Destinationination-board'
-import type { RegionSlug } from '@/lib/Destination-data'
+import { countryWorkspaceSlug, STATUS_META, STATUS_ORDER, useNextinationBoard, type NextinationStatus, type SavedNextination } from '@/lib/nextination-board'
+import type { RegionSlug } from '@/lib/destinations-data'
 
-function workspaceSlug(place: SavedDestinationination): string | null {
+function workspaceSlug(place: SavedNextination): string | null {
   return countryWorkspaceSlug(place.country)
 }
 
@@ -19,7 +19,7 @@ export function KolmariWorldBoard({
   profileComplete: boolean
   regionMatches: Record<RegionSlug, number> | null
 }) {
-  const { items, ready, add, update, remove } = useDestinationinationBoard()
+  const { items, ready, add, update, remove } = useNextinationBoard()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const selected = items.find((x) => x.id === selectedId) ?? null
 
@@ -39,8 +39,8 @@ export function KolmariWorldBoard({
       {/* Header + Add destination (top) */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Kolmari World</p>
-          <h1 className="mt-1 text-2xl font-bold text-navy sm:text-3xl">My Destinationinations</h1>
+          <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Kolmarination</p>
+          <h1 className="mt-1 text-2xl font-bold text-navy sm:text-3xl">Your Destinations</h1>
           <p className="mt-1 text-sm text-muted">
             {ready ? `${counts.total} saved · ${counts.researching} researching · ${counts.shortlisted} shortlisted` : 'Loading your board…'}
           </p>
@@ -50,12 +50,12 @@ export function KolmariWorldBoard({
         </div>
       </div>
 
-      <section aria-label="Interactive Kolmari World map" className="card-surface overflow-hidden p-3">
-        <DestinationMapLoader profile={{ complete: profileComplete, matches: regionMatches }} />
+      <section aria-label="Interactive world map" className="card-surface overflow-hidden p-3">
+        <NexitnationMapLoader profile={{ complete: profileComplete, matches: regionMatches }} />
       </section>
 
       {items.length > 0 ? (
-        <section aria-label="Saved Destinationinations" className="card-surface flex gap-2 overflow-x-auto p-3">
+        <section aria-label="Saved destinations" className="card-surface flex gap-2 overflow-x-auto p-3">
           {items.map((item) => {
             const meta = STATUS_META[item.status]
             return (
@@ -120,18 +120,18 @@ function AddDestination({ onAdd, existingIds }: { onAdd: (p: WorldPlace) => void
 }
 
 function DetailPanel({ item, onStatus, onNote, onRemove, onClose }: {
-  item: SavedDestinationination
-  onStatus: (s: DestinationinationStatus) => void
+  item: SavedNextination
+  onStatus: (s: NextinationStatus) => void
   onNote: (n: string) => void
   onRemove: () => void
   onClose: () => void
 }) {
   const slug = workspaceSlug(item)
   return (
-    <section className="card-surface p-5 sm:p-6" aria-label={`Selected Destinationination: ${item.name}`}>
+    <section className="card-surface p-5 sm:p-6" aria-label={`Selected destination: ${item.name}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Selected Destinationination</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Selected Destination</p>
           <h2 className="mt-1 flex items-center gap-2 text-xl font-bold text-navy"><span aria-hidden>{flagEmoji(item.countryCode)}</span>{item.name}</h2>
           <p className="text-sm text-muted">{item.country} · {item.region}</p>
         </div>
@@ -183,8 +183,8 @@ function DetailPanel({ item, onStatus, onNote, onRemove, onClose }: {
           </label>
 
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
-            {slug ? <Link href={`/Destinationinations/${slug}`} className="gold-button w-full">Open profile <ArrowRight size={15} /></Link> : null}
-            <Link href="/Kolmari-plan" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[var(--radius-btn)] border border-line bg-white text-sm font-bold text-navy transition hover:border-gold">Move to planning</Link>
+            {slug ? <Link href={`/nextinations/${slug}`} className="gold-button w-full">View Destination <ArrowRight size={15} /></Link> : null}
+            <Link href="/nexit-plan" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[var(--radius-btn)] border border-line bg-white text-sm font-bold text-navy transition hover:border-gold">Open Kolmari Plan</Link>
             <button type="button" onClick={onRemove} className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[var(--radius-btn)] text-sm font-bold text-danger transition hover:bg-danger/10 sm:col-span-2"><Trash2 size={15} /> Remove</button>
           </div>
         </div>

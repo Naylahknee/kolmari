@@ -1,4 +1,4 @@
-import { SavedNextinations } from '@/components/nexit/saved-nextinations'
+import { SavedNextinations } from '@/components/kolmari/saved-nextinations'
 
 export default function DestinationsPage() {
   return (

@@ -55,7 +55,7 @@ export function calculateNexitReadiness(
     profile: {
       score: profileScore,
       label: 'Profile',
-      detail: 'Based on household, region, timeline, priorities, goals, budget, and work information currently stored in your Nexit Profile.',
+      detail: 'Based on household, region, timeline, priorities, goals, budget, and work information currently stored in your Kolmari Profile.',
     },
     documents: {
       score: documentScore,

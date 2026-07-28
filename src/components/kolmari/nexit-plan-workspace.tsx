@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { BookOpen, Check, FileText, LoaderCircle, Plus, Save, Sparkles, Trash2 } from 'lucide-react'
-import type { NexitPlan, PlanBudget, PlanStage } from '@/lib/nexit-plan'
+import type { NexitPlan, PlanBudget, PlanStage } from '@/lib/kolmari-plan'
 
 const STAGES: PlanStage[] = ['Explore', 'Decide', 'Prepare', 'Apply', 'Move', 'Settle']
 const DEFAULT_TASKS = [
@@ -73,7 +73,7 @@ export function NexitPlanWorkspace({
     plan.documents.length > 0,
   ]
   const progressLabels = [
-    'Nextination chosen',
+    'Destination chosen',
     'Pathway selected',
     'Target date set',
     'Checklist started',
@@ -84,7 +84,7 @@ export function NexitPlanWorkspace({
   const progress = !hasSavedPlan && !progressChecks.some(Boolean)
     ? null
     : Math.round(completed / progressChecks.length * 100)
-  const nextStep = progressLabels[progressChecks.findIndex((item) => !item)] ?? 'Ready for Nexicution'
+  const nextStep = progressLabels[progressChecks.findIndex((item) => !item)] ?? 'Ready for Flutter Mode'
 
   function update<K extends keyof NexitPlan>(key: K, value: NexitPlan[K]) {
     setPlan((current) => ({ ...current, [key]: value }))
@@ -102,7 +102,7 @@ export function NexitPlanWorkspace({
       const result = await response.json()
       if (!response.ok) throw new Error(result.error ?? 'Unable to save your plan.')
       setPlan(result)
-      setMessage('Your Nexit Plan is saved.')
+      setMessage('Your Move Plan is saved.')
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Unable to save your plan.')
     } finally {
@@ -132,12 +132,12 @@ export function NexitPlanWorkspace({
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-gold-deep">Private workspace</p>
-          <h1 className="font-display mt-1 text-3xl font-bold text-navy sm:text-4xl">Your Nexit Plan</h1>
+          <h1 className="font-display mt-1 text-3xl font-bold text-navy sm:text-4xl">Kolmari Plan</h1>
           <p className="mt-1 text-sm text-muted">Save decisions, evidence, dates, and preparation work in one place.</p>
         </div>
         <button type="button" disabled={saving} onClick={() => save()} className="gold-button">
           {saving ? <LoaderCircle size={16} className="animate-spin" aria-hidden="true" /> : <Save size={16} aria-hidden="true" />}
-          {saving ? 'Saving…' : 'Save Nexit Plan'}
+          {saving ? 'Saving…' : 'Save Kolmari Plan'}
         </button>
       </header>
 
@@ -148,7 +148,7 @@ export function NexitPlanWorkspace({
           <section className="card-surface p-5" aria-labelledby="plan-details-heading">
             <h2 id="plan-details-heading" className="text-sm font-bold text-navy">Plan details</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <Select label="Saved Nextination" value={plan.saved_nextination} options={nextinations} onChange={(value) => update('saved_nextination', value)} />
+              <Select label="Saved Destination" value={plan.saved_nextination} options={nextinations} onChange={(value) => update('saved_nextination', value)} />
               <Select label="Selected Pathway" value={plan.selected_pathway} options={pathways} onChange={(value) => update('selected_pathway', value)} />
               <label className="block text-xs font-semibold text-navy">
                 Target move date
@@ -162,7 +162,7 @@ export function NexitPlanWorkspace({
           </section>
 
           <section className="card-surface p-5" aria-labelledby="timeline-heading">
-            <h2 id="timeline-heading" className="text-sm font-bold text-navy">Nexit Timeline</h2>
+            <h2 id="timeline-heading" className="text-sm font-bold text-navy">Kolmari Timeline</h2>
             <p className="mt-1 text-xs text-muted">Select your current stage. Stages are checkpoints, not prescriptions.</p>
             <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
               {STAGES.map((stage, index) => (
@@ -276,7 +276,7 @@ export function NexitPlanWorkspace({
 
         <aside className="space-y-4">
           <section className="rounded-[var(--radius-card)] bg-navy p-5 text-white" aria-labelledby="readiness-heading">
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/55">Nexit Readiness</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/55">Kolmari Readiness</p>
             <h2 id="readiness-heading" className="font-display mt-2 text-2xl font-bold text-gold">
               {progress === null ? 'Not started' : `${progress}% ready`}
             </h2>
@@ -341,9 +341,9 @@ export function NexitPlanWorkspace({
               onClick={enterMode}
               className="gold-button mt-4 w-full justify-center text-xs"
             >
-              Enter Nexicution Mode
+              Enter Flutter Mode
             </button>
-            <p className="mt-2 text-[10px] text-white/55">Choose a Nextination and Pathway first.</p>
+            <p className="mt-2 text-[10px] text-white/55">Choose a Destination and Pathway first.</p>
           </article>
         </aside>
       </div>
