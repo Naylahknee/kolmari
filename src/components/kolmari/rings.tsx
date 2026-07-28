@@ -90,4 +90,3 @@ export function BudgetDonut({ slices, total, size = 132 }: { slices: BudgetSlice
     </div>
   )
 }
-export const BUDGET_COLORS = ['#17305b', '#f3c516', '#1f9d94', '#3a5a94', '#8090a8']
