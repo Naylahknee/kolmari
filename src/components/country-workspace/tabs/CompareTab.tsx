@@ -28,7 +28,7 @@ const METRIC_LABELS: { key: keyof CompareCountrySummary | 'matchScore'; label: s
   { key: 'incomeRequired', label: 'Income guide' },
   { key: 'cost', label: 'Relative cost' },
   { key: 'safety', label: 'Safety signal' },
-  { key: 'matchScore', label: 'Kolmari Match' },
+  { key: 'matchScore', label: 'Match Score' },
 ]
 
 function formatValue(key: keyof CompareCountrySummary | 'matchScore', country: CompareCountrySummary, match: MatchData | null): string {
@@ -136,7 +136,7 @@ export function CompareTab({ current, others }: Props) {
         </div>
       )}
 
-      <p className="text-xs text-muted">Comparison is based on your Kolmari Profile and editorial planning data. Not a financial or legal assessment.</p>
+      <p className="text-xs text-muted">Comparison is based on your Profile and editorial planning data. Not a financial or legal assessment.</p>
     </div>
   )
 }

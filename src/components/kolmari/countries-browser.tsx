@@ -42,7 +42,7 @@ export function CountriesView({ initialQuery = '', profileComplete }: { initialQ
     <div className="space-y-6">
       {!profileComplete && (
         <div className="rounded-[var(--radius-card)] border border-gold/30 bg-gold-soft/50 p-4 text-sm font-semibold text-navy">
-          Complete your Kolmari Profile to see personalized matches.{' '}
+          Complete your Profile to see personalized matches.{' '}
           <Link href="/profile-wizard" className="font-bold text-gold-deep underline">Start Wizard</Link>
         </div>
       )}
@@ -148,7 +148,7 @@ export function CountriesBrowser({ initialQuery = '', profileComplete }: { initi
         <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Destination directory</p>
         <h1 className="mt-1 text-2xl font-bold text-navy sm:text-3xl">Research countries and Pathways.</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
-          Compare general Pathway and cost information. Personalized matches require a completed Kolmari Profile.
+          Compare general Pathway and cost information. Personalized matches require a completed Profile.
         </p>
       </div>
       <CountriesView initialQuery={initialQuery} profileComplete={profileComplete} />

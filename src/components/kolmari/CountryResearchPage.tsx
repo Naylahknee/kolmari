@@ -7,7 +7,7 @@ export function CountryResearchPage({ country }: { country: DiscoverableCountry 
   return (
     <div className="space-y-6">
       <nav className="text-sm text-muted" aria-label="Breadcrumb">
-        <Link href="/nexitnation" className="hover:text-navy">Kolmarination</Link>
+        <Link href="/nexitnation" className="hover:text-navy">Destinations</Link>
         <span className="px-2">/</span>
         <span className="font-semibold text-navy">{country.name}</span>
       </nav>
@@ -27,7 +27,7 @@ export function CountryResearchPage({ country }: { country: DiscoverableCountry 
         <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Country research workspace</p>
         <h2 className="mt-1 text-3xl font-bold text-navy">Start with {country.city}</h2>
         <p className="mt-2 max-w-3xl text-muted">
-          This page is available from Kolmarination, but it is not automatically added to your Destinations. Save it only when you want to compare or plan around it.
+          This page is available from Destinations, but it is not automatically added to your Destinations. Save it only when you want to compare or plan around it.
         </p>
         <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {[

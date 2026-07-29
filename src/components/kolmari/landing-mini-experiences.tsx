@@ -90,7 +90,7 @@ const startingPlacesExperience: Experience = {
         items: [
           `Countries researched for ${priority.toLowerCase()} — compare Europe and Latin America as starting regions`,
           'Building a short starting list of 3–5 Destinations before narrowing further',
-          'Exploring the Kolmarination map to compare regional costs and Pathway categories',
+          'Exploring the Destinations map to compare regional costs and Pathway categories',
         ],
       }
     }
@@ -383,7 +383,7 @@ function FinalScreen({ onClose }: { onClose: () => void }) {
     'Save your results',
     'Compare Destinations',
     'Explore Pathways in more detail',
-    'Build Your Kolmari Plan',
+    'Build My Move Plan',
     'Track documents, costs, and next steps',
   ]
 
@@ -392,7 +392,7 @@ function FinalScreen({ onClose }: { onClose: () => void }) {
       <div>
         <p className="text-xs font-extrabold uppercase tracking-widest text-gold-deep">You are ready to begin</p>
         <h3 className="mt-2 font-display text-2xl font-bold text-navy sm:text-3xl">
-          Your Kolmari starting point is ready.
+          Your starting point is ready.
         </h3>
         <p className="mt-3 text-sm leading-6 text-muted">
           Create a free Kolmari account to save your result and see the full picture.

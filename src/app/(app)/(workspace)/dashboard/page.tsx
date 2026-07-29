@@ -38,7 +38,7 @@ export default async function DashboardPage() {
       {/* ── Page header ──────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Your Kolmari workspace</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Your workspace</p>
           <h1 className="mt-1 text-2xl font-bold text-navy sm:text-3xl">
             Welcome back, {firstName}.
           </h1>
@@ -48,7 +48,7 @@ export default async function DashboardPage() {
           href={complete ? '/flutter' : '/profile-wizard'}
           className="gold-button"
         >
-          {complete ? 'Enter Flutter Mode' : 'Build Your Kolmari Plan'} <ArrowRight size={16} />
+          {complete ? 'Enter Flutter Mode' : 'Build My Move Plan'} <ArrowRight size={16} />
         </Link>
       </div>
 
@@ -56,7 +56,7 @@ export default async function DashboardPage() {
       {!complete && (
         <section className="rounded-[var(--radius-card)] border border-gold/30 bg-gold-soft/50 p-5 sm:flex sm:items-center sm:justify-between sm:gap-6">
           <div>
-            <p className="font-semibold text-navy">Complete your Kolmari Profile to see personalized matches.</p>
+            <p className="font-semibold text-navy">Complete your Profile to see personalized matches.</p>
             <p className="mt-1 text-sm text-muted">
               Until then, no budget, work setup, household type, Match Score, or readiness score is assumed.
             </p>
@@ -73,9 +73,9 @@ export default async function DashboardPage() {
           Continue where you left off
         </h2>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard icon={UserRound}   label="Kolmari Profile"       value={complete ? 'Complete' : 'Not started'} href="/profile-wizard" action={complete ? 'Edit profile' : 'Start Wizard'} />
+          <StatCard icon={UserRound}   label="Profile"       value={complete ? 'Complete' : 'Not started'} href="/profile-wizard" action={complete ? 'Edit profile' : 'Start Wizard'} />
           <StatCard icon={Route}       label="Strong Pathway signals" value={complete ? String(strong.length) : '—'}     href="/pathways"      action="Review Pathways" />
-          <StatCard icon={NotebookTabs} label="Plan stage"            value={plan?.timeline_stage ?? 'Not started'} href="/nexit-plan"     action="Open Kolmari Plan" />
+          <StatCard icon={NotebookTabs} label="Plan stage"            value={plan?.timeline_stage ?? 'Not started'} href="/nexit-plan"     action="Open My Plan" />
           <StatCard icon={CheckCircle2} label="Saved plan tasks"      value={plan ? String(plan.checklist.length) : '0'} href="/flutter" action="Open Flutter Mode" />
         </div>
       </section>
@@ -116,13 +116,13 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      {/* ── Section 3 — Your Kolmari Plan ────────────────────────────────── */}
+      {/* ── Section 3 — My Plan ────────────────────────────────── */}
       <div className="grid gap-5 lg:grid-cols-2">
         <section className="card-surface p-6" aria-labelledby="plan-heading">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Kolmari Tracker</p>
-              <h2 id="plan-heading" className="mt-1 text-lg font-bold text-navy">Kolmari Timeline</h2>
+              <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Progress Tracker</p>
+              <h2 id="plan-heading" className="mt-1 text-lg font-bold text-navy">Move Timeline</h2>
             </div>
             <span className="grid size-10 place-items-center rounded-[var(--radius-field)] bg-gold-soft" aria-hidden="true">
               <ListChecks size={17} />
@@ -144,7 +144,7 @@ export default async function DashboardPage() {
             <div className="mt-4 rounded-[var(--radius-field)] bg-canvas p-4 text-sm text-muted">
               Start your Move Plan to track your relocation timeline.
               <Link href="/nexit-plan" className="mt-2 flex items-center gap-1 text-xs font-bold text-gold-deep">
-                Open Kolmari Plan <ArrowRight size={12} />
+                Open My Plan <ArrowRight size={12} />
               </Link>
             </div>
           )}
@@ -218,7 +218,7 @@ export default async function DashboardPage() {
           href={complete ? '/pathways' : '/profile-wizard'}
           className="gold-button mt-5 inline-flex items-center gap-2"
         >
-          {complete ? 'View My Pathways' : 'Build Your Kolmari Plan'} <ArrowRight size={15} />
+          {complete ? 'View My Pathways' : 'Build My Move Plan'} <ArrowRight size={15} />
         </Link>
       </section>
     </div>

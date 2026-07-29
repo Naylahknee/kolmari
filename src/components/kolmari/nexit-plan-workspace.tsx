@@ -132,12 +132,12 @@ export function NexitPlanWorkspace({
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-gold-deep">Private workspace</p>
-          <h1 className="font-display mt-1 text-3xl font-bold text-navy sm:text-4xl">Kolmari Plan</h1>
+          <h1 className="font-display mt-1 text-3xl font-bold text-navy sm:text-4xl">My Plan</h1>
           <p className="mt-1 text-sm text-muted">Save decisions, evidence, dates, and preparation work in one place.</p>
         </div>
         <button type="button" disabled={saving} onClick={() => save()} className="gold-button">
           {saving ? <LoaderCircle size={16} className="animate-spin" aria-hidden="true" /> : <Save size={16} aria-hidden="true" />}
-          {saving ? 'Saving…' : 'Save Kolmari Plan'}
+          {saving ? 'Saving…' : 'Save My Plan'}
         </button>
       </header>
 
@@ -162,7 +162,7 @@ export function NexitPlanWorkspace({
           </section>
 
           <section className="card-surface p-5" aria-labelledby="timeline-heading">
-            <h2 id="timeline-heading" className="text-sm font-bold text-navy">Kolmari Timeline</h2>
+            <h2 id="timeline-heading" className="text-sm font-bold text-navy">Move Timeline</h2>
             <p className="mt-1 text-xs text-muted">Select your current stage. Stages are checkpoints, not prescriptions.</p>
             <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
               {STAGES.map((stage, index) => (
@@ -276,7 +276,7 @@ export function NexitPlanWorkspace({
 
         <aside className="space-y-4">
           <section className="rounded-[var(--radius-card)] bg-navy p-5 text-white" aria-labelledby="readiness-heading">
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/55">Kolmari Readiness</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/55">Move Readiness</p>
             <h2 id="readiness-heading" className="font-display mt-2 text-2xl font-bold text-gold">
               {progress === null ? 'Not started' : `${progress}% ready`}
             </h2>

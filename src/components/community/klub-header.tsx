@@ -30,7 +30,7 @@ export function KlubEmptyState() {
         Until moderation and verification are ready, Kolmari clearly labels editorial planning prompts and sourced insights.
       </p>
       <p className="mt-4 text-sm leading-6 text-muted">
-        In the meantime, use Greenbook Insights for sourced planning context and Kolmarination to explore destinations.
+        In the meantime, use Greenbook Insights for sourced planning context and the Destinations map to explore places.
       </p>
       <Link
         href="/signup?next=%2Fcommunity"

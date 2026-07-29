@@ -36,14 +36,14 @@ export function MarketingMobileNav() {
             ['Destinations', '#nextinations'],
             ['Community', '#community'],
             ['Sign in', '/login'],
-            ['Build Your Kolmari Plan', '/quiz'],
+            ['Build My Move Plan', '/quiz'],
           ].map(([label, href]) => (
             <Link
               key={href}
               href={href}
               onClick={() => setOpen(false)}
               className={`block rounded-xl px-4 py-3 text-sm font-bold ${
-                label === 'Build Your Kolmari Plan'
+                label === 'Build My Move Plan'
                   ? 'mt-1 bg-gold text-navy'
                   : 'text-white/80 hover:bg-white/5'
               }`}

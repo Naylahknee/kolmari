@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Kolmari — Build Your Relocation Plan',
     short_name: 'Kolmari',
-    description: 'Compare destinations, review pathways, and build a practical Kolmari Plan.',
+    description: 'Compare destinations, review pathways, and build a practical My Plan.',
     start_url: '/',
     display: 'standalone',
     background_color: '#0D1B39',

@@ -71,7 +71,7 @@ export default function LandingPage() {
               <a href="#destinations" className="transition hover:text-white">Destinations</a>
               <a href="#community" className="transition hover:text-white">Community</a>
               <Link href="/login" className="transition hover:text-white">Sign in</Link>
-              <Link href="/quiz" className="gold-button !min-h-10 !px-4">Build Your Kolmari Plan</Link>
+              <Link href="/quiz" className="gold-button !min-h-10 !px-4">Build My Move Plan</Link>
             </nav>
             <MarketingMobileNav />
           </header>
@@ -87,7 +87,7 @@ export default function LandingPage() {
                 Compare Destinations, review Pathways, and build a realistic Move Plan — without piecing it together across a dozen tabs.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="/quiz" className="gold-button">Build Your Kolmari Plan <ArrowRight size={17} /></Link>
+                <Link href="/quiz" className="gold-button">Build My Move Plan <ArrowRight size={17} /></Link>
                 <Link href="#how-it-works" className="inline-flex min-h-12 items-center rounded-xl border border-white/25 px-5 font-bold text-white transition hover:bg-white/8">
                   See how it works
                 </Link>
@@ -98,7 +98,7 @@ export default function LandingPage() {
 
         <section id="features" className="relative z-20 mx-3 -mt-9 grid overflow-hidden rounded-[18px] border border-line bg-white shadow-[0_20px_50px_-30px_rgba(16,34,68,.4)] sm:mx-8 sm:grid-cols-3">
           {[
-            [Sparkles, 'Find your strongest Pathway', 'Match Scores based on your Kolmari Profile'],
+            [Sparkles, 'Find your strongest Pathway', 'Match Scores based on your Profile'],
             [Calculator, 'Plan your budget', 'Understand realistic costs before you move'],
             [CheckCircle2, 'Move with confidence', 'A step-by-step Move Plan that stays on track'],
           ].map(([Icon, title, copy], index) => (
@@ -171,7 +171,7 @@ export default function LandingPage() {
           <div className="mx-auto w-full max-w-[1180px] px-5">
             <h2 className="max-w-xl font-display text-4xl font-extrabold">Your next chapter deserves a real plan.</h2>
             <p className="mt-3 text-white/75">Compare clearly. Prepare practically. Move with confidence.</p>
-            <Link href="/quiz" className="gold-button mt-6">Build Your Kolmari Plan <ArrowRight size={17} /></Link>
+            <Link href="/quiz" className="gold-button mt-6">Build My Move Plan <ArrowRight size={17} /></Link>
           </div>
         </div>
         <div className="border-t border-white/10 px-5 py-5">

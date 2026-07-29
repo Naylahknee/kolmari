@@ -110,7 +110,7 @@ export default async function SeoPageRoute({ params }: Props) {
           <Wordmark dark />
           <nav className="flex items-center gap-4 text-sm font-bold" aria-label="SEO page navigation">
             <Link href="/login" className="hidden text-white/72 transition hover:text-white sm:inline">Sign in</Link>
-            <Link href={signupHref} className="gold-button !min-h-10 !px-4">Build Your Kolmari Plan</Link>
+            <Link href={signupHref} className="gold-button !min-h-10 !px-4">Build My Move Plan</Link>
           </nav>
         </div>
       </header>
@@ -124,9 +124,9 @@ export default async function SeoPageRoute({ params }: Props) {
           <h1 className="mt-4 max-w-4xl font-display text-4xl font-extrabold leading-tight sm:text-6xl">{page.h1}</h1>
           <p className="mt-6 max-w-3xl text-base leading-8 text-[#c3d0e6] sm:text-lg">{page.intro}</p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href={signupHref} className="gold-button">Build Your Kolmari Plan<ArrowRight size={17} /></Link>
+            <Link href={signupHref} className="gold-button">Build My Move Plan<ArrowRight size={17} /></Link>
             <Link href={page.mapHref} className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/20 px-5 font-bold text-white transition hover:bg-white/8">
-              Kolmarination<MapPinned size={17} />
+              Destinations<MapPinned size={17} />
             </Link>
           </div>
           <p className="mt-6 text-xs text-white/50">Last reviewed {page.lastReviewed}. Planning guidance, not legal, tax, or safety advice.</p>
@@ -138,7 +138,7 @@ export default async function SeoPageRoute({ params }: Props) {
           <div className="max-w-2xl">
             <p className="text-xs font-extrabold uppercase tracking-[.18em] text-gold-deep">Decision engine</p>
             <h2 id="match-heading" className="mt-2 font-display text-3xl font-bold sm:text-4xl">Compare your strongest signals</h2>
-            <p className="mt-3 leading-7 text-muted">Scores are planning signals, not guarantees. Your Kolmari Profile produces the personalized decision.</p>
+            <p className="mt-3 leading-7 text-muted">Scores are planning signals, not guarantees. Your Profile produces the personalized decision.</p>
           </div>
           <div className="mt-7 grid gap-5 lg:grid-cols-3">
             {page.countryCards.map((item) => (
@@ -215,8 +215,8 @@ export default async function SeoPageRoute({ params }: Props) {
         <section className="rounded-[24px] bg-navy-deep p-7 text-white sm:p-10">
           <p className="text-xs font-extrabold uppercase tracking-[.18em] text-gold">From planning to doing</p>
           <h2 className="mt-3 max-w-3xl font-display text-3xl font-bold sm:text-4xl">Turn this research into your Move Plan.</h2>
-          <p className="mt-4 max-w-2xl leading-7 text-white/70">Build your Kolmari Profile, compare personalized Match Scores, review Pathways, and enter Flutter Mode when you&apos;re ready to move.</p>
-          <Link href={signupHref} className="gold-button mt-7">Build Your Kolmari Plan<ArrowRight size={17} /></Link>
+          <p className="mt-4 max-w-2xl leading-7 text-white/70">Build your Profile, compare personalized Match Scores, review Pathways, and enter Flutter Mode when you&apos;re ready to move.</p>
+          <Link href={signupHref} className="gold-button mt-7">Build My Move Plan<ArrowRight size={17} /></Link>
         </section>
       </div>
 
