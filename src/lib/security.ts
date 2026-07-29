@@ -29,23 +29,38 @@ import 'server-only'
  * non-browser API client using a bearer token — those are handled by auth).
  */
 export function isSameOrigin(request: Request): boolean {
-  const origin = request.headers.get('origin')
-  const referer = request.headers.get('referer')
-  const host = request.headers.get('host')
-  if (!host) return false
-
-  const source = origin ?? referer
-  // No Origin/Referer: allow. Browsers attach Origin to cross-site POSTs, so
-  // the dangerous case (a cross-site form/script POST) will have a mismatching
-  // Origin and be rejected below. Legitimate bearer-token API clients that omit
-  // these headers still pass here and are gated by authentication.
+  const source = request.headers.get('origin') ?? request.headers.get('referer')
+  // No Origin/Referer at all (some same-origin fetches; non-browser API clients
+  // using a bearer token): allow — authentication still applies.
   if (!source) return true
 
+  let sourceHost: string
   try {
-    return new URL(source).host === host
+    sourceHost = new URL(source).host
   } catch {
     return false
   }
+
+  // Collect every host this request could legitimately be served under. Behind
+  // proxies/CDNs (Cloudflare Workers + OpenNext) the `Host` header, the
+  // `x-forwarded-host`, and the request URL host can each differ, so accept any.
+  const selfHosts = new Set<string>()
+  const hostHeader = request.headers.get('host')
+  const forwardedHost = request.headers.get('x-forwarded-host')
+  if (hostHeader) selfHosts.add(hostHeader)
+  if (forwardedHost) selfHosts.add(forwardedHost)
+  try {
+    selfHosts.add(new URL(request.url).host)
+  } catch {
+    // ignore an unparseable request URL
+  }
+
+  // If we can't determine our own host at all, fail OPEN rather than lock every
+  // user out — this is defense-in-depth (cookies are SameSite=Lax), not the
+  // primary auth boundary.
+  if (selfHosts.size === 0) return true
+
+  return selfHosts.has(sourceHost)
 }
 
 // ── Best-effort in-memory rate limiter ──────────────────────────────────────
