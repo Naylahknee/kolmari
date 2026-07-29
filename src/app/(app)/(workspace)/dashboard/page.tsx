@@ -73,8 +73,7 @@ export default async function DashboardPage() {
     return (
       <div className="space-y-6">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Your workspace</p>
-          <h1 className="mt-1 text-2xl font-bold text-navy sm:text-3xl">Welcome back, {firstName}.</h1>
+          <h1 className="text-2xl font-bold text-navy sm:text-3xl">Welcome back, {firstName}.</h1>
           <p className="mt-1 text-sm text-muted">Continue building your Kolmari Plan.</p>
         </div>
 

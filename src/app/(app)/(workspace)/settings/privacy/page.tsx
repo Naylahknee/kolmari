@@ -1,9 +1,7 @@
-import { requireCurrentUser } from '@/lib/auth'
-import { PrivacyAccountPage } from '@/components/kolmari/privacy-account-page'
+import { redirect } from 'next/navigation'
 
-export const metadata = { title: 'Privacy & Account — Kolmari' }
-
+// Privacy & Account now lives as a tab inside /settings rather than a separate
+// page. Keep this route as a redirect so existing links still work.
 export default async function PrivacyAccountRoute() {
-  const user = await requireCurrentUser()
-  return <PrivacyAccountPage email={user.email} />
+  redirect('/settings?tab=account')
 }
