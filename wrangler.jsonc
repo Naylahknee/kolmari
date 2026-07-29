@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "main": ".open-next/worker.js",
-  "name": "nexit",
+  "name": "kolmari",
   "compatibility_date": "2026-07-21",
   "compatibility_flags": [
     "nodejs_compat"
