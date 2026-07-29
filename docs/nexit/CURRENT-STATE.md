@@ -934,3 +934,46 @@ SVG shape-maps become real Mapbox maps.
 
 ### Tests: tsc pass · next build pass · ESLint no new errors (36 pre-existing) · visual
 QA via temporary preview route (free/paid × Portugal/Spain/Japan × desktop/mobile).
+
+## Free-user dashboard: gated Journey Progress + Destination & Visa Planner
+
+Owner: the dashboard should show a reference-style layout for FREE users — a
+"Your Journey Progress" milestone stepper (first stage open, later stages
+locked), an upgrade banner, a get-started intro, and a "Destination & Visa
+Planner" (ranked Destination cards + a per-Destination visa/Pathways list).
+Adapted to Kolmari's design language and data-integrity rules (not a clone).
+
+Owner decisions: (1) **actually gate** the later journey stages for free users
+(not just visual); (2) **no fabricated stage durations** — honest names +
+descriptors only.
+
+- **Gate:** `dashboard/page.tsx` branches on `isPaid(profile)`. Free → the new
+  layout below; paid → the existing rich dashboard (unchanged). Everyone is
+  `free` until billing exists, so free is the default view today.
+- **`JourneyProgress`** (`src/components/kolmari/journey-progress.tsx`): the
+  `PLAN_STAGES` stepper with the first stage (Explore) open and every later
+  stage locked (padlock + "Plus" chip, non-interactive), a calm upgrade banner
+  → `/#pricing`, and honest per-stage descriptors with **no durations**. No
+  scarcity/urgency framing (interaction rules). The paid `MoveTracker` is
+  untouched.
+- **`DestinationVisaPlanner`** (`src/components/kolmari/destination-visa-planner.tsx`):
+  ranked Destination image tiles (reusing `destinationImage`), with the free
+  tier's **top 3 unlocked** and any further matched Destinations **locked →
+  upgrade**; plus a "Kolmari Pathways for {Destination}" list from
+  `evaluatePathways(profile)` for the top Destination. Data-integrity: rank
+  numbers and Match Scores show only when the Profile is complete (real
+  scores); otherwise neutral explore tiles (visa-route pill, no rank/score).
+  Pathway names are catalog facts (always shown); match STATUS badges appear
+  only once the Profile is complete — never implying eligibility.
+- Terminology uses approved product language (Destination, Match Score, Kolmari
+  Pathways, Kolmari Plan, Kolmari Profile) and the live rename ("Progress
+  Tracker" / "Your journey progress").
+
+Note: this reintroduces gated journey stages, which supersedes the earlier
+"### 5. App is not gated" decision for the free dashboard specifically (owner
+approved the reversal). Server-side enforcement of plan-stage advancement in My
+Plan is a follow-up; this pass gates the dashboard representation + upsell.
+
+### Tests: tsc pass · next build pass · ESLint no new errors (36 pre-existing) ·
+visual QA via temporary preview route (free dashboard, profile complete +
+incomplete, desktop + mobile).

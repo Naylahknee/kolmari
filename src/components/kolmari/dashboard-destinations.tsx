@@ -15,7 +15,7 @@ const REGION_IMAGE: Record<string, string> = {
   Americas: '/images/regions/latin-america.webp',
 }
 
-function destinationImage(country: CountryDetail) {
+export function destinationImage(country: CountryDetail) {
   return COUNTRY_IMAGE[country.slug] ?? REGION_IMAGE[country.region] ?? '/images/regions/europe.webp'
 }
 

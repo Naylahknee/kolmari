@@ -1,13 +1,15 @@
 import Link from 'next/link'
-import { ArrowRight, CheckCircle2, Globe2, NotebookTabs, Route, UserRound, Wallet } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Globe2, NotebookTabs, PlayCircle, Route, UserRound, Wallet } from 'lucide-react'
 import { requireCurrentUser } from '@/lib/auth'
 import { COUNTRIES } from '@/lib/countries'
 import { getNexitPlan, PLAN_STAGES, type PlanBudget } from '@/lib/kolmari-plan'
 import { evaluatePathways } from '@/lib/pathways'
-import { getProfile, hasCompletedProfile } from '@/lib/profile'
+import { getProfile, hasCompletedProfile, isPaid } from '@/lib/profile'
 import { rankNextinations } from '@/lib/userProfile'
 import { BudgetDonut, BUDGET_COLORS, type BudgetSlice } from '@/components/kolmari/rings'
 import { DashboardDestinations, type DestinationPanel } from '@/components/kolmari/dashboard-destinations'
+import { DestinationVisaPlanner, type PlannerPanel } from '@/components/kolmari/destination-visa-planner'
+import { JourneyProgress } from '@/components/kolmari/journey-progress'
 import { MoveTracker } from '@/components/kolmari/move-tracker'
 
 const BUDGET_LABELS: Record<keyof PlanBudget, string> = {
@@ -41,6 +43,61 @@ export default async function DashboardPage() {
     ? rankedList.slice(0, 3).map((item) => ({ country: item.country, match: item.match.score }))
     : COUNTRIES.slice(0, 3).map((country) => ({ country, match: null }))
   const destinationsRanked = rankedList.length > 0
+
+  // ── FREE plan dashboard ─────────────────────────────────────────────────
+  // Gated journey stepper + upgrade banner, a get-started intro, and the
+  // Destination & Visa Planner. Rank/score only when the Profile is complete.
+  if (!isPaid(profile)) {
+    const plannerPanels: PlannerPanel[] = rankedList.length > 0
+      ? rankedList.slice(0, 3).map((item) => ({ country: item.country, match: item.match.score }))
+      : COUNTRIES.slice(0, 3).map((country) => ({ country, match: null }))
+    const lockedPanels: PlannerPanel[] = rankedList.length > 3
+      ? rankedList.slice(3).map((item) => ({ country: item.country, match: item.match.score }))
+      : []
+    const topCountry = plannerPanels[0].country
+    const topPathways = evaluatePathways(profile).filter((item) => item.country === topCountry.name)
+
+    return (
+      <div className="space-y-6">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Your workspace</p>
+          <h1 className="mt-1 text-2xl font-bold text-navy sm:text-3xl">Welcome back, {firstName}.</h1>
+          <p className="mt-1 text-sm text-muted">Continue building your Kolmari Plan.</p>
+        </div>
+
+        <JourneyProgress stages={PLAN_STAGES} currentIndex={stageIndex} />
+
+        {!complete && (
+          <section className="card-surface p-6 sm:flex sm:items-center sm:justify-between sm:gap-6">
+            <div className="flex items-start gap-4">
+              <span className="grid size-11 shrink-0 place-items-center rounded-[var(--radius-field)] bg-gold-soft" aria-hidden="true">
+                <PlayCircle size={22} className="text-gold-deep" />
+              </span>
+              <div>
+                <h2 className="text-lg font-bold text-navy">Get started with Kolmari</h2>
+                <p className="mt-1 max-w-xl text-sm text-muted">
+                  See how Kolmari helps you compare Destinations, review visa Pathways, and build a realistic
+                  Kolmari Plan — one step at a time.
+                </p>
+              </div>
+            </div>
+            <Link href="/profile-wizard" className="gold-button mt-4 shrink-0 sm:mt-0">
+              Get Started <ArrowRight size={16} />
+            </Link>
+          </section>
+        )}
+
+        <DestinationVisaPlanner
+          panels={plannerPanels}
+          lockedPanels={lockedPanels}
+          ranked={destinationsRanked}
+          topCountry={topCountry}
+          pathways={topPathways}
+          profileComplete={complete}
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
