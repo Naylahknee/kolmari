@@ -2,8 +2,46 @@
 import Link from 'next/link'
 import { toggleAcc, toggleStep } from './client/behaviours'
 
-/* Converted from the approved index.html mockup. Markup verbatim. */
-export function RightRail({}: Record<string, never>) {
+/* The right rail.
+
+   Portugal (`rich`) renders the approved, verified mockup: a real Match Score,
+   a first-actions checklist, and risk notes. Every other country renders an
+   honest rail — no fabricated score — until its dataset is verified. */
+export function RightRail({ rich = false, country }: { rich?: boolean; country?: { name: string; city: string } }) {
+  if (!rich) {
+    const name = country?.name ?? 'this country'
+    const city = country?.city
+    return (
+      <aside className="rightcol">
+        <div className="card-surface" style={{ padding: 20 }}>
+          <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Match Score</p>
+          <p className="mt-2 text-sm leading-6 text-muted">
+            Your personalized Match Score for {name} unlocks once your Profile is complete and this
+            destination has a verified dataset. We never show an estimated score.
+          </p>
+          <Link href="/profile-wizard" className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-btn)] bg-navy px-5 text-sm font-bold text-white transition hover:bg-navy-deep">
+            Complete your Profile
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="14" height="14"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+          </Link>
+        </div>
+
+        <div className="card-surface" style={{ padding: 20 }}>
+          <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Start your research</p>
+          <ul className="mt-3 space-y-3 text-sm leading-6 text-muted">
+            <li>Confirm which residence pathways currently apply to you with the official authority.</li>
+            <li>Compare cities and neighborhoods{city ? `, starting with ${city}` : ''}.</li>
+            <li>Build a real budget in the Cost Calculator from current listings.</li>
+            <li>Save {name} to your shortlist when you want to compare or plan around it.</li>
+          </ul>
+          <Link href="/nexit-plan" className="gold-button btn-full" style={{ marginTop: 16 }}>
+            Build My Move Plan
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="14" height="14"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+          </Link>
+        </div>
+      </aside>
+    )
+  }
+
   return (
     <aside className="rightcol">
             <div className="card-surface">

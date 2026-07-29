@@ -889,3 +889,48 @@ Decisions: Mapbox (token to be provided), add a plan field now, country pages on
 - Optional: tighten the map hero height.
 
 ### Tests: tsc pass · next build pass · ESLint no new errors (36 pre-existing).
+
+## Country pages: correct free/paid gating + rich Portugal-style page for all countries (increment 2)
+
+Owner correction: the gating was backwards. **Paid** users get the rich Portugal-style
+page for **any** country (real maps, honest "being verified" gaps — never fabricated
+figures). **Free** users get a **simple, non-expanded** view for any country: info +
+short summary + basic visa info + a small real map + an upgrade CTA. The remaining fake
+SVG shape-maps become real Mapbox maps.
+
+- **Free view:** new `src/components/country-template/SimpleCountryView.tsx` — flag +
+  name + region/city, `CountryDetail.summary` (honest fallback for discoverables), a
+  basic visa line (`visaType` + income guideline, else "visa details being verified"),
+  a small real `CountrySnapshotMap` (via `getCountryCenter`), and an "Unlock the full
+  {country} page" CTA → `/#pricing`. No tabs/snapshot/ring/checklist.
+- **Paid rich view for all countries:** the `CountryTemplate` frame is now data-driven.
+  - `CountryHero` takes the country record + center + a `rich` flag. Portugal (`rich`)
+    keeps its approved, verified content; every other country renders the same frame
+    with honest "Being verified" metrics. The decorative `hero-shape` SVG silhouette is
+    replaced by a **real map background** (`.hero-map`) when a token + center exist,
+    otherwise the navy gradient (never a fake shape).
+  - New `tabs/DataOverviewTab.tsx` drives the Overview for every non-Portugal country
+    from `getCountryFacts` + `getCountryCityOverviews` with real `CountrySnapshotMap` /
+    `CityMapImage` maps and honest "Researching" states where a dataset is absent.
+  - `RightRail` takes a `rich` flag: Portugal keeps its verified Match Score + checklist;
+    other countries get an honest locked Match Score + "start your research" rail (no
+    fabricated score).
+  - Portugal's own `OverviewTab` fake maps are now real: the `.map-card` locator →
+    `CountrySnapshotMap`; the four `.city-map` shape blobs → real `CityMapImage` (Lisbon,
+    Porto, Funchal, Braga). Deeper non-Portugal tabs show an honest "being verified"
+    panel inside the rich frame (binding each data country's full `country-content.ts`
+    into all tabs is a fast follow).
+- **Gate:** the v2 route (`nextinations/[countrySlug]/v2/[section]`) now branches on
+  `isPaid(profile)` — free → `SimpleCountryView`; paid → rich `CountryTemplate`
+  (Portugal verified, all others data-driven). The interim `CountryResearchTemplate`
+  (the "Japan" layout) is retired/removed.
+
+### Remaining (noted to owner)
+- Provide `NEXT_PUBLIC_MAPBOX_TOKEN` (dev `.env.local`; a `vars` entry in
+  `wrangler.jsonc` for Cloudflare) to turn on real map tiles — until then all maps show
+  the honest "map unavailable" fallback.
+- Fast follow: bind the four data countries' (`spain`/`greece`/`estonia`/`mexico`)
+  `country-content.ts` into the deeper paid tabs so they are as rich as Portugal.
+
+### Tests: tsc pass · next build pass · ESLint no new errors (36 pre-existing) · visual
+QA via temporary preview route (free/paid × Portugal/Spain/Japan × desktop/mobile).
