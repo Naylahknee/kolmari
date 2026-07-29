@@ -1,10 +1,21 @@
+'use client'
+import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, ChevronRight, Lock, LockOpen, Pencil } from 'lucide-react'
-import { countryFlag, type CountryDetail } from '@/lib/countries'
-import type { PathwayEvaluation, PathwayMatchStatus } from '@/lib/pathways'
-import { destinationImage } from './dashboard-destinations'
+import { ArrowRight, ChevronRight, Lock, Pencil } from 'lucide-react'
+import type { PathwayMatchStatus } from '@/lib/pathways'
 
-export type PlannerPanel = { country: CountryDetail; match: number | null }
+export type PlannerPathway = { id: string; name: string; category: string; status: PathwayMatchStatus }
+export type PlannerDestination = {
+  slug: string
+  name: string
+  code: string
+  city: string
+  region: string
+  visaType: string
+  match: number | null
+  locked: boolean
+  pathways: PlannerPathway[]
+}
 
 const STATUS_TONE: Record<PathwayMatchStatus, string> = {
   'Strong Match': 'bg-ok-soft text-ok',
@@ -12,88 +23,37 @@ const STATUS_TONE: Record<PathwayMatchStatus, string> = {
   'Missing Requirements': 'bg-canvas text-muted',
 }
 
-/** A single ranked destination tile. Locked tiles are dimmed and route to
- *  the upgrade page instead of the Destination workspace. */
-function DestinationTile({
-  panel,
-  rank,
-  ranked,
-  locked,
-}: {
-  panel: PlannerPanel
-  rank: number
-  ranked: boolean
-  locked: boolean
-}) {
-  const { country, match } = panel
-  const href = locked ? '/#pricing' : `/nextinations/${country.slug}`
+function Flag({ code, className }: { code: string; className?: string }) {
   return (
-    <Link
-      href={href}
-      className="group relative flex aspect-[16/7] flex-col justify-end overflow-hidden rounded-[var(--radius-card)] border border-line shadow-tile transition hover:border-gold hover:shadow-card"
-      style={{
-        backgroundImage: `linear-gradient(180deg, rgba(13,27,57,0) 30%, rgba(13,27,57,0.84) 100%), url(${destinationImage(country)})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
-    >
-      {ranked && (
-        <span className="absolute left-3 top-3 rounded-pill bg-white/90 px-2.5 py-1 text-xs font-extrabold text-navy shadow-tile">
-          #{rank}
-        </span>
-      )}
-      <span
-        className="absolute right-3 top-3 grid size-8 place-items-center rounded-full bg-white/90 text-navy shadow-tile"
-        aria-hidden="true"
-      >
-        {locked ? <Lock size={14} className="text-gold-deep" /> : <LockOpen size={14} className="text-muted" />}
-      </span>
-      <div className="relative p-4 text-white">
-        <p className="text-lg font-bold leading-tight">{country.name}</p>
-        <p className="text-xs text-white/80">{country.city} · {country.region}</p>
-        <div className="mt-2 flex items-center gap-2">
-          {locked ? (
-            <span className="rounded-pill bg-gold px-2.5 py-1 text-xs font-bold text-navy-deep">Unlock with Plus</span>
-          ) : match !== null ? (
-            <span className="rounded-pill bg-gold px-2.5 py-1 text-xs font-bold text-navy-deep">{match}% Match Score</span>
-          ) : (
-            <span className="rounded-pill border border-white/40 bg-white/10 px-2.5 py-1 text-xs font-semibold text-white">
-              {country.visaType} route
-            </span>
-          )}
-          <ArrowRight size={15} className="text-gold opacity-0 transition group-hover:opacity-100" aria-hidden="true" />
-        </div>
-      </div>
-    </Link>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={`https://flagcdn.com/${code.toLowerCase()}.svg`}
+      alt=""
+      className={className}
+      onError={(e) => { e.currentTarget.style.display = 'none' }}
+    />
   )
 }
 
 /**
- * Free-plan "Destination & Visa Planner" — ranked Destination tiles plus the
- * Kolmari Pathways catalogued for the top Destination.
- *
- * Data integrity: rank numbers and Match Scores appear only when the Profile is
- * complete (real scores); otherwise tiles are neutral "explore" panels. Pathway
- * NAMES are catalog facts and always shown, but match STATUS is shown only once
- * the Profile is complete — we never imply eligibility.
+ * Free-plan "Destination & Visa Planner" — small country panels arranged
+ * horizontally; clicking one reveals its details (Kolmari Pathways) below.
+ * Uses each country's flag (per-country, reliable) rather than a shared map
+ * graphic. Rank numbers / Match Scores appear only when the Profile is
+ * complete; pathway match status only when complete — never implying eligibility.
  */
 export function DestinationVisaPlanner({
-  panels,
-  lockedPanels,
+  destinations,
   ranked,
-  topCountry,
-  pathways,
   profileComplete,
 }: {
-  panels: PlannerPanel[]
-  lockedPanels: PlannerPanel[]
+  destinations: PlannerDestination[]
   ranked: boolean
-  topCountry: CountryDetail
-  pathways: PathwayEvaluation[]
   profileComplete: boolean
 }) {
-  const shown = pathways.slice(0, 4)
-  const extra = pathways.length - shown.length
+  const firstUnlocked = destinations.find((d) => !d.locked) ?? destinations[0]
+  const [openSlug, setOpenSlug] = useState<string | null>(firstUnlocked?.slug ?? null)
+  const selected = destinations.find((d) => d.slug === openSlug) ?? null
 
   return (
     <section className="card-surface p-6" aria-labelledby="planner-heading">
@@ -109,88 +69,109 @@ export function DestinationVisaPlanner({
 
       <p className="mt-1 text-sm text-muted">
         {ranked
-          ? 'Your top Destinations, ranked by Match Score.'
+          ? 'Your top Destinations. Tap one to see its Pathways.'
           : 'Destinations to explore. Complete your Kolmari Profile to see personalized matches.'}
       </p>
 
-      {/* Ranked destination tiles */}
-      <div className="mt-5 space-y-3">
-        {panels.map((panel, index) => (
-          <DestinationTile key={panel.country.slug} panel={panel} rank={index + 1} ranked={ranked} locked={false} />
-        ))}
-        {lockedPanels.map((panel, index) => (
-          <DestinationTile key={panel.country.slug} panel={panel} rank={panels.length + index + 1} ranked={ranked} locked />
-        ))}
+      {/* Small panels, arranged horizontally */}
+      <div className="mt-4 flex flex-wrap gap-2">
+        {destinations.map((d, index) => {
+          const active = d.slug === openSlug
+          return (
+            <button
+              key={d.slug}
+              type="button"
+              onClick={() => setOpenSlug(active ? null : d.slug)}
+              aria-expanded={active}
+              className={[
+                'inline-flex items-center gap-2 rounded-[var(--radius-field)] border px-3 py-2 text-sm font-semibold transition',
+                active ? 'border-gold bg-gold-soft/60 text-navy' : 'border-line bg-white text-navy hover:border-gold/60',
+              ].join(' ')}
+            >
+              {ranked && <span className="text-xs font-extrabold text-gold-deep">#{index + 1}</span>}
+              <Flag code={d.code} className="h-3.5 w-5 rounded-[2px] object-cover" />
+              <span>{d.name}</span>
+              {d.locked
+                ? <Lock size={13} className="text-gold-deep" aria-hidden="true" />
+                : <ChevronRight size={14} className={`text-muted transition ${active ? 'rotate-90' : ''}`} aria-hidden="true" />}
+            </button>
+          )
+        })}
       </div>
 
-      {lockedPanels.length > 0 && (
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-field)] border border-gold/30 bg-gold-soft/40 p-4">
-          <p className="flex items-center gap-2 text-sm font-semibold text-navy">
-            <Lock size={15} className="shrink-0 text-gold-deep" aria-hidden="true" />
-            Plus unlocks every matched Destination — not just your top {panels.length}.
-          </p>
-          <Link href="/#pricing" className="gold-button shrink-0">
-            Upgrade <ArrowRight size={15} />
-          </Link>
+      {/* Revealed details for the selected panel */}
+      {selected && (
+        <div className="mt-4 rounded-[var(--radius-card)] border border-line bg-canvas p-5">
+          <div className="flex items-center gap-3">
+            <Flag code={selected.code} className="h-6 w-9 rounded-[3px] object-cover shadow-sm" />
+            <div className="min-w-0">
+              <h3 className="text-base font-bold text-navy">{selected.name}</h3>
+              <p className="text-xs text-muted">{selected.city} · {selected.region}</p>
+            </div>
+            <span className="ml-auto">
+              {selected.match !== null ? (
+                <span className="rounded-pill bg-gold px-2.5 py-1 text-xs font-bold text-navy-deep">{selected.match}% Match Score</span>
+              ) : (
+                <span className="rounded-pill border border-line bg-white px-2.5 py-1 text-xs font-semibold text-muted">{selected.visaType} route</span>
+              )}
+            </span>
+          </div>
+
+          {selected.locked ? (
+            <div className="mt-4 rounded-[var(--radius-field)] border border-gold/30 bg-gold-soft/40 p-4 sm:flex sm:items-center sm:justify-between sm:gap-3">
+              <p className="flex items-center gap-2 text-sm font-semibold text-navy">
+                <Lock size={15} className="shrink-0 text-gold-deep" aria-hidden="true" />
+                Unlock {selected.name} and every matched Destination with Plus.
+              </p>
+              <Link href="/#pricing" className="gold-button mt-3 shrink-0 sm:mt-0">
+                Upgrade <ArrowRight size={15} />
+              </Link>
+            </div>
+          ) : (
+            <>
+              <p className="mt-4 text-xs font-bold uppercase tracking-widest text-gold-deep">Kolmari Pathways for {selected.name}</p>
+              {selected.pathways.length > 0 ? (
+                <ul className="mt-2 space-y-2">
+                  {selected.pathways.slice(0, 4).map((p) => (
+                    <li key={p.id}>
+                      <Link
+                        href="/pathways"
+                        className="flex items-center justify-between gap-3 rounded-[var(--radius-field)] border border-line bg-white px-4 py-3 transition hover:border-gold"
+                      >
+                        <span className="min-w-0">
+                          <span className="block truncate text-sm font-semibold text-navy">{p.name}</span>
+                          <span className="block text-xs text-muted">{p.category}</span>
+                        </span>
+                        <span className="flex shrink-0 items-center gap-2">
+                          {profileComplete && (
+                            <span className={`rounded-pill px-2.5 py-1 text-[11px] font-bold ${STATUS_TONE[p.status]}`}>{p.status}</span>
+                          )}
+                          <ChevronRight size={15} className="text-muted" aria-hidden="true" />
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-2 rounded-[var(--radius-field)] bg-white px-4 py-3 text-sm text-muted">
+                  No Kolmari Pathways are catalogued yet for {selected.name}.
+                </p>
+              )}
+              {!profileComplete && selected.pathways.length > 0 && (
+                <p className="mt-3 text-xs text-muted">Complete your Kolmari Profile to see match status for each Pathway.</p>
+              )}
+              <div className="mt-4 flex flex-wrap items-center gap-4">
+                <Link href={`/nextinations/${selected.slug}`} className="inline-flex items-center gap-1 text-xs font-bold text-gold-deep hover:text-navy">
+                  Open {selected.name} <ArrowRight size={12} />
+                </Link>
+                <Link href="/pathways" className="inline-flex items-center gap-1 text-xs font-bold text-gold-deep hover:text-navy">
+                  View all Pathways <ArrowRight size={12} />
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       )}
-
-      {/* Visa options for the top destination */}
-      <div className="mt-6 rounded-[var(--radius-card)] border border-line bg-canvas p-4">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl" aria-hidden="true">{countryFlag(topCountry.code)}</span>
-          <div>
-            <h3 className="text-sm font-bold text-navy">Kolmari Pathways for {topCountry.name}</h3>
-            <p className="text-xs text-muted">Research routes for this Destination — not an eligibility decision.</p>
-          </div>
-        </div>
-
-        {shown.length > 0 ? (
-          <ul className="mt-4 space-y-2">
-            {shown.map((pathway) => (
-              <li key={pathway.id}>
-                <Link
-                  href="/pathways"
-                  className="flex items-center justify-between gap-3 rounded-[var(--radius-field)] border border-line bg-white px-4 py-3 transition hover:border-gold"
-                >
-                  <span className="min-w-0">
-                    <span className="block truncate text-sm font-semibold text-navy">{pathway.name}</span>
-                    <span className="block text-xs text-muted">{pathway.category}</span>
-                  </span>
-                  <span className="flex shrink-0 items-center gap-2">
-                    {profileComplete && (
-                      <span className={`rounded-pill px-2.5 py-1 text-[11px] font-bold ${STATUS_TONE[pathway.status]}`}>
-                        {pathway.status}
-                      </span>
-                    )}
-                    <ChevronRight size={15} className="text-muted" aria-hidden="true" />
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="mt-4 rounded-[var(--radius-field)] bg-white px-4 py-3 text-sm text-muted">
-            No Kolmari Pathways are catalogued yet for {topCountry.name}. Browse all researched routes in Pathways.
-          </p>
-        )}
-
-        {!profileComplete && shown.length > 0 && (
-          <p className="mt-3 text-xs text-muted">
-            Complete your Kolmari Profile to see match status for each Pathway.
-          </p>
-        )}
-
-        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1">
-          <Link href="/pathways" className="inline-flex items-center gap-1 text-xs font-bold text-gold-deep hover:text-navy">
-            {extra > 0 ? `View all Pathways (+${extra} more)` : 'View all Pathways'} <ArrowRight size={12} />
-          </Link>
-        </div>
-      </div>
-
-      <p className="mt-4 text-xs text-muted">
-        Explore a Destination to see its Pathways. Upgrade to Plus to compare and plan across all of them.
-      </p>
     </section>
   )
 }

@@ -29,9 +29,11 @@ export function JourneyProgress({
   stages: readonly string[]
   currentIndex: number
 }) {
-  // Free users can use the first stage; everything after it is locked until Plus.
-  const openTo = 0
-  const activeIndex = currentIndex > openTo ? openTo : Math.max(currentIndex, 0)
+  // Reflect the real plan stage so the tracker updates as the user progresses.
+  // Completed stages show a check, the current stage is highlighted, and later
+  // stages are locked (Plus).
+  const started = currentIndex >= 0
+  const activeIndex = started ? currentIndex : 0
 
   return (
     <section className="card-surface p-6" aria-labelledby="journey-heading">
@@ -40,7 +42,9 @@ export function JourneyProgress({
           <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Progress Tracker</p>
           <h2 id="journey-heading" className="mt-1 text-lg font-bold text-navy">Your journey progress</h2>
           <p className="mt-1 text-sm text-muted">
-            Start in the {stages[0]} stage. Unlock the rest of your move with Plus.
+            {started
+              ? `You're in the ${stages[activeIndex]} stage. Unlock later stages with Plus.`
+              : `Start in the ${stages[0]} stage. Unlock later stages with Plus.`}
           </p>
         </div>
       </div>
@@ -60,7 +64,7 @@ export function JourneyProgress({
         {stages.map((stage, index) => {
           const done = index < activeIndex
           const active = index === activeIndex
-          const locked = index > openTo
+          const locked = index > activeIndex
           return (
             <li key={stage} className="flex min-w-[8.5rem] flex-1 flex-col items-center text-center">
               <div className="flex w-full items-center">

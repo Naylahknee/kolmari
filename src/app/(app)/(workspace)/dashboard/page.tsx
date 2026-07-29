@@ -8,7 +8,7 @@ import { getProfile, hasCompletedProfile, isPaid } from '@/lib/profile'
 import { rankNextinations } from '@/lib/userProfile'
 import { BudgetDonut, BUDGET_COLORS, type BudgetSlice } from '@/components/kolmari/rings'
 import { DashboardDestinations, type DestinationPanel } from '@/components/kolmari/dashboard-destinations'
-import { DestinationVisaPlanner, type PlannerPanel } from '@/components/kolmari/destination-visa-planner'
+import { DestinationVisaPlanner, type PlannerDestination, type PlannerPathway } from '@/components/kolmari/destination-visa-planner'
 import { JourneyProgress } from '@/components/kolmari/journey-progress'
 import { MoveTracker } from '@/components/kolmari/move-tracker'
 
@@ -48,14 +48,27 @@ export default async function DashboardPage() {
   // Gated journey stepper + upgrade banner, a get-started intro, and the
   // Destination & Visa Planner. Rank/score only when the Profile is complete.
   if (!isPaid(profile)) {
-    const plannerPanels: PlannerPanel[] = rankedList.length > 0
-      ? rankedList.slice(0, 3).map((item) => ({ country: item.country, match: item.match.score }))
-      : COUNTRIES.slice(0, 3).map((country) => ({ country, match: null }))
-    const lockedPanels: PlannerPanel[] = rankedList.length > 3
-      ? rankedList.slice(3).map((item) => ({ country: item.country, match: item.match.score }))
-      : []
-    const topCountry = plannerPanels[0].country
-    const topPathways = evaluatePathways(profile).filter((item) => item.country === topCountry.name)
+    // Build the planner's destinations with each country's own Pathways. Free
+    // plan: the first three are open, the rest are locked (Plus).
+    const evaluated = evaluatePathways(profile)
+    const pathwaysFor = (name: string): PlannerPathway[] =>
+      evaluated
+        .filter((p) => p.country === name)
+        .map((p) => ({ id: p.id, name: p.name, category: p.category, status: p.status }))
+    const base = rankedList.length > 0
+      ? rankedList.map((item) => ({ country: item.country, match: item.match.score as number | null }))
+      : COUNTRIES.map((country) => ({ country, match: null as number | null }))
+    const destinations: PlannerDestination[] = base.map(({ country, match }, index) => ({
+      slug: country.slug,
+      name: country.name,
+      code: country.code,
+      city: country.city,
+      region: country.region,
+      visaType: country.visaType,
+      match,
+      locked: index >= 3,
+      pathways: pathwaysFor(country.name),
+    }))
 
     return (
       <div className="space-y-6">
@@ -88,11 +101,8 @@ export default async function DashboardPage() {
         )}
 
         <DestinationVisaPlanner
-          panels={plannerPanels}
-          lockedPanels={lockedPanels}
+          destinations={destinations}
           ranked={destinationsRanked}
-          topCountry={topCountry}
-          pathways={topPathways}
           profileComplete={complete}
         />
       </div>
