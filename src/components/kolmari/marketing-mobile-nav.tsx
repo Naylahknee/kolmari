@@ -15,7 +15,7 @@ export function MarketingMobileNav() {
         aria-controls="mobile-marketing-menu"
         aria-label={open ? 'Close navigation' : 'Open navigation'}
         onClick={() => setOpen((v) => !v)}
-        className="grid size-10 place-items-center rounded-xl border border-white/15"
+        className="grid size-10 place-items-center rounded-xl border border-line text-navy"
       >
         {open ? <X size={20} /> : <Menu size={20} />}
       </button>
@@ -23,7 +23,7 @@ export function MarketingMobileNav() {
         <nav
           id="mobile-marketing-menu"
           aria-label="Mobile navigation"
-          className="absolute right-0 top-12 w-64 rounded-[var(--radius-card)] border border-white/10 bg-navy-card p-3 shadow-2xl"
+          className="absolute right-0 top-12 z-50 w-64 rounded-[var(--radius-card)] border border-line bg-white p-3 shadow-[0_20px_50px_-24px_rgba(16,34,68,0.4)]"
         >
           <div className="mb-2 px-2 py-1">
             <span onClick={() => setOpen(false)}>
@@ -32,8 +32,6 @@ export function MarketingMobileNav() {
           </div>
           {[
             ['How it works', '#how-it-works'],
-            ['Features', '#features'],
-            ['Destinations', '#nextinations'],
             ['Community', '#community'],
             ['Sign in', '/login'],
             ['Build My Move Plan', '/quiz'],
@@ -45,7 +43,7 @@ export function MarketingMobileNav() {
               className={`block rounded-xl px-4 py-3 text-sm font-bold ${
                 label === 'Build My Move Plan'
                   ? 'mt-1 bg-gold text-navy'
-                  : 'text-white/80 hover:bg-white/5'
+                  : 'text-navy/80 hover:bg-canvas'
               }`}
             >
               {label}

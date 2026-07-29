@@ -763,3 +763,24 @@ Seven owner-requested changes.
 | TypeScript (`tsc --noEmit`) | ✅ Pass |
 | Production build (`next build`) | ✅ Pass — all routes generated |
 | ESLint | ✅ No new errors (36 pre-existing country-template `<a>` errors unchanged) |
+
+---
+
+## Landing page redesign (conversion-focused, 4-color palette)
+
+Redesigned the marketing landing page (`src/app/(marketing)/page.tsx`) using the
+owner-supplied landing-page-designer framework (SaaS + considered-service patterns).
+
+- **4-color palette** (owner choice): Navy Deep, Gold (action-only), Canvas
+  off-white, White. Teal removed from the landing page.
+- **Single conversion goal:** every primary CTA points to `/quiz`; the Kolmari Klub
+  community CTA was demoted to a secondary outline button.
+- **Sticky header** with a persistent gold "Build My Move Plan" CTA.
+- **The Journey** (new trust layer — honest process transparency, no fabricated
+  stats/testimonials): Quiz → Destination Match → Visa Pathway → Move Plan →
+  Readiness Tracker, horizontal on desktop / vertical on mobile, ending in `/quiz`.
+- **Fixed the broken logo** (missing `/brand/nexit-butterfly.png` → on-disk
+  `favicon-512.png` mark + "Kolmari" wordmark, `tone` prop for dark/light).
+- Fixed the mobile-nav `#nextinations` anchor typo; removed dead `MarketingWordmark`.
+
+### Tests: tsc pass · next build pass (55 pages) · ESLint no new errors · visual (desktop+mobile) verified.
