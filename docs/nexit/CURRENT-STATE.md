@@ -784,3 +784,28 @@ owner-supplied landing-page-designer framework (SaaS + considered-service patter
 - Fixed the mobile-nav `#nextinations` anchor typo; removed dead `MarketingWordmark`.
 
 ### Tests: tsc pass · next build pass (55 pages) · ESLint no new errors · visual (desktop+mobile) verified.
+
+---
+
+## Top-of-funnel consistency: auth + quiz (follow-up to landing redesign)
+
+Carried the landing's 4-color discipline into the auth pages and the quiz. Both were
+already teal-free, so this was a cohesion + logo-fix pass.
+
+- **Root-cause logo fix:** `Wordmark` referenced the missing `/brand/KolmariWordMark.svg`
+  (broken image on auth). It now delegates to `MarketingLogo` (on-disk favicon mark +
+  "Kolmari" text); `MarketingLogo` gained an optional `href`. One logo implementation.
+- **Branded auth:** new `AuthShell` gives login + signup one consistent layout — a navy
+  brand panel (hero-grid texture, logo, value prop + 3 gold-check bullets echoing the
+  landing Journey) beside a white form card; single column on mobile. `AuthForm`,
+  `safeNextPath`, and the `?next=` flow are unchanged.
+- **Quiz polish:** added the working logo to both header states, added the hero-grid
+  dot texture, and fixed the h1 copy ("Build your Move Planning starting point." →
+  "Find your move-planning starting point."). Palette already navy/gold/canvas/white.
+
+### Files changed
+`src/components/kolmari/wordmark.tsx`, `marketing-logo.tsx`, new `auth-shell.tsx`,
+`src/app/(auth)/login/page.tsx`, `src/app/(auth)/signup/page.tsx`,
+`src/app/(marketing)/quiz/page.tsx`.
+
+### Tests: tsc pass · next build pass · ESLint no new errors · /login, /signup, /quiz screenshotted (desktop+mobile), 0 teal, logo resolves.

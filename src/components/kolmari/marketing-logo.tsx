@@ -7,11 +7,11 @@ import Link from 'next/link'
  * text color for the surface it sits on ('dark' text on light surfaces,
  * 'light' text on dark surfaces).
  */
-export function MarketingLogo({ compact = false, tone = 'dark' }: { compact?: boolean; tone?: 'dark' | 'light' }) {
+export function MarketingLogo({ compact = false, tone = 'dark', href = '/' }: { compact?: boolean; tone?: 'dark' | 'light'; href?: string }) {
   const mark = compact ? 28 : 34
   const inner = Math.round(mark * 0.72)
   return (
-    <Link href="/" aria-label="Kolmari home" className="inline-flex shrink-0 items-center gap-2.5">
+    <Link href={href} aria-label="Kolmari home" className="inline-flex shrink-0 items-center gap-2.5">
       <span
         className="grid shrink-0 place-items-center rounded-[9px] bg-navy-deep"
         style={{ width: mark, height: mark }}
