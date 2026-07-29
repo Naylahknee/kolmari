@@ -5,6 +5,12 @@ import { getSql } from './db'
 export const WIZARD_STATUSES = ['not_started', 'in_progress', 'completed', 'skipped'] as const
 export type WizardStatus = (typeof WIZARD_STATUSES)[number]
 
+// Subscription tier. Maps to the landing pricing: free = Explorer, plus = Plus,
+// navigator = Navigator. There is no billing yet — everyone is 'free' and the
+// column is settable manually for testing until checkout is built.
+export const PLAN_TIERS = ['free', 'plus', 'navigator'] as const
+export type PlanTier = (typeof PLAN_TIERS)[number]
+
 export const PATHWAY_GOALS = [
   'Remote Work',
   'Employment',
@@ -19,6 +25,7 @@ export type PathwayGoal = (typeof PATHWAY_GOALS)[number]
 
 export type RelocationProfile = {
   user_id: number
+  plan: PlanTier
   wizard_status: WizardStatus
   display_name: string | null
   citizenship: string | null
@@ -53,6 +60,7 @@ let profilesTableReady: Promise<void> | null = null
 export function emptyProfile(userId: number): RelocationProfile {
   return {
     user_id: userId,
+    plan: 'free',
     wizard_status: 'not_started',
     display_name: null,
     citizenship: null,
@@ -87,6 +95,16 @@ export function hasCompletedProfile(profile: RelocationProfile) {
   return profile.wizard_status === 'completed'
 }
 
+/** True when the profile's plan is at least `min` in the tier order. */
+export function hasPlan(profile: RelocationProfile, min: PlanTier) {
+  return PLAN_TIERS.indexOf(profile.plan) >= PLAN_TIERS.indexOf(min)
+}
+
+/** True for any paid tier (Plus or Navigator). */
+export function isPaid(profile: RelocationProfile) {
+  return profile.plan !== 'free'
+}
+
 async function ensureProfilesTable() {
   if (!profilesTableReady) {
     profilesTableReady = (async () => {
@@ -94,6 +112,7 @@ async function ensureProfilesTable() {
       await sql`
         CREATE TABLE IF NOT EXISTS profiles (
           user_id INT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+          plan TEXT NOT NULL DEFAULT 'free',
           wizard_status TEXT NOT NULL DEFAULT 'not_started',
           display_name TEXT,
           citizenship TEXT,
@@ -124,6 +143,7 @@ async function ensureProfilesTable() {
           updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )
       `
+      await sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS plan TEXT NOT NULL DEFAULT 'free'`
       await sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS wizard_status TEXT NOT NULL DEFAULT 'not_started'`
       await sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS citizenship TEXT`
       await sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS annual_income INT CHECK (annual_income >= 0)`
@@ -199,6 +219,7 @@ function normalizeProfile(row: RelocationProfile): RelocationProfile {
   return {
     ...emptyProfile(row.user_id),
     ...row,
+    plan: PLAN_TIERS.includes(row.plan) ? row.plan : 'free',
     wizard_status: WIZARD_STATUSES.includes(row.wizard_status) ? row.wizard_status : 'not_started',
     preferred_regions: asStringArray(row.preferred_regions),
     goals: asStringArray(row.goals).filter((goal): goal is PathwayGoal => PATHWAY_GOALS.includes(goal as PathwayGoal)),
@@ -220,14 +241,14 @@ export async function saveProfile(profile: RelocationProfile) {
   const wizardCompleted = profile.wizard_status === 'completed'
   const rows = await getSql()`
     INSERT INTO profiles (
-      user_id, wizard_status, display_name, citizenship, current_country,
+      user_id, plan, wizard_status, display_name, citizenship, current_country,
       monthly_income, annual_income, income_type, remote, occupation, credentials,
       education, savings, household_type, family_size, spouse, dependents,
       ancestry_connections, preferred_regions, preferred_region, timeline, priority,
       goals, climate, onboarding_completed, wizard_completed, completed_tasks,
       completed_at, updated_at
     ) VALUES (
-      ${profile.user_id}, ${profile.wizard_status}, ${profile.display_name}, ${profile.citizenship}, ${profile.current_country},
+      ${profile.user_id}, ${profile.plan}, ${profile.wizard_status}, ${profile.display_name}, ${profile.citizenship}, ${profile.current_country},
       ${profile.monthly_income}, ${profile.annual_income}, ${profile.income_type}, ${profile.remote}, ${profile.occupation}, ${profile.credentials},
       ${profile.education}, ${profile.savings}, ${profile.household_type}, ${profile.family_size}, ${profile.spouse}, ${profile.dependents},
       ${profile.ancestry_connections}, ${preferredRegions}::jsonb, ${profile.preferred_region}, ${profile.timeline}, ${profile.priority},
@@ -235,6 +256,7 @@ export async function saveProfile(profile: RelocationProfile) {
       ${profile.completed_at}, NOW()
     )
     ON CONFLICT (user_id) DO UPDATE SET
+      plan = EXCLUDED.plan,
       wizard_status = EXCLUDED.wizard_status,
       display_name = EXCLUDED.display_name,
       citizenship = EXCLUDED.citizenship,

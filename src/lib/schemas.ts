@@ -31,6 +31,8 @@ export const authSchema = z.object({
 }).strict()
 
 export const profileUpdateSchema = z.object({
+  // Settable manually for testing tier gating until billing exists.
+  plan: z.enum(['free', 'plus', 'navigator']).optional(),
   wizard_status: z.enum(['not_started', 'in_progress', 'completed', 'skipped']).optional(),
   display_name: z.string().trim().max(80).nullable().optional(),
   citizenship: z.string().trim().max(80).nullable().optional(),

@@ -857,3 +857,35 @@ freemium value-ladder norm). Owner chose: Free + two paid tiers + a concierge ad
   separate build. Tier CTAs currently funnel to /quiz (Explorer) and /signup (paid).
 
 ### Tests: tsc pass · next build pass · ESLint no new errors (36 pre-existing).
+
+---
+
+## Country pages: real maps, plan/tier field, free vs paid views (increment 1)
+
+Owner: clean up country pages, real maps (not shapes), simple (free) vs expanded (paid).
+Decisions: Mapbox (token to be provided), add a plan field now, country pages only.
+
+- **Plan/tier field:** `plan` column on `profiles` (`free`/`plus`/`navigator`, default
+  `free`) — type + emptyProfile + normalize + save + CREATE TABLE + runtime migration
+  (`ensureProfilesTable`) + `db/migrations/004_profile_plan.sql`. Helpers `hasPlan()` /
+  `isPaid()` in `src/lib/profile.ts`. Settable via `profileUpdateSchema` for testing
+  (no billing yet — everyone is `free`).
+- **Real maps:** `src/lib/country-geo.ts` `getCountryCenter(slug)` (from world-places +
+  supplemental centroids, covers all 30 country slugs). The standard country page now
+  renders a **real Mapbox static-map hero** (reusing `CountrySnapshotMap`) instead of an
+  SVG shape; shows an honest "map unavailable" fallback until `NEXT_PUBLIC_MAPBOX_TOKEN`
+  is set (CSP already allows Mapbox).
+- **Consistent layout + free/paid:** rewrote `CountryResearchTemplate` (every country
+  except Portugal — 29 of 30) into one clean layout: map hero + tabs + overview (free)
+  + a right rail. Free plan sees a **"Plus feature" upgrade lock**; paid sees the
+  **expanded research workspace**. The v2 route reads `profile.plan` + the country
+  center and passes them in.
+
+### Remaining (increment 2, noted to owner)
+- Portugal still uses the old `CountryTemplate` (SVG-shape hero + fake overview map);
+  convert it to the real-map hero + gating so all 30 match.
+- Provide `NEXT_PUBLIC_MAPBOX_TOKEN` (`.env.local` for dev; a `vars` entry in
+  `wrangler.jsonc` for the Cloudflare deploy) to turn on real map tiles.
+- Optional: tighten the map hero height.
+
+### Tests: tsc pass · next build pass · ESLint no new errors (36 pre-existing).
