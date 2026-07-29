@@ -1,5 +1,8 @@
 import { notFound } from 'next/navigation'
 import { COUNTRIES, getDiscoverableCountry } from '@/lib/countries'
+import { requireCurrentUser } from '@/lib/auth'
+import { getProfile } from '@/lib/profile'
+import { getCountryCenter } from '@/lib/country-geo'
 import { CountryResearchTemplate } from '@/components/country-template/CountryResearchTemplate'
 import { CountryTemplate } from '@/components/country-template/CountryTemplate'
 import { TAB_SLUGS, type TabSlug } from '@/components/country-template/TabBar'
@@ -34,11 +37,21 @@ export default async function CountryV2Page({ params, searchParams }: Props) {
 
   const active = (TAB_SLUGS.includes(section as TabSlug) ? section : 'overview') as TabSlug
 
+  const user = await requireCurrentUser()
+  const profile = await getProfile(user.id)
+
   // Portugal is the only country with a fully verified dataset, so it renders
   // the rich template. Every other country uses the SAME template frame but
-  // with honest, data-driven research content (no fabricated Portugal facts).
+  // with a real map, honest research content, and a free/paid gated expanded view.
   if (countrySlug !== 'portugal') {
-    return <CountryResearchTemplate country={record} active={active} />
+    return (
+      <CountryResearchTemplate
+        country={record}
+        active={active}
+        center={getCountryCenter(countrySlug)}
+        plan={profile.plan}
+      />
+    )
   }
 
   const source = (await searchParams).source
