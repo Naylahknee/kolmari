@@ -1,34 +1,22 @@
 import type { Metadata } from 'next'
-import { NexitPlanWorkspace } from '@/components/kolmari/nexit-plan-workspace'
+import { MoveChecklist } from '@/components/kolmari/checklist'
 import { requireCurrentUser } from '@/lib/auth'
-import { COUNTRIES } from '@/lib/countries'
-import { emptyNexitPlan, getNexitPlan } from '@/lib/kolmari-plan'
-import { PATHWAYS } from '@/lib/pathways'
 import { getProfile } from '@/lib/profile'
 
 export const metadata: Metadata = {
   title: 'Flutter Mode | Kolmari',
-  description: 'Your execution workspace — track tasks, deadlines, and move progress.',
+  description: 'Prepare for lift-off — work through your move-readiness checklist step by step.',
 }
 
 /**
- * Flutter Mode — execution-focused view of your move plan.
- * This route renders the same NexitPlanWorkspace but scrolls to the checklist
- * and is surfaced in the Kolmari nav as "Flutter Mode".
+ * Flutter Mode — the execution / preparation phase ("flexing your wings before
+ * lift-off"). Distinct from My Plan (the planning workspace): this is the
+ * move-readiness checklist you work through, with progress that saves as you go.
  *
  * Route: /flutter
- * Legacy compatibility: /checklist still redirects to /nexit-plan#checklist
  */
 export default async function FlutterModePage() {
   const user = await requireCurrentUser()
-  const [profile, existing] = await Promise.all([getProfile(user.id), getNexitPlan(user.id)])
-  return (
-    <NexitPlanWorkspace
-      initial={existing ?? emptyNexitPlan(user.id)}
-      nextinations={COUNTRIES.map((country) => country.name)}
-      pathways={PATHWAYS.map((pathway) => `${pathway.country} — ${pathway.name}`)}
-      profileHousehold={profile.wizard_status === 'completed' ? profile.family_size : null}
-      defaultTab="checklist"
-    />
-  )
+  const profile = await getProfile(user.id)
+  return <MoveChecklist initial={profile} />
 }
