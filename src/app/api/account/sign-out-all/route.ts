@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server'
 import { getRequestUser, SESSION_COOKIE } from '@/lib/auth'
+import { isSameOrigin } from '@/lib/security'
 
 export async function POST(request: Request) {
+  if (!isSameOrigin(request)) return Response.json({ error: 'Request blocked.' }, { status: 403 })
+
   const user = await getRequestUser(request)
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 

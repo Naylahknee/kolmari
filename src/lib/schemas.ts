@@ -1,7 +1,31 @@
 import { z } from 'zod'
 
+// A small denylist of the most trivially-guessed passwords. Not exhaustive —
+// a durable HIBP/k-anonymity check is the production upgrade path — but it
+// blocks the passwords that dominate credential-stuffing lists.
+const COMMON_PASSWORDS = new Set([
+  'password', 'password1', 'password123', '12345678', '123456789', '1234567890',
+  'qwerty123', 'iloveyou', 'admin123', 'welcome1', 'letmein1', 'changeme1',
+  'passw0rd', 'abc12345', 'football1', 'baseball1', 'sunshine1', 'trustno1',
+])
+
+/**
+ * Policy for passwords a user is SETTING (signup, password change): at least
+ * 10 characters, must mix letters and numbers, and must not be a well-known
+ * weak password. bcrypt only hashes the first 72 bytes, so 72 is the ceiling.
+ */
+export const strongPasswordSchema = z
+  .string()
+  .min(10, 'Use at least 10 characters.')
+  .max(72, 'Use at most 72 characters.')
+  .refine((v) => /[a-zA-Z]/.test(v) && /\d/.test(v), 'Include both letters and numbers.')
+  .refine((v) => !COMMON_PASSWORDS.has(v.toLowerCase()), 'Choose a less common password.')
+
 export const authSchema = z.object({
   email: z.string().trim().toLowerCase().email().max(254),
+  // Loose here so existing accounts (created under the old 8-char rule) can
+  // still authenticate. New passwords are validated with strongPasswordSchema
+  // in the signup branch and the change-password route.
   password: z.string().min(8).max(72),
   mode: z.enum(['login', 'signup']).default('login'),
 }).strict()
