@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation'
 import { COUNTRIES, getDiscoverableCountry } from '@/lib/countries'
-import { CountryResearchPage } from '@/components/kolmari/CountryResearchPage'
-import { CountryResearchShell } from '@/components/country-template/CountryResearchShell'
+import { CountryResearchTemplate } from '@/components/country-template/CountryResearchTemplate'
 import { CountryTemplate } from '@/components/country-template/CountryTemplate'
 import { TAB_SLUGS, type TabSlug } from '@/components/country-template/TabBar'
 import { OverviewTab } from '@/components/country-template/tabs/OverviewTab'
@@ -30,15 +29,18 @@ export default async function CountryV2Page({ params, searchParams }: Props) {
   const { countrySlug, section } = await params
   const country = COUNTRIES.find((c) => c.slug === countrySlug)
   const discoverableCountry = getDiscoverableCountry(countrySlug)
-  if (!country && !discoverableCountry) notFound()
-  if (discoverableCountry && countrySlug !== 'portugal')
-    return (
-      <CountryResearchShell>
-        <CountryResearchPage country={discoverableCountry} />
-      </CountryResearchShell>
-    )
+  const record = country ?? discoverableCountry
+  if (!record) notFound()
 
   const active = (TAB_SLUGS.includes(section as TabSlug) ? section : 'overview') as TabSlug
+
+  // Portugal is the only country with a fully verified dataset, so it renders
+  // the rich template. Every other country uses the SAME template frame but
+  // with honest, data-driven research content (no fabricated Portugal facts).
+  if (countrySlug !== 'portugal') {
+    return <CountryResearchTemplate country={record} active={active} />
+  }
+
   const source = (await searchParams).source
   const fromQuiz = source === 'quiz'
 

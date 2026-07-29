@@ -5,7 +5,7 @@ import { getProfile } from '@/lib/profile'
 import { calculateRegionMatches } from '@/lib/userProfile'
 
 export const metadata: Metadata = {
-  title: 'Your World | Kolmari',
+  title: 'Destinations | Kolmari',
   description: 'Save destinations, track their status, and plan your move.',
 }
 

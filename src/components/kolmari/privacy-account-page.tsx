@@ -269,7 +269,7 @@ function DataExportSection() {
 
   return (
     <section className="card-surface p-6" aria-labelledby="data-export-heading">
-      <SectionHeading icon={Download} title="Download My Data" description="Export a copy of your Kolmari Profile, plan, and settings as a JSON file." />
+      <SectionHeading icon={Download} title="Download My Data" description="Export a copy of your Profile, plan, and settings as a JSON file." />
       <div className="mt-5 space-y-3">
         <p className="text-sm text-muted">
           Your export will include your profile, Move Plan, and settings. It will not include password hashes or internal security records.
@@ -349,7 +349,7 @@ function DeleteAccountSection() {
           <p className="text-sm text-muted">Deleting your account will permanently remove:</p>
           <ul className="space-y-1 text-sm text-muted">
             {[
-              'Your Kolmari Profile and all saved answers',
+              'Your Profile and all saved answers',
               'Your Move Plan, tasks, and budget',
               'Your saved Destinations',
               'All account and session data',

@@ -6,7 +6,7 @@ import { emptyNexitPlan, getNexitPlan } from '@/lib/kolmari-plan'
 import { PATHWAYS } from '@/lib/pathways'
 import { getProfile } from '@/lib/profile'
 
-export const metadata: Metadata = { title: 'Kolmari Plan | Kolmari', description: 'Your private move planning workspace.' }
+export const metadata: Metadata = { title: 'My Plan | Kolmari', description: 'Your private move planning workspace.' }
 
 export default async function NexitPlanPage() {
   const user = await requireCurrentUser()

@@ -38,15 +38,15 @@ type SavedItem = { id: string; name: string; code: string; slug: string | null }
 
 // ─── Sidebar structure ───────────────────────────────────────────────────────
 
-// EXPLORE group (Kolmarination is rendered inline with collapsible regions)
+// EXPLORE group (Destinations is rendered inline with collapsible regions)
 const NAV_EXPLORE_SAVED = [
-  { href: '/saved', label: 'Destinations', icon: Compass },
+  { href: '/saved', label: 'Saved', icon: Compass },
 ] as const
 
 // PLAN group
 const NAV_PLAN = [
   { href: '/pathways',   label: 'Pathways',     icon: Route },
-  { href: '/nexit-plan', label: 'Kolmari Plan',  icon: NotebookTabs },
+  { href: '/nexit-plan', label: 'My Plan',       icon: NotebookTabs },
   { href: '/flutter',    label: 'Flutter Mode',  icon: Zap },
   { href: '/documents',  label: 'Documents',     icon: FileText },
 ] as const
@@ -224,8 +224,8 @@ function GroupLabel({ label, collapsed }: { label: string; collapsed: boolean })
 // Implements the Kolmari sidebar IA:
 //
 //   [ungrouped] Dashboard
-//   EXPLORE     Kolmarination · Countries
-//   MY PLAN     Destinations · Pathways · Kolmari Plan · Flutter Mode · Documents
+//   EXPLORE     Destinations · Countries
+//   MY PLAN     Destinations · Pathways · My Plan · Flutter Mode · Documents
 //   CONNECT     Kolmari Klub
 //   TOOLS       Cost Calculator · Greenbook · Settings
 
@@ -270,9 +270,9 @@ function SidebarNav({
       {/* ── EXPLORE ───────────────────────────────────────────────────── */}
       <GroupLabel label="Explore" collapsed={collapsed} />
 
-      {/* Kolmarination — expandable with region sub-list */}
+      {/* Destinations — expandable with region sub-list */}
       {collapsed ? (
-        <SidebarItem href="/nexitnation" label="Kolmarination" icon={Globe2}
+        <SidebarItem href="/nexitnation" label="Destinations" icon={Globe2}
           active={isActive(pathname, '/nexitnation')} collapsed />
       ) : (
         <div>
@@ -284,7 +284,7 @@ function SidebarNav({
           ].join(' ')}>
             <Link href="/nexitnation" className="flex min-w-0 flex-1 items-center gap-3 px-3 py-2 text-sm font-medium">
               <Globe2 size={16} aria-hidden="true" className="shrink-0" />
-              <span>Kolmarination</span>
+              <span>Destinations</span>
             </Link>
             <button
               type="button"
@@ -314,7 +314,7 @@ function SidebarNav({
         </div>
       )}
 
-      {/* Destinations (saved) */}
+      {/* Saved (shortlist) */}
       {NAV_EXPLORE_SAVED.map(({ href, label, icon }) => (
         <SidebarItem key={href} href={href} label={label} icon={icon}
           active={isActive(pathname, href)} collapsed={collapsed} />
@@ -524,7 +524,7 @@ export function AppShell({
         {/* Profile readiness footer */}
         {!collapsed && (
           <div className="mx-2 mb-4 rounded-[var(--radius-card)] border border-white/10 bg-navy-card p-4 text-center">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[#cdd7e8]">Kolmari Readiness</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#cdd7e8]">Move Readiness</p>
             <p className="mt-2 text-sm font-bold text-white">
               {profileComplete ? 'Profile complete' : 'Not started'}
             </p>
@@ -561,12 +561,12 @@ export function AppShell({
               {noticesOpen && (
                 <div className="absolute right-0 top-12 w-72 rounded-[var(--radius-card)] border border-line bg-white p-4 text-sm shadow-[var(--shadow-shell)]">
                   <p className="font-bold text-navy">
-                    {profileComplete ? 'Your Kolmari Profile is ready' : 'Personalized matches are off'}
+                    {profileComplete ? 'Your Profile is ready' : 'Personalized matches are off'}
                   </p>
                   <p className="mt-1 text-muted">
                     {profileComplete
                       ? 'Review Pathways or continue your Move Plan.'
-                      : 'Complete your Kolmari Profile to see personalized matches.'}
+                      : 'Complete your Profile to see personalized matches.'}
                   </p>
                 </div>
               )}
@@ -700,7 +700,7 @@ export function AppShell({
         />
 
         <div className="mx-1 mt-4 rounded-[var(--radius-card)] border border-white/10 bg-navy-card p-4">
-          <p className="text-xs font-semibold uppercase tracking-widest text-[#cdd7e8]">Kolmari Readiness</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-[#cdd7e8]">Move Readiness</p>
           <p className="mt-1 text-sm font-bold text-white">
             {profileComplete ? 'Profile complete' : 'Not started'}
           </p>

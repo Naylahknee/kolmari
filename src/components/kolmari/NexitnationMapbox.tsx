@@ -32,7 +32,7 @@ function RegionGrid({ profile }: Props) {
               <span className="mt-1 block text-xs text-white/70">
                 {region.countryCount} countries
                 {profile.complete && matchValue !== undefined
-                  ? ` · Kolmari Match ${matchValue}%`
+                  ? ` · Match Score ${matchValue}%`
                   : profile.complete
                     ? ''
                     : ' · Complete your profile for match data'}
@@ -50,7 +50,7 @@ function RegionGrid({ profile }: Props) {
 function RegionFallback({ profile }: Props) {
   const router = useRouter()
   return (
-    <section className="hero-grid rounded-[24px] bg-navy-deep p-6 text-white sm:p-8" aria-label="Kolmarination regions">
+    <section className="hero-grid rounded-[24px] bg-navy-deep p-6 text-white sm:p-8" aria-label="Destinations regions">
       <div className="max-w-md">
         <span className="grid size-12 place-items-center rounded-xl bg-gold text-navy" aria-hidden="true">
           <MapPinned size={22} />
@@ -77,7 +77,7 @@ function RegionFallback({ profile }: Props) {
                 <strong className="block text-sm">{region.name}</strong>
                 <span className="text-xs text-white/60">
                   {region.countryCount} countries
-                  {profile.complete && value !== undefined ? ` · Kolmari Match ${value}%` : ''}
+                  {profile.complete && value !== undefined ? ` · Match Score ${value}%` : ''}
                 </span>
               </span>
               <ArrowRight size={16} className="text-gold" aria-hidden="true" />
@@ -141,7 +141,7 @@ export function NexitnationMapbox({ profile }: Props) {
         if (profile.complete && matchValue !== undefined) {
           const matchEl = document.createElement('span')
           matchEl.className = 'custom-region-badge__match'
-          matchEl.textContent = `Kolmari Match ${matchValue}%`
+          matchEl.textContent = `Match Score ${matchValue}%`
           el.appendChild(matchEl)
         }
 
@@ -189,11 +189,11 @@ export function NexitnationMapbox({ profile }: Props) {
 
   return (
     <div>
-      <div className="nexit-mapbox" aria-hidden="true">
+      <div className="kolmari-mapbox" aria-hidden="true">
         <div ref={containerRef} className="absolute inset-0" />
       </div>
       {/* Non-map path: always rendered, keyboard and screen-reader accessible */}
-      <section aria-label="Kolmarination regions">
+      <section aria-label="Destinations regions">
         <h2 className="mt-8 text-lg font-bold text-navy">All regions</h2>
         <RegionGrid profile={profile} />
       </section>

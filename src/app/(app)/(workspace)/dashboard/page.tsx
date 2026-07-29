@@ -1,11 +1,14 @@
 import Link from 'next/link'
-import { ArrowRight, CheckCircle2, Globe2, ListChecks, NotebookTabs, Route, UserRound, Wallet } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Globe2, NotebookTabs, Route, UserRound, Wallet } from 'lucide-react'
 import { requireCurrentUser } from '@/lib/auth'
-import { COUNTRIES, countryFlag } from '@/lib/countries'
+import { COUNTRIES } from '@/lib/countries'
 import { getNexitPlan, PLAN_STAGES, type PlanBudget } from '@/lib/kolmari-plan'
 import { evaluatePathways } from '@/lib/pathways'
 import { getProfile, hasCompletedProfile } from '@/lib/profile'
-import { BudgetDonut, BUDGET_COLORS, ScoreRing, type BudgetSlice } from '@/components/kolmari/rings'
+import { rankNextinations } from '@/lib/userProfile'
+import { BudgetDonut, BUDGET_COLORS, type BudgetSlice } from '@/components/kolmari/rings'
+import { DashboardDestinations, type DestinationPanel } from '@/components/kolmari/dashboard-destinations'
+import { MoveTracker } from '@/components/kolmari/move-tracker'
 
 const BUDGET_LABELS: Record<keyof PlanBudget, string> = {
   housing: 'Housing',
@@ -28,9 +31,16 @@ export default async function DashboardPage() {
   const firstName = profile.display_name || user.email.split('@')[0]
   const strong = complete ? evaluatePathways(profile).filter((item) => item.status === 'Strong Match') : []
   const stageIndex = plan ? PLAN_STAGES.indexOf(plan.timeline_stage) : -1
-  const timelineProgress = stageIndex >= 0 ? Math.round(((stageIndex + 1) / PLAN_STAGES.length) * 100) : 0
   const slices = plan ? budgetSlices(plan.budget) : []
   const budgetTotal = slices.reduce((sum, slice) => sum + slice.amount, 0)
+
+  // Potential destinations as panels. Ranked with a real Match Score when the
+  // Profile is complete; otherwise neutral "explore" panels with no score.
+  const rankedList = complete ? rankNextinations(profile) : []
+  const destinationPanels: DestinationPanel[] = rankedList.length > 0
+    ? rankedList.slice(0, 3).map((item) => ({ country: item.country, match: item.match.score }))
+    : COUNTRIES.slice(0, 3).map((country) => ({ country, match: null }))
+  const destinationsRanked = rankedList.length > 0
 
   return (
     <div className="space-y-6">
@@ -38,7 +48,7 @@ export default async function DashboardPage() {
       {/* ── Page header ──────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Your Kolmari workspace</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Your workspace</p>
           <h1 className="mt-1 text-2xl font-bold text-navy sm:text-3xl">
             Welcome back, {firstName}.
           </h1>
@@ -48,7 +58,7 @@ export default async function DashboardPage() {
           href={complete ? '/flutter' : '/profile-wizard'}
           className="gold-button"
         >
-          {complete ? 'Enter Flutter Mode' : 'Build Your Kolmari Plan'} <ArrowRight size={16} />
+          {complete ? 'Enter Flutter Mode' : 'Build My Move Plan'} <ArrowRight size={16} />
         </Link>
       </div>
 
@@ -56,7 +66,7 @@ export default async function DashboardPage() {
       {!complete && (
         <section className="rounded-[var(--radius-card)] border border-gold/30 bg-gold-soft/50 p-5 sm:flex sm:items-center sm:justify-between sm:gap-6">
           <div>
-            <p className="font-semibold text-navy">Complete your Kolmari Profile to see personalized matches.</p>
+            <p className="font-semibold text-navy">Complete your Profile to see personalized matches.</p>
             <p className="mt-1 text-sm text-muted">
               Until then, no budget, work setup, household type, Match Score, or readiness score is assumed.
             </p>
@@ -73,83 +83,21 @@ export default async function DashboardPage() {
           Continue where you left off
         </h2>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard icon={UserRound}   label="Kolmari Profile"       value={complete ? 'Complete' : 'Not started'} href="/profile-wizard" action={complete ? 'Edit profile' : 'Start Wizard'} />
+          <StatCard icon={UserRound}   label="Profile"       value={complete ? 'Complete' : 'Not started'} href="/profile-wizard" action={complete ? 'Edit profile' : 'Start Wizard'} />
           <StatCard icon={Route}       label="Strong Pathway signals" value={complete ? String(strong.length) : '—'}     href="/pathways"      action="Review Pathways" />
-          <StatCard icon={NotebookTabs} label="Plan stage"            value={plan?.timeline_stage ?? 'Not started'} href="/nexit-plan"     action="Open Kolmari Plan" />
+          <StatCard icon={NotebookTabs} label="Plan stage"            value={plan?.timeline_stage ?? 'Not started'} href="/nexit-plan"     action="Open My Plan" />
           <StatCard icon={CheckCircle2} label="Saved plan tasks"      value={plan ? String(plan.checklist.length) : '0'} href="/flutter" action="Open Flutter Mode" />
         </div>
       </section>
 
-      {/* ── Section 2 — Your Destinations ───────────────────────────────── */}
-      <section aria-labelledby="nextinations-heading">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 id="nextinations-heading" className="text-xs font-bold uppercase tracking-widest text-muted">
-            Destinations to explore
-          </h2>
-          <Link href="/nexitnation?view=countries" className="text-xs font-bold text-gold-deep hover:text-navy">
-            View all
-          </Link>
-        </div>
-        <div className="card-surface divide-y divide-line">
-          {COUNTRIES.slice(0, 3).map((country) => (
-            <Link
-              key={country.slug}
-              href={`/nextinations/${country.slug}`}
-              className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-canvas"
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-2xl" aria-hidden="true">{countryFlag(country.code)}</span>
-                <div>
-                  <p className="font-semibold text-navy">{country.name}</p>
-                  <p className="text-xs text-muted">{country.city} · {country.region}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 text-right">
-                <div className="hidden sm:block">
-                  <p className="text-xs text-muted">Common route</p>
-                  <p className="text-xs font-semibold text-navy">{country.visaType}</p>
-                </div>
-                <ArrowRight size={15} className="text-muted" aria-hidden="true" />
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+      {/* ── Section 2 — Your Destinations (panels) ──────────────────────── */}
+      <DashboardDestinations panels={destinationPanels} ranked={destinationsRanked} />
 
-      {/* ── Section 3 — Your Kolmari Plan ────────────────────────────────── */}
+      {/* ── Section 3 — Journey progress tracker ─────────────────────────── */}
+      <MoveTracker stages={PLAN_STAGES} currentIndex={stageIndex} />
+
+      {/* ── Section 4 — Budget snapshot ──────────────────────────────────── */}
       <div className="grid gap-5 lg:grid-cols-2">
-        <section className="card-surface p-6" aria-labelledby="plan-heading">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Kolmari Tracker</p>
-              <h2 id="plan-heading" className="mt-1 text-lg font-bold text-navy">Kolmari Timeline</h2>
-            </div>
-            <span className="grid size-10 place-items-center rounded-[var(--radius-field)] bg-gold-soft" aria-hidden="true">
-              <ListChecks size={17} />
-            </span>
-          </div>
-          {plan ? (
-            <div className="mt-5 flex items-center gap-5">
-              <ScoreRing value={timelineProgress} label="Timeline" />
-              <div className="min-w-0">
-                <p className="text-xs text-muted">Current stage</p>
-                <p className="font-bold text-navy">{plan.timeline_stage}</p>
-                <p className="mt-0.5 text-xs text-muted">{plan.checklist.length} saved task{plan.checklist.length === 1 ? '' : 's'}</p>
-                <Link href="/flutter" className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-gold-deep">
-                  Open Flutter Mode <ArrowRight size={12} />
-                </Link>
-              </div>
-            </div>
-          ) : (
-            <div className="mt-4 rounded-[var(--radius-field)] bg-canvas p-4 text-sm text-muted">
-              Start your Move Plan to track your relocation timeline.
-              <Link href="/nexit-plan" className="mt-2 flex items-center gap-1 text-xs font-bold text-gold-deep">
-                Open Kolmari Plan <ArrowRight size={12} />
-              </Link>
-            </div>
-          )}
-        </section>
-
         <section className="card-surface p-6" aria-labelledby="budget-heading">
           <div className="flex items-center justify-between">
             <div>
@@ -173,9 +121,8 @@ export default async function DashboardPage() {
             </div>
           )}
         </section>
-      </div>
 
-      {/* ── Section 4 — Recent activity / Pathways signal ────────────────── */}
+      {/* ── Section 5 — Pathways signal ──────────────────────────────────── */}
       <section className="card-surface p-6" aria-labelledby="pathways-heading">
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -218,9 +165,10 @@ export default async function DashboardPage() {
           href={complete ? '/pathways' : '/profile-wizard'}
           className="gold-button mt-5 inline-flex items-center gap-2"
         >
-          {complete ? 'View My Pathways' : 'Build Your Kolmari Plan'} <ArrowRight size={15} />
+          {complete ? 'View My Pathways' : 'Build My Move Plan'} <ArrowRight size={15} />
         </Link>
       </section>
+      </div>
     </div>
   )
 }

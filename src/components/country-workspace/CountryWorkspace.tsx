@@ -121,7 +121,7 @@ function CountryHero({ country, match, fromQuiz, pathwayCount }: Pick<Props, 'co
       <div className="relative z-10 flex min-h-[500px] flex-col justify-end p-6 sm:p-8 lg:p-10">
         {fromQuiz && (
           <p className="mb-5 inline-flex w-fit items-center gap-2 rounded-[var(--radius-pill)] border border-gold/30 bg-navy-deep/65 px-3 py-1.5 text-xs font-bold text-gold backdrop-blur-sm">
-            <Sparkles size={14} /> Your top Destination from the Kolmari Match Quiz
+            <Sparkles size={14} /> Your top Destination from the Match Quiz
           </p>
         )}
         <div className="max-w-3xl">
@@ -148,19 +148,19 @@ function CountryHero({ country, match, fromQuiz, pathwayCount }: Pick<Props, 'co
 
           {match ? (
             <div className="mt-6 max-w-2xl rounded-[var(--radius-card)] border border-white/15 bg-navy-deep/72 p-5 backdrop-blur-md sm:p-6">
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-gold">Kolmari Match</p>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-gold">Match Score</p>
               <div className="mt-1 flex items-end gap-3"><p className="text-5xl font-extrabold leading-none">{match.score}%</p><p className="pb-1 text-xl font-bold text-ok-soft">{matchLabel(match.score)}</p></div>
               <div className="mt-4 h-3 overflow-hidden rounded-full bg-white/20" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={match.score}><div className="h-full rounded-full bg-gold" style={{ width: `${match.score}%` }} /></div>
               <p className="mt-4 text-sm leading-6 text-white/82">{country.name} aligns with your stated relocation goals, available pathways, and budget priorities.</p>
               <ul className="mt-4 space-y-2">{match.reasons.slice(0, 3).map((reason) => <li key={reason} className="flex gap-2 text-sm text-white/88"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-ok-soft" />{reason}</li>)}</ul>
               <p className="mt-4 border-t border-white/12 pt-3 text-sm text-white/72"><span className="font-semibold text-gold">Tradeoff:</span> {match.tradeoff}</p>
             </div>
-          ) : <p className="mt-6 max-w-xl rounded-[var(--radius-card)] bg-navy-deep/70 p-4 text-sm text-white/80 backdrop-blur-sm">Complete your Kolmari Profile to see your personalized Kolmari Match for {country.name}.</p>}
+          ) : <p className="mt-6 max-w-xl rounded-[var(--radius-card)] bg-navy-deep/70 p-4 text-sm text-white/80 backdrop-blur-sm">Complete your Profile to see your personalized Match Score for {country.name}.</p>}
 
           <div className="mt-6 flex flex-wrap gap-2">
             <Link href="/saved" className="inline-flex items-center gap-2 rounded-[var(--radius-field)] border border-white/20 bg-navy-deep/55 px-4 py-2.5 text-sm font-semibold backdrop-blur-sm hover:bg-navy-deep/75"><Heart size={15} /> Save this country</Link>
             <Link href={`/nextinations/${country.slug}/compare`} className="inline-flex items-center gap-2 rounded-[var(--radius-field)] border border-white/20 bg-navy-deep/55 px-4 py-2.5 text-sm font-semibold backdrop-blur-sm hover:bg-navy-deep/75"><Layers size={15} /> Compare</Link>
-            <Link href="/nexit-plan" className="gold-button">Build Your Kolmari Plan <ArrowRight size={15} /></Link>
+            <Link href="/nexit-plan" className="gold-button">Build My Move Plan <ArrowRight size={15} /></Link>
           </div>
         </div>
       </div>
@@ -289,7 +289,7 @@ function TabPanel({ id, country, match, pathways, content, compareData, hasChild
     )
   }
 
-  if (id === 'why-you') return <section className="card-surface p-6"><h2 className="text-lg font-bold text-navy">Why {country.name} matches you</h2>{match ? <><div className="mt-4 flex flex-wrap gap-2">{match.reasons.map((reason) => <span key={reason} className="rounded-[var(--radius-pill)] bg-gold-soft/60 px-3 py-1.5 text-xs font-semibold text-navy">{reason}</span>)}</div><p className="mt-5 text-sm leading-6 text-muted">We surfaced {country.name} because of how your Kolmari Profile lines up with what this place asks for. <strong className="text-navy">Tradeoff:</strong> {match.tradeoff}</p></> : <p className="mt-3 text-sm text-muted">Complete your Kolmari Profile to see why {country.name} matches you.</p>}</section>
+  if (id === 'why-you') return <section className="card-surface p-6"><h2 className="text-lg font-bold text-navy">Why {country.name} matches you</h2>{match ? <><div className="mt-4 flex flex-wrap gap-2">{match.reasons.map((reason) => <span key={reason} className="rounded-[var(--radius-pill)] bg-gold-soft/60 px-3 py-1.5 text-xs font-semibold text-navy">{reason}</span>)}</div><p className="mt-5 text-sm leading-6 text-muted">We surfaced {country.name} because of how your Profile lines up with what this place asks for. <strong className="text-navy">Tradeoff:</strong> {match.tradeoff}</p></> : <p className="mt-3 text-sm text-muted">Complete your Profile to see why {country.name} matches you.</p>}</section>
   if (id === 'economic-profile') return <EconomicProfileTab content={content?.economic ?? null} countryName={country.name} />
   if (id === 'cost-of-living') return <CostOfLivingTab content={content?.costOfLiving ?? null} countryName={country.name} monthlyIncome={monthlyIncome} isFamily={isFamily} />
   if (id === 'pathways') {

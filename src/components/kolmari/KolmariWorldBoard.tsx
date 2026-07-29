@@ -39,8 +39,8 @@ export function KolmariWorldBoard({
       {/* Header + Add destination (top) */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Kolmarination</p>
-          <h1 className="mt-1 text-2xl font-bold text-navy sm:text-3xl">Your Destinations</h1>
+          <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Explore</p>
+          <h1 className="mt-1 text-2xl font-bold text-navy sm:text-3xl">Destinations</h1>
           <p className="mt-1 text-sm text-muted">
             {ready ? `${counts.total} saved · ${counts.researching} researching · ${counts.shortlisted} shortlisted` : 'Loading your board…'}
           </p>
@@ -73,9 +73,9 @@ export function KolmariWorldBoard({
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-[var(--radius-card)] border border-gold/25 bg-gold-soft/35 p-5">
           <div>
             <p className="font-bold text-navy">Explore every region now.</p>
-            <p className="mt-1 text-sm text-muted">Complete your Kolmari Profile later to add personalized region matches.</p>
+            <p className="mt-1 text-sm text-muted">Complete your Profile later to add personalized region matches.</p>
           </div>
-          <Link href="/profile-wizard" className="gold-button">Complete Kolmari Profile <ArrowRight size={15} /></Link>
+          <Link href="/profile-wizard" className="gold-button">Complete Profile <ArrowRight size={15} /></Link>
         </div>
       )}
 
@@ -184,7 +184,7 @@ function DetailPanel({ item, onStatus, onNote, onRemove, onClose }: {
 
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
             {slug ? <Link href={`/nextinations/${slug}`} className="gold-button w-full">View Destination <ArrowRight size={15} /></Link> : null}
-            <Link href="/nexit-plan" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[var(--radius-btn)] border border-line bg-white text-sm font-bold text-navy transition hover:border-gold">Open Kolmari Plan</Link>
+            <Link href="/nexit-plan" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[var(--radius-btn)] border border-line bg-white text-sm font-bold text-navy transition hover:border-gold">Open My Plan</Link>
             <button type="button" onClick={onRemove} className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[var(--radius-btn)] text-sm font-bold text-danger transition hover:bg-danger/10 sm:col-span-2"><Trash2 size={15} /> Remove</button>
           </div>
         </div>

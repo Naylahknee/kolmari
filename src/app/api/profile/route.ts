@@ -1,6 +1,7 @@
 import { getRequestUser } from '@/lib/auth'
 import { getProfile, saveProfile } from '@/lib/profile'
 import { profileUpdateSchema } from '@/lib/schemas'
+import { isSameOrigin } from '@/lib/security'
 
 export async function GET(request: Request) {
   const user = await getRequestUser(request)
@@ -15,6 +16,8 @@ export async function GET(request: Request) {
 }
 
 export async function PUT(request: Request) {
+  if (!isSameOrigin(request)) return Response.json({ error: 'Request blocked.' }, { status: 403 })
+
   const user = await getRequestUser(request)
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 

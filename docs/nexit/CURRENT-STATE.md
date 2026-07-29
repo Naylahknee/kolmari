@@ -694,3 +694,118 @@ sidebar menu at all breakpoints.
 | TypeScript (`tsc --noEmit`) | ✅ Pass |
 | Lint (`eslint`) | ✅ No new errors (36 pre-existing errors unchanged) |
 | Production build (`next build`) | ✅ Pass |
+
+---
+
+## Kolmarination → Destinations, security hardening, unified country template, dashboard redesign
+
+Seven owner-requested changes.
+
+### 1. Kolmarination is now Destinations + map restored
+- The discovery map was invisible because the JSX used `.nexit-mapbox` but the
+  stylesheet only defines `.kolmari-mapbox` (zero-height container). Fixed the
+  class name in `NexitnationMapbox.tsx`.
+- The "Kolmarination" nav item/page (`/nexitnation`) is now labeled
+  **Destinations**; the old saved "Destinations" item (`/saved`) is now
+  **Saved** to remove the duplicate. Page title and eyebrow updated.
+
+### 2. Login/account security hardening
+- New `src/lib/security.ts`: same-origin (CSRF) check + best-effort in-isolate
+  rate limiter.
+- Security headers via `next.config.ts` `headers()` (CSP, HSTS,
+  X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy).
+- Login: per-IP rate limit, dummy-bcrypt timing equalization (no user
+  enumeration by timing), strong-password policy on signup, token no longer
+  echoed in the response body.
+- Origin checks added to login, logout, profile PUT, plan PUT, change-password,
+  sign-out-all, deletion-request. Strong-password policy applied to
+  change-password.
+- No security document was supplied with the request; this is a standard
+  hardening pass. (No DB migration; stateless-JWT global revocation and a
+  durable rate-limit store remain future work.)
+
+### 3. Every country uses the Portugal template
+- New `CountryResearchTemplate` renders the same frame as Portugal's
+  `CountryTemplate` (top bar, sidebar, hero band, 8-tab bar, main + right rail)
+  but with honest, data-driven content. Non-Portugal countries no longer show
+  Portugal's hardcoded facts; they show an explicit "research in progress"
+  state. Greece/Estonia no longer fall through to Portugal content.
+- Legacy `/countries/[slug]` single-page template now redirects into
+  `/nextinations/[slug]/v2/overview`.
+
+### 4. "Kolmari" reserved for the brand + Kolmari Klub
+- Swept user-facing feature names off the "Kolmari" prefix: Kolmari Plan → My
+  Plan, Kolmari Readiness → Move Readiness, Kolmari Timeline → Move Timeline,
+  Kolmari Tracker → Progress Tracker, Kolmari Profile → Profile, Kolmari Match →
+  Match Score; CTAs updated (Build My Move Plan, Choose Your Destination, Start
+  Your Move). Internal identifiers, DB columns, cookie names, and JWT claims
+  were intentionally left unchanged (compatibility).
+
+### 5. App is not gated
+- Confirmed there is no monetary paywall/subscription anywhere. The new
+  dashboard tracker and destination panels ship with no locked steps or upgrade
+  prompts. Profile-completion states remain (they withhold personalization to
+  avoid fabricating scores — a data-integrity requirement, not a paywall).
+
+### 6. Dashboard destination panels
+- `DashboardDestinations` shows potential destinations as image panels. Ranked
+  with a real Match Score when the Profile is complete; neutral explore panels
+  (no score, no rank number) otherwise.
+
+### 7. Dashboard journey tracker
+- `MoveTracker` renders a horizontal stepper over the plan stages
+  (Explore → Settle) with the current stage highlighted. Honest per-stage
+  descriptors, no fabricated durations, no gating.
+
+### Tests
+| Check | Result |
+|---|---|
+| TypeScript (`tsc --noEmit`) | ✅ Pass |
+| Production build (`next build`) | ✅ Pass — all routes generated |
+| ESLint | ✅ No new errors (36 pre-existing country-template `<a>` errors unchanged) |
+
+---
+
+## Landing page redesign (conversion-focused, 4-color palette)
+
+Redesigned the marketing landing page (`src/app/(marketing)/page.tsx`) using the
+owner-supplied landing-page-designer framework (SaaS + considered-service patterns).
+
+- **4-color palette** (owner choice): Navy Deep, Gold (action-only), Canvas
+  off-white, White. Teal removed from the landing page.
+- **Single conversion goal:** every primary CTA points to `/quiz`; the Kolmari Klub
+  community CTA was demoted to a secondary outline button.
+- **Sticky header** with a persistent gold "Build My Move Plan" CTA.
+- **The Journey** (new trust layer — honest process transparency, no fabricated
+  stats/testimonials): Quiz → Destination Match → Visa Pathway → Move Plan →
+  Readiness Tracker, horizontal on desktop / vertical on mobile, ending in `/quiz`.
+- **Fixed the broken logo** (missing `/brand/nexit-butterfly.png` → on-disk
+  `favicon-512.png` mark + "Kolmari" wordmark, `tone` prop for dark/light).
+- Fixed the mobile-nav `#nextinations` anchor typo; removed dead `MarketingWordmark`.
+
+### Tests: tsc pass · next build pass (55 pages) · ESLint no new errors · visual (desktop+mobile) verified.
+
+---
+
+## Top-of-funnel consistency: auth + quiz (follow-up to landing redesign)
+
+Carried the landing's 4-color discipline into the auth pages and the quiz. Both were
+already teal-free, so this was a cohesion + logo-fix pass.
+
+- **Root-cause logo fix:** `Wordmark` referenced the missing `/brand/KolmariWordMark.svg`
+  (broken image on auth). It now delegates to `MarketingLogo` (on-disk favicon mark +
+  "Kolmari" text); `MarketingLogo` gained an optional `href`. One logo implementation.
+- **Branded auth:** new `AuthShell` gives login + signup one consistent layout — a navy
+  brand panel (hero-grid texture, logo, value prop + 3 gold-check bullets echoing the
+  landing Journey) beside a white form card; single column on mobile. `AuthForm`,
+  `safeNextPath`, and the `?next=` flow are unchanged.
+- **Quiz polish:** added the working logo to both header states, added the hero-grid
+  dot texture, and fixed the h1 copy ("Build your Move Planning starting point." →
+  "Find your move-planning starting point."). Palette already navy/gold/canvas/white.
+
+### Files changed
+`src/components/kolmari/wordmark.tsx`, `marketing-logo.tsx`, new `auth-shell.tsx`,
+`src/app/(auth)/login/page.tsx`, `src/app/(auth)/signup/page.tsx`,
+`src/app/(marketing)/quiz/page.tsx`.
+
+### Tests: tsc pass · next build pass · ESLint no new errors · /login, /signup, /quiz screenshotted (desktop+mobile), 0 teal, logo resolves.

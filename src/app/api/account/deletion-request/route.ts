@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { compare } from 'bcryptjs'
 import { getRequestUser, SESSION_COOKIE } from '@/lib/auth'
 import { getSql } from '@/lib/db'
+import { isSameOrigin } from '@/lib/security'
 
 const schema = z.object({
   // The user must type the exact phrase to confirm the destructive action.
@@ -13,6 +14,8 @@ const schema = z.object({
 type UserRow = { id: number; password: string; email: string }
 
 export async function POST(request: Request) {
+  if (!isSameOrigin(request)) return Response.json({ error: 'Request blocked.' }, { status: 403 })
+
   const user = await getRequestUser(request)
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 

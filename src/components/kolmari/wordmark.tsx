@@ -1,36 +1,22 @@
-import Image from 'next/image'
-import Link from 'next/link'
+import { MarketingLogo } from './marketing-logo'
 
 /**
- * Wordmark — uses the approved KolmariWordMark.svg from public/brand/.
+ * Wordmark — the Kolmari logo lockup (butterfly mark + "Kolmari" wordmark).
  *
- * The SVG carries transparent background and works on both dark surfaces
- * (sidebar, hero) and light surfaces (auth, cards, mobile header).
- *
- * Do not recreate the wordmark in CSS or with a standard font.
- * Brand asset rule: use only the owner-supplied files in public/brand/.
+ * Delegates to the shared MarketingLogo so there is a single logo implementation
+ * across the app. The previous `/brand/KolmariWordMark.svg` asset does not exist
+ * in public/brand/ (only favicons ship), which rendered a broken image on the
+ * auth pages; the lockup uses the on-disk favicon mark instead.
  */
 export function Wordmark({
   compact = false,
   href = '/',
+  dark = false,
 }: {
-  /** @deprecated The SVG works on all surfaces — this prop is kept for call-site compatibility only */
+  /** When the wordmark sits on a dark surface, render the text in white. */
   dark?: boolean
   compact?: boolean
   href?: string
 }) {
-  const h = compact ? 28 : 32
-  const w = compact ? 96 : 112
-  return (
-    <Link href={href} aria-label="Kolmari home" className="inline-flex shrink-0 items-center">
-      <Image
-        src="/brand/KolmariWordMark.svg"
-        alt="Kolmari"
-        width={w}
-        height={h}
-        style={{ width: 'auto', height: h }}
-        priority
-      />
-    </Link>
-  )
+  return <MarketingLogo compact={compact} href={href} tone={dark ? 'light' : 'dark'} />
 }

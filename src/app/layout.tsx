@@ -8,7 +8,7 @@ const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] })
 
 const title = 'Kolmari | Build Your Relocation Plan'
-const description = 'Compare destinations, review pathways, build your budget, and turn relocation research into a practical Kolmari Plan.'
+const description = 'Compare destinations, review pathways, build your budget, and turn relocation research into a practical plan.'
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),

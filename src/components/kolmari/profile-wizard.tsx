@@ -59,7 +59,7 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
       body: JSON.stringify(payload(wizardStatus)),
     })
     const result = await response.json()
-    if (!response.ok) throw new Error(result.error ?? 'Unable to save your Kolmari Profile.')
+    if (!response.ok) throw new Error(result.error ?? 'Unable to save your Profile.')
   }
 
   function canContinue() {
@@ -96,7 +96,7 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
       router.push('/nextinations?source=quiz')
       router.refresh()
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Unable to complete your Kolmari Profile.')
+      setError(reason instanceof Error ? reason.message : 'Unable to complete your Profile.')
       setSaving(false)
     }
   }
@@ -130,7 +130,7 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
   return (
     <main className="min-h-screen bg-canvas px-5 py-8 sm:py-12">
       <div className="mx-auto max-w-3xl">
-        <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm font-bold text-gold-deep">{isRetake ? 'Edit Kolmari Profile' : 'Profile Wizard'}</p><p className="text-xs text-muted">Step {step + 1} of {panels.length}</p></div><Link href={isRetake ? '/settings' : '/nexitnation'} className="text-sm font-bold text-muted">Exit wizard</Link></div>
+        <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm font-bold text-gold-deep">{isRetake ? 'Edit Profile' : 'Profile Wizard'}</p><p className="text-xs text-muted">Step {step + 1} of {panels.length}</p></div><Link href={isRetake ? '/settings' : '/nexitnation'} className="text-sm font-bold text-muted">Exit wizard</Link></div>
         <div className="mt-4 flex gap-1.5" aria-hidden>{panels.map((_, index) => <span key={index} className={`h-2 flex-1 rounded-full ${index <= step ? 'bg-gold' : 'bg-line'}`} />)}</div>
         <div className="card-surface mt-6 p-6 sm:p-10">{panels[step]}{error ? <p role="alert" className="mt-6 rounded-xl bg-danger/10 px-4 py-3 text-sm font-semibold text-danger">{error}</p> : null}<div className="mt-10 flex items-center justify-between gap-3"><button type="button" onClick={() => setStep((current) => Math.max(0, current - 1))} disabled={step === 0 || saving} className="inline-flex min-h-12 items-center gap-2 rounded-xl px-3 font-bold text-muted disabled:opacity-0"><ArrowLeft size={17} />Back</button>{step < panels.length - 1 ? <button type="button" onClick={next} disabled={!canContinue() || saving} className="gold-button disabled:cursor-not-allowed disabled:opacity-50">{saving ? <LoaderCircle size={16} className="animate-spin" /> : null}Continue<ArrowRight size={17} /></button> : <button type="button" onClick={finish} disabled={!canContinue() || saving} className="gold-button disabled:cursor-not-allowed disabled:opacity-50">{saving ? <LoaderCircle size={16} className="animate-spin" /> : null}Reveal my top Destination<ArrowRight size={17} /></button>}</div></div>
         {!isRetake ? <button type="button" onClick={skip} disabled={saving} className="mx-auto mt-5 block text-sm font-bold text-muted underline-offset-4 hover:underline">Skip for now and explore destinations</button> : null}

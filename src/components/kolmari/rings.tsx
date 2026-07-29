@@ -1,7 +1,7 @@
 /**
  * Rings & donuts (from the Kolmari design handoff).
- *  - ScoreRing:  Kolmari Score / Kolmari Readiness / Pathway Match (gold arc on a track).
- *  - BudgetDonut: Kolmari Budget breakdown via conic-gradient + legend.
+ *  - ScoreRing:  Match Score / Move Readiness / Pathway Match (gold arc on a track).
+ *  - BudgetDonut: Budget breakdown via conic-gradient + legend.
  * Pure SVG/CSS, no deps. Server-component safe.
  */
 

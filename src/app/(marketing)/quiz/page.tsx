@@ -1,9 +1,9 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react'
+import { MarketingLogo } from '@/components/kolmari/marketing-logo'
 
 const questions = [
   { id: 'who', prompt: 'Who are you planning this move for?', options: ['Just me', 'Me and a partner', 'My family', 'I am only exploring'] },
@@ -91,9 +91,9 @@ export default function NexitQuizPage() {
     return (
       <main className="min-h-screen bg-canvas px-5 py-10 sm:py-16">
         <section className="mx-auto max-w-2xl overflow-hidden rounded-[24px] border border-line bg-white shadow-card">
-          <div className="bg-navy-deep px-6 py-8 text-center text-white sm:px-10">
-            <Image src="/brand/favicon-32.png" alt="" width={40} height={40} className="mx-auto h-10 w-10" />
-            <p className="mt-4 text-xs font-extrabold uppercase tracking-[0.22em] text-gold">Your Kolmari starting point</p>
+          <div className="hero-grid bg-navy-deep px-6 py-8 text-center text-white sm:px-10">
+            <div className="flex justify-center"><MarketingLogo compact tone="light" /></div>
+            <p className="mt-5 text-xs font-extrabold uppercase tracking-[0.22em] text-gold">Your starting point</p>
             <h1 className="mt-3 font-display text-3xl font-extrabold sm:text-4xl">You are in the {result.stage}.</h1>
           </div>
 
@@ -127,12 +127,13 @@ export default function NexitQuizPage() {
   return (
     <main className="min-h-screen bg-canvas px-5 py-8 sm:py-12">
       <section className="mx-auto max-w-2xl overflow-hidden rounded-[24px] border border-line bg-white shadow-card">
-        <div className="border-b border-line bg-navy-deep px-6 py-6 text-white sm:px-10">
+        <div className="hero-grid border-b border-line bg-navy-deep px-6 py-6 text-white sm:px-10">
           <div className="flex items-center justify-between gap-4">
             <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-white/75 hover:text-white"><ArrowLeft size={16} /> Back</Link>
-            <span className="text-xs font-extrabold uppercase tracking-[0.2em] text-gold">Kolmari Quiz</span>
+            <MarketingLogo compact tone="light" />
           </div>
-          <h1 className="mt-6 font-display text-3xl font-extrabold sm:text-4xl">Build your Move Planning starting point.</h1>
+          <p className="mt-6 text-xs font-extrabold uppercase tracking-[0.2em] text-gold">Match Quiz</p>
+          <h1 className="mt-2 font-display text-3xl font-extrabold sm:text-4xl">Find your move-planning starting point.</h1>
           <p className="mt-3 max-w-xl text-sm leading-6 text-white/70">Eight focused questions. No relocation knowledge required.</p>
         </div>
 

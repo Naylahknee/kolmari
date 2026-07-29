@@ -6,7 +6,7 @@ export const KOLMARI_LEXICON = {
   world: PRODUCT_COPY.world,
   destinations: PRODUCT_COPY.destinations,
   destination: PRODUCT_COPY.destination,
-  profile: 'Kolmari Profile',
+  profile: 'Profile',
   plan: PRODUCT_COPY.plan,
   matchScore: PRODUCT_COPY.matchScore,
   pathways: PRODUCT_COPY.pathways,
@@ -25,8 +25,8 @@ export const KOLMARI_LEXICON = {
 } as const
 
 export const KOLMARI_STORY = [
-  'Start Your Kolmari',
-  'Choose Your Kolmarination',
+  'Start Your Move',
+  'Choose Your Destination',
   'Explore a Destination',
   'Review Your Pathways',
   KOLMARI_LEXICON.startCta,

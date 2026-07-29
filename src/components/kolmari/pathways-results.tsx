@@ -183,10 +183,10 @@ export function PathwaysResults({ profile, pathways }: { profile: RelocationProf
       <header className="rounded-[20px] bg-navy-deep p-7 text-white sm:p-10">
         <div className="flex items-center gap-3"><Route size={22} className="text-gold" aria-hidden="true" /><p className="text-sm font-bold text-gold">Pathways</p></div>
         <h1 className="mt-3 text-3xl font-bold sm:text-4xl">Research the routes that fit your facts.</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-white/70">Your Kolmari Profile supplies the inputs. This page organizes official Pathway research. It does not determine your eligibility or guarantee any outcome.</p>
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-white/70">Your Profile supplies the inputs. This page organizes official Pathway research. It does not determine your eligibility or guarantee any outcome.</p>
         {!complete && (
           <div className="mt-6 rounded-[var(--radius-card)] border border-gold/30 bg-white/8 p-5">
-            <p className="font-semibold">Complete your Kolmari Profile to see personalized Pathway signals.</p>
+            <p className="font-semibold">Complete your Profile to see personalized Pathway signals.</p>
             <p className="mt-1 text-sm text-white/70">Until then, all Pathways show as needing more information—no match is assumed.</p>
             <Link href="/profile-wizard" className="gold-button mt-4 inline-flex items-center gap-2">Start Profile Wizard <ArrowRight size={16} /></Link>
           </div>
@@ -196,7 +196,7 @@ export function PathwaysResults({ profile, pathways }: { profile: RelocationProf
       {strongest.length > 0 && (
         <section className="mt-8" aria-labelledby="top-matches-heading">
           <h2 id="top-matches-heading" className="text-xs font-bold uppercase tracking-[0.14em] text-gold-deep">Your strongest signals</h2>
-          <p className="mt-1 text-sm text-muted">Based on your Kolmari Profile. Official requirements still control eligibility.</p>
+          <p className="mt-1 text-sm text-muted">Based on your Profile. Official requirements still control eligibility.</p>
           <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">{strongest.map((pathway) => <StrongSignalCard key={pathway.id} pathway={pathway} />)}</div>
         </section>
       )}

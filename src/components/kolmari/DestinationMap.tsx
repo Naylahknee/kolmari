@@ -29,10 +29,10 @@ export default function DestinationMap({ profile }: { profile: MapProfile }) {
           <path d={REGION_MAP_SHAPES[region.slug]} fill="#0D1B39" fillOpacity=".48" stroke="#F3C516" strokeWidth="3" className="nexit-region-outline" />
           <text x={x} y={y} textAnchor="middle" fill="white" fontSize="18" fontWeight="800" className="pointer-events-none">{region.name}</text>
           <text x={x} y={y + 22} textAnchor="middle" fill="#D6DCE7" fontSize="11" className="pointer-events-none">{region.countryCount} countries</text>
-          <text x={x} y={y + 40} textAnchor="middle" fill="#F3C516" fontSize="10" fontWeight="700" className="pointer-events-none">{profile.complete && match !== undefined ? `Kolmari Match ${match}%` : 'Complete profile to see match'}</text>
+          <text x={x} y={y + 40} textAnchor="middle" fill="#F3C516" fontSize="10" fontWeight="700" className="pointer-events-none">{profile.complete && match !== undefined ? `Match Score ${match}%` : 'Complete profile to see match'}</text>
         </Link>
       })}
     </svg>
-    {!profile.complete ? <div className="m-2 flex flex-wrap items-center justify-between gap-4 rounded-card border border-gold/25 bg-white/8 p-5 text-white"><div><p className="font-bold">Complete your Kolmari Profile to see personalized matches.</p><p className="mt-1 text-sm text-white/60">You can still open every region and research destinations now.</p></div><Link href="/profile-wizard" className="gold-button">Start Wizard <ArrowRight size={16} /></Link></div> : null}
+    {!profile.complete ? <div className="m-2 flex flex-wrap items-center justify-between gap-4 rounded-card border border-gold/25 bg-white/8 p-5 text-white"><div><p className="font-bold">Complete your Profile to see personalized matches.</p><p className="mt-1 text-sm text-white/60">You can still open every region and research destinations now.</p></div><Link href="/profile-wizard" className="gold-button">Start Wizard <ArrowRight size={16} /></Link></div> : null}
   </section>
 }

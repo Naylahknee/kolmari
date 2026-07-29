@@ -137,7 +137,7 @@ function profileSignals(profile: RelocationProfile, pathway: PathwayDefinition) 
   const met: string[] = []
   const missing: string[] = []
   const selected = profile.goals.includes(pathway.category)
-  if (selected) met.push(`${pathway.category} selected in your Kolmari Profile`)
+  if (selected) met.push(`${pathway.category} selected in your Profile`)
   else missing.push(`Add ${pathway.category} as a profile goal`)
 
   // Citizenship signal — EU/EEA free movement often removes the need for a visa.

@@ -3,21 +3,25 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getRequestUser, SESSION_COOKIE } from '@/lib/auth'
 import { getSql } from '@/lib/db'
+import { strongPasswordSchema } from '@/lib/schemas'
+import { isSameOrigin } from '@/lib/security'
 
 const schema = z.object({
   currentPassword: z.string().min(1),
-  newPassword: z.string().min(8).max(72),
+  newPassword: strongPasswordSchema,
 }).strict()
 
 type UserRow = { id: number; password: string }
 
 export async function POST(request: Request) {
+  if (!isSameOrigin(request)) return Response.json({ error: 'Request blocked.' }, { status: 403 })
+
   const user = await getRequestUser(request)
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
     const parsed = schema.safeParse(await request.json())
-    if (!parsed.success) return Response.json({ error: 'New password must be at least 8 characters.' }, { status: 400 })
+    if (!parsed.success) return Response.json({ error: parsed.error.issues[0]?.message ?? 'New password does not meet the requirements.' }, { status: 400 })
 
     const sql = getSql()
     const rows = await sql`SELECT id, password FROM users WHERE id = ${user.id} LIMIT 1` as UserRow[]

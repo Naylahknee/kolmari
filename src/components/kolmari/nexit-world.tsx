@@ -42,7 +42,7 @@ const MapboxCanvas = dynamic(
   },
 )
 
-// ─── Unified Kolmarination workspace ──────────────────────────────────────────
+// ─── Unified Destinations workspace ──────────────────────────────────────────
 
 export function NexitWorldWorkspace({ profileComplete, regionMatches, initialView, initialQuery }: Props) {
   const router = useRouter()

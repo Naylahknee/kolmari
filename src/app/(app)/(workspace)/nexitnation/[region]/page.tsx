@@ -46,7 +46,7 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
   return (
     <div>
       <nav aria-label="Breadcrumb" className="mb-5 flex items-center gap-2 text-sm text-muted">
-        <Link href="/nexitnation" className="font-semibold transition hover:text-navy">Kolmarination</Link>
+        <Link href="/nexitnation" className="font-semibold transition hover:text-navy">Destinations</Link>
         <ChevronRight size={14} aria-hidden="true" />
         <span className="font-semibold text-navy">{region.name}</span>
       </nav>
@@ -66,7 +66,7 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
           <h1 className="mt-2 text-5xl font-bold">{region.name}</h1>
           <p className="mt-4 max-w-xl leading-7 text-white/80">{region.description}</p>
           <div className="mt-6 flex flex-wrap gap-2">
-            <span className="rounded-pill border border-gold/45 bg-gold/12 px-3 py-1.5 text-xs font-bold text-gold">{matches ? `Kolmari Match ${matches[slug]}%` : 'Popular region research'}</span>
+            <span className="rounded-pill border border-gold/45 bg-gold/12 px-3 py-1.5 text-xs font-bold text-gold">{matches ? `Match Score ${matches[slug]}%` : 'Popular region research'}</span>
             <span className="rounded-pill border border-white/20 bg-black/20 px-3 py-1.5 text-xs backdrop-blur">{region.countryCount} countries</span>
             {region.indicators.map((indicator) => (
               <span key={indicator} className="rounded-pill border border-white/20 bg-black/20 px-3 py-1.5 text-xs backdrop-blur">{indicator}</span>
@@ -78,9 +78,9 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
       <section className="py-10">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">{matches ? 'Connected to your Kolmari Profile' : 'Popular places to research'}</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">{matches ? 'Connected to your Profile' : 'Popular places to research'}</p>
             <h2 className="mt-1 text-3xl font-bold text-navy">Destinations in {region.name}</h2>
-            {!profileComplete && <p className="mt-2 max-w-2xl text-sm text-muted">These are editorial starting points, not personalized rankings. Complete your Kolmari Profile to compare regions against your facts.</p>}
+            {!profileComplete && <p className="mt-2 max-w-2xl text-sm text-muted">These are editorial starting points, not personalized rankings. Complete your Profile to compare regions against your facts.</p>}
           </div>
           <Link href="/nexitnation?view=countries" className="text-sm font-semibold text-navy transition hover:text-gold-deep">View all Destinations</Link>
         </div>
@@ -128,8 +128,8 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
         <article className="rounded-card border border-line bg-white p-6 shadow-card">
           <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">{NEXIT_LEXICON.pathways}</p>
           <h2 className="mt-1 text-2xl font-bold text-navy">{matches ? 'Residency options matched to you' : 'Research residency options'}</h2>
-          <p className="mt-3 text-muted">Review visa, residency, work, retirement, and study Pathways based on your Kolmari Profile.</p>
-          <Link href={matches ? '/pathways' : '/profile-wizard'} className="mt-5 inline-flex rounded-field bg-navy px-5 py-3 text-sm font-semibold text-white transition hover:bg-navy-deep">{matches ? 'View My Pathways' : 'Build Your Kolmari Plan'}</Link>
+          <p className="mt-3 text-muted">Review visa, residency, work, retirement, and study Pathways based on your Profile.</p>
+          <Link href={matches ? '/pathways' : '/profile-wizard'} className="mt-5 inline-flex rounded-field bg-navy px-5 py-3 text-sm font-semibold text-white transition hover:bg-navy-deep">{matches ? 'View My Pathways' : 'Build My Move Plan'}</Link>
         </article>
 
         <article className="rounded-card border border-line bg-white p-6 shadow-card">
