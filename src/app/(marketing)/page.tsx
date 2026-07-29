@@ -3,8 +3,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import {
   ArrowRight,
-  Calculator,
-  CheckCircle2,
   ChevronDown,
   ChevronRight,
   ClipboardList,
@@ -14,7 +12,6 @@ import {
   MessageCircleMore,
   NotebookTabs,
   Route,
-  Sparkles,
   UsersRound,
 } from 'lucide-react'
 import { MarketingMobileNav } from '@/components/kolmari/marketing-mobile-nav'
@@ -30,12 +27,6 @@ const journey = [
   { icon: NotebookTabs, label: 'Move Plan', copy: 'Build a practical plan: documents, budget, and tasks.' },
   { icon: Gauge, label: 'Readiness Tracker', copy: "Track your progress until you're move-ready." },
 ]
-
-const benefits = [
-  [Sparkles, 'Find your strongest pathway', 'Match Scores based on your Profile — not guesswork.'],
-  [Calculator, 'Plan a realistic budget', 'Understand true monthly costs before you commit.'],
-  [CheckCircle2, 'Move with confidence', 'A step-by-step plan that stays on track to departure.'],
-] as const
 
 export default function LandingPage() {
   return (
@@ -90,21 +81,8 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ── Benefits strip (overlaps hero) ────────────────────────────── */}
-        <section id="features" className="relative z-20 mx-3 -mt-9 grid overflow-hidden rounded-[18px] border border-line bg-white shadow-[0_20px_50px_-30px_rgba(16,34,68,.4)] sm:mx-8 sm:grid-cols-3">
-          {benefits.map(([Icon, title, copy], index) => (
-            <div key={title} className={`flex items-center gap-4 px-5 py-5 sm:px-7 sm:py-6 ${index ? 'border-t border-line sm:border-l sm:border-t-0' : ''}`}>
-              <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-gold-soft text-gold-deep"><Icon size={20} /></span>
-              <div>
-                <p className="text-sm font-extrabold text-navy">{title}</p>
-                <p className="mt-1 text-xs leading-5 text-muted">{copy}</p>
-              </div>
-            </div>
-          ))}
-        </section>
-
         {/* ── The journey (how Kolmari works) ───────────────────────────── */}
-        <section id="how-it-works" className="pb-20 pt-24 sm:pt-28">
+        <section id="how-it-works" className="pb-20 pt-16 sm:pt-20">
           <div className="mx-auto max-w-2xl text-center">
             <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-gold-deep">How Kolmari works</p>
             <h2 className="mt-3 font-display text-4xl font-extrabold text-navy sm:text-5xl">From first question to move-ready</h2>
