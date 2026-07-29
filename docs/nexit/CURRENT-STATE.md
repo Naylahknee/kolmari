@@ -809,3 +809,29 @@ already teal-free, so this was a cohesion + logo-fix pass.
 `src/app/(marketing)/quiz/page.tsx`.
 
 ### Tests: tsc pass · next build pass · ESLint no new errors · /login, /signup, /quiz screenshotted (desktop+mobile), 0 teal, logo resolves.
+
+---
+
+## Logged-in shell simplification (light declutter)
+
+Owner asked to simplify the logged-in app chrome. Key discovery: the previously-
+edited `src/components/kolmari/app-shell.tsx` was **dead code** — the live shell is
+`country-template/TopBar.tsx` + `Sidebar.tsx` (via `workspace-shell.tsx`). Changes
+target the live shell. Teal kept for Greenbook/Klub (owner choice); light declutter.
+
+- **Top bar** (`country-template/TopBar.tsx`): removed 5 dead placeholder buttons
+  (Search, Notifications, Help, More/kebab, plus the non-interactive page-title
+  dropdown chevron and the dead Compare/Save pills). Page title is now static text.
+  Kept the functional sidebar toggle, logo, and `UnitsControl` (country pages).
+- **Sidebar** (`country-template/Sidebar.tsx`): fixed the duplicate "Destinations"
+  label — `/saved` now reads **Saved** (distinct from `/nexitnation` = Destinations).
+  Removed the **fake hardcoded readiness footer** (always showed "Profile complete ·
+  100%" regardless of real status — misleading / data-integrity issue).
+- **`/saved` page** + TopBar page-name map updated to "Saved" for consistency.
+- **CSS** (`workspace-chrome.css`): dropped the mobile rule that hid the first zone-A
+  button (which, after removing Search, would have hidden the sidebar toggle).
+- **Deleted dead code:** `src/components/kolmari/app-shell.tsx` (unreferenced;
+  removed the last broken `/brand/NexitWordMark.svg` references). The live shell logo
+  (`favicon-48.png` + "Kolmari") already works.
+
+### Tests: tsc pass · next build pass · ESLint no new errors (36 pre-existing). Simplified chrome screenshotted via a temporary preview route (removed before commit).

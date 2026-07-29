@@ -33,7 +33,7 @@ export function Sidebar() {
         </Link>
         <Link className={`sb-item${active('/saved') || active('/countries') ? ' active' : ''}`} href="/saved">
           <Icon><circle cx="12" cy="12" r="9" /><path d="M15.5 8.5l-2 5-5 2 2-5z" /></Icon>
-          <span className="lbl">{PRODUCT_COPY.destinations}</span>
+          <span className="lbl">Saved</span>
         </Link>
 
         <p className="sb-label">Plan</p>
@@ -74,13 +74,6 @@ export function Sidebar() {
           <span className="lbl">{PRODUCT_COPY.settings}</span>
         </Link>
       </nav>
-
-      <div className="readiness">
-        <div className="rl">{PRODUCT_COPY.readiness}</div>
-        <div className="rv">Profile complete</div>
-        <div className="rbar"><i style={{ width: '100%' }} /></div>
-        <Link href="/profile-wizard">Edit profile</Link>
-      </div>
     </aside>
   )
 }

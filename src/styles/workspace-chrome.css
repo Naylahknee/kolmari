@@ -174,7 +174,6 @@ body.rail-collapsed .sb-item .ic {
   .topbar-zone-a { padding: 0; justify-content: center; border-right: 1px solid var(--color-line); }
   .topbar-zone-a .mark { display: none; }
   .topbar-zone-a .zone-a-actions { display: flex; }
-  .topbar-zone-a .zone-a-actions .icon-btn:first-child { display: none; }
   .topbar-zone-b { padding: 0 10px 0 12px; }
   .topbar-zone-b .page-section,
   .topbar-zone-b .header-pill,
