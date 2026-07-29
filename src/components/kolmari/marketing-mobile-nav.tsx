@@ -32,6 +32,7 @@ export function MarketingMobileNav() {
           </div>
           {[
             ['How it works', '#how-it-works'],
+            ['Pricing', '#pricing'],
             ['Community', '#community'],
             ['Sign in', '/login'],
             ['Build My Move Plan', '/quiz'],

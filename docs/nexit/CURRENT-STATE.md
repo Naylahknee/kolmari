@@ -835,3 +835,25 @@ target the live shell. Teal kept for Greenbook/Klub (owner choice); light declut
   (`favicon-48.png` + "Kolmari") already works.
 
 ### Tests: tsc pass · next build pass · ESLint no new errors (36 pre-existing). Simplified chrome screenshotted via a temporary preview route (removed before commit).
+
+---
+
+## Pricing / payment plan added to the landing page
+
+Owner requested a payment plan, informed by market research (Expatsi freemium
+$99/mo human-support; Monarch/YNAB ~$14.99/mo·$99–109/yr; Nomad List $99 lifetime;
+freemium value-ladder norm). Owner chose: Free + two paid tiers + a concierge add-on.
+
+- **New `#pricing` section** on the landing page (`src/app/(marketing)/page.tsx`),
+  data-driven `tiers` array, 4-color palette, added to header + mobile nav.
+- Tiers: **Explorer (Free)** · **Plus $12/mo ($99/yr)** [Most popular] · **Navigator
+  $29/mo ($249/yr)**, with an honest value ladder mapping to real features (Match
+  Score, Pathways, Move Plan, Readiness Tracker, Documents, Cost Calculator,
+  Greenbook, Kolmari Klub). "Every plan starts free" honors the prior promise.
+- **Kolmari Concierge** add-on callout — from $149/session, labeled "guidance, not
+  legal advice." Disclaimer: "not legal advice or visa filing."
+- Scope note: this is the pricing **display + value ladder** only. Actual checkout/
+  billing (e.g. Stripe) and enforcing the free-vs-paid feature gates in-app are a
+  separate build. Tier CTAs currently funnel to /quiz (Explorer) and /signup (paid).
+
+### Tests: tsc pass · next build pass · ESLint no new errors (36 pre-existing).

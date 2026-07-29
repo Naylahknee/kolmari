@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import {
   ArrowRight,
+  Check,
   ChevronDown,
   ChevronRight,
   ClipboardList,
@@ -28,6 +29,64 @@ const journey = [
   { icon: Gauge, label: 'Readiness Tracker', copy: "Track your progress until you're move-ready." },
 ]
 
+// Pricing tiers. Every plan starts free; paid tiers unlock more of the same
+// real features (no fabricated numbers — gated data is shown only when real).
+const tiers = [
+  {
+    name: 'Explorer',
+    price: 'Free',
+    period: '',
+    annual: 'Free forever',
+    tagline: 'See if moving abroad is realistic for you.',
+    cta: 'Start free',
+    href: '/quiz',
+    featured: false,
+    features: [
+      'Your Kolmari Profile',
+      'Match Score for your top 3 destinations',
+      'Browse visa Pathways (read-only)',
+      'A starter Move Plan',
+      'Greenbook Insights preview',
+      'Kolmari Klub (read-only)',
+    ],
+  },
+  {
+    name: 'Plus',
+    price: '$12',
+    period: '/mo',
+    annual: 'or $99/yr — save ~2 months',
+    tagline: 'Turn a maybe into a real, tracked plan.',
+    cta: 'Choose Plus',
+    href: '/signup?plan=plus',
+    featured: true,
+    features: [
+      'Everything in Explorer, plus:',
+      'Full Match Score across all destinations',
+      'Personalized Pathway eligibility',
+      'Full Move Plan, Documents & Readiness Tracker',
+      'Full Cost Calculator & Greenbook Insights',
+      'Full Kolmari Klub community',
+    ],
+  },
+  {
+    name: 'Navigator',
+    price: '$29',
+    period: '/mo',
+    annual: 'or $249/yr — save ~2 months',
+    tagline: 'For households executing a move across destinations.',
+    cta: 'Choose Navigator',
+    href: '/signup?plan=navigator',
+    featured: false,
+    features: [
+      'Everything in Plus, plus:',
+      'Compare destinations side by side',
+      'Full household modeling (partner, dependents)',
+      'Multiple active Move Plans',
+      'Priority Greenbook updates & deeper data',
+    ],
+  },
+]
+
 export default function LandingPage() {
   return (
     <main className="min-h-screen bg-canvas">
@@ -37,6 +96,7 @@ export default function LandingPage() {
           <MarketingLogo />
           <nav className="hidden items-center gap-7 text-sm font-semibold text-navy/75 md:flex" aria-label="Landing navigation">
             <a href="#how-it-works" className="transition hover:text-navy">How it works</a>
+            <a href="#pricing" className="transition hover:text-navy">Pricing</a>
             <a href="#community" className="transition hover:text-navy">Community</a>
             <Link href="/login" className="transition hover:text-navy">Sign in</Link>
             <Link href="/quiz" className="gold-button !min-h-10 !px-4">Build My Move Plan</Link>
@@ -123,6 +183,82 @@ export default function LandingPage() {
       </div>
 
       <QuestionsSection />
+
+      {/* ── Pricing ─────────────────────────────────────────────────────── */}
+      <section id="pricing" className="mx-auto max-w-[1236px] px-4 py-20 sm:px-6 lg:px-7">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-gold-deep">Pricing</p>
+          <h2 className="mt-3 font-display text-4xl font-extrabold text-navy sm:text-5xl">Start free. Upgrade when you&apos;re ready.</h2>
+          <p className="mt-4 text-base leading-7 text-muted">
+            Every plan starts free — you only upgrade when a plan is worth it. No credit card to begin.
+          </p>
+        </div>
+
+        <div className="mt-12 grid items-start gap-5 lg:grid-cols-3">
+          {tiers.map((tier) => (
+            <div
+              key={tier.name}
+              className={[
+                'flex flex-col rounded-[22px] p-7 sm:p-8',
+                tier.featured
+                  ? 'bg-navy-deep text-white shadow-[0_28px_70px_-42px_rgba(13,27,57,.85)] ring-1 ring-gold/40'
+                  : 'border border-line bg-white text-navy shadow-card',
+              ].join(' ')}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-lg font-extrabold">{tier.name}</h3>
+                {tier.featured && (
+                  <span className="rounded-pill bg-gold px-2.5 py-1 text-xs font-extrabold text-navy-deep">Most popular</span>
+                )}
+              </div>
+              <div className="mt-4 flex items-baseline gap-1">
+                <span className="text-4xl font-extrabold">{tier.price}</span>
+                {tier.period && <span className={tier.featured ? 'text-white/70' : 'text-muted'}>{tier.period}</span>}
+              </div>
+              <p className={`mt-1 text-xs font-semibold ${tier.featured ? 'text-gold' : 'text-gold-deep'}`}>{tier.annual}</p>
+              <p className={`mt-3 text-sm leading-6 ${tier.featured ? 'text-white/75' : 'text-muted'}`}>{tier.tagline}</p>
+
+              <Link
+                href={tier.href}
+                className={
+                  tier.featured || tier.name === 'Explorer'
+                    ? 'gold-button mt-6 w-full justify-center'
+                    : `mt-6 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[var(--radius-btn)] border px-5 font-bold transition ${tier.featured ? 'border-white/30 text-white hover:border-gold' : 'border-line text-navy hover:border-gold'}`
+                }
+              >
+                {tier.cta} <ArrowRight size={16} />
+              </Link>
+
+              <ul className="mt-7 space-y-3">
+                {tier.features.map((feature, index) => (
+                  <li key={feature} className={`flex items-start gap-2.5 text-sm leading-6 ${tier.featured ? 'text-white/85' : 'text-navy'} ${index === 0 ? 'font-semibold' : ''}`}>
+                    <Check size={16} className={`mt-0.5 shrink-0 ${tier.featured ? 'text-gold' : 'text-gold-deep'}`} aria-hidden="true" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* Concierge add-on */}
+        <div className="mt-6 flex flex-col items-start justify-between gap-4 rounded-[22px] border border-line bg-white p-6 shadow-card sm:flex-row sm:items-center sm:p-7">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Add-on</p>
+            <h3 className="mt-1 text-lg font-extrabold text-navy">Kolmari Concierge</h3>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-muted">
+              A guided plan review with a relocation expert — from <span className="font-semibold text-navy">$149 per session</span>. Community and guidance, not legal advice.
+            </p>
+          </div>
+          <Link href="/signup?plan=concierge" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-[var(--radius-btn)] border border-line px-5 font-bold text-navy transition hover:border-gold">
+            Learn more <ArrowRight size={15} />
+          </Link>
+        </div>
+
+        <p className="mt-6 text-center text-xs text-muted">
+          Prices in USD. Kolmari surfaces relocation research and planning signals — not legal advice or visa filing.
+        </p>
+      </section>
 
       {/* ── Community — secondary to the single /quiz goal ──────────────── */}
       <section id="community" className="mx-auto max-w-[1236px] px-4 py-20 sm:px-6 lg:px-7">
