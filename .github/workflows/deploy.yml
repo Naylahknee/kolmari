@@ -1,0 +1,46 @@
+name: Deploy to Cloudflare
+
+# Deploys the app to the Cloudflare Worker named in wrangler.jsonc ("kolmari")
+# whenever main updates. Also runnable on demand from the Actions tab.
+#
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   CLOUDFLARE_API_TOKEN   – a token with "Edit Cloudflare Workers" permission
+#   CLOUDFLARE_ACCOUNT_ID  – your Cloudflare account ID
+#
+# Runtime secrets (JWT_SECRET, DATABASE_URL, NEXT_PUBLIC_MAPBOX_TOKEN, …) live on
+# the Worker itself (Cloudflare dashboard → Workers → kolmari → Settings →
+# Variables) and are preserved across deploys — they are NOT set here.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-cloudflare
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Build the OpenNext bundle and deploy it to the Worker. wrangler reads the
+      # token + account id from the environment below.
+      - name: Build and deploy
+        run: npm run deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # Build-time placeholders only. Server code reads the real values from
+          # the Worker's bindings at runtime, so these never reach production.
+          JWT_SECRET: build-time-placeholder-not-used-at-runtime
+          DATABASE_URL: postgres://placeholder:placeholder@localhost:5432/placeholder
