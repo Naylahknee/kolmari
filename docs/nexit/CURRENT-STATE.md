@@ -977,3 +977,31 @@ Plan is a follow-up; this pass gates the dashboard representation + upsell.
 ### Tests: tsc pass · next build pass · ESLint no new errors (36 pre-existing) ·
 visual QA via temporary preview route (free dashboard, profile complete +
 incomplete, desktop + mobile).
+
+## Gate information-heavy pages for free users
+
+Owner: "Any page that provides excessive info should be gated." The old country
+routes already redirect into the gated v2 page, but Pathways, Greenbook, and the
+Cost Calculator showed full detail to free users. Now gated by `isPaid(profile)`
+with the same treatment as the country pages.
+
+- New reusable `src/components/kolmari/plus-gate.tsx` (`PlusGate`) — a consistent
+  "Plus feature" lock panel (eyebrow + title + description + bullets + Upgrade CTA
+  → `/#pricing`) with an optional `preview` slot. Mirrors the `SimpleCountryView`
+  lock so the whole app upsells the same way.
+- **Pathways** (`/pathways`): free → the routes we research **by name only**
+  (no requirements/thresholds/fees/sources) + `PlusGate`; paid → full
+  `PathwaysResults`.
+- **Greenbook** (`/greenbook`): split the client UI into
+  `components/kolmari/greenbook-board.tsx` (`GreenbookBoard`); the page is now a
+  server component — free → a 3-card read-only preview + `PlusGate`; paid → the
+  full interactive board.
+- **Cost Calculator** (`/cost-calculator`): free → `PlusGate`; paid → full
+  `CostCalculator`.
+
+Everyone is `free` until billing exists, so these show the gated view today.
+Data integrity unchanged (no fabricated figures). `/nexitnation` (Destinations
+browse) is intentionally left open as the free funnel entry point; can be gated
+next if desired.
+
+### Tests: tsc pass · next build pass · ESLint no new errors.
