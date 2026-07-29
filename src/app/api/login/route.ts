@@ -7,6 +7,24 @@ import { clientIp, isSameOrigin, rateLimit } from '@/lib/security'
 
 type UserRow = { id: number; email: string; password: string }
 
+// The `users` table is normally created by db/migrations/000_init.sql. Mirror
+// the ensure*Table pattern used for profiles / plans so the app self-heals on a
+// database where migrations were never run, instead of throwing a 500 on the
+// first SELECT. Idempotent; cached per isolate.
+let usersTableReady: Promise<void> | undefined
+function ensureUsersTable() {
+  return (usersTableReady ??= (async () => {
+    const sql = getSql()
+    await sql`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        email TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL
+      )
+    `
+  })())
+}
+
 // A bcrypt hash used to equalize response timing when no account exists, so an
 // attacker cannot distinguish "no such user" from "wrong password" by how long
 // the request takes. Computed once (guaranteed valid) and cached per isolate.
@@ -38,6 +56,7 @@ export async function POST(request: Request) {
     const { email, password, mode } = parsed.data
 
     const sql = getSql()
+    await ensureUsersTable()
     const users = await sql`SELECT id, email, password FROM users WHERE email = ${email} LIMIT 1` as UserRow[]
     let user = users[0]
 
