@@ -889,3 +889,119 @@ Decisions: Mapbox (token to be provided), add a plan field now, country pages on
 - Optional: tighten the map hero height.
 
 ### Tests: tsc pass · next build pass · ESLint no new errors (36 pre-existing).
+
+## Country pages: correct free/paid gating + rich Portugal-style page for all countries (increment 2)
+
+Owner correction: the gating was backwards. **Paid** users get the rich Portugal-style
+page for **any** country (real maps, honest "being verified" gaps — never fabricated
+figures). **Free** users get a **simple, non-expanded** view for any country: info +
+short summary + basic visa info + a small real map + an upgrade CTA. The remaining fake
+SVG shape-maps become real Mapbox maps.
+
+- **Free view:** new `src/components/country-template/SimpleCountryView.tsx` — flag +
+  name + region/city, `CountryDetail.summary` (honest fallback for discoverables), a
+  basic visa line (`visaType` + income guideline, else "visa details being verified"),
+  a small real `CountrySnapshotMap` (via `getCountryCenter`), and an "Unlock the full
+  {country} page" CTA → `/#pricing`. No tabs/snapshot/ring/checklist.
+- **Paid rich view for all countries:** the `CountryTemplate` frame is now data-driven.
+  - `CountryHero` takes the country record + center + a `rich` flag. Portugal (`rich`)
+    keeps its approved, verified content; every other country renders the same frame
+    with honest "Being verified" metrics. The decorative `hero-shape` SVG silhouette is
+    replaced by a **real map background** (`.hero-map`) when a token + center exist,
+    otherwise the navy gradient (never a fake shape).
+  - New `tabs/DataOverviewTab.tsx` drives the Overview for every non-Portugal country
+    from `getCountryFacts` + `getCountryCityOverviews` with real `CountrySnapshotMap` /
+    `CityMapImage` maps and honest "Researching" states where a dataset is absent.
+  - `RightRail` takes a `rich` flag: Portugal keeps its verified Match Score + checklist;
+    other countries get an honest locked Match Score + "start your research" rail (no
+    fabricated score).
+  - Portugal's own `OverviewTab` fake maps are now real: the `.map-card` locator →
+    `CountrySnapshotMap`; the four `.city-map` shape blobs → real `CityMapImage` (Lisbon,
+    Porto, Funchal, Braga). Deeper non-Portugal tabs show an honest "being verified"
+    panel inside the rich frame (binding each data country's full `country-content.ts`
+    into all tabs is a fast follow).
+- **Gate:** the v2 route (`nextinations/[countrySlug]/v2/[section]`) now branches on
+  `isPaid(profile)` — free → `SimpleCountryView`; paid → rich `CountryTemplate`
+  (Portugal verified, all others data-driven). The interim `CountryResearchTemplate`
+  (the "Japan" layout) is retired/removed.
+
+### Remaining (noted to owner)
+- Provide `NEXT_PUBLIC_MAPBOX_TOKEN` (dev `.env.local`; a `vars` entry in
+  `wrangler.jsonc` for Cloudflare) to turn on real map tiles — until then all maps show
+  the honest "map unavailable" fallback.
+- Fast follow: bind the four data countries' (`spain`/`greece`/`estonia`/`mexico`)
+  `country-content.ts` into the deeper paid tabs so they are as rich as Portugal.
+
+### Tests: tsc pass · next build pass · ESLint no new errors (36 pre-existing) · visual
+QA via temporary preview route (free/paid × Portugal/Spain/Japan × desktop/mobile).
+
+## Free-user dashboard: gated Journey Progress + Destination & Visa Planner
+
+Owner: the dashboard should show a reference-style layout for FREE users — a
+"Your Journey Progress" milestone stepper (first stage open, later stages
+locked), an upgrade banner, a get-started intro, and a "Destination & Visa
+Planner" (ranked Destination cards + a per-Destination visa/Pathways list).
+Adapted to Kolmari's design language and data-integrity rules (not a clone).
+
+Owner decisions: (1) **actually gate** the later journey stages for free users
+(not just visual); (2) **no fabricated stage durations** — honest names +
+descriptors only.
+
+- **Gate:** `dashboard/page.tsx` branches on `isPaid(profile)`. Free → the new
+  layout below; paid → the existing rich dashboard (unchanged). Everyone is
+  `free` until billing exists, so free is the default view today.
+- **`JourneyProgress`** (`src/components/kolmari/journey-progress.tsx`): the
+  `PLAN_STAGES` stepper with the first stage (Explore) open and every later
+  stage locked (padlock + "Plus" chip, non-interactive), a calm upgrade banner
+  → `/#pricing`, and honest per-stage descriptors with **no durations**. No
+  scarcity/urgency framing (interaction rules). The paid `MoveTracker` is
+  untouched.
+- **`DestinationVisaPlanner`** (`src/components/kolmari/destination-visa-planner.tsx`):
+  ranked Destination image tiles (reusing `destinationImage`), with the free
+  tier's **top 3 unlocked** and any further matched Destinations **locked →
+  upgrade**; plus a "Kolmari Pathways for {Destination}" list from
+  `evaluatePathways(profile)` for the top Destination. Data-integrity: rank
+  numbers and Match Scores show only when the Profile is complete (real
+  scores); otherwise neutral explore tiles (visa-route pill, no rank/score).
+  Pathway names are catalog facts (always shown); match STATUS badges appear
+  only once the Profile is complete — never implying eligibility.
+- Terminology uses approved product language (Destination, Match Score, Kolmari
+  Pathways, Kolmari Plan, Kolmari Profile) and the live rename ("Progress
+  Tracker" / "Your journey progress").
+
+Note: this reintroduces gated journey stages, which supersedes the earlier
+"### 5. App is not gated" decision for the free dashboard specifically (owner
+approved the reversal). Server-side enforcement of plan-stage advancement in My
+Plan is a follow-up; this pass gates the dashboard representation + upsell.
+
+### Tests: tsc pass · next build pass · ESLint no new errors (36 pre-existing) ·
+visual QA via temporary preview route (free dashboard, profile complete +
+incomplete, desktop + mobile).
+
+## Gate information-heavy pages for free users
+
+Owner: "Any page that provides excessive info should be gated." The old country
+routes already redirect into the gated v2 page, but Pathways, Greenbook, and the
+Cost Calculator showed full detail to free users. Now gated by `isPaid(profile)`
+with the same treatment as the country pages.
+
+- New reusable `src/components/kolmari/plus-gate.tsx` (`PlusGate`) — a consistent
+  "Plus feature" lock panel (eyebrow + title + description + bullets + Upgrade CTA
+  → `/#pricing`) with an optional `preview` slot. Mirrors the `SimpleCountryView`
+  lock so the whole app upsells the same way.
+- **Pathways** (`/pathways`): free → the routes we research **by name only**
+  (no requirements/thresholds/fees/sources) + `PlusGate`; paid → full
+  `PathwaysResults`.
+- **Greenbook** (`/greenbook`): split the client UI into
+  `components/kolmari/greenbook-board.tsx` (`GreenbookBoard`); the page is now a
+  server component — free → a 3-card read-only preview + `PlusGate`; paid → the
+  full interactive board.
+- **Cost Calculator** (`/cost-calculator`): free → `PlusGate`; paid → full
+  `CostCalculator`.
+
+Everyone is `free` until billing exists, so these show the gated view today.
+Data integrity unchanged (no fabricated figures). `/nexitnation` (Destinations
+browse) is intentionally left open as the free funnel entry point; can be gated
+next if desired.
+
+### Tests: tsc pass · next build pass · ESLint no new errors.

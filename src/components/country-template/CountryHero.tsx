@@ -1,74 +1,157 @@
-/* Converted from the approved index.html mockup. Markup verbatim. */
-export function CountryHero({ go, fromQuiz = false }: { go: (s: string) => void; fromQuiz?: boolean }) {
+import { CountrySnapshotMap } from '@/components/country-workspace/CountrySnapshotMap'
+
+/* The country page hero.
+
+   For Portugal (`rich`) it renders the approved, verified mockup content. For
+   every other country it renders the same frame driven by the country record,
+   with honest "being verified" metrics rather than borrowed figures.
+
+   The decorative country silhouette has been replaced by a real Mapbox map:
+   when a map token and a country center are available, the hero background is a
+   real map under the navy scrim; otherwise it falls back to the navy gradient
+   (never a fake shape). */
+
+type HeroCountry = { slug: string; name: string; code: string; city: string; region: string }
+type LatLng = { lat: number; lng: number }
+
+/** Real map background layer, only rendered when a token + center are present. */
+function HeroMap({ country, center }: { country: HeroCountry; center: LatLng | null }) {
+  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+  if (!token || !center) return null
+  return (
+    <div className="hero-map" aria-hidden="true">
+      <CountrySnapshotMap countryName={country.name} lat={center.lat} lng={center.lng} alt={`Map of ${country.name}`} />
+    </div>
+  )
+}
+
+/** Honest metric card for a country without a verified metric dataset. */
+function VerifyingMetric({ label, icon }: { label: string; icon: React.ReactNode }) {
+  return (
+    <div className="metric" aria-disabled="true">
+      <span className="m-l">{icon} {label}</span>
+      <span className="m-v" style={{ fontSize: 15, color: 'rgba(255,255,255,.72)' }}>Being verified</span>
+      <span className="m-n">Shown once confirmed from official sources</span>
+    </div>
+  )
+}
+
+export function CountryHero({
+  go,
+  fromQuiz = false,
+  country,
+  center = null,
+  visaType,
+  rich = false,
+}: {
+  go: (s: string) => void
+  fromQuiz?: boolean
+  country: HeroCountry
+  center?: LatLng | null
+  visaType?: string
+  rich?: boolean
+}) {
+  if (rich) {
+    return (
+      <section className="hero">
+        <div className="hero-bg"></div>
+        <HeroMap country={country} center={center} />
+        <div className="scrim"></div>
+        <div className="hero-body">
+          {fromQuiz && (
+            <p className="hero-quizpill">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><path d="M12 3l2.1 4.9 5.4.5-4.1 3.6 1.2 5.3L12 14.6 7.4 17.3l1.2-5.3L4.5 8.4l5.4-.5z" /></svg>
+              Your top Destination from the Match Quiz
+            </p>
+          )}
+          <div className="hero-eyebrow">Western Europe · Atlantic coast</div>
+          <h1 className="hero-name">
+            <span className="flag hero-flag" role="img" aria-label="Flag of Portugal">
+              <svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="360" height="600" fill="#006600" /><rect x="360" width="540" height="600" fill="#DA291C" /><g transform="translate(360 300)" fill="none" stroke="#FFE900" strokeWidth="15"><circle r="108" /><ellipse rx="108" ry="42" /><ellipse rx="42" ry="108" /><ellipse rx="108" ry="42" transform="rotate(38)" /><ellipse rx="108" ry="42" transform="rotate(-38)" /><path d="M-108 0H108" /></g><g transform="translate(360 300)"><path d="M-52-70h104v78c0 44-38 68-52 76-14-8-52-32-52-76z" fill="#DA291C" stroke="#fff" strokeWidth="13" /><path d="M-31-46h62v54c0 28-22 44-31 50-9-6-31-22-31-50z" fill="#fff" /><g fill="#003399"><rect x="-9" y="-38" width="18" height="26" rx="3" /><rect x="-9" y="12" width="18" height="26" rx="3" /><rect x="-34" y="-13" width="18" height="26" rx="3" /><rect x="16" y="-13" width="18" height="26" rx="3" /></g></g></svg>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="https://flagcdn.com/pt.svg" alt="" onError={(e) => { e.currentTarget.style.display = 'none' }} />
+            </span>
+            Portugal
+          </h1>
+          <p className="hero-blurb">Mild Atlantic climate, costs below the Western European average, and five legal routes open to non-EU nationals. Lisbon and Porto carry the infrastructure, while the Algarve and Alentejo trade pace for price.</p>
+          <div className="badges">
+            <span className="badge-h b-sch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18" /></svg> Schengen Area</span>
+            <span className="badge-h b-eu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 6.6l.9 1.9 2 .3-1.5 1.4.4 2-1.8-1-1.8 1 .4-2-1.5-1.4 2-.3z" fill="currentColor" stroke="none" /></svg> EU Member</span>
+            <span className="badge-h b-nato"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2l8 3.6v6.1c0 4.6-3.3 8.7-8 10.3-4.7-1.6-8-5.7-8-10.3V5.6z" /><path d="M12 7v10M7.5 12h9" /></svg> NATO Member</span>
+          </div>
+        </div>
+        <div className="metrics">
+          <button className="metric" onClick={() => go('cost-housing')} aria-label="Cost against your budget. Opens Cost and Housing.">
+            <svg className="m-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+            <span className="m-l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /></svg> Cost vs your budget</span>
+            <span className="m-v">$2,365 <small>/ mo</small></span>
+            <span className="m-n">couple in Lisbon · <b>34% under</b> budget</span>
+          </button>
+          <button className="metric" onClick={() => go('move-there')} aria-label="Your best route. Opens Move There.">
+            <svg className="m-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+            <span className="m-l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="6" cy="6" r="2.5" /><circle cx="18" cy="18" r="2.5" /><path d="M8.5 6H15a3 3 0 010 6H9a3 3 0 000 6h6.5" /></svg> Your best route</span>
+            <span className="m-v">D8 <small>digital nomad</small></span>
+            <span className="m-n"><b>You qualify</b> · 2 items outstanding</span>
+          </button>
+          <button className="metric" onClick={() => go('move-there')} aria-label="Time to residency. Opens Move There.">
+            <svg className="m-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+            <span className="m-l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg> Time to residency</span>
+            <span className="m-v">4 <small>to 7 months</small></span>
+            <span className="m-n">filing to landing · <b className="warn">consulate backlog</b></span>
+          </button>
+          <button className="metric" onClick={() => go('move-there')} aria-label="Path to citizenship. Opens Move There.">
+            <svg className="m-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+            <span className="m-l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="3" width="16" height="18" rx="2" /><circle cx="12" cy="10" r="2.6" /><path d="M8.5 17c.9-1.8 2-2.6 3.5-2.6s2.6.8 3.5 2.6" /></svg> Path to citizenship</span>
+            <span className="m-v">5 <small>years</small></span>
+            <span className="m-n">fastest tier in the EU · needs <b>A2</b></span>
+          </button>
+        </div>
+      </section>
+    )
+  }
+
+  // Data-driven hero for every non-Portugal country. Real map, real name / flag
+  // / region from the record, and honest metrics (the only verified figure we
+  // may have is the visa route for the five mapped countries).
   return (
     <section className="hero">
-          <div className="hero-bg"></div><div className="scrim"></div>
-          <svg className="hero-shape" viewBox="0 0 200 407" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-            <defs><radialGradient id="capGlow"><stop offset="0%" stopColor="#f3c516" stopOpacity=".55" /><stop offset="70%" stopColor="#f3c516" stopOpacity=".08" /><stop offset="100%" stopColor="#f3c516" stopOpacity="0" /></radialGradient></defs>
-            {/* per-country outline. In the live build this path comes from the country record. */}
-            <g className="outline">
-              <path className="fill" d="M 38.1,21.9 L 53.2,13.3 L 74.9,3.1 L 93.7,7.8 L 117.8,4.7 L 139.0,11.8 L 165.6,26.6 L 179.5,36.8 L 195.2,50.9 L 178.2,65.0 L 157.1,87.8 L 168.0,101.9 L 186.1,115.2 L 200.0,145.0 L 178.2,170.1 L 151.1,195.9 L 129.9,199.8 L 117.8,193.6 L 131.7,223.3 L 142.6,248.4 L 134.1,268.8 L 145.0,290.0 L 142.0,309.6 L 145.0,326.8 L 126.9,360.5 L 99.7,387.9 L 72.5,396.5 L 45.3,398.9 L 30.8,402.0 L 33.8,380.1 L 41.1,360.5 L 43.5,329.1 L 42.3,305.6 L 30.2,290.0 L 18.1,282.1 L 23.0,271.9 L 12.1,268.8 L 0.0,264.1 L 4.8,242.9 L 7.3,218.6 L 18.1,199.8 L 31.4,172.4 L 38.1,156.7 L 42.3,137.1 L 45.3,118.3 L 47.1,98.0 L 49.5,78.4 L 42.3,58.8 L 40.5,36.0 Z" />
-              <path className="edge" d="M 38.1,21.9 L 53.2,13.3 L 74.9,3.1 L 93.7,7.8 L 117.8,4.7 L 139.0,11.8 L 165.6,26.6 L 179.5,36.8 L 195.2,50.9 L 178.2,65.0 L 157.1,87.8 L 168.0,101.9 L 186.1,115.2 L 200.0,145.0 L 178.2,170.1 L 151.1,195.9 L 129.9,199.8 L 117.8,193.6 L 131.7,223.3 L 142.6,248.4 L 134.1,268.8 L 145.0,290.0 L 142.0,309.6 L 145.0,326.8 L 126.9,360.5 L 99.7,387.9 L 72.5,396.5 L 45.3,398.9 L 30.8,402.0 L 33.8,380.1 L 41.1,360.5 L 43.5,329.1 L 42.3,305.6 L 30.2,290.0 L 18.1,282.1 L 23.0,271.9 L 12.1,268.8 L 0.0,264.1 L 4.8,242.9 L 7.3,218.6 L 18.1,199.8 L 31.4,172.4 L 38.1,156.7 L 42.3,137.1 L 45.3,118.3 L 47.1,98.0 L 49.5,78.4 L 42.3,58.8 L 40.5,36.0 Z" />
-            </g>
-            <g className="cap-pin"><title>Lisbon, capital of Portugal</title>
-              <circle className="cap-glow" cx="21.8" cy="241" r="42" />
-              <ellipse className="cap-shadow" cx="21.8" cy="271" rx="9" ry="2.6" />
-              <g transform="translate(21.8 269)">
-                <path className="cap-body" d="M0 0 L-13.13 -18.86 A16.0 16.0 0 1 1 13.13 -18.86 Z" />
-                <image href="data:image/png;base64,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" x="-11.5" y="-39.5" width="23" height="23" preserveAspectRatio="xMidYMid meet" />
-              </g>
-              <text className="cap-label" x="45" y="238">LISBON</text>
-              <text className="cap-sub" x="45" y="251">CAPITAL</text>
-            </g>
-          </svg>
-          <div className="hero-body">
-            {fromQuiz && (
+      <div className="hero-bg"></div>
+      <HeroMap country={country} center={center} />
+      <div className="scrim"></div>
+      <div className="hero-body">
+        {fromQuiz && (
           <p className="hero-quizpill">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><path d="M12 3l2.1 4.9 5.4.5-4.1 3.6 1.2 5.3L12 14.6 7.4 17.3l1.2-5.3L4.5 8.4l5.4-.5z" /></svg>
             Your top Destination from the Match Quiz
           </p>
         )}
-        <div className="hero-eyebrow">Western Europe · Atlantic coast</div>
-            <h1 className="hero-name">
-              <span className="flag hero-flag" role="img" aria-label="Flag of Portugal">
-                <svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="360" height="600" fill="#006600" /><rect x="360" width="540" height="600" fill="#DA291C" /><g transform="translate(360 300)" fill="none" stroke="#FFE900" strokeWidth="15"><circle r="108" /><ellipse rx="108" ry="42" /><ellipse rx="42" ry="108" /><ellipse rx="108" ry="42" transform="rotate(38)" /><ellipse rx="108" ry="42" transform="rotate(-38)" /><path d="M-108 0H108" /></g><g transform="translate(360 300)"><path d="M-52-70h104v78c0 44-38 68-52 76-14-8-52-32-52-76z" fill="#DA291C" stroke="#fff" strokeWidth="13" /><path d="M-31-46h62v54c0 28-22 44-31 50-9-6-31-22-31-50z" fill="#fff" /><g fill="#003399"><rect x="-9" y="-38" width="18" height="26" rx="3" /><rect x="-9" y="12" width="18" height="26" rx="3" /><rect x="-34" y="-13" width="18" height="26" rx="3" /><rect x="16" y="-13" width="18" height="26" rx="3" /></g></g></svg>
-                <img src="https://flagcdn.com/pt.svg" alt="" onError={(e) => { e.currentTarget.style.display = "none" }} />
-              </span>
-              Portugal
-            </h1>
-            <p className="hero-blurb">Mild Atlantic climate, costs below the Western European average, and five legal routes open to non-EU nationals. Lisbon and Porto carry the infrastructure, while the Algarve and Alentejo trade pace for price.</p>
-            <div className="badges">
-              <span className="badge-h b-sch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18" /></svg> Schengen Area</span>
-              <span className="badge-h b-eu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 6.6l.9 1.9 2 .3-1.5 1.4.4 2-1.8-1-1.8 1 .4-2-1.5-1.4 2-.3z" fill="currentColor" stroke="none" /></svg> EU Member</span>
-              <span className="badge-h b-nato"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2l8 3.6v6.1c0 4.6-3.3 8.7-8 10.3-4.7-1.6-8-5.7-8-10.3V5.6z" /><path d="M12 7v10M7.5 12h9" /></svg> NATO Member</span>
-            </div>
+        <div className="hero-eyebrow">{country.region} · {country.city}</div>
+        <h1 className="hero-name">
+          <span className="flag hero-flag" role="img" aria-label={`Flag of ${country.name}`}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`https://flagcdn.com/${country.code.toLowerCase()}.svg`} alt="" onError={(e) => { e.currentTarget.style.display = 'none' }} />
+          </span>
+          {country.name}
+        </h1>
+        <p className="hero-blurb">
+          Your research workspace for {country.name}. Figures appear here only once they are verified from
+          official sources — never estimated or borrowed from another country.
+        </p>
+      </div>
+      <div className="metrics">
+        {visaType ? (
+          <div className="metric" aria-disabled="true">
+            <span className="m-l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="6" cy="6" r="2.5" /><circle cx="18" cy="18" r="2.5" /><path d="M8.5 6H15a3 3 0 010 6H9a3 3 0 000 6h6.5" /></svg> Primary route</span>
+            <span className="m-v" style={{ fontSize: 20 }}>{visaType}</span>
+            <span className="m-n">Confirm your eligibility with the official authority</span>
           </div>
-          <div className="metrics">
-            <button className="metric" onClick={() => go('cost-housing')} aria-label="Cost against your budget. Opens Cost and Housing.">
-              <svg className="m-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-              <span className="m-l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /></svg> Cost vs your budget</span>
-              <span className="m-v">$2,365 <small>/ mo</small></span>
-              <span className="m-n">couple in Lisbon · <b>34% under</b> budget</span>
-            </button>
-            <button className="metric" onClick={() => go('move-there')} aria-label="Your best route. Opens Move There.">
-              <svg className="m-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-              <span className="m-l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="6" cy="6" r="2.5" /><circle cx="18" cy="18" r="2.5" /><path d="M8.5 6H15a3 3 0 010 6H9a3 3 0 000 6h6.5" /></svg> Your best route</span>
-              <span className="m-v">D8 <small>digital nomad</small></span>
-              <span className="m-n"><b>You qualify</b> · 2 items outstanding</span>
-            </button>
-            <button className="metric" onClick={() => go('move-there')} aria-label="Time to residency. Opens Move There.">
-              <svg className="m-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-              <span className="m-l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg> Time to residency</span>
-              <span className="m-v">4 <small>to 7 months</small></span>
-              <span className="m-n">filing to landing · <b className="warn">consulate backlog</b></span>
-            </button>
-            <button className="metric" onClick={() => go('move-there')} aria-label="Path to citizenship. Opens Move There.">
-              <svg className="m-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-              <span className="m-l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="3" width="16" height="18" rx="2" /><circle cx="12" cy="10" r="2.6" /><path d="M8.5 17c.9-1.8 2-2.6 3.5-2.6s2.6.8 3.5 2.6" /></svg> Path to citizenship</span>
-              <span className="m-v">5 <small>years</small></span>
-              <span className="m-n">fastest tier in the EU · needs <b>A2</b></span>
-            </button>
-          </div>
-        </section>
+        ) : (
+          <VerifyingMetric label="Primary route" icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="6" cy="6" r="2.5" /><circle cx="18" cy="18" r="2.5" /><path d="M8.5 6H15a3 3 0 010 6H9a3 3 0 000 6h6.5" /></svg>} />
+        )}
+        <VerifyingMetric label="Cost vs your budget" icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /></svg>} />
+        <VerifyingMetric label="Time to residency" icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>} />
+        <VerifyingMetric label="Path to citizenship" icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="3" width="16" height="18" rx="2" /><circle cx="12" cy="10" r="2.6" /><path d="M8.5 17c.9-1.8 2-2.6 3.5-2.6s2.6.8 3.5 2.6" /></svg>} />
+      </div>
+    </section>
   )
 }
