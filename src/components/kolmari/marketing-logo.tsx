@@ -9,23 +9,18 @@ import Link from 'next/link'
  */
 export function MarketingLogo({ compact = false, tone = 'dark', href = '/' }: { compact?: boolean; tone?: 'dark' | 'light'; href?: string }) {
   const mark = compact ? 28 : 34
-  const inner = Math.round(mark * 0.72)
   return (
     <Link href={href} aria-label="Kolmari home" className="inline-flex shrink-0 items-center gap-2.5">
-      <span
-        className="grid shrink-0 place-items-center rounded-[9px] bg-navy-deep"
+      {/* Transparent butterfly mark — no background tile. */}
+      <Image
+        src="/brand/favicon-512.png"
+        alt=""
+        width={mark}
+        height={mark}
+        priority
+        className="object-contain"
         style={{ width: mark, height: mark }}
-      >
-        <Image
-          src="/brand/favicon-512.png"
-          alt=""
-          width={inner}
-          height={inner}
-          priority
-          className="object-contain"
-          style={{ width: inner, height: inner }}
-        />
-      </span>
+      />
       <span className={`font-extrabold tracking-tight ${compact ? 'text-base' : 'text-lg'} ${tone === 'light' ? 'text-white' : 'text-navy'}`}>
         Kolmari
       </span>
