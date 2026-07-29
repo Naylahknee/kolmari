@@ -6,13 +6,6 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
-  // Give server rendering the full CPU budget (Workers Paid default is 30s).
-  // Next.js/OpenNext SSR needs far more than the Free plan's ~10ms, so the
-  // account must be on the Workers Paid plan for pages to render (error 1102 =
-  // CPU/memory limit exceeded).
-  "limits": {
-    "cpu_ms": 30000
-  },
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
