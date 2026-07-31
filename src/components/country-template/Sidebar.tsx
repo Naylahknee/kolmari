@@ -31,10 +31,6 @@ export function Sidebar() {
           <Icon><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18" /></Icon>
           <span className="lbl">{PRODUCT_COPY.world}</span>
         </Link>
-        <Link className={`sb-item${active('/saved') || active('/countries') ? ' active' : ''}`} href="/saved">
-          <Icon><circle cx="12" cy="12" r="9" /><path d="M15.5 8.5l-2 5-5 2 2-5z" /></Icon>
-          <span className="lbl">Saved</span>
-        </Link>
 
         <p className="sb-label">Plan</p>
         <Link className={`sb-item${active('/pathways') ? ' active' : ''}`} href="/pathways">
@@ -45,7 +41,7 @@ export function Sidebar() {
           <Icon><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M8 3v18M11 8h6M11 12h4" /></Icon>
           <span className="lbl">{PRODUCT_COPY.plan}</span>
         </Link>
-        <Link className={`sb-item${active('/checklist') ? ' active' : ''}`} href="/checklist">
+        <Link className={`sb-item${active('/flutter') || active('/checklist') ? ' active' : ''}`} href="/flutter">
           <Icon><path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" /></Icon>
           <span className="lbl">{PRODUCT_COPY.flutterMode}</span>
         </Link>
