@@ -18,6 +18,7 @@ const pageNames: Record<string, string> = {
   '/community': PRODUCT_COPY.kolmariKlub,
   '/cost-calculator': PRODUCT_COPY.costCalculator,
   '/greenbook': PRODUCT_COPY.greenbook,
+  '/passportindex': 'PassportIndex',
   '/documents': PRODUCT_COPY.documents,
   '/settings': PRODUCT_COPY.settings,
   '/profile-wizard': 'Profile',

@@ -65,10 +65,18 @@ export function Sidebar() {
           <Icon><path d="M3 5a2 2 0 012-2h5v18H5a2 2 0 01-2-2zM21 5a2 2 0 00-2-2h-5v18h5a2 2 0 002-2z" /></Icon>
           <span className="lbl">{PRODUCT_COPY.greenbook}</span>
         </Link>
-        <Link className={`sb-item${active('/settings') ? ' active' : ''}`} href="/settings">
-          <Icon><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-1.8-.3 1.6 1.6 0 00-1 1.5v.2a2 2 0 11-4 0v-.1a1.6 1.6 0 00-1-1.5 1.6 1.6 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.6 1.6 0 00.3-1.8 1.6 1.6 0 00-1.5-1H2a2 2 0 010-4h.1a1.6 1.6 0 001.5-1 1.6 1.6 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 001.8.3H9a1.6 1.6 0 001-1.5V2a2 2 0 014 0v.1a1.6 1.6 0 001 1.5 1.6 1.6 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00-.3 1.8V9a1.6 1.6 0 001.5 1h.2a2 2 0 010 4h-.1a1.6 1.6 0 00-1.5 1z" /></Icon>
-          <span className="lbl">{PRODUCT_COPY.settings}</span>
+        <Link className={`sb-item${active('/passportindex') ? ' active' : ''}`} href="/passportindex">
+          <Icon><rect x="4" y="3" width="16" height="18" rx="2" /><circle cx="12" cy="10" r="2.5" /><path d="M9 16h6" /></Icon>
+          <span className="lbl">PassportIndex</span>
         </Link>
+
+        {/* Profile pinned below the content nav, visually separate. */}
+        <div className="mt-3 border-t border-line pt-3">
+          <Link className={`sb-item${active('/settings') ? ' active' : ''}`} href="/settings">
+            <Icon><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0116 0" /></Icon>
+            <span className="lbl">Profile</span>
+          </Link>
+        </div>
       </nav>
     </aside>
   )
