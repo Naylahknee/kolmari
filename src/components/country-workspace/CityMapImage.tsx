@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useState } from 'react'
+import { MapPin } from 'lucide-react'
 
 type Props = {
   cityName: string
@@ -17,13 +18,15 @@ export function CityMapImage({ cityName, countryName, lat, lng, alt }: Props) {
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
 
   if (!token || failed) {
+    // Intentional static placeholder rather than a broken "unavailable" box.
     return (
       <div
         role="img"
-        aria-label={`${cityName}, ${countryName} map image unavailable`}
-        className="flex aspect-[12/7] items-center justify-center bg-canvas px-5 text-center text-sm font-semibold text-muted"
+        aria-label={`${cityName}, ${countryName}`}
+        className="flex aspect-[12/7] items-center justify-center gap-1.5 bg-[#cfe6f5] px-4 text-center"
       >
-        Map image unavailable for {cityName}
+        <MapPin size={15} className="text-navy/45" aria-hidden="true" />
+        <span className="text-xs font-semibold text-navy/70">{cityName}</span>
       </div>
     )
   }

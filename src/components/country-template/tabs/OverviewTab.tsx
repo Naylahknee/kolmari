@@ -67,6 +67,8 @@ export function OverviewTab({ slug }: { slug: string }) {
                   <div className="fact yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2l8 3.6v6.1c0 4.6-3.3 8.7-8 10.3-4.7-1.6-8-5.7-8-10.3V5.6z" /><path d="M9 12l2 2 4-4" /></svg><div><div className="l">Schengen Area</div><div className="v">Yes</div></div></div>
                   <div className="fact yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18" /></svg><div><div className="l">EU member</div><div className="v">Yes</div></div></div>
                   <div className="fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="4.5" /><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19" /></svg><div><div className="l">Climate</div><div className="v">Mediterranean</div></div></div>
+                  <div className="fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 2v6M15 2v6M6 8h12v2a6 6 0 01-12 0zM12 16v6" /></svg><div><div className="l">Plug type</div><div className="v">Type C / F</div></div></div>
+                  <div className="fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M13 2L4 14h7l-2 8 9-12h-7z" /></svg><div><div className="l">Electricity</div><div className="v">230V · 50Hz</div></div></div>
                 </div>
                 <div className="src"><span>Last verified: January 2026 · World Bank, Eurostat, Instituto Nacional de Estatística</span><span className="sbadge">Official source verified</span></div>
               </section>
