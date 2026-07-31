@@ -29,7 +29,10 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
     return {
       wizard_status: wizardStatus,
       display_name: profile.display_name,
-      citizenship: profile.citizenship,
+      // v1 is built for US-based movers; we assume a US starting point rather
+      // than asking for citizenship directly. Ancestry ties are collected in a
+      // later step. Existing values are preserved for retakes.
+      citizenship: profile.citizenship ?? 'United States',
       current_country: profile.current_country,
       monthly_income: profile.monthly_income,
       annual_income: profile.annual_income,
@@ -64,8 +67,8 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
 
   function canContinue() {
     if (step === 0) return profile.goals.length > 0
-    if (step === 1) return Boolean(profile.display_name?.trim() && profile.citizenship?.trim() && profile.current_country?.trim())
-    if (step === 2) return profile.monthly_income !== null && Boolean(profile.income_type) && profile.savings !== null
+    if (step === 1) return Boolean(profile.display_name?.trim() && profile.current_country?.trim())
+    if (step === 2) return Boolean(profile.income_type)
     if (step === 3) return profile.remote !== null && Boolean(profile.occupation?.trim() && profile.education && profile.household_type)
       && profile.family_size !== null && profile.dependents !== null && profile.spouse !== null
       && (profile.ancestry_connections === 'None known' || Boolean(profile.ancestry_connections?.trim()))
@@ -116,8 +119,8 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
 
   const panels = [
     <section key="goal"><StepLabel step={1} title="What's your main reason for moving?" copy="This is the biggest factor â€” it decides which Pathways even apply. Choose every category that fits." /><div className="mt-7 grid gap-3 sm:grid-cols-2">{goals.map((goal) => <Choice key={goal} active={profile.goals.includes(goal)} onClick={() => update('goals', profile.goals.includes(goal) ? profile.goals.filter((item) => item !== goal) : [...profile.goals, goal])}>{goal}</Choice>)}</div></section>,
-    <section key="origin"><StepLabel step={2} title="Where are you starting from?" copy="Your citizenship is a major determinant of visa-free access and ancestry routes." /><div className="mt-7 grid gap-5 sm:grid-cols-2"><TextField label="What should we call you?" value={profile.display_name} onChange={(value) => update('display_name', value)} /><TextField label="Citizenship (add a second if you hold dual)" value={profile.citizenship} onChange={(value) => update('citizenship', value)} /><TextField label="Current country of residence" value={profile.current_country} onChange={(value) => update('current_country', value)} /></div></section>,
-    <section key="money"><StepLabel step={3} title="What money can support your move?" copy="Enter real planning figures â€” amounts are compared to each Pathway's guide. Kolmari never inserts a sample budget." /><div className="mt-7 grid gap-5 sm:grid-cols-2"><NumberField label="Monthly income (USD)" value={profile.monthly_income} onChange={(value) => update('monthly_income', value)} /><SelectField label="Primary income type" value={profile.income_type} options={incomeTypes} onChange={(value) => update('income_type', value)} /><NumberField label="Available relocation savings (USD)" value={profile.savings} onChange={(value) => update('savings', value)} /></div></section>,
+    <section key="origin"><StepLabel step={2} title="Where are you starting from?" copy="Kolmari is built for US-based movers, so we assume a US starting point â€” no citizenship or passport questions. Ancestry ties come in a later step." /><div className="mt-7 grid gap-5 sm:grid-cols-2"><TextField label="What should we call you?" value={profile.display_name} onChange={(value) => update('display_name', value)} /><TextField label="Current country of residence" value={profile.current_country} onChange={(value) => update('current_country', value)} /></div></section>,
+    <section key="money"><StepLabel step={3} title="How do you earn?" copy="Just the category for now â€” how your income comes in. Exact income and savings figures come later, only when you build your Kolmari Plan." /><div className="mt-7 grid gap-5 sm:grid-cols-2"><SelectField label="Primary income type" value={profile.income_type} options={incomeTypes} onChange={(value) => update('income_type', value)} /></div></section>,
     <section key="life"><StepLabel step={4} title="Your work, household, and ties" copy="These shape eligibility â€” remote work, credentials, dependents, and any ancestry connection." />
       <div className="mt-7"><p className="text-sm font-bold">Can your current work be performed remotely?</p><div className="mt-3 grid grid-cols-2 gap-3"><Choice active={profile.remote === true} onClick={() => update('remote', true)}>Yes</Choice><Choice active={profile.remote === false} onClick={() => update('remote', false)}>No</Choice></div></div>
       <div className="mt-5 grid gap-5 sm:grid-cols-2"><TextField label="Occupation" value={profile.occupation} onChange={(value) => update('occupation', value)} /><SelectField label="Highest education or credential" value={profile.education} options={educationLevels} onChange={(value) => update('education', value)} /><TextField label="Licenses or credentials (optional)" value={profile.credentials} onChange={(value) => update('credentials', value)} /><SelectField label="Household type" value={profile.household_type} options={householdTypes} onChange={(value) => update('household_type', value)} /><NumberField label="Total household members" value={profile.family_size} min={1} max={12} onChange={(value) => update('family_size', value)} /><NumberField label="Dependents" value={profile.dependents} min={0} max={11} onChange={(value) => update('dependents', value)} /></div>
