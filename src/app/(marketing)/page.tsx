@@ -99,7 +99,7 @@ export default function LandingPage() {
             <a href="#pricing" className="transition hover:text-navy">Pricing</a>
             <a href="#community" className="transition hover:text-navy">Community</a>
             <Link href="/login" className="transition hover:text-navy">Sign in</Link>
-            <Link href="/quiz" className="gold-button !min-h-10 !px-4">Build My Move Plan</Link>
+            <Link href="/quiz" className="gold-button !min-h-10 !px-4">Build My Kolmari Plan</Link>
           </nav>
           <MarketingMobileNav />
         </div>
@@ -129,7 +129,7 @@ export default function LandingPage() {
                 Compare destinations, review visa pathways, and build a realistic move plan — without piecing it together across a dozen tabs.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="/quiz" className="gold-button">Build My Move Plan <ArrowRight size={17} /></Link>
+                <Link href="/quiz" className="gold-button">Build My Kolmari Plan <ArrowRight size={17} /></Link>
                 <Link href="#how-it-works" className="inline-flex min-h-12 items-center rounded-xl border border-white/25 px-5 font-bold text-white transition hover:bg-white/10">
                   See how it works
                 </Link>
@@ -176,7 +176,7 @@ export default function LandingPage() {
           </ol>
 
           <div className="mt-11 text-center">
-            <Link href="/quiz" className="gold-button">Build My Move Plan <ArrowRight size={17} /></Link>
+            <Link href="/quiz" className="gold-button">Build My Kolmari Plan <ArrowRight size={17} /></Link>
             <p className="mt-3 text-sm text-muted">About 3 minutes · No relocation knowledge required</p>
           </div>
         </section>
@@ -250,7 +250,7 @@ export default function LandingPage() {
               A guided plan review with a relocation expert — from <span className="font-semibold text-navy">$149 per session</span>. Community and guidance, not legal advice.
             </p>
           </div>
-          <Link href="/signup?plan=concierge" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-[var(--radius-btn)] border border-line px-5 font-bold text-navy transition hover:border-gold">
+          <Link href="/coming-soon?feature=concierge" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-[var(--radius-btn)] border border-line px-5 font-bold text-navy transition hover:border-gold">
             Learn more <ArrowRight size={15} />
           </Link>
         </div>
@@ -301,7 +301,7 @@ export default function LandingPage() {
           <div className="mx-auto w-full max-w-[1180px] px-5">
             <h2 className="max-w-xl font-display text-4xl font-extrabold">Your next chapter deserves a real plan.</h2>
             <p className="mt-3 text-white/75">Compare clearly. Prepare practically. Move with confidence.</p>
-            <Link href="/quiz" className="gold-button mt-6">Build My Move Plan <ArrowRight size={17} /></Link>
+            <Link href="/quiz" className="gold-button mt-6">Build My Kolmari Plan <ArrowRight size={17} /></Link>
           </div>
         </div>
         <div className="border-t border-white/10 px-5 py-5">

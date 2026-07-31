@@ -129,7 +129,7 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
           <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">{NEXIT_LEXICON.pathways}</p>
           <h2 className="mt-1 text-2xl font-bold text-navy">{matches ? 'Residency options matched to you' : 'Research residency options'}</h2>
           <p className="mt-3 text-muted">Review visa, residency, work, retirement, and study Pathways based on your Profile.</p>
-          <Link href={matches ? '/pathways' : '/profile-wizard'} className="mt-5 inline-flex rounded-field bg-navy px-5 py-3 text-sm font-semibold text-white transition hover:bg-navy-deep">{matches ? 'View My Pathways' : 'Build My Move Plan'}</Link>
+          <Link href={matches ? '/pathways' : '/profile-wizard'} className="mt-5 inline-flex rounded-field bg-navy px-5 py-3 text-sm font-semibold text-white transition hover:bg-navy-deep">{matches ? 'View My Pathways' : 'Build My Kolmari Plan'}</Link>
         </article>
 
         <article className="rounded-card border border-line bg-white p-6 shadow-card">

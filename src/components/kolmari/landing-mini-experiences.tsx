@@ -383,7 +383,7 @@ function FinalScreen({ onClose }: { onClose: () => void }) {
     'Save your results',
     'Compare Destinations',
     'Explore Pathways in more detail',
-    'Build My Move Plan',
+    'Build My Kolmari Plan',
     'Track documents, costs, and next steps',
   ]
 

@@ -16,7 +16,7 @@ export const PRODUCT_COPY = {
   readiness: 'Move Readiness',
   timeline: 'Move Timeline',
   tracker: 'Progress Tracker',
-  startCta: 'Build My Move Plan',
+  startCta: 'Build My Kolmari Plan',
   executionCta: 'Enter Flutter Mode',
   exploreCta: 'Explore Countries',
   worldTitle: 'Destinations',
