@@ -53,7 +53,7 @@ export const profileUpdateSchema = z.object({
   preferred_regions: z.array(z.enum(['North America', 'Latin America', 'Europe', 'Africa', 'Asia', 'Oceania', 'Open to anywhere'])).max(7).optional(),
   preferred_region: z.string().trim().max(80).nullable().optional(),
   timeline: z.enum(['0-3 months', '3-6 months', '6-12 months', '12+ months', 'Just researching']).nullable().optional(),
-  priority: z.enum(['Affordability', 'Safety', 'Warm weather', 'Career options']).nullable().optional(),
+  priority: z.enum(['Affordability', 'Safety', 'Career', 'Healthcare & schools', 'Quality of life']).nullable().optional(),
   goals: z.array(z.enum(['Remote Work', 'Employment', 'Entrepreneurship', 'Passive Income / Retirement', 'Education', 'Family Reunification', 'Ancestry', 'Investment'])).max(8).optional(),
   climate: z.enum(['Warm', 'Four seasons', 'Cool', 'No preference']).nullable().optional(),
   onboarding_completed: z.boolean().optional(),
