@@ -1,9 +1,13 @@
-import { SettingsTabs } from '@/components/kolmari/settings-tabs'
+import { AccountTabs } from '@/components/kolmari/account-tabs'
 import { requireCurrentUser } from '@/lib/auth'
 import { getProfile } from '@/lib/profile'
 
+const VALID = ['profile', 'billing', 'notifications', 'help'] as const
+type Tab = (typeof VALID)[number]
+
 export default async function SettingsPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const user = await requireCurrentUser()
-  const tab = (await searchParams).tab === 'account' ? 'account' : 'general'
-  return <SettingsTabs email={user.email} initial={await getProfile(user.id)} initialTab={tab} />
+  const raw = (await searchParams).tab
+  const tab: Tab = raw && (VALID as readonly string[]).includes(raw) ? (raw as Tab) : 'profile'
+  return <AccountTabs email={user.email} initial={await getProfile(user.id)} initialTab={tab} />
 }
