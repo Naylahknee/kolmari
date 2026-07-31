@@ -17,14 +17,17 @@ export function CountrySnapshotMap({ countryName, lat, lng, alt }: Props) {
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
 
   if (!token || failed) {
+    // Intentional static placeholder (not a broken "unavailable" box) — the
+    // interactive map is an enhancement, not load-bearing, and only renders
+    // when a Mapbox token is configured.
     return (
       <div
         role="img"
-        aria-label={`${countryName} country map unavailable`}
-        className="flex aspect-[16/9] min-h-56 flex-col items-center justify-center gap-3 bg-canvas px-6 text-center text-sm font-semibold text-muted"
+        aria-label={countryName}
+        className="flex aspect-[16/9] min-h-40 w-full flex-col items-center justify-center gap-2 bg-[#cfe6f5] px-6 text-center"
       >
-        <MapPinned size={36} className="text-gold-deep" aria-hidden="true" />
-        Country map unavailable for {countryName}
+        <MapPinned size={26} className="text-navy/45" aria-hidden="true" />
+        <span className="text-sm font-semibold text-navy/70">{countryName}</span>
       </div>
     )
   }
