@@ -13,6 +13,7 @@ const pageNames: Record<string, string> = {
   '/countries': 'Saved',
   '/pathways': PRODUCT_COPY.pathways,
   '/nexit-plan': PRODUCT_COPY.plan,
+  '/flutter': PRODUCT_COPY.flutterMode,
   '/checklist': PRODUCT_COPY.flutterMode,
   '/community': PRODUCT_COPY.kolmariKlub,
   '/cost-calculator': PRODUCT_COPY.costCalculator,
