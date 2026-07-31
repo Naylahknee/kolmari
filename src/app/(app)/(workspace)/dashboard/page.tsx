@@ -2,15 +2,14 @@ import Link from 'next/link'
 import { ArrowRight, CheckCircle2, Globe2, NotebookTabs, PlayCircle, Route, UserRound, Wallet } from 'lucide-react'
 import { requireCurrentUser } from '@/lib/auth'
 import { COUNTRIES } from '@/lib/countries'
-import { getNexitPlan, PLAN_STAGES, type PlanBudget } from '@/lib/kolmari-plan'
+import { getNexitPlan, type PlanBudget } from '@/lib/kolmari-plan'
 import { evaluatePathways } from '@/lib/pathways'
 import { getProfile, hasCompletedProfile, isPaid } from '@/lib/profile'
 import { rankNextinations } from '@/lib/userProfile'
 import { BudgetDonut, BUDGET_COLORS, type BudgetSlice } from '@/components/kolmari/rings'
 import { DashboardDestinations, type DestinationPanel } from '@/components/kolmari/dashboard-destinations'
 import { DestinationVisaPlanner, type PlannerDestination, type PlannerPathway } from '@/components/kolmari/destination-visa-planner'
-import { JourneyProgress } from '@/components/kolmari/journey-progress'
-import { MoveTracker } from '@/components/kolmari/move-tracker'
+import { KolmariTracker, kolmariStageIndex } from '@/components/kolmari/kolmari-tracker'
 
 const BUDGET_LABELS: Record<keyof PlanBudget, string> = {
   housing: 'Housing',
@@ -32,7 +31,7 @@ export default async function DashboardPage() {
   const complete = hasCompletedProfile(profile)
   const firstName = profile.display_name || user.email.split('@')[0]
   const strong = complete ? evaluatePathways(profile).filter((item) => item.status === 'Strong Match') : []
-  const stageIndex = plan ? PLAN_STAGES.indexOf(plan.timeline_stage) : -1
+  const trackerIdx = kolmariStageIndex(complete, plan, profile.completed_tasks.length)
   const slices = plan ? budgetSlices(plan.budget) : []
   const budgetTotal = slices.reduce((sum, slice) => sum + slice.amount, 0)
 
@@ -77,7 +76,7 @@ export default async function DashboardPage() {
           <p className="mt-1 text-sm text-muted">Continue building your Kolmari Plan.</p>
         </div>
 
-        <JourneyProgress stages={PLAN_STAGES} currentIndex={stageIndex} />
+        <KolmariTracker currentIndex={trackerIdx} gated />
 
         {!complete && (
           <section className="card-surface p-6 sm:flex sm:items-center sm:justify-between sm:gap-6">
@@ -160,7 +159,7 @@ export default async function DashboardPage() {
       <DashboardDestinations panels={destinationPanels} ranked={destinationsRanked} />
 
       {/* ── Section 3 — Journey progress tracker ─────────────────────────── */}
-      <MoveTracker stages={PLAN_STAGES} currentIndex={stageIndex} />
+      <KolmariTracker currentIndex={trackerIdx} gated={false} />
 
       {/* ── Section 4 — Budget snapshot ──────────────────────────────────── */}
       <div className="grid gap-5 lg:grid-cols-2">
