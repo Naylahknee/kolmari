@@ -17,6 +17,12 @@ export type PublishedGreenbookInsight = {
   bestAreas: string[]
   watchAreas: string[]
   summary: string
+  /**
+   * Black-traveler / Black-expat lens. Portugal is the hand-curated reference;
+   * where this is absent the UI shows an honest "being verified" state rather
+   * than borrowing another country's context.
+   */
+  blackTravelerNote?: string
   sourceTitle: string
   sourceUrl: string
   lastReviewed: string
@@ -79,6 +85,7 @@ export const PUBLISHED_GREENBOOK_INSIGHTS: PublishedGreenbookInsight[] = [
     countrySlug: 'portugal', communityFit: 'Strong starting signal',
     bestAreas: ['Lisbon', 'Porto'], watchAreas: ['Central-city housing pressure', 'Petty theft in crowded areas'],
     summary: 'Portugal can offer a practical base for remote professionals, but Community Fit still depends on neighborhood, housing access, and the communities a person builds. General safety guidance does not measure the experience of Black Americans, so Kolmari recommends community-specific research and a scouting stay.',
+    blackTravelerNote: 'Lisbon and Porto have visible, growing African-diaspora and Black-American communities, and Portugal has large Portuguese-speaking African populations — but day-to-day belonging still varies by neighborhood and workplace. Before committing: connect with Black-led expat networks in your target city ahead of arrival, confirm hair-care and specialist-care access where you plan to live, and treat a scouting stay as research rather than a vacation. Advisories measure safety, not racialized belonging — validate that through the community, not a national label.',
     sourceTitle: 'U.S. Department of State — Portugal Travel Advisory',
     sourceUrl: 'https://travel.state.gov/en/international-travel/travel-advisories/portugal.html',
     lastReviewed: '2026-07-21',
