@@ -118,7 +118,7 @@ export function QuestionsSection() {
               href="/quiz"
               className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#F3C516] px-7 py-3 font-medium text-[#0D1B39] transition hover:bg-[#FFD52E]"
             >
-              Build My Move Plan
+              Build My Kolmari Plan
             </Link>
 
             <span className="text-sm text-white/55">

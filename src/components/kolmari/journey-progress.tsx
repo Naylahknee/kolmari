@@ -55,8 +55,8 @@ export function JourneyProgress({
           <Sparkles size={16} className="shrink-0 text-gold-deep" aria-hidden="true" />
           Unlock every stage of your move with Plus.
         </p>
-        <Link href="/#pricing" className="gold-button shrink-0">
-          Upgrade <ArrowRight size={15} />
+        <Link href="/coming-soon?feature=plus" className="gold-button shrink-0">
+          Build My Kolmari Plan <ArrowRight size={15} />
         </Link>
       </div>
 

@@ -124,7 +124,7 @@ export default async function DashboardPage() {
           href={complete ? '/flutter' : '/profile-wizard'}
           className="gold-button"
         >
-          {complete ? 'Enter Flutter Mode' : 'Build My Move Plan'} <ArrowRight size={16} />
+          {complete ? 'Enter Flutter Mode' : 'Build My Kolmari Plan'} <ArrowRight size={16} />
         </Link>
       </div>
 
@@ -231,7 +231,7 @@ export default async function DashboardPage() {
           href={complete ? '/pathways' : '/profile-wizard'}
           className="gold-button mt-5 inline-flex items-center gap-2"
         >
-          {complete ? 'View My Pathways' : 'Build My Move Plan'} <ArrowRight size={15} />
+          {complete ? 'View My Pathways' : 'Build My Kolmari Plan'} <ArrowRight size={15} />
         </Link>
       </section>
       </div>

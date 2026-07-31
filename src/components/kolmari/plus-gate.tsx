@@ -45,8 +45,8 @@ export function PlusGate({
           </ul>
         )}
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link href="/#pricing" className="gold-button">
-            Upgrade to Plus <ArrowRight size={15} />
+          <Link href="/coming-soon?feature=plus" className="gold-button">
+            Build My Kolmari Plan <ArrowRight size={15} />
           </Link>
           <Link
             href="/dashboard"

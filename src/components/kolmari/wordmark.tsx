@@ -7,6 +7,10 @@ import { MarketingLogo } from './marketing-logo'
  * across the app. The previous `/brand/KolmariWordMark.svg` asset does not exist
  * in public/brand/ (only favicons ship), which rendered a broken image on the
  * auth pages; the lockup uses the on-disk favicon mark instead.
+ *
+ * Note: this lockup is only used on the auth screens (logged-out) and the static
+ * SEO marketing pages, so it links to `/`. The in-app logo (TopBar in
+ * workspace-shell) already routes logged-in users to `/dashboard`.
  */
 export function Wordmark({
   compact = false,

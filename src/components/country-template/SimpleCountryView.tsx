@@ -136,8 +136,8 @@ export function SimpleCountryView({
                   Move Plan. Explorer stays free.
                 </p>
                 <div className="mt-5 flex flex-wrap gap-3">
-                  <Link href="/#pricing" className="gold-button">
-                    Upgrade to Plus <ArrowRight size={15} />
+                  <Link href="/coming-soon?feature=plus" className="gold-button">
+                    Build My Kolmari Plan <ArrowRight size={15} />
                   </Link>
                   <Link
                     href="/cost-calculator"

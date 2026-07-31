@@ -6,7 +6,7 @@ export default async function SignupPage({ searchParams }: { searchParams: Promi
   const nextPath = safeNextPath((await searchParams).next)
   return (
     <AuthShell
-      eyebrow="Build My Move Plan"
+      eyebrow="Build My Kolmari Plan"
       title="Your move, made clearer."
       subtitle="Create your secure workspace, then build your Move Plan."
     >

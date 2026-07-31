@@ -123,8 +123,8 @@ export function DestinationVisaPlanner({
                 <Lock size={15} className="shrink-0 text-gold-deep" aria-hidden="true" />
                 Unlock {selected.name} and every matched Destination with Plus.
               </p>
-              <Link href="/#pricing" className="gold-button mt-3 shrink-0 sm:mt-0">
-                Upgrade <ArrowRight size={15} />
+              <Link href="/coming-soon?feature=plus" className="gold-button mt-3 shrink-0 sm:mt-0">
+                Build My Kolmari Plan <ArrowRight size={15} />
               </Link>
             </div>
           ) : (
