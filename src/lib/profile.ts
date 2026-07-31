@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { isAdminEmail } from './admin'
 import { getSql } from './db'
 
 export const WIZARD_STATUSES = ['not_started', 'in_progress', 'completed', 'skipped'] as const
@@ -229,8 +230,18 @@ function normalizeProfile(row: RelocationProfile): RelocationProfile {
 
 export async function getProfile(userId: number) {
   await ensureProfilesTable()
-  const rows = await getSql()`SELECT * FROM profiles WHERE user_id = ${userId} LIMIT 1` as RelocationProfile[]
-  return rows[0] ? normalizeProfile(rows[0]) : emptyProfile(userId)
+  const rows = await getSql()`
+    SELECT p.*, u.email AS __email
+    FROM profiles p JOIN users u ON u.id = p.user_id
+    WHERE p.user_id = ${userId} LIMIT 1
+  ` as (RelocationProfile & { __email?: string })[]
+  if (!rows[0]) return emptyProfile(userId)
+  const { __email: email, ...row } = rows[0]
+  const profile = normalizeProfile(row as RelocationProfile)
+  // Admins see the whole site ungated: promote to the top plan on load so every
+  // existing isPaid/plan gate opens. No gate logic or real-user data changes.
+  if (isAdminEmail(email)) profile.plan = 'navigator'
+  return profile
 }
 
 export async function saveProfile(profile: RelocationProfile) {
