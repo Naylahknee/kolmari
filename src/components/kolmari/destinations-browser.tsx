@@ -123,30 +123,32 @@ export function DestinationsBrowser({ rows, profileComplete }: { rows: DestRow[]
         })}
       </div>
 
-      {/* Filters */}
-      <div className="mt-4 flex flex-wrap gap-3">
-        <div className="relative min-w-52 flex-1">
+      {/* Filters — search full width, the three dropdowns side by side */}
+      <div className="mt-4 space-y-3">
+        <div className="relative">
           <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />
           <input className="field pl-9" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search destinations" aria-label="Search destinations" />
         </div>
-        <select className="field w-auto" value={region} onChange={(e) => setRegion(e.target.value)} aria-label="Filter by region">
-          <option value="">All regions</option>
-          {regions.map((r) => <option key={r}>{r}</option>)}
-        </select>
-        <select className="field w-auto" value={visa} onChange={(e) => setVisa(e.target.value)} aria-label="Filter by visa type">
-          <option value="">All visa types</option>
-          {visas.map((v) => <option key={v}>{v}</option>)}
-        </select>
-        <select className="field w-auto" value={cost} onChange={(e) => setCost(e.target.value)} aria-label="Filter by cost of living">
-          <option value="">Any cost</option>
-          {costs.map((c) => <option key={c} value={c}>{c === '$' ? '$ — lower' : '$$ — moderate'}</option>)}
-        </select>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <select className="field" value={region} onChange={(e) => setRegion(e.target.value)} aria-label="Filter by region">
+            <option value="">All regions</option>
+            {regions.map((r) => <option key={r}>{r}</option>)}
+          </select>
+          <select className="field" value={visa} onChange={(e) => setVisa(e.target.value)} aria-label="Filter by visa type">
+            <option value="">All visa types</option>
+            {visas.map((v) => <option key={v}>{v}</option>)}
+          </select>
+          <select className="field" value={cost} onChange={(e) => setCost(e.target.value)} aria-label="Filter by cost of living">
+            <option value="">Any cost</option>
+            {costs.map((c) => <option key={c} value={c}>{c === '$' ? '$ — lower' : '$$ — moderate'}</option>)}
+          </select>
+        </div>
       </div>
 
-      {/* List */}
-      <div className="mt-4 divide-y divide-line overflow-hidden rounded-card border border-line bg-white">
+      {/* List — country panels side by side (two columns on desktop) */}
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
         {filtered.length === 0 ? (
-          <p className="p-8 text-center text-sm text-muted">
+          <p className="p-8 text-center text-sm text-muted sm:col-span-2">
             {tab === 'explore'
               ? 'No destinations match your filters.'
               : `No ${tab} destinations yet. Tap the ${tab === 'interested' ? 'star' : tab === 'visited' ? 'star' : 'heart'} on any destination to add it here.`}
@@ -188,7 +190,7 @@ function Row({
   return (
     <Link
       href={`/nextinations/${row.slug}/v2/overview`}
-      className="flex items-center gap-3 px-3 py-3 transition hover:bg-gold-soft/20 sm:px-4"
+      className="flex items-center gap-3 rounded-card border border-line bg-white px-3 py-3 transition hover:border-gold/40 hover:bg-gold-soft/20 sm:px-4"
     >
       <img
         src={`https://flagcdn.com/${row.code}.svg`}
