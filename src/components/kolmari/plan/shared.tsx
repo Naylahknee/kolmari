@@ -1,12 +1,12 @@
 'use client'
 
 import { Check } from 'lucide-react'
-import { DOC_STATUS_LABELS, type DocStatus, type NexitPlan } from '@/lib/plan-types'
+import { DOC_STATUS_LABELS, PLAN_TABS, type DocStatus, type NexitPlan, type TabId } from '@/lib/plan-types'
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
-export const PLAN_TABS = ['overview', 'checklist', 'documents', 'budget', 'notes'] as const
-export type TabId = (typeof PLAN_TABS)[number]
+export { PLAN_TABS }
+export type { TabId }
 
 // Everything each tab needs from the workspace container.
 export type PlanCtx = {

@@ -10,6 +10,12 @@
 export const PLAN_STAGES = ['Explore', 'Decide', 'Prepare', 'Apply', 'Move', 'Settle'] as const
 export type PlanStage = (typeof PLAN_STAGES)[number]
 
+// Tab identifiers live here (a server-safe module) so the server page can read
+// ?tab= without importing from a 'use client' module — doing that turns the
+// value into a client reference and crashes the page at request time.
+export const PLAN_TABS = ['overview', 'checklist', 'documents', 'budget', 'notes'] as const
+export type TabId = (typeof PLAN_TABS)[number]
+
 export type DocStatus = 'not_started' | 'in_progress' | 'needs_review' | 'ready'
 export const DOC_STATUS_LABELS: Record<DocStatus, string> = {
   not_started: 'Not started',
