@@ -231,16 +231,20 @@ function normalizeProfile(row: RelocationProfile): RelocationProfile {
 export async function getProfile(userId: number) {
   await ensureProfilesTable()
   const rows = await getSql()`
-    SELECT p.*, u.email AS __email
+    SELECT p.*, u.email AS __email,
+           (u.id = (SELECT MIN(id) FROM users)) AS __is_first
     FROM profiles p JOIN users u ON u.id = p.user_id
     WHERE p.user_id = ${userId} LIMIT 1
-  ` as (RelocationProfile & { __email?: string })[]
+  ` as (RelocationProfile & { __email?: string; __is_first?: boolean | string })[]
   if (!rows[0]) return emptyProfile(userId)
-  const { __email: email, ...row } = rows[0]
+  const { __email: email, __is_first: isFirstRaw, ...row } = rows[0]
   const profile = normalizeProfile(row as RelocationProfile)
   // Admins see the whole site ungated: promote to the top plan on load so every
   // existing isPaid/plan gate opens. No gate logic or real-user data changes.
-  if (isAdminEmail(email)) profile.plan = 'navigator'
+  // The first registered account (the owner) is always an admin with zero
+  // config; ADMIN_EMAILS grants access to any additional admins.
+  const isFirst = isFirstRaw === true || isFirstRaw === 't'
+  if (isFirst || isAdminEmail(email)) profile.plan = 'navigator'
   return profile
 }
 
