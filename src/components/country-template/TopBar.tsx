@@ -8,6 +8,7 @@ import { UnitsControl } from './client/UnitsControl'
 
 const pageNames: Record<string, string> = {
   '/dashboard': PRODUCT_COPY.dashboard,
+  '/your-world': 'Your World',
   '/nexitnation': PRODUCT_COPY.world,
   '/saved': 'Saved',
   '/countries': 'Saved',
