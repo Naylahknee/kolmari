@@ -46,7 +46,7 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
   return (
     <div>
       <nav aria-label="Breadcrumb" className="mb-5 flex items-center gap-2 text-sm text-muted">
-        <Link href="/nexitnation" className="font-semibold transition hover:text-navy">Destinations</Link>
+        <Link href="/destinations" className="font-semibold transition hover:text-navy">Destinations</Link>
         <ChevronRight size={14} aria-hidden="true" />
         <span className="font-semibold text-navy">{region.name}</span>
       </nav>
@@ -82,7 +82,7 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
             <h2 className="mt-1 text-3xl font-bold text-navy">Destinations in {region.name}</h2>
             {!profileComplete && <p className="mt-2 max-w-2xl text-sm text-muted">These are editorial starting points, not personalized rankings. Complete your Profile to compare regions against your facts.</p>}
           </div>
-          <Link href="/nexitnation?view=countries" className="text-sm font-semibold text-navy transition hover:text-gold-deep">View all Destinations</Link>
+          <Link href="/destinations" className="text-sm font-semibold text-navy transition hover:text-gold-deep">View all Destinations</Link>
         </div>
 
         {region.countries.length > 0 ? (
@@ -150,7 +150,7 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
             <p className="text-xs font-bold uppercase tracking-widest text-gold">Your {NEXIT_LEXICON.plan}</p>
             <h2 className="mt-1 text-3xl font-bold">Save, compare, and build your relocation plan.</h2>
           </div>
-          <Link href="/nexit-plan" className="gold-button mt-5 sm:mt-0">Enter Flutter Mode <ArrowRight size={16} /></Link>
+          <Link href="/my-plan" className="gold-button mt-5 sm:mt-0">Enter Flutter Mode <ArrowRight size={16} /></Link>
         </div>
       </section>
     </div>
