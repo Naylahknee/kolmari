@@ -64,14 +64,32 @@ export const profileUpdateSchema = z.object({
 
 const nullableMoney = z.number().int().min(0).max(100_000_000).nullable()
 
+const checklistItemSchema = z.object({
+  id: z.string().max(64),
+  text: z.string().trim().min(1).max(160),
+  done: z.boolean(),
+  stage: z.enum(['Explore', 'Decide', 'Prepare', 'Apply', 'Move', 'Settle']).nullable(),
+  due: z.string().date().nullable(),
+}).strict()
+
+const documentItemSchema = z.object({
+  id: z.string().max(64),
+  name: z.string().trim().min(1).max(160),
+  status: z.enum(['not_started', 'in_progress', 'needs_review', 'ready']),
+  apostille: z.boolean(),
+  translate: z.boolean(),
+  due: z.string().date().nullable(),
+  note: z.string().trim().max(400).nullable(),
+}).strict()
+
 export const nexitPlanUpdateSchema = z.object({
   saved_nextination: z.string().trim().max(100).nullable().optional(),
   selected_pathway: z.string().trim().max(180).nullable().optional(),
   target_move_date: z.string().date().nullable().optional(),
   household_members: z.number().int().min(1).max(20).nullable().optional(),
   timeline_stage: z.enum(['Explore', 'Decide', 'Prepare', 'Apply', 'Move', 'Settle']).optional(),
-  checklist: z.array(z.string().trim().min(1).max(120)).max(100).optional(),
+  checklist: z.array(checklistItemSchema).max(200).optional(),
   budget: z.object({ housing: nullableMoney, food: nullableMoney, transport: nullableMoney, healthcare: nullableMoney, other: nullableMoney }).strict().optional(),
-  documents: z.array(z.string().trim().min(1).max(120)).max(100).optional(),
+  documents: z.array(documentItemSchema).max(200).optional(),
   notes: z.string().max(10_000).nullable().optional(),
 }).strict()

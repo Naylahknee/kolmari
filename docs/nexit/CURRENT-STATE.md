@@ -1042,3 +1042,48 @@ honest placeholders rather than invented values.
 
 ### Tests: tsc pass · next build pass · ESLint no new errors (only pre-existing
 logo `<img>` warning).
+
+## My Plan unified into a five-tab workspace
+
+Combined the My Plan page and the (HTML-only) Documents Journey into one tabbed
+command center at `/nexit-plan`. Main content area only — the sidebar, header
+shell, and other routes are untouched.
+
+- **Model extension (backward-compatible).** New `src/lib/plan-types.ts` holds
+  the shared, pure plan model + derivations. `checklist` and `documents` moved
+  from `string[]` to structured records (`ChecklistItem` = text/done/stage/due;
+  `DocumentItem` = name/status/apostille/translate/due/note). `normalizePlan`
+  coerces legacy string rows on read, so existing saved plans keep working;
+  readiness (six milestones) is unchanged. `kolmari-plan.ts` now builds on
+  `plan-types` and re-exports it; `schemas.ts` validates the structured shape.
+  This makes document status, apostille/translation, deadlines, and checklist
+  completion **real user-owned data** rather than fabricated screenshot values.
+- **Everything is derived, nothing hardcoded.** Document counts, %s, workflow
+  step (Collect→Apostille→Translate→Compile→Submit), deadlines, next-best-action,
+  processing buckets, budget total, and readiness all come from
+  `plan-types` pure functions over the user's real plan. No Portugal / D8 / "13
+  documents" / "$3,300" / week-estimates from the mockups were copied in;
+  processing shows real counts + qualitative guidance only (no invented weeks).
+- **Components** under `src/components/kolmari/plan/`: `PlanWorkspace` (container:
+  autosave via debounced `PUT /api/plan`, URL tab state via History API +
+  popstate, accessible roving-tabindex tablist, Edit-plan-details dialog),
+  `shared.tsx` (SaveChip, Stepper, StatusBadge, ProgressBar, PlanCtx), and one
+  file per tab: Overview (next action + readiness + move journey + 3 summary
+  cards + Greenbook + contextual Flutter), Checklist (stages, completion, due
+  dates, edit/delete, suggestions — visa records kept out), Documents (master
+  list + workflow + processing + next action + deadlines + real help links),
+  Budget (categories + health + context), Notes (notebook + quick-insert +
+  context). Old `nexit-plan-workspace.tsx` removed.
+- **Autosave** replaces the dominant "Save My Plan" button — debounced whole-plan
+  PUT with Saving…/Saved/Save failed—Retry, not overwriting local state.
+- Cross-tab actions (Open document workspace → Documents, Edit budget → Budget)
+  switch tabs; back/forward and reload preserve the tab.
+
+### Data gaps surfaced (honest, not faked): apostille/translation processing
+durations are not modelled, so the Documents processing card shows real counts
+and qualitative "plan ahead" guidance instead of invented week ranges; the app
+stores no currency, so the budget shows currency-neutral totals (no "USD"
+card). Everything else is real user input.
+
+### Tests: tsc pass · next build pass · ESLint no new errors. Legacy string
+checklist/documents rows verified to normalize into the structured shape.
