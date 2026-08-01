@@ -88,7 +88,7 @@ export const nexitPlanUpdateSchema = z.object({
   selected_pathway: z.string().trim().max(180).nullable().optional(),
   target_move_date: z.string().date().nullable().optional(),
   household_members: z.number().int().min(1).max(20).nullable().optional(),
-  journey_stage: z.number().int().min(1).max(8).optional(),
+  journey_stage: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5), z.literal(6), z.literal(7), z.literal(8)]).optional(),
   timeline_stage: z.enum(['Explore', 'Assess', 'Shortlist', 'Decide', 'Prepare', 'Apply', 'Move', 'Settle In']).optional(),
   checklist: z.array(checklistItemSchema).max(200).optional(),
   budget: z.object({ housing: nullableMoney, food: nullableMoney, transport: nullableMoney, healthcare: nullableMoney, other: nullableMoney }).strict().optional(),
