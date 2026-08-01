@@ -161,7 +161,7 @@ export function GreenbookBoard() {
             <p className="mt-1 text-xs text-white/75">Review country details alongside official sources before making a decision.</p>
           </div>
         </div>
-        <Link href="/nexitnation?view=countries" className="gold-button mt-5 shrink-0 sm:mt-0">
+        <Link href="/destinations" className="gold-button mt-5 shrink-0 sm:mt-0">
           Compare Destinations <ArrowRight size={16} />
         </Link>
       </section>
