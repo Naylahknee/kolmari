@@ -21,7 +21,7 @@ export function WelcomeActions() {
       })
       const result = await response.json()
       if (!response.ok) throw new Error(result.error ?? 'Unable to continue right now.')
-      router.push('/nexitnation')
+      router.push('/destinations')
       router.refresh()
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'Unable to continue right now.')
