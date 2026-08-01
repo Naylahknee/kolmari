@@ -16,7 +16,7 @@ export default async function WelcomePage() {
   const user = await requireCurrentUser()
   const profile = await getProfile(user.id)
   if (profile.wizard_status === 'completed') redirect('/dashboard')
-  if (profile.wizard_status === 'skipped') redirect('/nexitnation')
+  if (profile.wizard_status === 'skipped') redirect('/destinations')
   if (profile.wizard_status === 'in_progress') redirect('/profile-wizard')
 
   return (
