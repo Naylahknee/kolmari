@@ -8,7 +8,7 @@ type Props = {
 }
 
 // Dynamically import the Mapbox component so the Mapbox GL JS bundle (~870 KB)
-// is code-split and only fetched + parsed when the user navigates to /nexitnation.
+// is code-split and only fetched + parsed when the user navigates to /destinations.
 // ssr: false is valid here because this is a Client Component.
 const NexitnationMapbox = dynamic(
   () => import('./NexitnationMapbox').then((m) => m.NexitnationMapbox),
