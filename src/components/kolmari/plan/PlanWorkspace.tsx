@@ -1,8 +1,14 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { Pencil, X } from 'lucide-react'
-import { documentStep, type NexitPlan } from '@/lib/plan-types'
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react'
+import { Pencil } from 'lucide-react'
+import {
+  PLAN_STAGES,
+  documentStep,
+  journeyStageLabel,
+  type JourneyStage,
+  type NexitPlan,
+} from '@/lib/plan-types'
 import { PLAN_TABS, SaveChip, type PlanCtx, type SaveStatus, type TabId } from './shared'
 import { OverviewTab } from './OverviewTab'
 import { ChecklistTab } from './ChecklistTab'
@@ -20,7 +26,6 @@ function formatTime(date: Date): string {
   return `${h}:${m} ${ampm}`
 }
 
-// --- autosave state ---
 function usePlanState(initial: NexitPlan) {
   const [plan, setPlan] = useState(initial)
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
@@ -36,7 +41,6 @@ function usePlanState(initial: NexitPlan) {
       const res = await fetch('/api/plan', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(latest.current) })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Save failed')
-      // Do not overwrite local state — that would clobber in-flight typing.
       setSaveStatus('saved')
       setSavedAt(new Date())
     } catch {
@@ -61,59 +65,78 @@ function usePlanState(initial: NexitPlan) {
   return { plan, update, saveStatus, savedAtLabel, retry: flush }
 }
 
-function Select({ label, value, options, placeholder, onChange }: { label: string; value: string | null; options: string[]; placeholder: string; onChange: (v: string | null) => void }) {
+function PlanDetailsPanel({ ctx, sectionRef, firstFieldRef }: {
+  ctx: PlanCtx
+  sectionRef: RefObject<HTMLElement | null>
+  firstFieldRef: RefObject<HTMLSelectElement | null>
+}) {
+  const { plan, update, nextinations, pathways } = ctx
   return (
-    <label className="block text-xs font-semibold text-navy">
-      {label}
-      <select className="field mt-2" value={value ?? ''} onChange={(e) => onChange(e.target.value || null)}>
-        <option value="">{placeholder}</option>
-        {options.map((item) => <option key={item}>{item}</option>)}
-      </select>
-    </label>
+    <section ref={sectionRef} className="card-surface p-5 sm:p-6" aria-labelledby="plan-details-heading">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 id="plan-details-heading" className="text-base font-bold text-navy">Plan details</h2>
+          <p className="mt-1 text-xs text-muted">The core decisions that shape your move plan.</p>
+        </div>
+        <SaveChip status={ctx.saveStatus} onRetry={ctx.retry} />
+      </div>
+      <div className="mt-5 grid gap-4 sm:grid-cols-2">
+        <label className="block text-xs font-semibold text-navy">
+          Saved destination
+          <select ref={firstFieldRef} className="field mt-2" value={plan.saved_nextination ?? ''} onChange={(e) => update('saved_nextination', e.target.value || null)}>
+            <option value="">Not selected</option>
+            {nextinations.map((item) => <option key={item}>{item}</option>)}
+          </select>
+        </label>
+        <label className="block text-xs font-semibold text-navy">
+          Selected pathway
+          <select className="field mt-2" value={plan.selected_pathway ?? ''} onChange={(e) => update('selected_pathway', e.target.value || null)}>
+            <option value="">Not selected</option>
+            {pathways.map((item) => <option key={item}>{item}</option>)}
+          </select>
+        </label>
+        <label className="block text-xs font-semibold text-navy">
+          Target move date
+          <input className="field mt-2" type="date" value={plan.target_move_date ?? ''} onChange={(e) => update('target_move_date', e.target.value || null)} />
+        </label>
+        <label className="block text-xs font-semibold text-navy">
+          Household members
+          <input className="field mt-2" type="number" min="1" max="20" value={plan.household_members ?? ''} onChange={(e) => update('household_members', e.target.value ? Math.max(1, Math.min(20, Number(e.target.value))) : null)} />
+        </label>
+      </div>
+    </section>
   )
 }
 
-function PlanDetailsDialog({ ctx, onClose }: { ctx: PlanCtx; onClose: () => void }) {
-  const { plan, update, nextinations, pathways } = ctx
-  const firstRef = useRef<HTMLSelectElement>(null)
-  useEffect(() => {
-    firstRef.current?.focus()
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
+function VerticalMoveTimeline({ ctx }: { ctx: PlanCtx }) {
+  const current = ctx.plan.journey_stage
   return (
-    <div className="fixed inset-0 z-[120] grid place-items-center bg-navy/40 p-4" role="dialog" aria-modal="true" aria-label="Edit plan details" onClick={onClose}>
-      <div className="card-surface w-full max-w-lg p-5" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-navy">Edit plan details</h2>
-          <button type="button" onClick={onClose} aria-label="Close" className="grid size-8 place-items-center rounded-full text-muted hover:bg-canvas hover:text-navy"><X size={16} /></button>
-        </div>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <label className="block text-xs font-semibold text-navy">
-            Destination
-            <select ref={firstRef} className="field mt-2" value={plan.saved_nextination ?? ''} onChange={(e) => update('saved_nextination', e.target.value || null)}>
-              <option value="">Not selected</option>
-              {nextinations.map((item) => <option key={item}>{item}</option>)}
-            </select>
-          </label>
-          <Select label="Pathway" value={plan.selected_pathway} options={pathways} placeholder="Not selected" onChange={(v) => update('selected_pathway', v)} />
-          <label className="block text-xs font-semibold text-navy">
-            Target move date
-            <input className="field mt-2" type="date" value={plan.target_move_date ?? ''} onChange={(e) => update('target_move_date', e.target.value || null)} />
-          </label>
-          <label className="block text-xs font-semibold text-navy">
-            Household members
-            <input className="field mt-2" type="number" min="1" max="20" value={plan.household_members ?? ''} onChange={(e) => update('household_members', e.target.value ? Math.max(1, Math.min(20, Number(e.target.value))) : null)} />
-          </label>
-        </div>
-        <div className="mt-5 flex items-center justify-between">
-          <SaveChip status={ctx.saveStatus} onRetry={ctx.retry} />
-          <button type="button" onClick={onClose} className="gold-button">Done</button>
-        </div>
-      </div>
-    </div>
+    <aside className="card-surface p-5 lg:sticky lg:top-24 lg:self-start" aria-labelledby="move-timeline-heading">
+      <h2 id="move-timeline-heading" className="text-base font-bold text-navy">Move Timeline</h2>
+      <p className="mt-1 text-xs leading-5 text-muted">Select your current stage. Stages are checkpoints, not prescriptions.</p>
+      <ol className="mt-4 space-y-2" aria-label="Move Timeline stages">
+        {PLAN_STAGES.map((stage, index) => {
+          const value = (index + 1) as JourneyStage
+          const selected = value === current
+          return (
+            <li key={stage}>
+              <button
+                type="button"
+                aria-current={selected ? 'step' : undefined}
+                onClick={() => ctx.update('journey_stage', value)}
+                className={[
+                  'flex min-h-12 w-full items-center gap-3 rounded-[var(--radius-field)] px-3.5 py-2.5 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-gold',
+                  selected ? 'bg-[#F3C516] text-navy' : 'bg-canvas text-muted hover:bg-gold-soft/50 hover:text-navy',
+                ].join(' ')}
+              >
+                <span className={['grid size-6 shrink-0 place-items-center rounded-full text-[11px] font-extrabold', selected ? 'bg-navy text-white' : 'bg-white text-muted'].join(' ')}>{value}</span>
+                <span className="text-sm font-bold">{stage}</span>
+              </button>
+            </li>
+          )
+        })}
+      </ol>
+    </aside>
   )
 }
 
@@ -127,14 +150,20 @@ export function PlanWorkspace({ initial, nextinations, pathways, profileHousehol
   const seeded: NexitPlan = { ...initial, household_members: initial.household_members ?? profileHousehold }
   const { plan, update, saveStatus, savedAtLabel, retry } = usePlanState(seeded)
   const [tab, setTab] = useState<TabId>(initialTab)
-  const [detailsOpen, setDetailsOpen] = useState(false)
   const tabsRef = useRef<HTMLDivElement>(null)
+  const detailsRef = useRef<HTMLElement>(null)
+  const detailsFirstRef = useRef<HTMLSelectElement>(null)
 
   const goToTab = useCallback((next: TabId) => {
     setTab(next)
     const url = next === 'overview' ? window.location.pathname : `${window.location.pathname}?tab=${next}`
     window.history.pushState(null, '', url)
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
+
+  const openDetails = useCallback(() => {
+    detailsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    window.setTimeout(() => detailsFirstRef.current?.focus(), 350)
   }, [])
 
   useEffect(() => {
@@ -157,15 +186,15 @@ export function PlanWorkspace({ initial, nextinations, pathways, profileHousehol
   }
 
   const ctx: PlanCtx = {
-    plan, update, goToTab, openDetails: () => setDetailsOpen(true), saveStatus, savedAtLabel, retry, nextinations, pathways,
+    plan, update, goToTab, openDetails, saveStatus, savedAtLabel, retry, nextinations, pathways,
   }
 
   const step = documentStep(plan)
   const summaryBits = [plan.selected_pathway, plan.target_move_date ? `Target ${plan.target_move_date}` : null, plan.household_members ? `${plan.household_members} household members` : null].filter(Boolean)
+  const currentStage = journeyStageLabel(plan.journey_stage)
 
   return (
     <div className="mx-auto max-w-[1180px] pb-8">
-      {/* Persistent header */}
       <header className="rounded-[var(--radius-card)] bg-navy px-5 py-5 text-white sm:px-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
@@ -173,12 +202,12 @@ export function PlanWorkspace({ initial, nextinations, pathways, profileHousehol
             <h1 className="font-display mt-1 text-3xl font-bold sm:text-4xl">My Plan</h1>
             <p className="mt-1 text-sm text-white/70">{summaryBits.length ? summaryBits.join(' · ') : 'Set your destination and pathway to build your plan.'}</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold text-white/90">Move stage: {plan.timeline_stage}</span>
+              <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold text-white/90">Move stage: {currentStage}</span>
               {step && <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold text-white/90">Document step: {step.name}</span>}
             </div>
           </div>
           <div className="flex flex-col items-end gap-2">
-            <button type="button" onClick={() => setDetailsOpen(true)} className="inline-flex items-center gap-1.5 rounded-[var(--radius-btn)] bg-gold px-3.5 py-2 text-xs font-bold text-navy transition hover:brightness-95">
+            <button type="button" onClick={openDetails} className="inline-flex items-center gap-1.5 rounded-[var(--radius-btn)] bg-gold px-3.5 py-2 text-xs font-bold text-navy transition hover:brightness-95">
               <Pencil size={13} aria-hidden="true" /> Edit plan details
             </button>
             <SaveChip status={saveStatus} onRetry={retry} className="!bg-white/10 !text-white/80" />
@@ -186,7 +215,11 @@ export function PlanWorkspace({ initial, nextinations, pathways, profileHousehol
         </div>
       </header>
 
-      {/* Tabs */}
+      <div className="mt-4 grid items-start gap-4 lg:grid-cols-[minmax(0,1.65fr)_minmax(260px,.75fr)]">
+        <PlanDetailsPanel ctx={ctx} sectionRef={detailsRef} firstFieldRef={detailsFirstRef} />
+        <VerticalMoveTimeline ctx={ctx} />
+      </div>
+
       <div className="card-surface mt-4 px-2">
         <div ref={tabsRef} role="tablist" aria-label="My Plan sections" className="flex gap-1 overflow-x-auto">
           {PLAN_TABS.map((id, index) => {
@@ -215,7 +248,6 @@ export function PlanWorkspace({ initial, nextinations, pathways, profileHousehol
         </div>
       </div>
 
-      {/* Panels */}
       <div role="tabpanel" id={`plan-panel-${tab}`} aria-labelledby={`plan-tab-${tab}`} tabIndex={0} className="mt-4 focus:outline-none">
         {tab === 'overview' && <OverviewTab ctx={ctx} />}
         {tab === 'checklist' && <ChecklistTab ctx={ctx} />}
@@ -223,8 +255,6 @@ export function PlanWorkspace({ initial, nextinations, pathways, profileHousehol
         {tab === 'budget' && <BudgetTab ctx={ctx} />}
         {tab === 'notes' && <NotesTab ctx={ctx} />}
       </div>
-
-      {detailsOpen && <PlanDetailsDialog ctx={ctx} onClose={() => setDetailsOpen(false)} />}
     </div>
   )
 }
