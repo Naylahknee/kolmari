@@ -29,7 +29,7 @@ export function NotesTab({ ctx }: { ctx: PlanCtx }) {
 
   return (
     <div className="space-y-6">
-      <section className="flex flex-wrap items-start justify-between gap-4 rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5 sm:p-6">
+      <section className="card-surface flex flex-wrap items-start justify-between gap-4 p-5 sm:p-6">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">Private workspace</p>
           <h2 className="mt-1 text-xl font-bold text-navy">Notes and decisions</h2>
@@ -39,7 +39,7 @@ export function NotesTab({ ctx }: { ctx: PlanCtx }) {
       </section>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.85fr)_minmax(260px,.85fr)]">
-        <section className="flex min-h-[620px] flex-col rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5" aria-label="Plan notebook">
+        <section className="card-surface flex min-h-[620px] flex-col p-5" aria-label="Plan notebook">
           <div className="flex items-start justify-between gap-3">
             <div>
               <h3 className="text-base font-bold text-navy">Plan notebook</h3>
@@ -62,12 +62,12 @@ export function NotesTab({ ctx }: { ctx: PlanCtx }) {
           />
           <div className="mt-4 flex items-center justify-between gap-3">
             <p className="text-xs text-muted">Autosaves while you type.</p>
-            <button type="button" onClick={() => ref.current?.blur()} className="rounded-[11px] bg-[#111111] px-5 py-2.5 text-xs font-semibold text-white hover:bg-black">Done editing</button>
+            <button type="button" onClick={() => ref.current?.blur()} className="gold-button !min-h-9 !px-4 text-xs">Done editing</button>
           </div>
         </section>
 
         <aside className="space-y-5">
-          <section className="rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5">
+          <section className="card-surface p-5">
             <p className="text-base font-bold text-navy">Plan context</p>
             <p className="mt-0.5 text-xs text-muted">Keep notes anchored to the plan.</p>
             <dl className="mt-3 space-y-2 text-sm">
@@ -78,7 +78,7 @@ export function NotesTab({ ctx }: { ctx: PlanCtx }) {
             </dl>
           </section>
 
-          <section className="rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5">
+          <section className="card-surface p-5">
             <p className="text-base font-bold text-navy">Useful prompts</p>
             <p className="mt-0.5 text-xs text-muted">Questions that move the plan forward.</p>
             <ul className="mt-3 divide-y divide-line">
@@ -90,8 +90,8 @@ export function NotesTab({ ctx }: { ctx: PlanCtx }) {
             </ul>
           </section>
 
-          <section className="rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5">
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">Private to your workspace</p>
+          <section className="rounded-[var(--radius-card)] border border-info/25 bg-info-soft p-5">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-info">Private to your workspace</p>
             <p className="mt-1 text-sm font-semibold text-navy">Notes are planning context — not community posts.</p>
           </section>
         </aside>
