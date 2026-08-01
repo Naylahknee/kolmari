@@ -23,7 +23,7 @@ function RegionGrid({ profile }: Props) {
           <button
             key={region.slug}
             type="button"
-            onClick={() => router.push(`/nexitnation/${region.slug}`)}
+            onClick={() => router.push(`/destinations/regions/${region.slug}`)}
             className="group relative min-h-28 overflow-hidden rounded-xl border border-line bg-navy-deep p-4 text-left shadow-tile transition hover:border-gold hover:shadow-card"
             style={{ backgroundImage: `linear-gradient(90deg, rgba(9,20,44,.96), rgba(9,20,44,.54)), url(${region.image})`, backgroundPosition: 'center', backgroundSize: 'cover' }}
           >
@@ -69,7 +69,7 @@ function RegionFallback({ profile }: Props) {
             <button
               key={region.slug}
               type="button"
-              onClick={() => router.push(`/nexitnation/${region.slug}`)}
+              onClick={() => router.push(`/destinations/regions/${region.slug}`)}
               className="relative min-h-28 overflow-hidden rounded-2xl border border-white/12 p-4 text-left transition hover:border-gold"
               style={{ backgroundImage: `linear-gradient(90deg, rgba(9,20,44,.96), rgba(9,20,44,.56)), url(${region.image})`, backgroundPosition: 'center', backgroundSize: 'cover' }}
             >
@@ -146,7 +146,7 @@ export function NexitnationMapbox({ profile }: Props) {
         }
 
         el.addEventListener('click', () => {
-          router.push(`/nexitnation/${region.slug}`)
+          router.push(`/destinations/regions/${region.slug}`)
         })
 
         const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
