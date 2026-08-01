@@ -33,7 +33,7 @@ export function SaveChip({ status, onRetry, className = '' }: { status: SaveStat
   const label = status === 'saving' ? 'Saving…' : status === 'saved' ? 'Saved' : 'All changes saved'
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold ${status === 'saving' ? 'bg-canvas text-muted' : 'bg-teal-soft text-teal-deep'} ${className}`}
+      className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold ${status === 'saving' ? 'bg-canvas text-muted' : 'bg-ok-soft text-ok'} ${className}`}
       role="status"
       aria-live="polite"
     >
@@ -45,19 +45,19 @@ export function SaveChip({ status, onRetry, className = '' }: { status: SaveStat
 export function ProgressBar({ value, className = '' }: { value: number; className?: string }) {
   return (
     <div className={`h-2 w-full overflow-hidden rounded-full bg-line ${className}`}>
-      <div className="h-full rounded-full bg-[#8B5CF6] transition-[width]" style={{ width: `${Math.max(0, Math.min(100, value))}%` }} />
+      <div className="h-full rounded-full bg-gold transition-[width]" style={{ width: `${Math.max(0, Math.min(100, value))}%` }} />
     </div>
   )
 }
 
 const STATUS_STYLES: Record<DocStatus, string> = {
-  ready: 'bg-teal-soft text-teal-deep',
+  ready: 'bg-ok-soft text-ok',
   in_progress: 'bg-gold-soft text-gold-deep',
   needs_review: 'bg-gold-soft text-gold-deep',
   not_started: 'bg-canvas text-muted',
 }
 const STATUS_DOT: Record<DocStatus, string> = {
-  ready: 'bg-teal-deep', in_progress: 'bg-gold', needs_review: 'bg-gold', not_started: 'bg-muted/50',
+  ready: 'bg-ok', in_progress: 'bg-gold', needs_review: 'bg-gold', not_started: 'bg-muted/50',
 }
 export function StatusDot({ status }: { status: DocStatus }) {
   return <span className={`size-2.5 shrink-0 rounded-full ${STATUS_DOT[status]}`} aria-hidden="true" />
@@ -77,8 +77,8 @@ export function Stepper({ items, current, onSelect, ariaLabel }: { items: StepIt
           <span
             className={[
               'relative z-10 grid size-8 place-items-center rounded-full border-2 text-xs font-bold transition-colors',
-              done ? 'border-[#111111] bg-[#111111] text-white'
-                : active ? 'border-[#2196F3] bg-[#2196F3] text-white'
+              done ? 'border-ok bg-ok text-white'
+                : active ? 'border-gold bg-gold text-navy'
                 : 'border-line bg-white text-muted',
             ].join(' ')}
           >
@@ -88,13 +88,13 @@ export function Stepper({ items, current, onSelect, ariaLabel }: { items: StepIt
         return (
           <li key={item.label} className="flex flex-1 flex-col items-center text-center last:flex-none">
             <div className="flex w-full items-center">
-              <span className={`h-0.5 flex-1 ${index === 0 ? 'opacity-0' : done || active ? 'bg-[#C7C7CA]' : 'bg-line'}`} aria-hidden="true" />
+              <span className={`h-0.5 flex-1 ${index === 0 ? 'opacity-0' : 'bg-line'}`} aria-hidden="true" />
               {onSelect ? (
                 <button type="button" onClick={() => onSelect(index)} aria-current={active ? 'step' : undefined} aria-label={`${item.label}${active ? ' (current)' : ''}`} className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
                   {node}
                 </button>
               ) : node}
-              <span className={`h-0.5 flex-1 ${index === items.length - 1 ? 'opacity-0' : index < current ? 'bg-[#C7C7CA]' : 'bg-line'}`} aria-hidden="true" />
+              <span className={`h-0.5 flex-1 ${index === items.length - 1 ? 'opacity-0' : 'bg-line'}`} aria-hidden="true" />
             </div>
             <span className={`mt-2 px-1 text-xs font-bold ${active ? 'text-navy' : done ? 'text-navy/70' : 'text-muted'}`}>{item.label}</span>
             {item.hint && <span className="text-[10px] text-muted">{item.hint}</span>}

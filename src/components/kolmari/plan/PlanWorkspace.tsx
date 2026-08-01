@@ -100,7 +100,7 @@ function PlanDetailsDialog({ ctx, onClose }: { ctx: PlanCtx; onClose: () => void
 
   return (
     <div className="fixed inset-0 z-[120] grid place-items-center bg-navy/40 p-4" role="dialog" aria-modal="true" aria-label="Edit plan details" onClick={onClose}>
-      <div className="w-full max-w-lg rounded-[18px] border border-line bg-white p-5 shadow-card" onClick={(event) => event.stopPropagation()}>
+      <div className="card-surface w-full max-w-lg p-5" onClick={(event) => event.stopPropagation()}>
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold text-navy">Edit plan details</h2>
           <button type="button" onClick={onClose} aria-label="Close" className="grid size-8 place-items-center rounded-full text-muted hover:bg-canvas hover:text-navy">
@@ -127,7 +127,7 @@ function PlanDetailsDialog({ ctx, onClose }: { ctx: PlanCtx; onClose: () => void
         </div>
         <div className="mt-5 flex items-center justify-between">
           <SaveChip status={ctx.saveStatus} onRetry={ctx.retry} />
-          <button type="button" onClick={onClose} className="rounded-[10px] bg-[#111111] px-4 py-2.5 text-xs font-bold text-white hover:bg-black">Done</button>
+          <button type="button" onClick={onClose} className="gold-button !min-h-9 !px-4 text-xs">Done</button>
         </div>
       </div>
     </div>
@@ -203,32 +203,32 @@ export function PlanWorkspace({ initial, nextinations, pathways, profileHousehol
 
   return (
     <div className="mx-auto max-w-[1180px] pb-8">
-      <header className="rounded-[22px] border border-[#D8D9DC] bg-[#F3F3F4] px-5 py-6 text-[#151515] sm:px-6 lg:px-8">
+      <header className="rounded-[var(--radius-card)] bg-navy-deep px-5 py-6 text-white shadow-shell sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-start justify-between gap-5">
           <div className="min-w-0">
-            <p className="text-[12px] font-medium uppercase tracking-[0.12em] text-[#85868A]">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-gold">
               Your Plan{plan.saved_nextination ? ` · ${plan.saved_nextination}` : ''}
             </p>
-            <h1 className="mt-2 text-3xl font-bold tracking-[-0.02em] text-[#151515]">My Plan</h1>
-            <p className="mt-3 text-sm text-[#85868A] sm:text-base">
+            <h1 className="mt-2 text-3xl font-extrabold tracking-[-0.02em] text-white">My Plan</h1>
+            <p className="mt-2 text-sm text-white/75 sm:text-base">
               {summaryBits.length ? summaryBits.join(' · ') : 'Set your destination and pathway to build your plan.'}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <span className="rounded-full bg-[#E2F2FF] px-3 py-1.5 text-xs font-bold text-[#1687DD]">Move stage: {currentStage}</span>
-              {document && <span className="rounded-full bg-[#E2F2FF] px-3 py-1.5 text-xs font-bold text-[#1687DD]">Document step: {document.name}</span>}
+              <span className="rounded-full bg-navy-card px-3 py-1.5 text-xs font-bold text-white">Move stage: {currentStage}</span>
+              {document && <span className="rounded-full bg-navy-card px-3 py-1.5 text-xs font-bold text-white">Document step: {document.name}</span>}
             </div>
           </div>
           <div className="flex flex-col items-end gap-2 pt-1">
-            <button type="button" onClick={() => setDetailsOpen(true)} className="inline-flex items-center gap-2 rounded-[11px] border border-[#D8D9DC] bg-white px-4 py-3 text-sm font-medium text-[#151515] shadow-sm transition hover:border-[#BFC1C5] hover:bg-[#FAFAFA]">
+            <button type="button" onClick={() => setDetailsOpen(true)} className="gold-button text-sm">
               <Pencil size={14} aria-hidden="true" /> Edit plan details
             </button>
-            <SaveChip status={saveStatus} onRetry={retry} className="!bg-transparent !px-0 !text-[#85868A]" />
+            <SaveChip status={saveStatus} onRetry={retry} className="!bg-white/10 !text-white/75" />
           </div>
         </div>
       </header>
 
-      <div className="mt-6 border-b border-[#D8D9DC]">
-        <div ref={tabsRef} role="tablist" aria-label="My Plan sections" className="flex gap-1 overflow-x-auto pb-2">
+      <div className="k-tabbar mt-4">
+        <div ref={tabsRef} role="tablist" aria-label="My Plan sections" className="k-tabs">
           {PLAN_TABS.map((id, index) => {
             const active = tab === id
             const count = id === 'documents' ? plan.documents.length : null
@@ -242,15 +242,12 @@ export function PlanWorkspace({ initial, nextinations, pathways, profileHousehol
                 tabIndex={active ? 0 : -1}
                 onKeyDown={(event) => onTabKey(event, index)}
                 onClick={() => goToTab(id)}
-                className={[
-                  'whitespace-nowrap rounded-[11px] px-5 py-3 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2095F3]',
-                  active ? 'bg-[#111111] text-white' : 'text-[#85868A] hover:bg-[#F3F3F4] hover:text-[#151515]',
-                ].join(' ')}
+                className="k-tab"
               >
                 <span className="inline-flex items-center gap-2">
                   {TAB_LABELS[id]}
                   {count !== null && count > 0 && (
-                    <span className="grid min-w-7 place-items-center rounded-full bg-[#E2F2FF] px-2 py-1 text-xs font-bold text-[#1687DD]">
+                    <span className="k-count">
                       {count}
                     </span>
                   )}
