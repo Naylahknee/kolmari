@@ -3,10 +3,10 @@
 import Link from 'next/link'
 import { ArrowRight, Sparkles } from 'lucide-react'
 import {
-  PLAN_STAGES, READINESS_LABELS, budgetEnteredCount, budgetTotal, docCounts, docProgress,
+  READINESS_LABELS, budgetEnteredCount, budgetTotal, docCounts, docProgress,
   formatAmount, formatMonthYear, formatShortDate, nextBestAction, readinessChecks,
 } from '@/lib/plan-types'
-import { ProgressBar, Stepper, type PlanCtx } from './shared'
+import { ProgressBar, type PlanCtx } from './shared'
 
 export function OverviewTab({ ctx }: { ctx: PlanCtx }) {
   const { plan, update, goToTab, openDetails } = ctx
@@ -19,7 +19,6 @@ export function OverviewTab({ ctx }: { ctx: PlanCtx }) {
   const progress = docProgress(plan)
   const total = budgetTotal(plan)
   const enteredCats = budgetEnteredCount(plan)
-  const currentStageIndex = PLAN_STAGES.indexOf(plan.timeline_stage)
   const canFlutter = Boolean(plan.saved_nextination && plan.selected_pathway)
 
   return (
@@ -54,23 +53,7 @@ export function OverviewTab({ ctx }: { ctx: PlanCtx }) {
         </section>
       </div>
 
-      {/* C: Move journey */}
-      <section className="card-surface p-5" aria-labelledby="journey-heading">
-        <h2 id="journey-heading" className="text-base font-bold text-navy">Move journey</h2>
-        <p className="mt-0.5 text-xs text-muted">One high-level path for the entire move.</p>
-        <div className="mt-5 overflow-x-auto pb-1">
-          <div className="min-w-[520px]">
-            <Stepper ariaLabel="Move journey stages" items={PLAN_STAGES.map((s) => ({ label: s }))} current={currentStageIndex} onSelect={(i) => update('timeline_stage', PLAN_STAGES[i])} />
-          </div>
-        </div>
-        {plan.timeline_stage === 'Prepare' && progress !== null && progress < 100 && (
-          <button type="button" onClick={() => goToTab('documents')} className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-gold-deep hover:underline">
-            Document work is the focus of Prepare — open Documents <ArrowRight size={13} aria-hidden="true" />
-          </button>
-        )}
-      </section>
-
-      {/* D: Summary cards */}
+      {/* Summary cards */}
       <div className="grid gap-4 md:grid-cols-3">
         <section className="card-surface flex flex-col p-5" aria-labelledby="essentials-heading">
           <h2 id="essentials-heading" className="text-base font-bold text-navy">Plan essentials</h2>
