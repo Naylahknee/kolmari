@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 import { PlanWorkspace } from '@/components/kolmari/plan/PlanWorkspace'
-import { PLAN_TABS, type TabId } from '@/components/kolmari/plan/shared'
 import { requireCurrentUser } from '@/lib/auth'
 import { COUNTRIES } from '@/lib/countries'
 import { emptyNexitPlan, getNexitPlan } from '@/lib/kolmari-plan'
+import { PLAN_TABS, type TabId } from '@/lib/plan-types'
 import { PATHWAYS } from '@/lib/pathways'
 import { getProfile } from '@/lib/profile'
 
