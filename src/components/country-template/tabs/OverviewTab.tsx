@@ -34,7 +34,7 @@ export function OverviewTab({ slug }: { slug: string }) {
                     <div className="pull"><b>The honest tradeoff:</b> everyone else figured this out too. Lisbon rents have climbed steeply since 2019, and the bureaucracy runs on its own clock regardless of how prepared you are.</div>
                   </div>
                   <div className="map-col">
-                    <Link className="map-card" href="/nexitnation/europe?focus=portugal" aria-label="Open the interactive map of Portugal">
+                    <Link className="map-card" href="/destinations/regions/europe?focus=portugal" aria-label="Open the interactive map of Portugal">
                       <span className="cmap">
                         {(() => {
                           const c = getCountryCenter('portugal')
