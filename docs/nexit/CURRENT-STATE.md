@@ -1005,3 +1005,40 @@ browse) is intentionally left open as the free funnel entry point; can be gated
 next if desired.
 
 ### Tests: tsc pass · next build pass · ESLint no new errors.
+
+## Workspace shell edits + "Your World" page
+
+Owner shell spec ("we have edits"). Applied to the shared workspace chrome
+(`TopBar` / `Sidebar`, used by both `NewWorkspaceChrome` and `CountryTemplate`)
+and added one new page. No unrelated behavior changed.
+
+- **Announcement bar** — new `components/kolmari/announcement-bar.tsx`, a
+  reusable full-width slot above the header (navy `#0D1B39`, ~54px). Empty by
+  default (renders `null`, takes no space); set `ANNOUNCEMENT` to publish copy.
+- **Header** — frosted `#F7F8FB@60%` background; added a notification bell
+  (ghost) and a rounded profile pill (avatar → `/settings`) in `.tb-right`,
+  styled with distinct classes so the existing responsive `.icon-btn` hide
+  rules leave them alone.
+- **Sidebar Destinations** — now an expandable entry listing the user's matched
+  countries as flag-code chips (`/nextinations/[slug]/v2/overview`), auto-open
+  on country pages; falls back to a plain link until matches exist. Data comes
+  from new `GET /api/matches` (ranked `rankNextinations`, self-fetched so both
+  shells work without prop threading).
+- **Your World** (`/your-world`, new sidebar item above Destinations) — sticky
+  search + filter toolbar (Region / Monthly budget / Visa route wired to real
+  data; Household + Healthcare shown disabled, "coming soon", since Kolmari has
+  no data for them), pills collapse into a "Filters" button below `lg`; a static
+  Mapbox map with our own Web-Mercator-projected **clickable gold pins** for the
+  matched destinations (navy `#0D1B39` chip-list fallback when no token / image
+  error); and a "Recommended for you" grid — matched countries ranked by real
+  Match Score with cost + visa route (citizenship time shown as "Not yet
+  tracked", an honest placeholder — no such data exists), plus an unscored
+  "More places to explore" group. Incomplete profile → empty-personalization
+  state with a Start Wizard prompt; no fabricated scores.
+
+### Data gaps surfaced (no fabrication): time-to-citizenship, household, and
+healthcare are not in the dataset, so those card field / two filter pills are
+honest placeholders rather than invented values.
+
+### Tests: tsc pass · next build pass · ESLint no new errors (only pre-existing
+logo `<img>` warning).

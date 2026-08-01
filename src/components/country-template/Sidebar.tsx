@@ -56,6 +56,10 @@ export function Sidebar() {
         </Link>
 
         <p className="sb-label">Explore</p>
+        <Link className={`sb-item${active('/your-world') ? ' active' : ''}`} href="/your-world">
+          <Icon><path d="M12 21s-7-6.3-7-11a7 7 0 0114 0c0 4.7-7 11-7 11z" /><circle cx="12" cy="10" r="2.6" /></Icon>
+          <span className="lbl">Your World</span>
+        </Link>
         {matches.length > 0 ? (
           <>
             <button
