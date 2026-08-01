@@ -66,7 +66,7 @@ export function CountryOverviewEnhancements({
           ))}
         </div>
 
-        <Link href="/nexit-plan" className="gold-button mt-5">
+        <Link href="/my-plan" className="gold-button mt-5">
           Continue building your Move Plan <ArrowRight size={16} />
         </Link>
       </section>
