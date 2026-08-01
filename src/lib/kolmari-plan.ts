@@ -47,7 +47,7 @@ async function ensurePlanTable() {
       await getSql()`ALTER TABLE nexit_plans ALTER COLUMN journey_stage SET DEFAULT 1`
       await getSql()`ALTER TABLE nexit_plans ALTER COLUMN journey_stage SET NOT NULL`
       await getSql()`
-        DO $$$$
+        DO $$
         BEGIN
           BEGIN
             ALTER TABLE nexit_plans ADD CONSTRAINT nexit_plans_journey_stage_v2_check CHECK (journey_stage BETWEEN 1 AND 8);
@@ -58,7 +58,7 @@ async function ensurePlanTable() {
           EXCEPTION WHEN duplicate_object THEN NULL;
           END;
         END
-        $$$$;
+        $$;
       `
     })().catch((error) => { planTableReady = null; throw error })
   }
