@@ -51,3 +51,6 @@ next-env.d.ts
 
 # working doc kept local, intentionally untracked
 docs/Kolmari/COUNTRY-PAGE-TEMPLATE.md
+
+# Ephemeral Claude Code agent worktrees
+.claude/worktrees/

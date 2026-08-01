@@ -1,31 +1,13 @@
 import 'server-only'
 
 import { getSql } from './db'
+import { normalizePlan, type NexitPlan } from './plan-types'
 
-export const PLAN_STAGES = ['Explore', 'Decide', 'Prepare', 'Apply', 'Move', 'Settle'] as const
-export type PlanStage = (typeof PLAN_STAGES)[number]
-
-export type PlanBudget = { housing: number | null; food: number | null; transport: number | null; healthcare: number | null; other: number | null }
-
-export type NexitPlan = {
-  user_id: number
-  saved_nextination: string | null
-  selected_pathway: string | null
-  target_move_date: string | null
-  household_members: number | null
-  timeline_stage: PlanStage
-  checklist: string[]
-  budget: PlanBudget
-  documents: string[]
-  notes: string | null
-  updated_at: string | null
-}
+// Re-export the shared model so existing server imports of '@/lib/kolmari-plan'
+// keep working. Client components import from '@/lib/plan-types' directly.
+export * from './plan-types'
 
 let planTableReady: Promise<void> | null = null
-
-export function emptyNexitPlan(userId: number): NexitPlan {
-  return { user_id: userId, saved_nextination: null, selected_pathway: null, target_move_date: null, household_members: null, timeline_stage: 'Explore', checklist: [], budget: { housing: null, food: null, transport: null, healthcare: null, other: null }, documents: [], notes: null, updated_at: null }
-}
 
 async function ensurePlanTable() {
   if (!planTableReady) {
@@ -48,13 +30,6 @@ async function ensurePlanTable() {
     })().catch((error) => { planTableReady = null; throw error })
   }
   await planTableReady
-}
-
-function strings(value: unknown) { return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [] }
-
-function normalizePlan(row: NexitPlan): NexitPlan {
-  const budget = typeof row.budget === 'object' && row.budget ? row.budget : emptyNexitPlan(row.user_id).budget
-  return { ...emptyNexitPlan(row.user_id), ...row, checklist: strings(row.checklist), documents: strings(row.documents), budget: { ...emptyNexitPlan(row.user_id).budget, ...budget } }
 }
 
 export async function getNexitPlan(userId: number) {
