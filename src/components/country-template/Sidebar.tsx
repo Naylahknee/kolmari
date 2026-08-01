@@ -1,15 +1,44 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { PRODUCT_COPY } from '@/config/product-copy'
 
 function Icon({ children }: { children: React.ReactNode }) {
   return <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor">{children}</svg>
 }
 
+type Match = { slug: string; name: string; code: string }
+
 export function Sidebar() {
   const pathname = usePathname()
   const active = (route: string) => pathname === route || pathname.startsWith(`${route}/`)
+
+  // The user's matched destinations, self-fetched so both workspace shells
+  // (NewWorkspaceChrome and CountryTemplate) get the expandable tree without
+  // threading props. Empty until the profile/quiz is complete.
+  const [matches, setMatches] = useState<Match[]>([])
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/matches')
+      .then((res) => (res.ok ? res.json() : { matches: [] }))
+      .then((data) => {
+        if (!cancelled) setMatches(Array.isArray(data.matches) ? data.matches : [])
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const onCountry = pathname.startsWith('/nextinations/')
+  const destinationsActive = active('/nexitnation') || onCountry
+  const [open, setOpen] = useState(false)
+  // Auto-open the tree whenever the user is on a country page.
+  useEffect(() => {
+    /* eslint-disable-next-line react-hooks/set-state-in-effect */
+    if (onCountry) setOpen(true)
+  }, [onCountry])
 
   return (
     <aside className="rail">
@@ -27,10 +56,41 @@ export function Sidebar() {
         </Link>
 
         <p className="sb-label">Explore</p>
-        <Link className={`sb-item${active('/nexitnation') ? ' active' : ''}`} href="/nexitnation">
-          <Icon><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18" /></Icon>
-          <span className="lbl">{PRODUCT_COPY.world}</span>
-        </Link>
+        {matches.length > 0 ? (
+          <>
+            <button
+              type="button"
+              className={`sb-item${destinationsActive ? ' active' : ''}`}
+              aria-expanded={open}
+              onClick={() => setOpen((prev) => !prev)}
+            >
+              <Icon><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18" /></Icon>
+              <span className="lbl">{PRODUCT_COPY.world}</span>
+              <svg className="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 9l6 6 6-6" /></svg>
+            </button>
+            <div className="sb-tree" hidden={!open}>
+              {matches.map((m) => (
+                <Link
+                  key={m.slug}
+                  className={`sb-country${pathname.startsWith(`/nextinations/${m.slug}`) ? ' active' : ''}`}
+                  href={`/nextinations/${m.slug}/v2/overview`}
+                >
+                  <span className="sb-cc">{m.code}</span>
+                  <span className="nm">{m.name}</span>
+                </Link>
+              ))}
+              <Link className="sb-country sb-country-all" href="/nexitnation">
+                <span className="sb-cc" aria-hidden="true">＋</span>
+                <span className="nm">Browse all</span>
+              </Link>
+            </div>
+          </>
+        ) : (
+          <Link className={`sb-item${active('/nexitnation') ? ' active' : ''}`} href="/nexitnation">
+            <Icon><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18" /></Icon>
+            <span className="lbl">{PRODUCT_COPY.world}</span>
+          </Link>
+        )}
 
         <p className="sb-label">Plan</p>
         <Link className={`sb-item${active('/pathways') ? ' active' : ''}`} href="/pathways">

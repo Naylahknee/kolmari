@@ -2,6 +2,7 @@
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { UnitsProvider } from './client/UnitsControl'
+import { AnnouncementBar } from '@/components/kolmari/announcement-bar'
 import { TopBar } from './TopBar'
 import { Sidebar } from './Sidebar'
 import { CountryHero } from './CountryHero'
@@ -38,6 +39,7 @@ export function CountryTemplate({ slug, active, fromQuiz = false, country, cente
   return (
     <UnitsProvider>
       <div className="country-template-root">
+        <AnnouncementBar />
         <TopBar onToggleRail={toggleRail} />
         <div className="shell">
           <button type="button" className="rail-backdrop" onClick={toggleRail} aria-label="Close navigation" />

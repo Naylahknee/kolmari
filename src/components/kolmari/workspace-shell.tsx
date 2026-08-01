@@ -6,6 +6,7 @@ import type { WizardStatus } from '@/lib/profile'
 import { UnitsProvider } from '@/components/country-template/client/UnitsControl'
 import { TopBar } from '@/components/country-template/TopBar'
 import { Sidebar } from '@/components/country-template/Sidebar'
+import { AnnouncementBar } from '@/components/kolmari/announcement-bar'
 
 export function WorkspaceShell({
   children,
@@ -34,6 +35,7 @@ function NewWorkspaceChrome({ children }: { children: React.ReactNode }) {
   return (
     <UnitsProvider>
       <div>
+        <AnnouncementBar />
         <TopBar onToggleRail={toggleRail} />
         <div className="shell">
           <button type="button" className="rail-backdrop" onClick={toggleRail} aria-label="Close navigation" />
