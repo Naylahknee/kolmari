@@ -28,25 +28,17 @@ export function AccountTabs({
   return (
     <div className="mx-auto max-w-3xl">
       <h1 className="text-2xl font-bold text-navy sm:text-3xl">Account</h1>
-      <div className="mt-4 flex gap-1 overflow-x-auto border-b border-line" role="tablist" aria-label="Account sections">
-        {TABS.map((t) => {
-          const active = tab === t.id
-          return (
-            <button
-              key={t.id}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              onClick={() => setTab(t.id)}
-              className={[
-                '-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 text-sm font-semibold transition',
-                active ? 'border-gold text-navy' : 'border-transparent text-muted hover:text-navy',
-              ].join(' ')}
-            >
-              {t.label}
-            </button>
-          )
-        })}
+      <div className="k-tabbar mt-4">
+        <div className="k-tabs" role="tablist" aria-label="Account sections">
+          {TABS.map((t) => {
+            const active = tab === t.id
+            return (
+              <button key={t.id} type="button" role="tab" aria-selected={active} onClick={() => setTab(t.id)} className="k-tab">
+                {t.label}
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       <div className="mt-6" role="tabpanel">

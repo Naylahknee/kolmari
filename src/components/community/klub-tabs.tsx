@@ -20,29 +20,22 @@ export function KlubTabs() {
   return (
     <div className="mt-6">
       {/* Tab bar */}
-      <div
-        role="tablist"
-        aria-label="Kolmari Klub sections"
-        className="flex gap-1 rounded-[var(--radius-field)] border border-line bg-canvas p-1"
-      >
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            role="tab"
-            id={`tab-${tab.id}`}
-            aria-selected={active === tab.id}
-            aria-controls={`panel-${tab.id}`}
-            onClick={() => setActive(tab.id)}
-            className={[
-              'flex-1 rounded-[6px] px-3 py-2 text-sm font-semibold transition-colors',
-              active === tab.id
-                ? 'bg-white text-navy shadow-sm'
-                : 'text-muted hover:text-navy',
-            ].join(' ')}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div className="k-tabbar">
+        <div role="tablist" aria-label="Kolmari Klub sections" className="k-tabs">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              role="tab"
+              id={`tab-${tab.id}`}
+              aria-selected={active === tab.id}
+              aria-controls={`panel-${tab.id}`}
+              onClick={() => setActive(tab.id)}
+              className="k-tab"
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Tab panels */}

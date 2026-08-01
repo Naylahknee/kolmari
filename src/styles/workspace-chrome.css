@@ -82,8 +82,9 @@
 
 /* Notification bell — transparent ghost button, muted icon. */
 .tb-bell {
-  width: 33px;
-  height: 33px;
+  position: relative;
+  width: 32px;
+  height: 32px;
   border-radius: 8px;
   display: grid;
   place-items: center;
@@ -91,32 +92,35 @@
   background: transparent;
   transition: background .14s, color .14s;
 }
-.tb-bell:hover { background: rgba(107, 122, 146, .1); color: var(--color-navy); }
+.tb-bell:hover { background: var(--color-canvas); color: var(--color-navy); }
 
-/* Profile avatar pill — white, hairline border, fully rounded, avatar flush left. */
+/* Profile avatar pill — white, hairline border, fully rounded, navy avatar
+   with gold initials flush left (matches the approved header treatment). */
 .profile-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  height: 33.6px;
+  gap: 8px;
   padding: 3px 10px 3px 3px;
   background: #fff;
-  border: 0.8px solid #e7ebf1;
+  border: 1px solid #e7ebf1;
   border-radius: 9999px;
-  transition: border-color .14s, box-shadow .14s;
+  transition: border-color .14s, background-color .14s;
 }
-.profile-pill:hover { border-color: #d4dbe6; box-shadow: 0 1px 3px rgba(13, 27, 57, .06); }
+.profile-pill:hover { border-color: #dbe1ea; background: #fbfcfe; }
 .profile-avatar {
-  width: 27.6px;
-  height: 27.6px;
+  width: 26px;
+  height: 26px;
   flex: 0 0 auto;
-  border-radius: 9999px;
+  border-radius: 50%;
   display: grid;
   place-items: center;
-  background: var(--color-navy-deep);
-  color: #fff;
+  background: var(--color-navy);
+  color: var(--color-gold);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .02em;
 }
-.profile-chev { color: #6b7a92; display: inline-flex; }
+.profile-name { font-size: 12.5px; font-weight: 600; color: var(--color-navy); white-space: nowrap; }
 
 .page-title-button {
   display: inline-flex;
