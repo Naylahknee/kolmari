@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { PRODUCT_COPY } from '@/config/product-copy'
 
@@ -12,6 +12,7 @@ type Match = { slug: string; name: string; code: string }
 
 export function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
   const active = (route: string) => pathname === route || pathname.startsWith(`${route}/`)
 
   // The user's matched destinations, self-fetched so both workspace shells
@@ -32,7 +33,7 @@ export function Sidebar() {
   }, [])
 
   const onCountry = pathname.startsWith('/nextinations/')
-  const destinationsActive = active('/nexitnation') || onCountry
+  const destinationsActive = active('/destinations') || active('/nexitnation') || onCountry
   const [open, setOpen] = useState(false)
   // Auto-open the tree whenever the user is on a country page.
   useEffect(() => {
@@ -55,7 +56,7 @@ export function Sidebar() {
           <span className="lbl">{PRODUCT_COPY.dashboard}</span>
         </Link>
 
-        <p className="sb-label">Explore</p>
+        <p className="sb-label" data-onboarding="explore-nav">Explore</p>
         <Link className={`sb-item${active('/your-world') ? ' active' : ''}`} href="/your-world">
           <Icon><path d="M12 21s-7-6.3-7-11a7 7 0 0114 0c0 4.7-7 11-7 11z" /><circle cx="12" cy="10" r="2.6" /></Icon>
           <span className="lbl">Your World</span>
@@ -66,7 +67,10 @@ export function Sidebar() {
               type="button"
               className={`sb-item${destinationsActive ? ' active' : ''}`}
               aria-expanded={open}
-              onClick={() => setOpen((prev) => !prev)}
+              onClick={() => {
+                setOpen((prev) => !prev)
+                router.push('/destinations')
+              }}
             >
               <Icon><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18" /></Icon>
               <span className="lbl">{PRODUCT_COPY.world}</span>
@@ -83,25 +87,25 @@ export function Sidebar() {
                   <span className="nm">{m.name}</span>
                 </Link>
               ))}
-              <Link className="sb-country sb-country-all" href="/nexitnation">
+              <Link className="sb-country sb-country-all" href="/destinations">
                 <span className="sb-cc" aria-hidden="true">＋</span>
                 <span className="nm">Browse all</span>
               </Link>
             </div>
           </>
         ) : (
-          <Link className={`sb-item${active('/nexitnation') ? ' active' : ''}`} href="/nexitnation">
+          <Link className={`sb-item${active('/destinations') || active('/nexitnation') ? ' active' : ''}`} href="/destinations">
             <Icon><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18" /></Icon>
             <span className="lbl">{PRODUCT_COPY.world}</span>
           </Link>
         )}
 
-        <p className="sb-label">Plan</p>
+        <p className="sb-label" data-onboarding="plan-nav">Plan</p>
         <Link className={`sb-item${active('/pathways') ? ' active' : ''}`} href="/pathways">
           <Icon><circle cx="6" cy="6" r="2.5" /><circle cx="18" cy="18" r="2.5" /><path d="M8.5 6H15a3 3 0 010 6H9a3 3 0 000 6h6.5" /></Icon>
           <span className="lbl">{PRODUCT_COPY.pathways}</span>
         </Link>
-        <Link className={`sb-item${active('/nexit-plan') ? ' active' : ''}`} href="/nexit-plan">
+        <Link className={`sb-item${active('/my-plan') || active('/nexit-plan') ? ' active' : ''}`} href="/my-plan">
           <Icon><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M8 3v18M11 8h6M11 12h4" /></Icon>
           <span className="lbl">{PRODUCT_COPY.plan}</span>
         </Link>

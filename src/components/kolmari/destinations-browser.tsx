@@ -95,6 +95,28 @@ export function DestinationsBrowser({ rows, profileComplete }: { rows: DestRow[]
     })
   }, [rows, statusSet, region, cost, visa, query])
 
+  if (!profileComplete) {
+    return (
+      <div className="mx-auto max-w-4xl">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Explore</p>
+          <h1 className="mt-1 text-2xl font-bold text-navy sm:text-3xl">Destinations</h1>
+          <p className="mt-1 text-sm text-muted">Build a personalized shortlist from the destinations Kolmari covers.</p>
+        </div>
+        <section className="card-surface mt-5 p-6 text-center sm:p-8" aria-labelledby="destinations-empty-heading">
+          <div className="mx-auto grid size-11 place-items-center rounded-full bg-gold-soft text-gold-deep" aria-hidden="true">
+            <Search size={20} />
+          </div>
+          <h2 id="destinations-empty-heading" className="mt-4 text-lg font-bold text-navy">Your matches will appear here</h2>
+          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted">
+            Once you complete your profile, we&rsquo;ll match you to destinations here.
+          </p>
+          <Link href="/profile-wizard" className="gold-button mt-5">Complete your profile</Link>
+        </section>
+      </div>
+    )
+  }
+
   return (
     <div className="mx-auto max-w-4xl">
       <div>

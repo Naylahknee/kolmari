@@ -145,7 +145,7 @@ export function YourWorld({ pins, cards, complete }: { pins: WorldPin[]; cards: 
       <div className="mt-8">
         <div className="flex items-end justify-between gap-3">
           <h2 className="text-lg font-bold text-navy">Recommended for you</h2>
-          <Link href="/nexitnation" className="inline-flex items-center gap-1 text-xs font-bold text-gold-deep">Browse all <ArrowRight size={13} aria-hidden="true" /></Link>
+          <Link href="/destinations" className="inline-flex items-center gap-1 text-xs font-bold text-gold-deep">Browse all <ArrowRight size={13} aria-hidden="true" /></Link>
         </div>
 
         {!complete && (

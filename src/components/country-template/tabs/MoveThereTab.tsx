@@ -337,7 +337,7 @@ export function MoveThereTab({}: Record<string, never>) {
               <section className="card-surface sec">
                 <div className="sec-head">
                   <div className="sec-title"><span className="sec-num">8</span><h2>Relocation Steps and Requirements</h2></div>
-                  <Link className="sec-link" href="/nexit-plan">Open in My Plan <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="13" height="13"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
+                  <Link className="sec-link" href="/my-plan">Open in My Plan <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" width="13" height="13"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
                 </div>
                 <div className="two">
                   <div>

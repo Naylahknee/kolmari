@@ -9,10 +9,12 @@ import { UnitsControl } from './client/UnitsControl'
 const pageNames: Record<string, string> = {
   '/dashboard': PRODUCT_COPY.dashboard,
   '/your-world': 'Your World',
-  '/nexitnation': PRODUCT_COPY.world,
+  '/destinations': 'Destinations',
+  '/nexitnation': 'Destinations',
   '/saved': 'Saved',
   '/countries': 'Saved',
   '/pathways': PRODUCT_COPY.pathways,
+  '/my-plan': PRODUCT_COPY.plan,
   '/nexit-plan': PRODUCT_COPY.plan,
   '/flutter': PRODUCT_COPY.flutterMode,
   '/checklist': PRODUCT_COPY.flutterMode,

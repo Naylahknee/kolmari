@@ -62,7 +62,7 @@ export function MapboxMap({ regions, activeSlug }: MapboxMapProps) {
       label.textContent = region.shortName
 
       markerButton.append(dot, label)
-      markerButton.addEventListener('click', () => router.push(`/nexitnation/${region.slug}`))
+      markerButton.addEventListener('click', () => router.push(`/destinations/regions/${region.slug}`))
 
       const popup = new mapboxgl.Popup({ closeButton: false, offset: 22, className: 'nexit-map-popup' })
         .setText(`${region.name}: ${region.eyebrow}`)
@@ -96,7 +96,7 @@ export function MapboxMap({ regions, activeSlug }: MapboxMapProps) {
             <button
               key={region.slug}
               type="button"
-              onClick={() => router.push(`/nexitnation/${region.slug}`)}
+              onClick={() => router.push(`/destinations/regions/${region.slug}`)}
               className={`group flex items-center justify-between rounded-2xl border p-4 text-left transition ${region.slug === activeSlug ? 'border-gold bg-gold text-navy' : 'border-white/12 bg-white/8 hover:bg-white/12'}`}
             >
               <span><MapPinned size={18} /><strong className="mt-2 block text-sm">{region.name}</strong></span>

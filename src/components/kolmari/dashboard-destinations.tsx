@@ -1,9 +1,8 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import type { CountryDetail } from '@/lib/countries'
+import { regionList } from '@/lib/destinations-data'
 
-// Real country artwork where it exists, otherwise the region artwork. No
-// fabricated imagery — every asset ships in the repo.
 const COUNTRY_IMAGE: Record<string, string> = {
   portugal: '/images/countries/portugal.webp',
   spain: '/images/countries/spain.webp',
@@ -19,27 +18,29 @@ export function destinationImage(country: CountryDetail) {
   return COUNTRY_IMAGE[country.slug] ?? REGION_IMAGE[country.region] ?? '/images/regions/europe.webp'
 }
 
+function monthlyCost(country: CountryDetail) {
+  for (const region of regionList) {
+    const estimate = region.countries.find((item) => item.slug === country.slug)?.monthlyCost
+    if (estimate !== undefined) return `$${estimate.toLocaleString()}/mo estimated`
+  }
+  return country.cost === '$' ? 'Lower monthly cost range' : 'Moderate monthly cost range'
+}
+
 export type DestinationPanel = { country: CountryDetail; match: number | null }
 
-/**
- * The user's potential destinations shown as panels (request: dashboard
- * destination panels like the reference). When the Profile is complete, panels
- * are ranked with a real Match Score; otherwise they are shown as neutral
- * "destinations to explore" with no rank number or score (no fabrication).
- */
 export function DashboardDestinations({ panels, ranked }: { panels: DestinationPanel[]; ranked: boolean }) {
   return (
-    <section aria-labelledby="destinations-heading">
+    <section id="dashboard-destinations" aria-labelledby="destinations-heading">
       <div className="mb-3 flex items-center justify-between">
         <h2 id="destinations-heading" className="text-xs font-bold uppercase tracking-widest text-muted">
           {ranked ? 'Your top destinations' : 'Destinations to explore'}
         </h2>
-        <Link href="/nexitnation" className="text-xs font-bold text-gold-deep hover:text-navy">
+        <Link href="/destinations" className="text-xs font-bold text-gold-deep hover:text-navy">
           View all
         </Link>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {panels.map(({ country, match }, index) => (
           <Link
             key={country.slug}
@@ -59,7 +60,8 @@ export function DashboardDestinations({ panels, ranked }: { panels: DestinationP
             <div className="relative p-4 text-white">
               <p className="text-lg font-bold leading-tight">{country.name}</p>
               <p className="text-xs text-white/80">{country.city} · {country.region}</p>
-              <div className="mt-2 flex items-center gap-2">
+              <p className="mt-2 text-[11px] font-semibold text-white/75">{monthlyCost(country)}</p>
+              <div className="mt-1.5 flex items-center gap-2">
                 {match !== null ? (
                   <span className="rounded-pill bg-gold px-2.5 py-1 text-xs font-bold text-navy-deep">{match}% Match Score</span>
                 ) : (

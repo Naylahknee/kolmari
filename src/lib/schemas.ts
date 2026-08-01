@@ -57,6 +57,7 @@ export const profileUpdateSchema = z.object({
   goals: z.array(z.enum(['Remote Work', 'Employment', 'Entrepreneurship', 'Passive Income / Retirement', 'Education', 'Family Reunification', 'Ancestry', 'Investment'])).max(8).optional(),
   climate: z.enum(['Warm', 'Four seasons', 'Cool', 'No preference']).nullable().optional(),
   onboarding_completed: z.boolean().optional(),
+  dashboard_onboarding_completed: z.boolean().optional(),
   wizard_completed: z.boolean().optional(),
   completed_tasks: z.array(z.string().max(80)).max(50).optional(),
   completed_at: z.string().datetime().nullable().optional(),
@@ -68,7 +69,7 @@ const checklistItemSchema = z.object({
   id: z.string().max(64),
   text: z.string().trim().min(1).max(160),
   done: z.boolean(),
-  stage: z.enum(['Explore', 'Decide', 'Prepare', 'Apply', 'Move', 'Settle']).nullable(),
+  stage: z.enum(['Explore', 'Assess', 'Shortlist', 'Decide', 'Prepare', 'Apply', 'Move', 'Settle In']).nullable(),
   due: z.string().date().nullable(),
 }).strict()
 
@@ -87,7 +88,8 @@ export const nexitPlanUpdateSchema = z.object({
   selected_pathway: z.string().trim().max(180).nullable().optional(),
   target_move_date: z.string().date().nullable().optional(),
   household_members: z.number().int().min(1).max(20).nullable().optional(),
-  timeline_stage: z.enum(['Explore', 'Decide', 'Prepare', 'Apply', 'Move', 'Settle']).optional(),
+  journey_stage: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5), z.literal(6), z.literal(7), z.literal(8)]).optional(),
+  timeline_stage: z.enum(['Explore', 'Assess', 'Shortlist', 'Decide', 'Prepare', 'Apply', 'Move', 'Settle In']).optional(),
   checklist: z.array(checklistItemSchema).max(200).optional(),
   budget: z.object({ housing: nullableMoney, food: nullableMoney, transport: nullableMoney, healthcare: nullableMoney, other: nullableMoney }).strict().optional(),
   documents: z.array(documentItemSchema).max(200).optional(),

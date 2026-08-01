@@ -7,8 +7,9 @@
 // the My Plan workspace is derived from these, never hardcoded. Legacy string
 // rows are coerced on read (see normalize*), so existing saved plans keep working.
 
-export const PLAN_STAGES = ['Explore', 'Decide', 'Prepare', 'Apply', 'Move', 'Settle'] as const
+export const PLAN_STAGES = ['Explore', 'Assess', 'Shortlist', 'Decide', 'Prepare', 'Apply', 'Move', 'Settle In'] as const
 export type PlanStage = (typeof PLAN_STAGES)[number]
+export type JourneyStage = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
 
 // Tab identifiers live here (a server-safe module) so the server page can read
 // ?tab= without importing from a 'use client' module — doing that turns the
@@ -51,6 +52,9 @@ export type NexitPlan = {
   selected_pathway: string | null
   target_move_date: string | null
   household_members: number | null
+  // Canonical persisted journey position shared by Dashboard and My Plan.
+  journey_stage: JourneyStage
+  // Compatibility label kept in the API/database while older clients migrate.
   timeline_stage: PlanStage
   checklist: ChecklistItem[]
   budget: PlanBudget
@@ -66,7 +70,7 @@ export function emptyBudget(): PlanBudget {
 export function emptyNexitPlan(userId: number): NexitPlan {
   return {
     user_id: userId, saved_nextination: null, selected_pathway: null, target_move_date: null,
-    household_members: null, timeline_stage: 'Explore', checklist: [], budget: emptyBudget(),
+    household_members: null, journey_stage: 1, timeline_stage: 'Explore', checklist: [], budget: emptyBudget(),
     documents: [], notes: null, updated_at: null,
   }
 }
@@ -80,6 +84,28 @@ export function newId(prefix = 'i'): string {
 
 function isStage(value: unknown): value is PlanStage {
   return typeof value === 'string' && (PLAN_STAGES as readonly string[]).includes(value)
+}
+
+const LEGACY_STAGE_VALUE: Record<string, JourneyStage> = {
+  Explore: 1,
+  Assess: 2,
+  Shortlist: 3,
+  Decide: 4,
+  Prepare: 5,
+  Apply: 6,
+  Move: 7,
+  Settle: 8,
+  'Settle In': 8,
+}
+
+export function normalizeJourneyStage(value: unknown, legacyLabel?: unknown): JourneyStage {
+  if (typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= 8) return value as JourneyStage
+  if (typeof legacyLabel === 'string' && legacyLabel in LEGACY_STAGE_VALUE) return LEGACY_STAGE_VALUE[legacyLabel]
+  return 1
+}
+
+export function journeyStageLabel(value: JourneyStage): PlanStage {
+  return PLAN_STAGES[value - 1]
 }
 function isStatus(value: unknown): value is DocStatus {
   return typeof value === 'string' && DOC_STATUS_ORDER.includes(value as DocStatus)
@@ -120,10 +146,12 @@ export function normalizeDocuments(value: unknown): DocumentItem[] {
 export function normalizePlan(row: NexitPlan): NexitPlan {
   const base = emptyNexitPlan(row.user_id)
   const budget = typeof row.budget === 'object' && row.budget ? row.budget : base.budget
+  const journeyStage = normalizeJourneyStage(row.journey_stage, row.timeline_stage)
   return {
     ...base,
     ...row,
-    timeline_stage: isStage(row.timeline_stage) ? row.timeline_stage : 'Explore',
+    journey_stage: journeyStage,
+    timeline_stage: journeyStageLabel(journeyStage),
     checklist: normalizeChecklist(row.checklist),
     documents: normalizeDocuments(row.documents),
     budget: { ...base.budget, ...budget },

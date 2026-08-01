@@ -58,7 +58,7 @@ export function NexitWorldWorkspace({ profileComplete, regionMatches, initialVie
     setView(next)
     const params = new URLSearchParams(searchParams.toString())
     params.set('view', next)
-    router.replace(`/nexitnation?${params.toString()}`, { scroll: false })
+    router.replace(`/destinations?${params.toString()}`, { scroll: false })
   }
 
   return (

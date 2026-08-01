@@ -184,7 +184,7 @@ function DetailPanel({ item, onStatus, onNote, onRemove, onClose }: {
 
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
             {slug ? <Link href={`/nextinations/${slug}`} className="gold-button w-full">View Destination <ArrowRight size={15} /></Link> : null}
-            <Link href="/nexit-plan" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[var(--radius-btn)] border border-line bg-white text-sm font-bold text-navy transition hover:border-gold">Open My Plan</Link>
+            <Link href="/my-plan" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[var(--radius-btn)] border border-line bg-white text-sm font-bold text-navy transition hover:border-gold">Open My Plan</Link>
             <button type="button" onClick={onRemove} className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[var(--radius-btn)] text-sm font-bold text-danger transition hover:bg-danger/10 sm:col-span-2"><Trash2 size={15} /> Remove</button>
           </div>
         </div>

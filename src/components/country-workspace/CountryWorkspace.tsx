@@ -160,7 +160,7 @@ function CountryHero({ country, match, fromQuiz, pathwayCount }: Pick<Props, 'co
           <div className="mt-6 flex flex-wrap gap-2">
             <Link href="/saved" className="inline-flex items-center gap-2 rounded-[var(--radius-field)] border border-white/20 bg-navy-deep/55 px-4 py-2.5 text-sm font-semibold backdrop-blur-sm hover:bg-navy-deep/75"><Heart size={15} /> Save this country</Link>
             <Link href={`/nextinations/${country.slug}/compare`} className="inline-flex items-center gap-2 rounded-[var(--radius-field)] border border-white/20 bg-navy-deep/55 px-4 py-2.5 text-sm font-semibold backdrop-blur-sm hover:bg-navy-deep/75"><Layers size={15} /> Compare</Link>
-            <Link href="/nexit-plan" className="gold-button">Build My Kolmari Plan <ArrowRight size={15} /></Link>
+            <Link href="/my-plan" className="gold-button">Build My Kolmari Plan <ArrowRight size={15} /></Link>
           </div>
         </div>
       </div>

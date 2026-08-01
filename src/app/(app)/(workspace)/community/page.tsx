@@ -8,7 +8,7 @@ import { getNexitPlan } from '@/lib/kolmari-plan'
 
 const relatedActions = [
   { href: '/greenbook', title: 'Greenbook Insights', copy: 'Sourced planning context to research daily life and Community Fit.', icon: BookOpen },
-  { href: '/nexitnation', title: 'Destinations', copy: 'Explore the map and narrow your strongest regional fit.', icon: Globe2 },
+  { href: '/destinations', title: 'Destinations', copy: 'Explore the map and narrow your strongest regional fit.', icon: Globe2 },
 ]
 
 export default async function CommunityPage() {
