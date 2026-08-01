@@ -7,12 +7,14 @@ import { ProgressBar, type PlanCtx } from './shared'
 
 const SUGGESTED = ['Confirm passport validity', 'Verify official Pathway requirements', 'Research housing areas', 'Review healthcare coverage', 'Compare neighborhoods']
 const STAGE_DESC: Record<PlanStage, string> = {
-  Explore: 'Scan destinations and narrow your options.',
+  Explore: 'Research destinations and possibilities.',
+  Assess: 'Compare your profile with real requirements.',
+  Shortlist: 'Narrow the destinations and pathways worth pursuing.',
   Decide: 'Commit to a destination and pathway.',
   Prepare: 'Finish research, documents, and cost planning before applying.',
   Apply: 'Submit your application and required records.',
   Move: 'Handle logistics for the move itself.',
-  Settle: 'Get established after you arrive.',
+  'Settle In': 'Get established after you arrive.',
 }
 
 export function ChecklistTab({ ctx }: { ctx: PlanCtx }) {
