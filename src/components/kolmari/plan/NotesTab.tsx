@@ -28,8 +28,8 @@ export function NotesTab({ ctx }: { ctx: PlanCtx }) {
   }
 
   return (
-    <div className="space-y-4">
-      <section className="card-surface flex flex-wrap items-start justify-between gap-4 p-5">
+    <div className="space-y-6">
+      <section className="flex flex-wrap items-start justify-between gap-4 rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5 sm:p-6">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">Private workspace</p>
           <h2 className="mt-1 text-xl font-bold text-navy">Notes and decisions</h2>
@@ -38,12 +38,12 @@ export function NotesTab({ ctx }: { ctx: PlanCtx }) {
         <SaveChip status={saveStatus} onRetry={retry} />
       </section>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
-        <section className="card-surface flex flex-col p-5" aria-label="Plan notebook">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.85fr)_minmax(260px,.85fr)]">
+        <section className="flex min-h-[620px] flex-col rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5" aria-label="Plan notebook">
           <div className="flex items-start justify-between gap-3">
             <div>
               <h3 className="text-base font-bold text-navy">Plan notebook</h3>
-              <p className="mt-0.5 text-xs text-muted">One flexible space instead of another complicated filing system.</p>
+              <p className="mt-0.5 text-xs text-muted">One flexible space for planning notes.</p>
             </div>
             {savedAtLabel && <span className="shrink-0 text-xs text-muted">{savedAtLabel}</span>}
           </div>
@@ -54,17 +54,20 @@ export function NotesTab({ ctx }: { ctx: PlanCtx }) {
           </div>
           <textarea
             ref={ref}
-            className="field mt-3 min-h-[320px] flex-1 py-3 leading-6"
+            className="field mt-4 min-h-[380px] flex-1 bg-white px-4 py-4 leading-6"
             value={plan.notes ?? ''}
             onChange={(e) => update('notes', e.target.value || null)}
             placeholder="Record questions, decisions, research findings, and follow-ups…"
             aria-label="Plan notes"
           />
-          <p className="mt-2 text-xs text-muted">Autosaves while you type.</p>
+          <div className="mt-4 flex items-center justify-between gap-3">
+            <p className="text-xs text-muted">Autosaves while you type.</p>
+            <button type="button" onClick={() => ref.current?.blur()} className="rounded-[11px] bg-[#111111] px-5 py-2.5 text-xs font-semibold text-white hover:bg-black">Done editing</button>
+          </div>
         </section>
 
-        <aside className="space-y-4">
-          <section className="card-surface p-5">
+        <aside className="space-y-5">
+          <section className="rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5">
             <p className="text-base font-bold text-navy">Plan context</p>
             <p className="mt-0.5 text-xs text-muted">Keep notes anchored to the plan.</p>
             <dl className="mt-3 space-y-2 text-sm">
@@ -75,7 +78,7 @@ export function NotesTab({ ctx }: { ctx: PlanCtx }) {
             </dl>
           </section>
 
-          <section className="card-surface p-5">
+          <section className="rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5">
             <p className="text-base font-bold text-navy">Useful prompts</p>
             <p className="mt-0.5 text-xs text-muted">Questions that move the plan forward.</p>
             <ul className="mt-3 divide-y divide-line">
@@ -87,8 +90,8 @@ export function NotesTab({ ctx }: { ctx: PlanCtx }) {
             </ul>
           </section>
 
-          <section className="rounded-[var(--radius-card)] border border-teal/25 bg-teal-soft p-4">
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-teal-deep">Private to your workspace</p>
+          <section className="rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">Private to your workspace</p>
             <p className="mt-1 text-sm font-semibold text-navy">Notes are planning context — not community posts.</p>
           </section>
         </aside>
