@@ -7,7 +7,7 @@ export function CountryResearchPage({ country }: { country: DiscoverableCountry 
   return (
     <div className="space-y-6">
       <nav className="text-sm text-muted" aria-label="Breadcrumb">
-        <Link href="/nexitnation" className="hover:text-navy">Destinations</Link>
+        <Link href="/destinations" className="hover:text-navy">Destinations</Link>
         <span className="px-2">/</span>
         <span className="font-semibold text-navy">{country.name}</span>
       </nav>
