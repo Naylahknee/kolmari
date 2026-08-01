@@ -47,14 +47,18 @@ async function ensurePlanTable() {
       await getSql()`ALTER TABLE nexit_plans ALTER COLUMN journey_stage SET DEFAULT 1`
       await getSql()`ALTER TABLE nexit_plans ALTER COLUMN journey_stage SET NOT NULL`
       await getSql()`
-        DO $ BEGIN
-          IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'nexit_plans_journey_stage_v2_check') THEN
+        DO $$$$
+        BEGIN
+          BEGIN
             ALTER TABLE nexit_plans ADD CONSTRAINT nexit_plans_journey_stage_v2_check CHECK (journey_stage BETWEEN 1 AND 8);
-          END IF;
-          IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'nexit_plans_timeline_stage_v2_check') THEN
+          EXCEPTION WHEN duplicate_object THEN NULL;
+          END;
+          BEGIN
             ALTER TABLE nexit_plans ADD CONSTRAINT nexit_plans_timeline_stage_v2_check CHECK (timeline_stage IN ('Explore','Assess','Shortlist','Decide','Prepare','Apply','Move','Settle In'));
-          END IF;
-        END $
+          EXCEPTION WHEN duplicate_object THEN NULL;
+          END;
+        END
+        $$$$;
       `
     })().catch((error) => { planTableReady = null; throw error })
   }
