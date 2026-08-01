@@ -5,53 +5,25 @@ Transform the static, empty-state "My Plan" workspace tabs into an intelligent, 
 
 ---
 
-## 🏗️ Phase 1: Database Schema Expansion (Prisma Migration)
-**File to Modify / Create:** `prisma/schema.prisma` (or your existing database model route)
+## 🏗️ Phase 1: Database Layer Schema Expansion
+**Directory to Modify:** `db/` (or your existing database model route)
 
 ### 📋 Objective
-Extend the database layer to handle dynamic location states, track manual input overrides, and record baseline vs. custom configuration statuses.
+Extend your database tracking layer to handle dynamic location states, track manual input overrides, and record baseline vs. custom configuration statuses using your project's native database tools.
 
 ### 🛠️ Execution Instructions
-1. Ensure the `ExpatPlanWorkspace` model tracks `destinationCountry`, `destinationCity`, `householdSize`, and `monthlyNetIncome`.
-2. Add a `BudgetItem` model with a strict relational constraint mapping back to the primary workspace.
-3. Incorporate an `ExpenseStage` Enum to isolate setup capital from recurring upkeep costs.
+1. Update your workspace schema records to track `destinationCountry`, `destinationCity`, `householdSize`, and `monthlyNetIncome`.
+2. Ensure you have table fields or data collections to store structural `BudgetItem` properties mapping back to the primary user workspace.
+3. Incorporate structure flags to separate immediate setup capital rows from monthly recurring upkeep costs.
 
-### 💻 Reference Schema Structure
-```prisma
-model ExpatPlanWorkspace {
-  id                 String          @id @default(uuid())
-  userId             String          @unique
-  destinationCountry String          // e.g., "Portugal"
-  destinationCity    String          // e.g., "Lisbon" or "Porto"
-  householdSize      Int             // e.g., 5
-  pathwayVisa        String          // e.g., "Remote-work residence visa"
-  targetMoveDate     DateTime
-  currentMoveStage   MoveStage       @default(EXPLORE)
-  monthlyNetIncome   Float           @default(0.0)
-  currencyPreference String          @default("USD")
-  locationMethod     LocationSource  @default(WIZARD)
-  
-  budgetItems        BudgetItem[]
-  createdAt          DateTime        @default(now())
-  updatedAt          DateTime        @updatedAt
-}
-
-model BudgetItem {
-  id                 String             @id @default(uuid())
-  workspaceId        String
-  workspace          ExpatPlanWorkspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  category           String             // "HOUSING", "FOOD", "VISAS", "SHIPPING"
-  label              String             // "Monthly Rent"
-  chronologicalStage ExpenseStage       // ONE_TIME or MONTHLY_RECURRING
-  systemBaseline     Float              // The country-track fallback average
-  userOverride       Float?             // Null if untouched; Float if edited
-  isCustom           Boolean            @default(false)
-}
-
-enum MoveStage { EXPLORE, ASSESS, SHORTLIST, DECIDE, PREPARE, APPLY, MOVE, SETTLE_IN }
-enum ExpenseStage { ONE_TIME, MONTHLY_RECURRING }
-enum LocationSource { WIZARD, MANUAL_DROPDOWN }
-```
+### 💻 Required Data Properties Matrix
+Your data store must track these structural object definitions per item:
+*   `category`: String (e.g., "HOUSING", "FOOD", "VISAS", "SHIPPING")
+*   `label`: String (e.g., "Monthly Rent")
+*   `chronologicalStage`: Enum/String ("ONE_TIME" or "MONTHLY_RECURRING")
+*   `systemBaseline`: Float (The country-track fallback average parameter)
+*   `userOverride`: Float/Null (Null if untouched; stores custom float input if edited)
+*   `isCustom`: Boolean (Toggles to true when user override is present)
 
 ---
 
@@ -147,4 +119,3 @@ Enable instantaneous offline report retrieval for users without bloating the sys
   }
 }
 ```
-
