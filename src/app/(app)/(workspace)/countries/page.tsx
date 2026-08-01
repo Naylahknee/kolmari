@@ -8,7 +8,7 @@ export default async function CountriesPage({
   const { q } = await searchParams
   const query = Array.isArray(q) ? (q[0] ?? '') : (q ?? '')
   const target = query
-    ? `/nexitnation?view=countries&q=${encodeURIComponent(query)}`
-    : '/nexitnation?view=countries'
+    ? `/destinations&q=${encodeURIComponent(query)}`
+    : '/destinations'
   redirect(target)
 }
