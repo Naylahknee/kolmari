@@ -9,7 +9,7 @@ import {
 import { ProgressBar, type PlanCtx } from './shared'
 
 export function OverviewTab({ ctx }: { ctx: PlanCtx }) {
-  const { plan, update, goToTab, openDetails } = ctx
+  const { plan, goToTab, openDetails } = ctx
   const checks = readinessChecks(plan)
   const completed = checks.filter(Boolean).length
   const readinessPct = Math.round((completed / checks.length) * 100)
