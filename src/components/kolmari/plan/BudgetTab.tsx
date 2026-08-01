@@ -18,7 +18,7 @@ export function BudgetTab({ ctx }: { ctx: PlanCtx }) {
 
   return (
     <div className="space-y-6">
-      <section className="flex flex-wrap items-start justify-between gap-4 rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5 sm:p-6">
+      <section className="card-surface flex flex-wrap items-start justify-between gap-4 p-5 sm:p-6">
         <div>
           {eyebrow && <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">{eyebrow}</p>}
           <h2 className="mt-1 text-xl font-bold text-navy">Move budget</h2>
@@ -28,13 +28,13 @@ export function BudgetTab({ ctx }: { ctx: PlanCtx }) {
       </section>
 
       <div className="grid gap-5 sm:grid-cols-3">
-        <Stat label="Estimated monthly budget" value={total === null ? 'Not set' : `$${formatAmount(total)}`} />
-        <Stat label="Categories entered" value={`${entered} of ${BUDGET_KEYS.length}`} />
-        <Stat label="Currency" value="USD" />
+        <Stat label="Estimated monthly budget" value={total === null ? 'Not set' : `$${formatAmount(total)}`} hint="Your planning estimate" />
+        <Stat label="Categories entered" value={`${entered} of ${BUDGET_KEYS.length}`} hint={entered === BUDGET_KEYS.length ? 'Budget complete' : 'Keep building your estimate'} />
+        <Stat label="Currency" value="USD" hint="Display preference" />
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.85fr)_minmax(260px,.85fr)]">
-        <section className="rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5" aria-label="Monthly budget categories">
+        <section className="card-surface p-5" aria-label="Monthly budget categories">
           <div className="flex items-center justify-between gap-3">
             <div>
               <h3 className="text-base font-bold text-navy">Monthly categories</h3>
@@ -68,7 +68,7 @@ export function BudgetTab({ ctx }: { ctx: PlanCtx }) {
         </section>
 
         <aside className="space-y-5">
-          <section className="rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5">
+          <section className="card-surface p-5">
             <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">Budget health</p>
             <div className="mt-2 flex items-baseline justify-between">
               <span className="text-sm font-bold text-navy">{entered} categor{entered === 1 ? 'y' : 'ies'} entered</span>
@@ -78,7 +78,7 @@ export function BudgetTab({ ctx }: { ctx: PlanCtx }) {
             <p className="mt-3 text-xs text-muted">A complete estimate makes move readiness more accurate.</p>
           </section>
 
-          <section className="rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5">
+          <section className="card-surface p-5">
             <p className="text-base font-bold text-navy">Plan context</p>
             <p className="mt-0.5 text-xs text-muted">The assumptions behind this budget.</p>
             <dl className="mt-3 space-y-2 text-sm">
@@ -88,10 +88,10 @@ export function BudgetTab({ ctx }: { ctx: PlanCtx }) {
             </dl>
           </section>
 
-          <section className="rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5">
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">Reality check</p>
-            <p className="mt-3 text-sm font-semibold text-navy">Compare this estimate with local cost research.</p>
-            <Link href="/greenbook" className="mt-3 inline-flex rounded-[11px] border border-[#D8D9DC] bg-white px-3.5 py-2 text-xs font-bold text-navy hover:bg-[#F8F8F8]">Review Greenbook costs</Link>
+          <section className="rounded-[var(--radius-card)] border border-teal/25 bg-teal-soft p-5">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-teal-deep">Reality check</p>
+            <p className="mt-3 text-sm font-semibold text-navy">Compare this estimate with local housing and healthcare research before deciding.</p>
+            <Link href="/greenbook" className="mt-3 inline-flex min-h-9 items-center rounded-[var(--radius-btn)] border border-teal/40 bg-white px-3.5 text-xs font-bold text-teal-deep hover:bg-teal-soft">Review Greenbook costs</Link>
           </section>
         </aside>
       </div>
@@ -99,11 +99,12 @@ export function BudgetTab({ ctx }: { ctx: PlanCtx }) {
   )
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value, hint }: { label: string; value: string; hint: string }) {
   return (
-    <div className="min-h-32 rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5">
+    <div className="card-surface min-h-32 p-5">
       <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">{label}</p>
       <p className="mt-2 text-2xl font-bold text-navy">{value}</p>
+      <p className="mt-1 text-xs text-muted">{hint}</p>
     </div>
   )
 }
