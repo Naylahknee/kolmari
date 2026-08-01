@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Download, Plus, Search } from 'lucide-react'
+import { Download, Plus, Search } from 'lucide-react'
 import {
-  DOC_STATUS_LABELS, DOC_STATUS_ORDER, DOC_STEPS, DOC_STEP_HINTS, docCounts, documentStep,
+  DOC_STATUS_LABELS, DOC_STATUS_ORDER, DOC_STEPS, docCounts, documentStep,
   formatShortDate, newId, processingBuckets, type DocStatus, type DocumentItem,
 } from '@/lib/plan-types'
 import { StatusBadge, StatusDot, Stepper, type PlanCtx } from './shared'
@@ -58,10 +58,10 @@ export function DocumentsTab({ ctx }: { ctx: PlanCtx }) {
   const eyebrow = [plan.saved_nextination, plan.selected_pathway].filter(Boolean).join(' · ')
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
-      <div className="space-y-4">
+    <div className="grid gap-5 lg:grid-cols-[minmax(0,1.85fr)_minmax(260px,.85fr)]">
+      <div className="space-y-5">
         {/* Header + progress */}
-        <section className="card-surface p-5">
+        <section className="rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5">
           {eyebrow && <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">{eyebrow}</p>}
           <h2 className="mt-1 text-xl font-bold text-navy">Document workspace</h2>
           <p className="mt-1 text-sm text-muted">Collect, authenticate, translate, compile, and submit your visa documents.</p>
@@ -71,31 +71,31 @@ export function DocumentsTab({ ctx }: { ctx: PlanCtx }) {
                 <span className="text-sm font-bold text-navy">{progressing} of {counts.total} ready or in progress</span>
                 <span className="text-sm font-bold text-muted">{pct}%</span>
               </div>
-              <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-line"><div className="h-full rounded-full bg-gold" style={{ width: `${pct}%` }} /></div>
+              <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-line"><div className="h-full rounded-full bg-[#8B5CF6]" style={{ width: `${pct}%` }} /></div>
             </>
           )}
         </section>
 
         {/* Document workflow */}
         {step && (
-          <section className="card-surface p-5">
+          <section className="rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <h3 className="text-base font-bold text-navy">Document workflow</h3>
                 <p className="mt-0.5 text-xs text-muted">The detailed workflow inside your Prepare stage.</p>
               </div>
-              <span className="shrink-0 rounded-full bg-gold-soft px-2.5 py-1 text-[11px] font-bold text-gold-deep">Step {step.index + 1} of 5</span>
+              <span className="shrink-0 rounded-full bg-[#E3F2FD] px-3 py-1.5 text-[11px] font-bold text-[#1688DF]">Step {step.index + 1} of 5</span>
             </div>
             <div className="mt-5 overflow-x-auto pb-1">
               <div className="min-w-[480px]">
-                <Stepper ariaLabel="Document workflow" items={DOC_STEPS.map((s) => ({ label: s, hint: DOC_STEP_HINTS[s] }))} current={step.index} />
+                <Stepper ariaLabel="Document workflow" items={DOC_STEPS.map((s) => ({ label: s }))} current={step.index} />
               </div>
             </div>
           </section>
         )}
 
         {/* Master document list */}
-        <section className="card-surface p-5" aria-label="Documents">
+        <section className="rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5" aria-label="Documents">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h3 className="text-base font-bold text-navy">Documents</h3>
@@ -165,41 +165,44 @@ export function DocumentsTab({ ctx }: { ctx: PlanCtx }) {
           </div>
         </section>
 
-        {/* Processing time — real counts only, no fabricated week estimates */}
+        {/* Processing time combines tracking counts with clearly labeled planning estimates. */}
         {(processing.apostille > 0 || processing.translation > 0) && (
-          <section className="card-surface p-5">
+          <section className="rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5">
             <h3 className="text-base font-bold text-navy">Processing time</h3>
-            <p className="mt-0.5 text-xs text-muted">Apostille and translation add third-party time you do not control.</p>
-            <div className="mt-4 space-y-3 text-sm">
-              <div className="flex items-center justify-between"><span className="font-semibold text-navy">{processing.apostille} document{processing.apostille === 1 ? '' : 's'} needing apostille</span></div>
-              <div className="flex items-center justify-between"><span className="font-semibold text-navy">{processing.translation} document{processing.translation === 1 ? '' : 's'} needing translation</span></div>
+            <p className="mt-0.5 text-xs text-muted">Apostille tracking and time impact combined.</p>
+            <div className="mt-4 space-y-5 text-sm">
+              <ProcessingRow count={processing.apostille} label="in apostille" estimate="2–6 weeks" progress={58} />
+              <ProcessingRow count={processing.translation} label="in translation" estimate="1–2 weeks" progress={31} />
             </div>
-            <p className="mt-4 rounded-[var(--radius-field)] bg-navy px-4 py-3 text-xs font-semibold text-white">Plan ahead: start apostille and translation early — they often take longer than expected.</p>
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-[11px] bg-white px-4 py-3 text-xs">
+              <p className="font-semibold text-navy">Plan ahead: third-party processing time is outside your control.</p>
+              <Link href="/greenbook" className="font-bold text-navy underline-offset-4 hover:underline">Review planning guidance</Link>
+            </div>
           </section>
         )}
       </div>
 
       {/* Right column */}
-      <aside className="space-y-4">
-        <section className="card-surface p-5">
+      <aside className="space-y-5">
+        <section className="rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5">
           <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">Next action</p>
           {nextDoc ? (
             <>
               <p className="mt-2 text-sm font-bold text-navy">{nextDoc.name}</p>
               <p className="mt-1 text-xs text-muted">{DOC_STATUS_LABELS[nextDoc.status]}{nextDoc.due ? ` · due ${formatShortDate(nextDoc.due)}` : ''}</p>
-              <button type="button" onClick={() => { setShowAll(true); setEditingId(nextDoc.id) }} className="gold-button mt-4 w-full justify-center">View details</button>
+              <button type="button" onClick={() => { setShowAll(true); setEditingId(nextDoc.id) }} className="mt-4 w-full rounded-[11px] bg-[#111111] px-4 py-2.5 text-xs font-semibold text-white hover:bg-black">View details</button>
             </>
           ) : (
             <p className="mt-2 text-sm text-muted">{docs.length ? 'Every document is ready.' : 'Add documents to see your next action.'}</p>
           )}
         </section>
 
-        <section className="card-surface p-5">
+        <section className="rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5">
           <p className="text-base font-bold text-navy">Upcoming deadlines</p>
           <p className="mt-0.5 text-xs text-muted">Nearest dates first.</p>
-          <ul className="mt-3 space-y-2 text-sm">
+          <ul className="mt-3 divide-y divide-line text-sm">
             {deadlines.length === 0 ? <li className="text-xs text-muted">No document deadlines yet. Add an expiration date on a document to track it.</li> : deadlines.slice(0, 5).map((d) => (
-              <li key={d.id} className="flex items-center justify-between gap-3">
+              <li key={d.id} className="flex items-center justify-between gap-3 py-3 first:pt-0">
                 <span className="min-w-0 truncate font-semibold text-navy">{d.name}</span>
                 <span className="shrink-0 text-xs font-bold text-gold-deep">{formatShortDate(d.due)}</span>
               </li>
@@ -207,21 +210,29 @@ export function DocumentsTab({ ctx }: { ctx: PlanCtx }) {
           </ul>
         </section>
 
-        <section className="card-surface p-5">
-          <p className="text-base font-bold text-navy">Need help?</p>
-          <p className="mt-0.5 text-xs text-muted">Get clarity on a requirement.</p>
+        <section className="rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5 lg:mt-56">
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">Need help?</p>
+          <p className="mt-3 text-sm text-muted">Get clarity on a requirement.</p>
           <div className="mt-3 grid gap-2">
-            <Link href="/community" className="rounded-[var(--radius-btn)] border border-line px-3.5 py-2.5 text-center text-xs font-bold text-navy hover:bg-canvas">Ask the community</Link>
-            <Link href="/pathways" className="rounded-[var(--radius-btn)] border border-line px-3.5 py-2.5 text-center text-xs font-bold text-navy hover:bg-canvas">View pathway requirements</Link>
+            <Link href="/pathways" className="rounded-[11px] border border-[#D8D9DC] bg-white px-3.5 py-2.5 text-center text-xs font-medium text-navy hover:bg-[#F8F8F8]">View pathway requirements</Link>
+            <Link href="/community" className="rounded-[11px] border border-[#D8D9DC] bg-white px-3.5 py-2.5 text-center text-xs font-medium text-navy hover:bg-[#F8F8F8]">Ask the community</Link>
           </div>
         </section>
-
-        <section className="rounded-[var(--radius-card)] border border-teal/25 bg-teal-soft p-4">
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-teal-deep">Why processing takes time</p>
-          <p className="mt-1 text-sm font-semibold text-navy">Apostilles and translations add third-party time you do not control.</p>
-          <Link href="/greenbook" className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-teal-deep hover:underline">Learn how to plan ahead <ArrowRight size={13} aria-hidden="true" /></Link>
-        </section>
       </aside>
+    </div>
+  )
+}
+
+function ProcessingRow({ count, label, estimate, progress }: { count: number; label: string; estimate: string; progress: number }) {
+  return (
+    <div>
+      <div className="flex items-center justify-between gap-3">
+        <span className="font-semibold text-navy">{count} document{count === 1 ? '' : 's'} {label}</span>
+        <span className="text-xs text-muted">{estimate}</span>
+      </div>
+      <div className="mt-2 h-2 overflow-hidden rounded-full bg-line">
+        <div className="h-full rounded-full bg-[#8B5CF6]" style={{ width: `${progress}%` }} />
+      </div>
     </div>
   )
 }
