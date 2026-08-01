@@ -68,6 +68,17 @@ export function TopBar({ onToggleRail }: { onToggleRail: () => void }) {
 
         <div className="tb-right">
           {country && <UnitsControl />}
+          <button type="button" className="tb-bell" aria-label="Notifications">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" width="18" height="18"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.7 21a2 2 0 01-3.4 0" /></svg>
+          </button>
+          <Link className="profile-pill" href="/settings" aria-label="Profile and settings">
+            <span className="profile-avatar" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" width="15" height="15"><circle cx="12" cy="8" r="3.4" /><path d="M5.5 20a6.5 6.5 0 0113 0" /></svg>
+            </span>
+            <span className="profile-chev" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="12" height="12"><path d="M6 9l6 6 6-6" /></svg>
+            </span>
+          </Link>
         </div>
       </div>
     </header>
