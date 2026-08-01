@@ -56,7 +56,7 @@ export function ChecklistTab({ ctx }: { ctx: PlanCtx }) {
   return (
     <div className="space-y-6">
       {/* Header band */}
-      <section className="flex flex-wrap items-center justify-between gap-5 rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5 sm:p-6">
+      <section className="card-surface flex flex-wrap items-center justify-between gap-5 p-5 sm:p-6">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">{plan.timeline_stage} stage</p>
           <h2 className="mt-1 text-xl font-bold text-navy">Move checklist</h2>
@@ -73,7 +73,7 @@ export function ChecklistTab({ ctx }: { ctx: PlanCtx }) {
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.85fr)_minmax(260px,.85fr)]">
         <div>
-          <section className="rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5" aria-label="Add and manage checklist tasks">
+          <section className="card-surface p-5" aria-label="Add and manage checklist tasks">
             <p className="text-sm font-bold text-navy">Add a move task</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <input
@@ -87,7 +87,7 @@ export function ChecklistTab({ ctx }: { ctx: PlanCtx }) {
               <select className="field w-auto" value={stage} onChange={(e) => setStage(e.target.value as PlanStage)} aria-label="Task stage">
                 {PLAN_STAGES.map((s) => <option key={s}>{s}</option>)}
               </select>
-              <button type="button" onClick={() => { add(text, stage); setText('') }} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[11px] bg-[#111111] px-5 text-sm font-semibold text-white transition hover:bg-black"><Plus size={15} aria-hidden="true" /> Add task</button>
+              <button type="button" onClick={() => { add(text, stage); setText('') }} className="gold-button text-sm"><Plus size={15} aria-hidden="true" /> Add task</button>
             </div>
 
             <div className="mt-4 flex flex-wrap gap-1.5" role="group" aria-label="Filter by stage">
@@ -102,7 +102,7 @@ export function ChecklistTab({ ctx }: { ctx: PlanCtx }) {
               ) : visible.map((item) => (
                 <li key={item.id} className="py-3">
                   <div className="flex items-center gap-3">
-                    <button type="button" role="checkbox" aria-checked={item.done} aria-label={`Mark “${item.text}” ${item.done ? 'incomplete' : 'complete'}`} onClick={() => patch(item.id, { done: !item.done })} className={`grid size-5 shrink-0 place-items-center rounded border ${item.done ? 'border-navy bg-navy text-white' : 'border-line'}`}>
+                    <button type="button" role="checkbox" aria-checked={item.done} aria-label={`Mark “${item.text}” ${item.done ? 'incomplete' : 'complete'}`} onClick={() => patch(item.id, { done: !item.done })} className={`grid size-5 shrink-0 place-items-center rounded border ${item.done ? 'border-ok bg-ok text-white' : 'border-line-strong bg-white'}`}>
                       {item.done && <Check size={12} strokeWidth={3} />}
                     </button>
                     <div className="min-w-0 flex-1">
@@ -129,7 +129,7 @@ export function ChecklistTab({ ctx }: { ctx: PlanCtx }) {
         </div>
 
         <aside className="space-y-5">
-          <section className="rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5">
+          <section className="card-surface p-5">
             <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">Current stage</p>
             <h3 className="mt-1 text-lg font-bold text-navy">{plan.timeline_stage}</h3>
             <p className="mt-1 text-xs text-muted">{STAGE_DESC[plan.timeline_stage]}</p>
@@ -143,7 +143,7 @@ export function ChecklistTab({ ctx }: { ctx: PlanCtx }) {
             </dl>
           </section>
 
-          <section className="rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5">
+          <section className="card-surface p-5">
             <p className="text-base font-bold text-navy">Upcoming</p>
             <p className="mt-0.5 text-xs text-muted">The next checklist deadlines.</p>
             <ul className="mt-3 space-y-2 text-sm">
@@ -156,19 +156,20 @@ export function ChecklistTab({ ctx }: { ctx: PlanCtx }) {
             </ul>
           </section>
 
-          <section className="rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5">
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">Visa records</p>
+          <section className="rounded-[var(--radius-card)] border border-info/25 bg-info-soft p-5">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-info">Visa records</p>
             <p className="mt-1 text-sm font-semibold text-navy">Apostilles, translations, and uploads belong in Documents — not this checklist.</p>
-            <button type="button" onClick={() => goToTab('documents')} className="mt-3 inline-flex items-center gap-1 rounded-[11px] border border-[#D8D9DC] bg-white px-3.5 py-2 text-xs font-bold text-navy hover:bg-[#F8F8F8]">Open Documents <ArrowRight size={13} aria-hidden="true" /></button>
+            <button type="button" onClick={() => goToTab('documents')} className="mt-3 inline-flex min-h-9 items-center gap-1 rounded-[var(--radius-btn)] border border-line-strong bg-white px-3.5 text-xs font-bold text-navy hover:bg-canvas">Open Documents <ArrowRight size={13} aria-hidden="true" /></button>
           </section>
         </aside>
       </div>
 
-      <section className="rounded-[18px] border border-[#D8D9DC] bg-[#F3F3F4] p-5">
+      <section className="card-surface p-5">
         <p className="text-base font-bold text-navy">Suggested next tasks</p>
+        <p className="mt-0.5 text-xs text-muted">Add only what belongs in your move checklist.</p>
         <div className="mt-3 flex flex-wrap gap-2">
           {SUGGESTED.filter((s) => !items.some((i) => i.text.toLowerCase() === s.toLowerCase())).map((s) => (
-            <button key={s} type="button" onClick={() => add(s, plan.timeline_stage)} className="rounded-[11px] border border-[#D8D9DC] bg-white px-3 py-2 text-xs font-medium text-navy hover:bg-[#F8F8F8]">+ {s}</button>
+            <button key={s} type="button" onClick={() => add(s, plan.timeline_stage)} className="rounded-[var(--radius-btn)] border border-line-strong bg-white px-3 py-2 text-xs font-bold text-navy hover:bg-canvas">+ {s}</button>
           ))}
         </div>
       </section>
