@@ -126,23 +126,18 @@ export function DestinationsBrowser({ rows, profileComplete }: { rows: DestRow[]
       </div>
 
       {/* Tabs */}
-      <div className="mt-5 flex gap-1 overflow-x-auto border-b border-line" role="tablist" aria-label="Destination lists">
-        {TABS.map((t) => {
-          const count = t.id === 'explore' ? rows.length : t.id === 'saved' ? saved.size : t.id === 'interested' ? interested.size : visited.size
-          const active = tab === t.id
-          return (
-            <button
-              key={t.id}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              onClick={() => setTab(t.id)}
-              className={['-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 text-sm font-semibold transition', active ? 'border-gold text-navy' : 'border-transparent text-muted hover:text-navy'].join(' ')}
-            >
-              {t.label} <span className="text-muted">{count}</span>
-            </button>
-          )
-        })}
+      <div className="k-tabbar mt-5">
+        <div className="k-tabs" role="tablist" aria-label="Destination lists">
+          {TABS.map((t) => {
+            const count = t.id === 'explore' ? rows.length : t.id === 'saved' ? saved.size : t.id === 'interested' ? interested.size : visited.size
+            const active = tab === t.id
+            return (
+              <button key={t.id} type="button" role="tab" aria-selected={active} onClick={() => setTab(t.id)} className="k-tab">
+                {t.label} <span className="k-count">{count}</span>
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {/* Filters — search full width, the three dropdowns side by side */}

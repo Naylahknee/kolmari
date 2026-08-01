@@ -220,8 +220,8 @@ export function PlanWorkspace({ initial, nextinations, pathways, profileHousehol
         <VerticalMoveTimeline ctx={ctx} />
       </div>
 
-      <div className="card-surface mt-4 px-2">
-        <div ref={tabsRef} role="tablist" aria-label="My Plan sections" className="flex gap-1 overflow-x-auto">
+      <div className="k-tabbar mt-4">
+        <div ref={tabsRef} role="tablist" aria-label="My Plan sections" className="k-tabs">
           {PLAN_TABS.map((id, index) => {
             const active = tab === id
             const count = id === 'documents' ? plan.documents.length : null
@@ -235,13 +235,10 @@ export function PlanWorkspace({ initial, nextinations, pathways, profileHousehol
                 tabIndex={active ? 0 : -1}
                 onKeyDown={(e) => onTabKey(e, index)}
                 onClick={() => goToTab(id)}
-                className={['relative whitespace-nowrap px-4 py-3.5 text-sm font-bold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold', active ? 'text-navy' : 'text-muted hover:text-navy'].join(' ')}
+                className="k-tab"
               >
-                <span className="inline-flex items-center gap-2">
-                  {TAB_LABELS[id]}
-                  {count !== null && count > 0 && <span className="rounded-full bg-canvas px-1.5 py-0.5 text-[10px] font-bold text-navy">{count}</span>}
-                </span>
-                {active && <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-gold" aria-hidden="true" />}
+                {TAB_LABELS[id]}
+                {count !== null && count > 0 && <span className="k-count">{count}</span>}
               </button>
             )
           })}
