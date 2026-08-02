@@ -41,6 +41,26 @@ export type DocumentItem = { id: string; name: string; status: DocStatus; expira
 // --- Checklist ---
 export type ChecklistItem = { id: string; text: string; done: boolean; stage: PlanStage | null; due: string | null; isSystemTemplate: boolean }
 
+// Generic starter tasks true for any international move (no fabricated
+// country-specific procedures). Auto-injected when a destination is set and the
+// checklist is empty; marked isSystemTemplate so they read as suggestions.
+export const CHECKLIST_TEMPLATE: { text: string; stage: PlanStage }[] = [
+  { text: 'Compare your shortlisted destinations', stage: 'Explore' },
+  { text: 'Research cost of living for your budget', stage: 'Explore' },
+  { text: 'Verify official pathway requirements', stage: 'Assess' },
+  { text: 'Confirm passport validity for the whole household', stage: 'Assess' },
+  { text: 'Compare neighborhoods and housing areas', stage: 'Shortlist' },
+  { text: 'Choose your destination and pathway', stage: 'Decide' },
+  { text: 'Build your required document list', stage: 'Prepare' },
+  { text: 'Review healthcare coverage options', stage: 'Prepare' },
+  { text: 'Draft your move budget', stage: 'Prepare' },
+  { text: 'Schedule your visa application appointment', stage: 'Apply' },
+  { text: 'Book flights and shipping', stage: 'Move' },
+  { text: 'Register your local address', stage: 'Settle In' },
+  { text: 'Open a local bank account', stage: 'Settle In' },
+  { text: 'Register for a local tax number', stage: 'Settle In' },
+]
+
 // --- Budget (line-item model) ---
 export type BudgetStage = 'ONE_TIME' | 'MONTHLY_RECURRING'
 export type BudgetLine = {
