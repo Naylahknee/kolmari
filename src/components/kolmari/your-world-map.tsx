@@ -2,9 +2,9 @@
 
 /* eslint-disable @next/next/no-img-element */
 
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { MapPinned } from 'lucide-react'
+import { LoaderCircle, MapPinned, RefreshCw } from 'lucide-react'
 
 export type WorldPin = {
   slug: string
@@ -20,6 +20,10 @@ export type WorldPin = {
 const W = 960
 const H = 480
 const TILE = 512
+const MAX_LOAD_ATTEMPTS = 3
+const LOAD_TIMEOUT_MS = 12_000
+
+type MapLoadStatus = 'loading' | 'ready' | 'failed'
 
 // Web Mercator (matches Mapbox's static projection) so our own clickable pins
 // land exactly on the rendered basemap.
@@ -53,7 +57,9 @@ function frame(pins: WorldPin[]) {
 }
 
 export function YourWorldMap({ pins }: { pins: WorldPin[] }) {
-  const [failed, setFailed] = useState(false)
+  const [loadAttempt, setLoadAttempt] = useState(0)
+  const [retryCycle, setRetryCycle] = useState(0)
+  const [loadStatus, setLoadStatus] = useState<MapLoadStatus>('loading')
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
   const view = frame(pins)
   const cx = projectX(view.lng, view.zoom)
@@ -65,17 +71,57 @@ export function YourWorldMap({ pins }: { pins: WorldPin[] }) {
     top: ((H / 2 + (projectY(p.lat, view.zoom) - cy)) / H) * 100,
   }))
 
-  // No token (or the image failed): a calm navy panel listing the pins as
+  const retryLoad = useCallback(() => {
+    setLoadAttempt((current) => {
+      if (current + 1 >= MAX_LOAD_ATTEMPTS) {
+        setLoadStatus('failed')
+        return current
+      }
+
+      return current + 1
+    })
+  }, [])
+
+  const restartLoad = useCallback(() => {
+    setRetryCycle((current) => current + 1)
+    setLoadAttempt(0)
+    setLoadStatus('loading')
+  }, [])
+
+  useEffect(() => {
+    if (!token || loadStatus !== 'loading') return
+
+    const timeout = window.setTimeout(retryLoad, LOAD_TIMEOUT_MS)
+    return () => window.clearTimeout(timeout)
+  }, [loadAttempt, loadStatus, retryCycle, retryLoad, token])
+
+  // No token (or all image attempts failed): a calm navy panel listing the pins as
   // clickable gold chips — the map is an enhancement, never the only path in.
-  if (!token || failed) {
+  if (!token || loadStatus === 'failed') {
     return (
       <div className="rounded-[16px] border border-white/10 bg-[#0D1B39] p-5 sm:p-6">
-        <div className="flex items-center gap-2 text-white/80">
-          <MapPinned size={18} className="text-gold" aria-hidden="true" />
-          <p className="text-sm font-semibold">
-            {pins.length > 0 ? 'Your matched destinations' : 'Your world map'}
-          </p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-white/80">
+            <MapPinned size={18} className="text-gold" aria-hidden="true" />
+            <p className="text-sm font-semibold">
+              {pins.length > 0 ? 'Your matched destinations' : 'Your world map'}
+            </p>
+          </div>
+          {token && (
+            <button
+              type="button"
+              onClick={restartLoad}
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/20 px-3 text-xs font-bold text-white transition hover:border-gold hover:text-gold"
+            >
+              <RefreshCw size={13} aria-hidden="true" /> Retry map
+            </button>
+          )}
         </div>
+        {token && (
+          <p className="mt-2 text-sm text-white/55">
+            The map image could not be reached. Your destination links are still available below.
+          </p>
+        )}
         {pins.length === 0 ? (
           <p className="mt-2 text-sm text-white/55">
             Complete your Kolmari Profile to plot your matched destinations here.
@@ -101,11 +147,28 @@ export function YourWorldMap({ pins }: { pins: WorldPin[] }) {
     )
   }
 
-  const src = `https://api.mapbox.com/styles/v1/mapbox/light-v11/static/${view.lng},${view.lat},${view.zoom.toFixed(2)},0/${W}x${H}@2x?access_token=${encodeURIComponent(token)}&attribution=false&logo=false`
+  // Vary valid zoom precision between attempts so the browser does not reuse a
+  // cached failed image response. The numeric camera position stays unchanged.
+  const zoomPrecision = Math.min(10, 2 + retryCycle * MAX_LOAD_ATTEMPTS + loadAttempt)
+  const src = `https://api.mapbox.com/styles/v1/mapbox/light-v11/static/${view.lng},${view.lat},${view.zoom.toFixed(zoomPrecision)},0/${W}x${H}@2x?access_token=${encodeURIComponent(token)}&attribution=false&logo=false`
 
   return (
     <div className="relative overflow-hidden rounded-[16px] border border-[#0D1B39]/15 bg-[#0D1B39]" style={{ aspectRatio: `${W} / ${H}` }}>
-      <img src={src} alt="Map of your matched destinations" onError={() => setFailed(true)} className="absolute inset-0 h-full w-full object-cover" />
+      <img
+        key={src}
+        src={src}
+        alt="Map of your matched destinations"
+        onLoad={() => setLoadStatus('ready')}
+        onError={retryLoad}
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${loadStatus === 'ready' ? 'opacity-100' : 'opacity-0'}`}
+      />
+      {loadStatus === 'loading' && (
+        <div className="absolute inset-0 z-20 grid place-items-center bg-[#0D1B39] text-white" role="status" aria-live="polite">
+          <span className="flex items-center gap-2 text-sm font-semibold">
+            <LoaderCircle size={17} className="animate-spin text-gold" aria-hidden="true" /> Loading your world…
+          </span>
+        </div>
+      )}
       {placed.map((p) => (
         <Link
           key={p.slug}
