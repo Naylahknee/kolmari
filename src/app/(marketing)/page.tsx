@@ -47,7 +47,7 @@ const tiers = [
       'Browse visa Pathways (read-only)',
       'A starter Move Plan',
       'Greenbook Insights preview',
-      'Kolmari Klub (read-only)',
+      'Kolmari Club (read-only)',
     ],
   },
   {
@@ -65,7 +65,7 @@ const tiers = [
       'Personalized Pathway eligibility',
       'Full Move Plan, Documents & Readiness Tracker',
       'Full Cost Calculator & Greenbook Insights',
-      'Full Kolmari Klub community',
+      'Full Kolmari Club community',
     ],
   },
   {
@@ -264,7 +264,7 @@ export default function LandingPage() {
       <section id="community" className="mx-auto max-w-[1236px] px-4 py-20 sm:px-6 lg:px-7">
         <div className="mb-9 max-w-2xl">
           <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-gold-deep">Community built in</p>
-          <h2 className="mt-3 font-display text-4xl font-extrabold text-navy sm:text-5xl">Join Kolmari Klub</h2>
+          <h2 className="mt-3 font-display text-4xl font-extrabold text-navy sm:text-5xl">Join Kolmari Club</h2>
           <p className="mt-4 text-base leading-7 text-muted">Connect with people planning real international moves, compare practical notes, and make decisions with better context.</p>
         </div>
 
@@ -275,7 +275,7 @@ export default function LandingPage() {
             <h3 className="mt-10 max-w-lg font-display text-3xl font-extrabold sm:text-4xl">A place for the questions that don&apos;t fit on an application form.</h3>
             <p className="mt-4 max-w-xl text-sm leading-6 text-white/75">Learn from people researching neighborhoods, paperwork, budgets, healthcare, and the everyday reality of starting again somewhere new.</p>
             <Link href="/signup?next=%2Fcommunity" className="mt-7 inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/30 px-5 font-bold text-white transition hover:border-gold hover:text-gold">
-              Join Kolmari Klub <ArrowRight size={17} />
+              Join Kolmari Club <ArrowRight size={17} />
             </Link>
           </article>
 

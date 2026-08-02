@@ -4,7 +4,9 @@ import { createClubPost, listClubPosts } from '@/lib/club'
 import { getProfile } from '@/lib/profile'
 import { isSameOrigin } from '@/lib/security'
 
-const VALID_SLUGS = new Set(COUNTRIES.map((c) => c.slug))
+// 'welcome' is the always-on group every member belongs to; the rest are
+// per-country groups (opened when a user matches a destination).
+const VALID_SLUGS = new Set(['welcome', ...COUNTRIES.map((c) => c.slug)])
 
 export async function GET(request: Request) {
   const user = await getRequestUser(request)
