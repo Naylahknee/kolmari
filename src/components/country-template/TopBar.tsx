@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import { LogOut, Settings as SettingsIcon } from 'lucide-react'
+import { LogOut, Settings as SettingsIcon, ShieldCheck } from 'lucide-react'
 import { BRAND } from '@/config/brand'
 import { PRODUCT_COPY } from '@/config/product-copy'
 import { UnitsControl } from './client/UnitsControl'
@@ -37,13 +37,16 @@ export function TopBar({ onToggleRail }: { onToggleRail: () => void }) {
 
   // Real account name for the profile pill avatar — never a placeholder name.
   const [displayName, setDisplayName] = useState<string | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
   useEffect(() => {
     let cancelled = false
     fetch('/api/profile')
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         const name = typeof data?.display_name === 'string' ? data.display_name.trim() : ''
-        if (!cancelled && name) setDisplayName(name)
+        if (cancelled) return
+        if (name) setDisplayName(name)
+        if (data?.isAdmin === true) setIsAdmin(true)
       })
       .catch(() => {})
     return () => { cancelled = true }
@@ -65,8 +68,6 @@ export function TopBar({ onToggleRail }: { onToggleRail: () => void }) {
     document.addEventListener('keydown', onKey)
     return () => { document.removeEventListener('mousedown', onDown); document.removeEventListener('keydown', onKey) }
   }, [menuOpen])
-  // Close the menu on navigation.
-  useEffect(() => { setMenuOpen(false) }, [pathname])
 
   async function signOut() {
     setSigningOut(true)
@@ -139,6 +140,11 @@ export function TopBar({ onToggleRail }: { onToggleRail: () => void }) {
             {menuOpen && (
               <div className="profile-dropdown" role="menu">
                 {displayName && <p className="profile-dropdown-name">{displayName}</p>}
+                {isAdmin && (
+                  <Link className="profile-dropdown-item" href="/admin" role="menuitem" onClick={() => setMenuOpen(false)}>
+                    <ShieldCheck size={15} aria-hidden="true" /> Admin
+                  </Link>
+                )}
                 <Link className="profile-dropdown-item" href="/settings" role="menuitem" onClick={() => setMenuOpen(false)}>
                   <SettingsIcon size={15} aria-hidden="true" /> Settings
                 </Link>
