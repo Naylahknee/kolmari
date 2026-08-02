@@ -2,404 +2,347 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { ArrowRight, CheckCircle2, ChevronDown, ExternalLink, Info, Route } from 'lucide-react'
+import { Check, ChevronDown, ExternalLink, Info, CheckCircle2, Minus, Plus } from 'lucide-react'
 import type { RelocationProfile } from '@/lib/profile'
 import { evaluatePathways, RESEARCH_DISCLAIMER, type PathwayEvaluation, type PathwayMatchStatus } from '@/lib/pathways'
+import { INCOME_TYPES, LESSER_KNOWN_ROUTES, VISA_JOURNEYS } from '@/lib/pathway-extras'
 
 // ─── Status presentation ────────────────────────────────────────────────
 //
-// Labels stay on the app's researched-signal language. Kolmari does not
-// assert visa eligibility, so a route is never described as "qualified".
+// Kolmari does not assert visa eligibility, so a route is described as a fit
+// signal — never as "qualified".
 
-const STATUS_LABELS: Record<PathwayMatchStatus, string> = {
-  'Strong Match': 'Strong Match',
-  'Possible Match': 'Possible Match',
-  'Missing Requirements': 'More information needed',
+const FIT_LABELS: Record<PathwayMatchStatus, string> = {
+  'Strong Match': 'Likely fit',
+  'Possible Match': 'Different route likely',
+  'Missing Requirements': 'Gap identified',
 }
-const STATUS_TONES: Record<PathwayMatchStatus, string> = {
-  'Strong Match': 'bg-teal-soft text-teal-deep',
-  'Possible Match': 'bg-gold-soft text-warn',
-  'Missing Requirements': 'bg-canvas text-muted',
+const FIT_TONES: Record<PathwayMatchStatus, string> = {
+  'Strong Match': 'bg-ok-soft text-ok',
+  'Possible Match': 'bg-canvas text-muted',
+  'Missing Requirements': 'bg-[#fdeaee] text-[#b3243c]',
 }
-const STATUS_RING: Record<PathwayMatchStatus, string> = {
-  'Strong Match': 'var(--color-teal)',
-  'Possible Match': 'var(--color-gold)',
-  'Missing Requirements': 'var(--color-line-strong)',
-}
-const GROUPS: Array<{ status: PathwayMatchStatus; description: string }> = [
-  { status: 'Strong Match', description: 'Your profile shows the strongest alignment with these routes. Official requirements still apply.' },
-  { status: 'Possible Match', description: 'Your profile has relevant signals, with important details still to verify.' },
-  { status: 'Missing Requirements', description: 'More profile information or official research is needed before comparing these routes.' },
-]
+const SECTIONS = [
+  { id: 'journey', label: 'Journey' },
+  { id: 'signals', label: 'Signals' },
+  { id: 'match', label: 'Match' },
+  { id: 'routes', label: 'All routes' },
+  { id: 'lesser', label: 'Lesser-known' },
+] as const
 
-const COUNTRY_CODES: Record<string, string> = {
-  Canada: 'CA', Germany: 'DE', Ireland: 'IE', 'New Zealand': 'NZ', Portugal: 'PT', Spain: 'ES',
-}
-function countryCode(country: string) {
-  return COUNTRY_CODES[country] ?? country.slice(0, 2).toUpperCase()
+function fitOrder(status: PathwayMatchStatus) {
+  return status === 'Strong Match' ? 0 : status === 'Possible Match' ? 1 : 2
 }
 
-/**
- * Share of this route's checked signals that the profile currently satisfies.
- * This is a count of researched requirement signals — not an eligibility score
- * and not a probability of approval.
- */
-function metShare(pathway: PathwayEvaluation): number {
-  const total = pathway.requirementsMet.length + pathway.missingRequirements.length
-  return total === 0 ? 0 : Math.round((pathway.requirementsMet.length / total) * 100)
+function FitBadge({ status }: { status: PathwayMatchStatus }) {
+  return <span className={`shrink-0 rounded-pill px-2.5 py-1 text-[11px] font-bold ${FIT_TONES[status]}`}>{FIT_LABELS[status]}</span>
 }
-
-function StatusBadge({ status }: { status: PathwayMatchStatus }) {
-  return <span className={`shrink-0 rounded-pill px-2.5 py-1 text-[11px] font-bold ${STATUS_TONES[status]}`}>{STATUS_LABELS[status]}</span>
-}
-
-function CountryLabel({ country }: { country: string }) {
-  return (
-    <span className="inline-flex items-center gap-2 text-xs font-semibold text-muted">
-      <span className="rounded-[var(--radius-field)] border border-line bg-canvas px-2 py-1 font-bold text-navy">{countryCode(country)}</span>
-      {country}
-    </span>
-  )
-}
-
-/** Ring showing the share of checked signals met. Labelled, never presented as a probability. */
-function MatchRing({ value, status, size = 52 }: { value: number; status: PathwayMatchStatus; size?: number }) {
-  const stroke = size >= 80 ? 9 : 6
-  const radius = (size - stroke) / 2
-  const circumference = 2 * Math.PI * radius
-  return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label={`${value}% of checked signals met`} className="shrink-0">
-      <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#e6eaf1" strokeWidth={stroke} />
-      <circle
-        cx={size / 2} cy={size / 2} r={radius} fill="none"
-        stroke={STATUS_RING[status]} strokeWidth={stroke} strokeLinecap="round"
-        strokeDasharray={`${(circumference * value) / 100} ${circumference}`}
-        transform={`rotate(-90 ${size / 2} ${size / 2})`}
-      />
-      <text
-        x="50%" y="50%" dominantBaseline="central" textAnchor="middle"
-        fontSize={size >= 80 ? 22 : 14} fontWeight={800} fill="var(--color-navy)"
-      >
-        {value}%
-      </text>
-    </svg>
-  )
-}
-
-// ─── Explorer controls ──────────────────────────────────────────────────
-
-function Segmented<T extends string | number | boolean | null>({ label, value, options, onChange }: {
-  label: string
-  value: T
-  options: { label: string; value: T }[]
-  onChange: (value: T) => void
-}) {
-  return (
-    <div>
-      <p className="text-xs font-bold text-navy">{label}</p>
-      <div className="mt-2 flex flex-wrap gap-2">
-        {options.map((option) => {
-          const active = option.value === value
-          return (
-            <button
-              key={String(option.value)}
-              type="button"
-              aria-pressed={active}
-              onClick={() => onChange(option.value)}
-              className={[
-                'min-h-9 rounded-[10px] border px-3 text-xs font-semibold transition-colors',
-                active ? 'border-navy bg-navy text-white' : 'border-line-strong bg-white text-muted hover:border-navy/30 hover:text-navy',
-              ].join(' ')}
-            >
-              {option.label}
-            </button>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
-const SAVINGS_MAX = 60_000
 
 // ─── Page ───────────────────────────────────────────────────────────────
 
-export function PathwaysResults({ profile }: { profile: RelocationProfile }) {
+export function PathwaysResults({ profile, savedDestination, selectedPathway, documentsReady, documentsTotal }: {
+  profile: RelocationProfile
+  savedDestination: string | null
+  selectedPathway: string | null
+  documentsReady: number
+  documentsTotal: number
+}) {
   const complete = profile.wizard_status === 'completed'
 
-  // Exploratory overrides. These never write to the saved Kolmari Profile —
-  // they let someone see how a different figure would change their signals.
+  // Exploratory overrides — never written back to the saved Kolmari Profile.
   const [income, setIncome] = useState<number | null>(profile.monthly_income)
   const [savings, setSavings] = useState<number | null>(profile.savings)
-  const [remote, setRemote] = useState<boolean | null>(profile.remote)
-  const [dependents, setDependents] = useState<number>(profile.dependents ?? 0)
-  const [activeCategory, setActiveCategory] = useState('All')
+  const [adults, setAdults] = useState(Math.max(1, (profile.family_size ?? 1) - (profile.dependents ?? 0)))
+  const [children, setChildren] = useState(profile.dependents ?? 0)
+  const [incomeType, setIncomeType] = useState<string | null>(profile.income_type)
+  const [activeSection, setActiveSection] = useState<string>('journey')
+  const [category, setCategory] = useState('All')
 
   const touched =
-    income !== profile.monthly_income ||
-    savings !== profile.savings ||
-    remote !== profile.remote ||
-    dependents !== (profile.dependents ?? 0)
+    income !== profile.monthly_income || savings !== profile.savings ||
+    children !== (profile.dependents ?? 0) || incomeType !== profile.income_type
 
-  // Until the wizard is complete nothing is assumed: every route reports that
-  // more information is needed rather than showing an invented signal.
+  function reset() {
+    setIncome(profile.monthly_income); setSavings(profile.savings)
+    setAdults(Math.max(1, (profile.family_size ?? 1) - (profile.dependents ?? 0)))
+    setChildren(profile.dependents ?? 0); setIncomeType(profile.income_type)
+  }
+
+  // Before the wizard is complete nothing is assumed — every route reports a gap.
   const evaluated = useMemo<PathwayEvaluation[]>(() => {
     if (!complete) {
       return evaluatePathways({ ...profile, goals: [], monthly_income: null, savings: null, remote: null, dependents: null })
-        .map((pathway) => ({ ...pathway, status: 'Missing Requirements' as const, requirementsMet: [], missingRequirements: [] }))
+        .map((p) => ({ ...p, status: 'Missing Requirements' as const, requirementsMet: [], missingRequirements: [] }))
     }
-    return evaluatePathways({ ...profile, monthly_income: income, savings, remote, dependents })
-  }, [complete, profile, income, savings, remote, dependents])
+    return evaluatePathways({ ...profile, monthly_income: income, savings, dependents: children, income_type: incomeType })
+  }, [complete, profile, income, savings, children, incomeType])
 
-  const counts = useMemo(() => ({
-    'Strong Match': evaluated.filter((p) => p.status === 'Strong Match').length,
-    'Possible Match': evaluated.filter((p) => p.status === 'Possible Match').length,
-    'Missing Requirements': evaluated.filter((p) => p.status === 'Missing Requirements').length,
-  }), [evaluated])
-
-  // Strongest status first, then the share of signals met — so a route that
-  // still needs information never outranks a Strong Match on percentage alone.
-  const live = useMemo(() => {
-    const rank: Record<PathwayMatchStatus, number> = { 'Strong Match': 0, 'Possible Match': 1, 'Missing Requirements': 2 }
-    return [...evaluated]
-      .sort((a, b) => rank[a.status] - rank[b.status] || metShare(b) - metShare(a))
-      .slice(0, 3)
-  }, [evaluated])
-
+  const strongest = useMemo(
+    () => [...evaluated].sort((a, b) => fitOrder(a.status) - fitOrder(b.status)).slice(0, 3),
+    [evaluated],
+  )
   const categories = ['All', ...Array.from(new Set(evaluated.map((p) => p.category)))]
-  const filtered = activeCategory === 'All' ? evaluated : evaluated.filter((p) => p.category === activeCategory)
-  const firstStrongId = filtered.find((p) => p.status === 'Strong Match')?.id
-  const categoryCount = (category: string) =>
-    category === 'All' ? evaluated.length : evaluated.filter((p) => p.category === category).length
+  const routes = useMemo(() => {
+    const list = category === 'All' ? evaluated : evaluated.filter((p) => p.category === category)
+    return [...list].sort((a, b) => fitOrder(a.status) - fitOrder(b.status))
+  }, [evaluated, category])
+
+  const journey = savedDestination ? VISA_JOURNEYS[savedDestination] ?? null : null
+  const currentStep = journey ? journey.findIndex((s) => s.state === 'current') + 1 : 0
 
   return (
-    <div>
-      <header className="rounded-[20px] bg-navy-deep p-7 text-white sm:p-10">
-        <div className="flex items-center gap-3">
-          <Route size={22} className="text-gold" aria-hidden="true" />
-          <p className="text-sm font-bold text-gold">Kolmari Pathways</p>
-        </div>
-        <h1 className="mt-3 text-3xl font-bold sm:text-4xl">Research the routes that fit your facts.</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-white/70">
+    <div className="space-y-4">
+      {/* 1 — Header */}
+      <header className="overflow-hidden rounded-[var(--radius-card)] bg-navy-deep p-7 text-white sm:p-10">
+        <p className="text-[10.5px] font-bold uppercase tracking-[0.13em] text-gold">Kolmari Pathways</p>
+        <h1 className="mt-3 max-w-[18ch] text-3xl font-bold leading-tight tracking-[-0.02em] sm:text-[40px]">
+          Research the routes that fit your facts.
+        </h1>
+        <p className="mt-3 max-w-[62ch] text-sm leading-6 text-white/70">
           Your Kolmari Profile supplies the inputs. This page organizes official Pathway research. It does not
           determine your eligibility or guarantee any outcome.
         </p>
-        {!complete && (
-          <div className="mt-6 rounded-[var(--radius-card)] border border-gold/30 bg-white/8 p-5">
-            <p className="font-semibold">Complete your Profile to see personalized Pathway signals.</p>
-            <p className="mt-1 text-sm text-white/70">Until then, all Pathways show as needing more information — no match is assumed.</p>
-            <Link href="/profile-wizard" className="gold-button mt-4 inline-flex items-center gap-2">
-              Start Profile Wizard <ArrowRight size={16} />
-            </Link>
-          </div>
-        )}
       </header>
 
-      {/* Sticky summary of where the routes currently stand. */}
-      <div className="sticky top-0 z-20 -mx-1 mt-6 bg-canvas/95 px-1 py-2 backdrop-blur">
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-[var(--radius-card)] border border-line bg-white px-4 py-3 shadow-tile">
-          {GROUPS.map((group) => (
-            <span key={group.status} className="flex items-center gap-2 text-xs font-semibold text-muted">
-              <span className="size-2 rounded-pill" style={{ background: STATUS_RING[group.status] }} aria-hidden="true" />
-              {STATUS_LABELS[group.status]}
-              <span className="font-bold text-navy">{counts[group.status]}</span>
-            </span>
+      {/* 2 — Section tabs */}
+      <nav className="k-tabbar" aria-label="Pathways sections">
+        <div className="k-tabs">
+          {SECTIONS.map((section) => (
+            <a
+              key={section.id}
+              href={`#pw-${section.id}`}
+              className={`k-tab${activeSection === section.id ? ' is-active' : ''}`}
+              onClick={() => setActiveSection(section.id)}
+            >
+              {section.label}
+            </a>
           ))}
-          <span className="ml-auto text-[11px] text-muted-soft">{evaluated.length} researched routes</span>
         </div>
-      </div>
+      </nav>
 
-      {complete && (
-        <section className="mt-6 grid items-start gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]" aria-labelledby="explore-heading">
-          <div className="card-surface p-6 sm:p-7">
-            <h2 id="explore-heading" className="text-[19px] font-bold text-navy">Tell us about your situation</h2>
-            <p className="mt-1 text-[12.5px] text-muted">
-              Adjust these to see how your signals change. Nothing here changes your saved Kolmari Profile.
-            </p>
-
-            <div className="mt-5 space-y-5">
-              <div>
-                <label htmlFor="pw-income" className="text-xs font-bold text-navy">Monthly income</label>
-                <div className="mt-2 flex items-center gap-2">
-                  <span className="text-sm font-bold text-muted">$</span>
-                  <input
-                    id="pw-income"
-                    type="number"
-                    inputMode="numeric"
-                    min={0}
-                    value={income ?? ''}
-                    placeholder="Not set"
-                    onChange={(e) => setIncome(e.target.value === '' ? null : Math.max(0, Number(e.target.value)))}
-                    className="field"
-                  />
-                </div>
-              </div>
-
-              <Segmented
-                label="Remote work"
-                value={remote}
-                onChange={setRemote}
-                options={[
-                  { label: 'Yes, fully remote', value: true },
-                  { label: 'No', value: false },
-                  { label: 'Not set', value: null },
-                ]}
-              />
-
-              <div>
-                <div className="flex items-baseline justify-between gap-3">
-                  <label htmlFor="pw-savings" className="text-xs font-bold text-navy">Savings available for relocation</label>
-                  <span className="rounded-pill bg-gold-soft px-2.5 py-0.5 text-[11px] font-bold text-warn">
-                    {savings === null ? 'Not set' : `$${savings.toLocaleString()}${savings >= SAVINGS_MAX ? '+' : ''}`}
-                  </span>
-                </div>
-                <input
-                  id="pw-savings"
-                  type="range"
-                  min={0}
-                  max={SAVINGS_MAX}
-                  step={1000}
-                  value={savings ?? 0}
-                  onChange={(e) => setSavings(Number(e.target.value))}
-                  className="mt-3 w-full accent-[var(--color-gold)]"
-                />
-                <div className="mt-1 flex justify-between text-[10.5px] text-muted-soft">
-                  <span>$0</span><span>${(SAVINGS_MAX / 1000).toFixed(0)}k+</span>
-                </div>
-              </div>
-
-              <Segmented
-                label="Household size"
-                value={dependents}
-                onChange={setDependents}
-                options={[
-                  { label: 'Just me', value: 0 },
-                  { label: '2', value: 1 },
-                  { label: '3', value: 2 },
-                  { label: '4+', value: 3 },
-                ]}
-              />
-            </div>
-
-            <div className="mt-6 flex flex-wrap gap-2">
-              <Link href="/profile-wizard" className="gold-button">Update my Profile</Link>
-              {touched && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIncome(profile.monthly_income); setSavings(profile.savings)
-                    setRemote(profile.remote); setDependents(profile.dependents ?? 0)
-                  }}
-                  className="inline-flex min-h-11 items-center rounded-[var(--radius-btn)] border border-line px-4 text-xs font-bold text-navy hover:bg-canvas"
-                >
-                  Reset to my Profile
-                </button>
-              )}
-            </div>
-            {touched && (
-              <p className="mt-3 text-[11px] font-semibold text-warn">
-                Showing exploratory figures — these are not saved to your Profile.
-              </p>
-            )}
+      {/* 3 — Visa journey tracker */}
+      <section id="pw-journey" className="scroll-mt-4 rounded-[var(--radius-card)] border border-line bg-white px-5 pb-5 pt-[18px] shadow-tile" aria-labelledby="pw-journey-heading">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <div>
+            <h2 id="pw-journey-heading" className="text-[16px] font-bold tracking-[-0.01em] text-navy">
+              Your visa journey{savedDestination ? ` · ${savedDestination}` : ''}{selectedPathway ? ` · ${selectedPathway}` : ''}
+            </h2>
+            <p className="mt-0.5 text-[12.5px] text-muted">Walks the route you have selected, step by step.</p>
           </div>
+          {journey && <span className="text-[11.5px] text-muted-soft">Step {currentStep} of {journey.length}</span>}
+        </div>
 
-          <div className="rounded-[var(--radius-card)] border border-white/10 bg-navy-deep p-6 text-white shadow-shell">
-            <p className="text-[11px] font-bold uppercase tracking-[0.05em] text-gold">Live Pathway Match</p>
-            <div className="mt-4 space-y-3">
-              {live.map((pathway, index) => {
-                const share = metShare(pathway)
-                return (
-                  <article
-                    key={pathway.id}
-                    className="rounded-[var(--radius-field)] border p-4"
-                    style={{
-                      background: 'var(--color-navy-card)',
-                      borderColor: index === 0 ? 'rgba(243,197,22,.35)' : 'rgba(255,255,255,.1)',
-                    }}
+        {journey ? (
+          <ol className="mt-4 flex items-start">
+            {journey.map((step, i) => {
+              const meta = step.label === 'Gather documents' && documentsTotal > 0
+                ? `${documentsReady} of ${documentsTotal}`
+                : step.meta
+              return (
+                <li key={step.label} className="relative flex min-w-0 flex-1 flex-col items-center gap-2">
+                  {i > 0 && (
+                    <span
+                      className="absolute left-[-50%] right-1/2 top-[15px] h-0.5"
+                      style={{ background: step.state === 'todo' ? 'var(--color-line)' : 'var(--color-teal)' }}
+                      aria-hidden="true"
+                    />
+                  )}
+                  <span
+                    className="relative z-10 grid size-[30px] flex-none place-items-center rounded-pill text-xs font-bold"
+                    style={
+                      step.state === 'done' ? { background: 'var(--color-teal)', color: '#fff' }
+                        : step.state === 'current' ? { background: 'var(--color-gold)', color: 'var(--color-navy-deep)', boxShadow: '0 0 0 4px rgba(243,197,22,.22)' }
+                          : { background: 'var(--color-line)', color: 'var(--color-muted-soft)' }
+                    }
+                    aria-current={step.state === 'current' ? 'step' : undefined}
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <p className="min-w-0 text-[15px] font-bold leading-5 text-white">{pathway.name}</p>
-                      <span className={`shrink-0 text-lg font-extrabold ${pathway.status === 'Strong Match' ? 'text-gold' : 'text-white/60'}`}>
-                        {share}%
-                      </span>
-                    </div>
-                    <p className="mt-1 text-[11px] text-white/60">{pathway.country} · {pathway.category}</p>
-                    <div className="mt-3 h-1.5 overflow-hidden rounded-pill bg-white/12">
-                      <div
-                        className="h-full rounded-pill"
-                        style={{ width: `${share}%`, background: pathway.status === 'Strong Match' ? 'var(--color-gold)' : 'var(--color-info)' }}
-                      />
-                    </div>
-                    <div className="mt-3">
-                      <StatusBadge status={pathway.status} />
-                    </div>
-                  </article>
-                )
-              })}
-            </div>
-            <p className="mt-4 text-[10.5px] leading-5 text-white/55">
-              Percentages show how many of the researched signals for each route your profile currently meets.
-              They are not an eligibility decision — final eligibility is confirmed with official sources.
-            </p>
-          </div>
-        </section>
-      )}
+                    {step.state === 'done' ? <Check size={15} strokeWidth={3} aria-hidden="true" /> : i + 1}
+                  </span>
+                  <span className="min-h-8 px-1.5 text-center text-[11.5px] font-bold leading-[1.35] text-navy">{step.label}</span>
+                  <span className="px-1.5 text-center text-[10.5px] leading-[1.4] text-muted-soft">{meta}</span>
+                </li>
+              )
+            })}
+          </ol>
+        ) : (
+          <p className="mt-4 rounded-[var(--radius-field)] bg-canvas p-4 text-[12.5px] leading-6 text-muted">
+            {savedDestination
+              ? `No step-by-step sequence has been researched for ${savedDestination} yet.`
+              : 'Choose a destination and pathway on your plan to see the route walked step by step.'}{' '}
+            <Link href="/my-plan" className="font-bold text-gold-deep">Open My Plan</Link>
+          </p>
+        )}
+      </section>
 
-      <section className="mt-8" aria-label="Filter Pathways by category">
-        <div className="-mx-1 overflow-x-auto px-1 pb-2 [scrollbar-width:thin]">
+      {/* 4 — Strongest signals */}
+      <section id="pw-signals" className="scroll-mt-4" aria-labelledby="pw-signals-heading">
+        <h2 id="pw-signals-heading" className="text-[10.5px] font-bold uppercase tracking-[0.13em] text-gold-deep">
+          Your strongest signals
+        </h2>
+        <p className="mt-1 text-[12.5px] text-muted">Based on your Kolmari Profile. Official requirements still control eligibility.</p>
+        <div className="mt-3 grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(300px,1fr))]">
+          {strongest.map((pathway) => (
+            <article key={pathway.id} className="rounded-[var(--radius-card)] border border-line bg-white px-[17px] pb-4 pt-[15px] shadow-tile">
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-[10px] font-bold uppercase tracking-[0.11em] text-muted-soft">{pathway.category}</p>
+                <FitBadge status={pathway.status} />
+              </div>
+              <h3 className="mt-2 text-[16.5px] font-bold tracking-[-0.01em] text-navy">{pathway.name}</h3>
+              <p className="text-[12.5px] text-muted-soft">{pathway.country}</p>
+              <p className="mt-2 text-[12.8px] leading-[1.6] text-muted">{pathway.incomeThreshold}</p>
+              <ul className="mt-3 space-y-1.5 border-t border-[#f0f3f7] pt-3">
+                {pathway.requirementsMet.slice(0, 2).map((item) => (
+                  <li key={item} className="flex gap-2 text-[12px] leading-5 text-ok">
+                    <CheckCircle2 size={14} className="mt-0.5 shrink-0" aria-hidden="true" /><span>{item}</span>
+                  </li>
+                ))}
+                {pathway.requirementsMet.length === 0 && (
+                  <li className="text-[12px] text-muted-soft">No profile signals confirmed for this route yet.</li>
+                )}
+              </ul>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {/* 5 — Match calculator */}
+      <section id="pw-match" className="scroll-mt-4 rounded-[var(--radius-card)] border border-line bg-white px-5 pb-5 pt-[18px] shadow-tile" aria-labelledby="pw-match-heading">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 id="pw-match-heading" className="text-[16px] font-bold tracking-[-0.01em] text-navy">Match your facts to the routes</h2>
+            <p className="mt-0.5 text-[12.5px] text-muted">Adjust the inputs and the fit labels below update. Nothing here is saved or submitted.</p>
+          </div>
+          {touched && (
+            <button type="button" onClick={reset} className="text-[12.5px] font-bold text-info hover:text-navy">Reset</button>
+          )}
+        </div>
+
+        <div className="mt-5 grid items-end gap-x-6 gap-y-5 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]">
+          <div>
+            <label htmlFor="pw-income" className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted-soft">Monthly income</label>
+            <p className="mt-1 text-[22px] font-extrabold leading-none text-navy">
+              {income === null ? 'Not set' : `$${income >= 1000 ? `${(income / 1000).toFixed(1)}k` : income}`}
+              <span className="ml-1.5 text-[11px] font-semibold text-muted-soft">per month</span>
+            </p>
+            <input
+              id="pw-income" type="range" min={0} max={15000} step={100}
+              value={income ?? 0}
+              onChange={(e) => setIncome(Number(e.target.value))}
+              className="mt-2 w-full accent-[var(--color-gold)]"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="pw-savings" className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted-soft">Savings available</label>
+            <p className="mt-1 text-[22px] font-extrabold leading-none text-navy">
+              {savings === null ? 'Not set' : `$${(savings / 1000).toFixed(0)}k`}
+            </p>
+            <input
+              id="pw-savings" type="range" min={0} max={200000} step={5000}
+              value={savings ?? 0}
+              onChange={(e) => setSavings(Number(e.target.value))}
+              className="mt-2 w-full accent-[var(--color-gold)]"
+            />
+          </div>
+
+          <div>
+            <p className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted-soft">People moving</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <Stepper label="Adults" value={adults} min={1} onChange={setAdults} />
+              <Stepper label="Children" value={children} min={0} onChange={setChildren} />
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="pw-earn" className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted-soft">How you earn</label>
+            <select
+              id="pw-earn"
+              value={incomeType ?? ''}
+              onChange={(e) => setIncomeType(e.target.value === '' ? null : e.target.value)}
+              className="field mt-2"
+            >
+              <option value="">Not set</option>
+              {INCOME_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
+            </select>
+          </div>
+        </div>
+
+        {touched && (
+          <p className="mt-4 text-[11px] font-semibold text-warn">
+            Showing exploratory figures — these are not saved to your Kolmari Profile.
+          </p>
+        )}
+      </section>
+
+      {/* 6 — All routes */}
+      <section id="pw-routes" className="scroll-mt-4" aria-labelledby="pw-routes-heading">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <h2 id="pw-routes-heading" className="text-[17px] font-bold tracking-[-0.01em] text-navy">Explore all Pathways</h2>
+          <span className="text-[11.5px] text-muted-soft">{evaluated.length} researched routes</span>
+        </div>
+
+        <div className="-mx-1 mt-3 overflow-x-auto px-1 pb-2 [scrollbar-width:thin]">
           <div className="flex w-max min-w-full gap-2">
-            {categories.map((category) => {
-              const active = activeCategory === category
+            {categories.map((item) => {
+              const active = category === item
               return (
                 <button
-                  key={category}
+                  key={item}
                   type="button"
                   aria-pressed={active}
-                  onClick={() => setActiveCategory(category)}
+                  onClick={() => setCategory(item)}
                   className={[
                     'shrink-0 rounded-pill border px-3.5 py-2 text-xs font-bold transition-colors',
                     active ? 'border-navy bg-navy text-white' : 'border-line bg-white text-muted hover:border-navy/30 hover:text-navy',
                   ].join(' ')}
                 >
-                  {category} <span className={active ? 'text-white/70' : 'text-muted-soft'}>{categoryCount(category)}</span>
+                  {item}
                 </button>
               )
             })}
           </div>
         </div>
-      </section>
 
-      <section className="mt-6" aria-labelledby="all-pathways-heading">
-        <h2 id="all-pathways-heading" className="text-lg font-bold text-navy">
-          {activeCategory === 'All' ? 'Explore all Pathways' : `${activeCategory} Pathways`}
-        </h2>
-        {filtered.length > 0 ? (
-          <div className="mt-5 space-y-8">
-            {GROUPS.map((group) => {
-              const items = filtered.filter((p) => p.status === group.status)
-              if (!items.length) return null
-              return (
-                <section key={group.status} aria-labelledby={`pathway-group-${group.status.replace(/\s+/g, '-')}`}>
-                  <div className="flex flex-wrap items-baseline gap-2">
-                    <h3 id={`pathway-group-${group.status.replace(/\s+/g, '-')}`} className="text-base font-bold text-navy">
-                      {STATUS_LABELS[group.status]}
-                    </h3>
-                    <span className="rounded-pill bg-canvas px-2 py-0.5 text-xs font-bold text-muted">{items.length}</span>
-                  </div>
-                  <p className="mt-1 text-sm text-muted">{group.description}</p>
-                  <div className="mt-3 space-y-3">
-                    {items.map((pathway) => <PathwayRow key={pathway.id} pathway={pathway} defaultOpen={pathway.id === firstStrongId} />)}
-                  </div>
-                </section>
-              )
-            })}
-          </div>
-        ) : (
-          <div className="card-surface mt-5 p-8 text-sm text-muted">No Pathways found for this category.</div>
+        <div className="mt-3 grid gap-3.5 [grid-template-columns:repeat(auto-fill,minmax(330px,1fr))]">
+          {routes.map((pathway, i) => (
+            <RouteCard key={pathway.id} pathway={pathway} best={i === 0 && pathway.status === 'Strong Match'} />
+          ))}
+        </div>
+        {routes.length === 0 && (
+          <div className="card-surface mt-3 p-8 text-sm text-muted">No Pathways found for this category.</div>
         )}
       </section>
 
-      <section className="mt-8 rounded-[var(--radius-card)] border border-line bg-canvas p-6 text-sm text-muted" aria-label="Sources and research notes">
+      {/* 7 — Lesser-known routes */}
+      <section id="pw-lesser" className="scroll-mt-4" aria-labelledby="pw-lesser-heading">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <h2 id="pw-lesser-heading" className="text-[17px] font-bold tracking-[-0.01em] text-navy">Lesser-known routes most people miss</h2>
+          <span className="text-[11.5px] text-muted-soft">Often faster or cheaper than the headline visa</span>
+        </div>
+        <div className="mt-3 grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(300px,1fr))]">
+          {LESSER_KNOWN_ROUTES.map((route) => (
+            <article key={`${route.country}-${route.name}`} className="rounded-[var(--radius-card)] border border-line bg-white px-[17px] pb-4 pt-[15px] shadow-tile">
+              <div className="flex items-start gap-2.5">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.11em] text-muted-soft">{route.country}</p>
+                  <h3 className="mt-0.5 text-[15px] font-bold tracking-[-0.01em] text-navy">{route.name}</h3>
+                </div>
+                <span className={`shrink-0 whitespace-nowrap rounded-pill px-2 py-[3px] text-[9.5px] font-bold ${route.tone === 'good' ? 'bg-teal-soft text-teal-deep' : 'bg-canvas text-muted'}`}>
+                  {route.tag}
+                </span>
+              </div>
+              <p className="mt-2 text-[12.3px] leading-[1.6] text-muted">{route.body}</p>
+              <p className="mt-2.5 border-t border-[#f0f3f7] pt-2.5 text-[11px] text-muted-soft">{route.who}</p>
+            </article>
+          ))}
+        </div>
+        <p className="mt-3 text-[11px] leading-5 text-muted-soft">
+          These are orientation only — they do not yet carry an official source or verification date. Confirm each
+          with the relevant government authority before acting on it.
+        </p>
+      </section>
+
+      <section className="rounded-[var(--radius-card)] border border-line bg-canvas p-6 text-sm text-muted" aria-label="Sources and research notes">
         <h2 className="font-bold text-navy">Sources and research notes</h2>
         <p className="mt-2 leading-6">{RESEARCH_DISCLAIMER}</p>
         <p className="mt-3 leading-6">
@@ -411,97 +354,115 @@ export function PathwaysResults({ profile }: { profile: RelocationProfile }) {
   )
 }
 
-function PathwayRow({ pathway, defaultOpen }: { pathway: PathwayEvaluation; defaultOpen: boolean }) {
-  const [open, setOpen] = useState(defaultOpen)
-  const headingId = `pathway-heading-${pathway.id}`
-  const panelId = `pathway-panel-${pathway.id}`
-  const facts = [
-    ['Income guide', pathway.incomeThreshold],
+function Stepper({ label, value, min, onChange }: { label: string; value: number; min: number; onChange: (v: number) => void }) {
+  return (
+    <div className="flex items-center gap-2 rounded-[var(--radius-field)] border border-line bg-white px-2.5 py-1.5">
+      <span className="text-[12px] font-semibold text-muted">{label}</span>
+      <button
+        type="button" aria-label={`Decrease ${label}`}
+        onClick={() => onChange(Math.max(min, value - 1))}
+        className="grid size-6 place-items-center rounded-[6px] border border-line text-muted hover:bg-canvas"
+      >
+        <Minus size={12} aria-hidden="true" />
+      </button>
+      <span className="min-w-4 text-center text-[13px] font-bold text-navy">{value}</span>
+      <button
+        type="button" aria-label={`Increase ${label}`}
+        onClick={() => onChange(Math.min(20, value + 1))}
+        className="grid size-6 place-items-center rounded-[6px] border border-line text-muted hover:bg-canvas"
+      >
+        <Plus size={12} aria-hidden="true" />
+      </button>
+    </div>
+  )
+}
+
+function RouteCard({ pathway, best }: { pathway: PathwayEvaluation; best: boolean }) {
+  const [open, setOpen] = useState(false)
+  const facts: [string, string][] = [
+    ['Income needed', pathway.incomeThreshold],
+    ['Processing', pathway.estimatedProcessingTime],
     ['Dependents', pathway.dependentsAllowed],
-    ['Local work rights', pathway.localWorkRights],
     ['Estimated fees', pathway.estimatedFees],
-    ['Estimated processing', pathway.estimatedProcessingTime],
-    ['Last verified', pathway.lastVerified],
   ].filter((fact): fact is [string, string] => Boolean(fact[1]))
 
   return (
-    <article className="card-surface overflow-hidden">
-      <h3>
-        <button
-          type="button"
-          id={headingId}
-          aria-expanded={open}
-          aria-controls={panelId}
-          onClick={() => setOpen((current) => !current)}
-          className="flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-canvas focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-gold/50"
-        >
-          <MatchRing value={metShare(pathway)} status={pathway.status} />
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-gold-deep">{pathway.category}</span>
-              <StatusBadge status={pathway.status} />
-            </div>
-            <p className="mt-2 line-clamp-2 text-base font-bold leading-6 text-navy">{pathway.name}</p>
-            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2">
-              <CountryLabel country={pathway.country} />
-              {pathway.estimatedProcessingTime && <span className="text-xs text-muted">{pathway.estimatedProcessingTime}</span>}
-              <span className="text-xs font-semibold text-muted">
-                {pathway.requirementsMet.length} met, {pathway.missingRequirements.length} to confirm
-              </span>
-            </div>
+    <article
+      className="flex flex-col rounded-[var(--radius-card)] bg-white px-[18px] pb-[18px] pt-4 shadow-tile"
+      style={{ border: `1px solid ${best ? 'var(--color-gold)' : 'var(--color-line)'}` }}
+    >
+      <div className="flex items-start gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-bold uppercase tracking-[0.11em] text-muted-soft">{pathway.country}</p>
+          <h3 className="mt-0.5 text-[16.5px] font-bold tracking-[-0.01em] text-navy">{pathway.name}</h3>
+        </div>
+        {best && <span className="shrink-0 rounded-pill bg-gold-soft px-2.5 py-[3px] text-[10px] font-bold text-[#7a5c05]">Best match</span>}
+      </div>
+
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <FitBadge status={pathway.status} />
+        <span className="text-[10px] font-bold uppercase tracking-[0.11em] text-muted-soft">{pathway.category}</span>
+      </div>
+
+      <p className="mt-2.5 text-[12.8px] leading-[1.6] text-muted">
+        {pathway.requirementsMet.length} signal{pathway.requirementsMet.length === 1 ? '' : 's'} met,{' '}
+        {pathway.missingRequirements.length} to confirm from your Kolmari Profile.
+      </p>
+
+      <dl className="mt-3 grid grid-cols-2 gap-2.5 border-t border-[#f0f3f7] pt-3">
+        {facts.slice(0, 4).map(([label, value]) => (
+          <div key={label}>
+            <dt className="text-[9.5px] uppercase tracking-[0.08em] text-muted-soft">{label}</dt>
+            <dd className="mt-0.5 line-clamp-2 text-[12.5px] font-bold text-navy">{value}</dd>
           </div>
-          <ChevronDown size={19} aria-hidden="true" className={`shrink-0 text-muted transition-transform duration-[var(--duration-standard)] ${open ? 'rotate-180' : ''}`} />
-        </button>
-      </h3>
+        ))}
+      </dl>
+
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="mt-3 flex items-center gap-1.5 text-[11.5px] font-bold text-gold-deep"
+      >
+        {open ? 'Hide requirements' : 'View requirements'}
+        <ChevronDown size={13} aria-hidden="true" className={`transition-transform duration-[var(--duration-standard)] ${open ? 'rotate-180' : ''}`} />
+      </button>
 
       {open && (
-        <div id={panelId} role="region" aria-labelledby={headingId} className="border-t border-line px-5 pb-6 pt-5">
-          <div className="grid gap-5 md:grid-cols-2">
-            <div>
-              <h4 className="text-xs font-bold uppercase tracking-wide text-teal-deep">Requirements met</h4>
-              {pathway.requirementsMet.length ? (
-                <ul className="mt-3 space-y-2 text-sm text-navy">
-                  {pathway.requirementsMet.map((item) => (
-                    <li key={item} className="flex gap-2"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-teal-deep" aria-hidden="true" /><span>{item}</span></li>
-                  ))}
-                </ul>
-              ) : <p className="mt-3 text-sm text-muted">No profile requirements confirmed yet.</p>}
-            </div>
-            <div>
-              <h4 className="text-xs font-bold uppercase tracking-wide text-warn">Missing or unconfirmed</h4>
-              {pathway.missingRequirements.length ? (
-                <ul className="mt-3 space-y-2 text-sm text-navy">
-                  {pathway.missingRequirements.map((item) => (
-                    <li key={item} className="flex gap-2"><Info size={16} className="mt-0.5 shrink-0 text-warn" aria-hidden="true" /><span>{item}</span></li>
-                  ))}
-                </ul>
-              ) : <p className="mt-3 text-sm text-muted">No profile gaps identified.</p>}
-            </div>
-          </div>
-
-          {facts.length > 0 && (
-            <dl className="mt-6 grid gap-x-8 gap-y-4 border-t border-line pt-5 text-sm sm:grid-cols-2">
-              {facts.map(([label, value]) => (
-                <div key={label}><dt className="text-xs font-bold text-muted">{label}</dt><dd className="mt-1 leading-6 text-navy">{value}</dd></div>
+        <div className="mt-3 border-t border-[#f0f3f7] pt-3">
+          <h4 className="text-[10px] font-bold uppercase tracking-wide text-teal-deep">Requirements met</h4>
+          {pathway.requirementsMet.length ? (
+            <ul className="mt-2 space-y-1.5">
+              {pathway.requirementsMet.map((item) => (
+                <li key={item} className="flex gap-2 text-[12px] leading-5 text-navy">
+                  <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-teal-deep" aria-hidden="true" /><span>{item}</span>
+                </li>
               ))}
-            </dl>
-          )}
+            </ul>
+          ) : <p className="mt-2 text-[12px] text-muted">No profile requirements confirmed yet.</p>}
 
-          <div className="mt-5 flex flex-wrap items-center gap-3">
+          <h4 className="mt-3 text-[10px] font-bold uppercase tracking-wide text-warn">Missing or unconfirmed</h4>
+          {pathway.missingRequirements.length ? (
+            <ul className="mt-2 space-y-1.5">
+              {pathway.missingRequirements.map((item) => (
+                <li key={item} className="flex gap-2 text-[12px] leading-5 text-navy">
+                  <Info size={14} className="mt-0.5 shrink-0 text-warn" aria-hidden="true" /><span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          ) : <p className="mt-2 text-[12px] text-muted">No profile gaps identified.</p>}
+
+          <div className="mt-3 flex flex-wrap items-center gap-3">
             {pathway.officialSource && (
               <a
-                href={pathway.officialSource}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-[var(--radius-field)] text-xs font-bold text-gold-deep underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-gold/50"
+                href={pathway.officialSource} target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-[11.5px] font-bold text-gold-deep underline-offset-4 hover:underline"
               >
-                <ExternalLink size={14} aria-hidden="true" />
+                <ExternalLink size={13} aria-hidden="true" />
                 {pathway.sourceLabel ?? 'Official source'}
               </a>
             )}
-            <Link href="/my-plan?tab=checklist" className="inline-flex min-h-9 items-center rounded-[var(--radius-btn)] border border-line px-3.5 text-xs font-bold text-navy hover:bg-canvas">
-              Add to plan
-            </Link>
+            <span className="text-[10.5px] text-muted-soft">Verified {pathway.lastVerified}</span>
           </div>
         </div>
       )}

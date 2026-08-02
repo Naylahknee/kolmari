@@ -3,6 +3,7 @@ import { PathwaysResults } from '@/components/kolmari/pathways-results'
 import { PlusGate } from '@/components/kolmari/plus-gate'
 import { requireCurrentUser } from '@/lib/auth'
 import { getProfile, isPaid } from '@/lib/profile'
+import { docCounts, getNexitPlan } from '@/lib/kolmari-plan'
 import { PATHWAYS } from '@/lib/pathways'
 
 export const metadata: Metadata = { title: 'Pathways | Kolmari', description: 'Compare official residency and visa Pathways using your Profile.' }
@@ -34,7 +35,7 @@ function PathwaysPreview() {
 
 export default async function PathwaysPage() {
   const user = await requireCurrentUser()
-  const profile = await getProfile(user.id)
+  const [profile, plan] = await Promise.all([getProfile(user.id), getNexitPlan(user.id)])
 
   if (!isPaid(profile)) {
     return (
@@ -52,6 +53,15 @@ export default async function PathwaysPage() {
       />
     )
   }
-  // Signals are evaluated client-side so the explorer controls can recompute them live.
-  return <PathwaysResults profile={profile} />
+  // Signals are evaluated client-side so the Match controls can recompute them live.
+  const docs = plan ? docCounts(plan) : null
+  return (
+    <PathwaysResults
+      profile={profile}
+      savedDestination={plan?.saved_nextination ?? null}
+      selectedPathway={plan?.selected_pathway ?? null}
+      documentsReady={docs ? docs.total - docs.MISSING : 0}
+      documentsTotal={docs?.total ?? 0}
+    />
+  )
 }

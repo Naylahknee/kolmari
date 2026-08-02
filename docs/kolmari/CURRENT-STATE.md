@@ -61,3 +61,42 @@ Chromium at 420px, 1024px, and 1440px in both expanded and collapsed states.
 move date. Documents is approved/total. Budget is entered/total cost lines. Housing and
 Healthcare report whether that budget line carries a figure. Schools reflects a school-related
 checklist task and is marked not applicable when the profile lists no dependents.
+
+## Pathways
+
+**Layout (top to bottom).** Navy header → section tab bar → visa journey tracker →
+strongest signals → Match calculator → Explore all Pathways → Lesser-known routes →
+sources note. The tabs (Journey / Signals / Match / All routes / Lesser-known) are
+anchor links onto the sections below, using the shared `.k-tabbar` / `.k-tab` styles.
+
+**Visa journey.** A six-step tracker for the destination saved on the plan: teal circle
+with a check for done, gold ring for the current step, grey for upcoming, with the label
+and a meta line under each. The "Gather documents" meta uses the real document counts from
+the plan when any exist. Sequences live in `VISA_JOURNEYS` in
+`src/lib/pathway-extras.ts`, keyed by country — a destination with no researched sequence
+shows an empty state rather than another country's steps.
+
+**Strongest signals.** Top three routes by fit, each showing category, fit badge, name,
+country, and the first two signals the profile actually meets.
+
+**Match calculator.** Monthly income and savings sliders, adults/children steppers, and a
+"how you earn" select. Adjusting these recomputes every fit label on the page live. They
+are exploratory only — nothing is written to the saved Kolmari Profile, and the card says
+so with a Reset once any value differs.
+
+**Explore all Pathways.** Category pill filters over the researched routes from
+`src/lib/pathways.ts`, rendered as cards with the fit badge, signals-met count, a 2×2 fact
+grid, and an expandable requirement ledger with the official source and verification date.
+Only the single top-ranked route carries the gold border and "Best match" tag.
+
+**Lesser-known routes.** `LESSER_KNOWN_ROUTES` in `src/lib/pathway-extras.ts`, ported
+verbatim from the approved design reference. These carry no official source or verification
+date yet, unlike the routes in `pathways.ts`, and the section says so — add a source and
+`lastVerified` to each before treating any of it as researched guidance.
+
+**Data integrity.** Fit labels come from the real `evaluatePathways`, run client-side so
+the Match controls recompute live (`src/lib/profile.ts` is `server-only`, so the component
+imports the profile type only and takes values from the client-safe `pathways.ts`). Labels
+stay on Likely fit / Different route likely / Gap identified rather than the
+"You Qualify" wording in the older prompt, since Kolmari does not assert visa eligibility.
+Before the wizard is complete every route reports a gap; nothing is assumed.
