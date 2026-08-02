@@ -5,15 +5,15 @@ import { ArrowRight, Check, Sparkles } from 'lucide-react'
 import {
   PLAN_STAGES,
   READINESS_LABELS,
-  budgetEnteredCount,
-  budgetTotal,
   docCounts,
   docProgress,
   formatAmount,
   formatMonthYear,
   formatShortDate,
+  monthlyTotal,
   nextBestAction,
   readinessChecks,
+  upfrontTotal,
   type JourneyStage,
 } from '@/lib/plan-types'
 import { ProgressBar, type PlanCtx } from './shared'
@@ -24,11 +24,16 @@ export function OverviewTab({ ctx }: { ctx: PlanCtx }) {
   const completed = checks.filter(Boolean).length
   const readinessPct = Math.round((completed / checks.length) * 100)
   const firstUnmet = READINESS_LABELS[checks.findIndex((check) => !check)]
-  const action = nextBestAction(plan)
+  // Next best action prefers the oldest incomplete checklist task in the active
+  // move stage; otherwise falls back to the plan-wide next action.
+  const stageTask = plan.checklist.find((c) => !c.done && c.stage === plan.timeline_stage)
+  const action = stageTask
+    ? { title: stageTask.text, detail: `The next open task in your ${plan.timeline_stage} stage.`, dueDate: stageTask.due, tab: 'checklist' as const, caughtUp: false }
+    : nextBestAction(plan)
   const counts = docCounts(plan)
   const progress = docProgress(plan)
-  const total = budgetTotal(plan)
-  const enteredCats = budgetEnteredCount(plan)
+  const monthly = monthlyTotal(plan)
+  const upfront = upfrontTotal(plan)
   const canFlutter = Boolean(plan.saved_nextination && plan.selected_pathway)
   const pathway = plan.selected_pathway?.includes(' — ')
     ? plan.selected_pathway.split(' — ').slice(1).join(' — ')
@@ -117,17 +122,23 @@ export function OverviewTab({ ctx }: { ctx: PlanCtx }) {
         <section className="card-surface flex min-h-[230px] flex-col p-5 sm:p-6" aria-labelledby="budget-summary-heading">
           <h2 id="budget-summary-heading" className="text-xl font-bold text-navy">Budget</h2>
           <div className="mt-5 flex-1">
-            {total === null ? (
+            {upfront === null && monthly === null ? (
               <p className="text-sm text-muted">No budget entered yet.</p>
             ) : (
-              <>
-                <p className="text-xl font-bold text-navy">${formatAmount(total)} monthly</p>
-                <p className="mt-3 text-sm text-muted">{enteredCats} of 5 categories</p>
-              </>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">Upfront</p>
+                  <p className="mt-1 text-lg font-bold text-navy">{upfront === null ? '—' : `$${formatAmount(upfront)}`}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">Monthly</p>
+                  <p className="mt-1 text-lg font-bold text-navy">{monthly === null ? '—' : `$${formatAmount(monthly)}`}</p>
+                </div>
+              </div>
             )}
           </div>
           <button type="button" onClick={() => goToTab('budget')} className="mt-5 inline-flex min-h-9 w-fit items-center rounded-[var(--radius-btn)] border border-line-strong bg-white px-3.5 text-xs font-bold text-navy hover:bg-canvas">
-            {total === null ? 'Build move budget' : 'Edit budget'}
+            {upfront === null && monthly === null ? 'Build move budget' : 'Edit budget'}
           </button>
         </section>
       </div>
@@ -170,20 +181,25 @@ function MoveJourney({ ctx }: { ctx: PlanCtx }) {
             const done = index < current
             const active = index === current
             const value = (index + 1) as JourneyStage
+            // Stages advance one step at a time: you can revisit any reached
+            // stage or step to the next one, but not skip ahead out of sequence.
+            const unlocked = index <= current + 1
             return (
               <li key={stage} className="flex flex-1 flex-col items-center text-center last:flex-none">
                 <div className="flex w-full items-center">
                   <span className={`h-0.5 flex-1 bg-line ${index === 0 ? 'opacity-0' : ''}`} aria-hidden="true" />
                   <button
                     type="button"
+                    disabled={!unlocked}
                     onClick={() => ctx.update('journey_stage', value)}
                     aria-current={active ? 'step' : undefined}
-                    aria-label={`${stage}${active ? ' (current)' : ''}`}
+                    aria-label={`${stage}${active ? ' (current)' : ''}${unlocked ? '' : ' (locked)'}`}
                     className={[
                       'relative z-10 grid size-10 shrink-0 place-items-center rounded-full border-2 text-sm font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2',
                       done ? 'border-ok bg-ok text-white'
                         : active ? 'border-gold bg-gold text-navy'
-                        : 'border-line-strong bg-white text-muted',
+                        : unlocked ? 'border-line-strong bg-white text-muted hover:border-gold hover:text-navy'
+                        : 'border-line bg-canvas text-muted/60 cursor-not-allowed',
                     ].join(' ')}
                   >
                     {done ? <Check size={15} strokeWidth={3} aria-hidden="true" /> : value}
