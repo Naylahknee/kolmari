@@ -100,3 +100,37 @@ imports the profile type only and takes values from the client-safe `pathways.ts
 stay on Likely fit / Different route likely / Gap identified rather than the
 "You Qualify" wording in the older prompt, since Kolmari does not assert visa eligibility.
 Before the wizard is complete every route reports a gap; nothing is assumed.
+
+
+## Flutter Mode
+
+**What it is.** The execution phase. The plan is decided; fluttering is the doing —
+working requirements off the list, tracking the application, and preparing to land. The
+page says this in the header rather than assuming the user knows the term.
+
+**Free (`isPaid` false).** `src/components/kolmari/flutter-gate.tsx` — upgrade banner,
+"What the report covers" (the four report sections, structure shown openly), "Your quiz
+results" with the top match readable and the rest locked, and the Kolmari Pro panel listing
+what upgrading opens. Country names are free; the scoring behind them is not.
+
+**Pro.** `src/components/kolmari/flutter-mode.tsx`, organised around The Waiting Room:
+
+1. Header — what fluttering means, plus Share report / Edit timeline.
+2. Kolmari Readiness dial with Legal & visa and Financial buffer bars, beside the navy
+   Immediate priority card (deadline + Open My Plan).
+3. Application status (self-reported pills) beside Move readiness.
+4. Kolmari Protocol Checklist beside Greenbook Insights.
+5. "A moment for the wait" reflection.
+6. The Waiting Room accordions — Before you go, Documents, Finances, Housing,
+   Shipping & customs, Winding down at home, Arrival day.
+7. Saved Destinations.
+
+**Data integrity.** Readiness is `readinessChecks()` — the share of setup milestones the
+plan actually records. Legal & visa is approved/total documents; Financial buffer is
+entered/total budget lines; both read "Not started" when the plan holds nothing. The
+Immediate priority is `nextBestAction()`. Protocol items are the user's own checklist with
+their real state (Complete / In progress / Overdue) — never an eligibility claim. Greenbook
+uses the published insight for the saved destination and shows an empty state when none
+exists. Application status is self-reported and stored client-side; Kolmari never sets it.
+Waiting Room task completion persists through `PUT /api/profile` (`completed_tasks`), as
+before — `checklist.tsx` was folded into `flutter-mode.tsx`.
