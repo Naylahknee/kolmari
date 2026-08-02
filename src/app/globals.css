@@ -54,8 +54,8 @@
   /* ─── Typography ────────────────────────────────────── */
   --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
-  /* Serif display face for headline typography (Playfair Display). */
-  --font-display: var(--font-playfair), "Playfair Display", Georgia, "Times New Roman", serif;
+  /* Headlines use the sans UI face (no serif, per owner preference). */
+  --font-display: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
 
   /* ─── Shadows ───────────────────────────────────────── */
   /* Deeper, softer elevation matching the design's card treatment. */
