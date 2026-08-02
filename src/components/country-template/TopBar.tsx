@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { LogOut, Settings as SettingsIcon, ShieldCheck } from 'lucide-react'
 import { BRAND } from '@/config/brand'
@@ -34,6 +34,16 @@ const titleCase = (value: string) =>
 
 export function TopBar({ onToggleRail }: { onToggleRail: () => void }) {
   const pathname = usePathname()
+  const router = useRouter()
+
+  // Global search: routes to the Destinations browser with the query, which
+  // seeds its own search field from ?q.
+  const [query, setQuery] = useState('')
+  function onSearch(e: React.FormEvent) {
+    e.preventDefault()
+    const term = query.trim()
+    router.push(term ? `/destinations?q=${encodeURIComponent(term)}` : '/destinations')
+  }
 
   // Real account name for the profile pill avatar — never a placeholder name.
   const [displayName, setDisplayName] = useState<string | null>(null)
@@ -115,6 +125,19 @@ export function TopBar({ onToggleRail }: { onToggleRail: () => void }) {
           <span>{country ?? pageName}</span>
           {country && <span className="page-section">{section}</span>}
         </div>
+
+        {!country && (
+          <form className="tb-search" role="search" onSubmit={onSearch}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" width="16" height="16" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search destinations, pathways, and more"
+              aria-label="Search destinations, pathways, and more"
+            />
+          </form>
+        )}
 
         <div className="tb-right">
           {country && <UnitsControl />}
