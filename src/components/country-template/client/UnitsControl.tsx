@@ -22,17 +22,22 @@ export const Temp = ({ c, hi }: { c: number; hi?: number }) => <>{fmtTemp(c, use
 
 export function UnitsControl() {
   const { currency, temp, setCurrency, setTemp } = useUnits()
+  const measurementSystems: { label: string; value: TempUnit }[] = [
+    { label: 'US', value: 'F' },
+    { label: 'Metric', value: 'C' },
+  ]
+
   return (
-    <div className="units nu" role="group" aria-label="Display units">
-      <span className="ulabel">Units</span>
-      <div className="useg" role="group" aria-label="Currency">
-        {(['EUR', 'USD'] as Currency[]).map(c => (
-          <button key={c} aria-pressed={currency === c} onClick={() => setCurrency(c)}>{c}</button>
+    <div className="units view-control" role="group" aria-label="Display preferences">
+      <span className="view-label">View</span>
+      <div className="view-options" role="group" aria-label="Currency">
+        {(['USD', 'EUR'] as Currency[]).map(c => (
+          <button className="view-option" type="button" key={c} aria-pressed={currency === c} onClick={() => setCurrency(c)}>{c}</button>
         ))}
       </div>
-      <div className="useg" role="group" aria-label="Temperature">
-        {(['C', 'F'] as TempUnit[]).map(t => (
-          <button key={t} aria-pressed={temp === t} onClick={() => setTemp(t)}>&deg;{t}</button>
+      <div className="view-options" role="group" aria-label="Measurement system">
+        {measurementSystems.map(({ label, value }) => (
+          <button className="view-option" type="button" key={value} aria-pressed={temp === value} onClick={() => setTemp(value)}>{label}</button>
         ))}
       </div>
     </div>
