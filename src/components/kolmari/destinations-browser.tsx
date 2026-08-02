@@ -4,7 +4,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ChevronRight, Heart, Lock, Search, Star } from 'lucide-react'
+import { Bookmark, Grid2x2, Heart, List, Lock, Search } from 'lucide-react'
 
 export type DestRow = {
   slug: string
@@ -43,24 +43,40 @@ const TABS: { id: 'explore' | StatusKey; label: string }[] = [
   { id: 'visited', label: 'Visited' },
 ]
 
+// Qualitative fit headline derived from the real Match Score (never invented).
+function fitHeadline(match: number | null): string {
+  if (match === null) return 'Not yet scored'
+  if (match >= 55) return 'Strong regional fit'
+  if (match >= 45) return 'Good fit overall'
+  if (match >= 35) return 'Moderate alignment'
+  return 'Lower alignment'
+}
+
+const costLabel = (cost: string) => (cost === '$' ? 'Low' : cost === '$$' ? 'Moderate' : cost)
+
 export function DestinationsBrowser({ rows, profileComplete }: { rows: DestRow[]; profileComplete: boolean }) {
   const [tab, setTab] = useState<'explore' | StatusKey>('explore')
   const [query, setQuery] = useState('')
+  const [sort, setSort] = useState<'best' | 'name'>('best')
+  const [view, setView] = useState<'grid' | 'list'>('grid')
+
+  // Applied filters vs. the draft edited in the sidebar (committed via Apply).
   const [region, setRegion] = useState('')
-  const [cost, setCost] = useState('')
   const [visa, setVisa] = useState('')
+  const [cost, setCost] = useState('')
+  const [draftRegion, setDraftRegion] = useState('')
+  const [draftVisa, setDraftVisa] = useState('')
+  const [draftCost, setDraftCost] = useState('')
+
   const [saved, setSaved] = useState<Set<string>>(new Set())
   const [interested, setInterested] = useState<Set<string>>(new Set())
   const [visited, setVisited] = useState<Set<string>>(new Set())
 
   useEffect(() => {
-    // Load persisted status after mount — reading localStorage during render
-    // would cause an SSR/client hydration mismatch.
     /* eslint-disable react-hooks/set-state-in-effect */
     setSaved(loadSet(STORAGE.saved))
     setInterested(loadSet(STORAGE.interested))
     setVisited(loadSet(STORAGE.visited))
-    // Seed the search from ?q= (e.g. arriving from the top-bar global search).
     const q = new URLSearchParams(window.location.search).get('q')
     if (q) setQuery(q)
     /* eslint-enable react-hooks/set-state-in-effect */
@@ -88,7 +104,7 @@ export function DestinationsBrowser({ rows, profileComplete }: { rows: DestRow[]
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    return rows.filter((r) => {
+    const list = rows.filter((r) => {
       if (statusSet && !statusSet.has(r.slug)) return false
       if (region && r.region !== region) return false
       if (cost && r.cost !== cost) return false
@@ -96,16 +112,33 @@ export function DestinationsBrowser({ rows, profileComplete }: { rows: DestRow[]
       if (q && !`${r.name} ${r.city} ${r.region}`.toLowerCase().includes(q)) return false
       return true
     })
-  }, [rows, statusSet, region, cost, visa, query])
+    if (sort === 'name') list.sort((a, b) => a.name.localeCompare(b.name))
+    else list.sort((a, b) => (b.match ?? -1) - (a.match ?? -1))
+    return list
+  }, [rows, statusSet, region, cost, visa, query, sort])
+
+  function applyFilters() {
+    setRegion(draftRegion)
+    setVisa(draftVisa)
+    setCost(draftCost)
+  }
+  function clearFilters() {
+    setDraftRegion(''); setDraftVisa(''); setDraftCost('')
+    setRegion(''); setVisa(''); setCost('')
+  }
+
+  const header = (
+    <div>
+      <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Explore</p>
+      <h1 className="mt-1 text-2xl font-bold text-navy sm:text-3xl">Destinations</h1>
+      <p className="mt-1 text-sm text-muted">Every destination Kolmari covers. Save the ones you love and track your shortlist.</p>
+    </div>
+  )
 
   if (!profileComplete) {
     return (
       <div>
-        <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Explore</p>
-          <h1 className="mt-1 text-2xl font-bold text-navy sm:text-3xl">Destinations</h1>
-          <p className="mt-1 text-sm text-muted">Build a personalized shortlist from the destinations Kolmari covers.</p>
-        </div>
+        {header}
         <section className="card-surface mt-5 p-6 text-center sm:p-8" aria-labelledby="destinations-empty-heading">
           <div className="mx-auto grid size-11 place-items-center rounded-full bg-gold-soft text-gold-deep" aria-hidden="true">
             <Search size={20} />
@@ -122,20 +155,15 @@ export function DestinationsBrowser({ rows, profileComplete }: { rows: DestRow[]
 
   return (
     <div>
-      <div>
-        <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Explore</p>
-        <h1 className="mt-1 text-2xl font-bold text-navy sm:text-3xl">Destinations</h1>
-        <p className="mt-1 text-sm text-muted">Every destination Kolmari covers. Save the ones you love and track your shortlist.</p>
-      </div>
+      {header}
 
-      {/* Tabs */}
+      {/* Status tabs */}
       <div className="k-tabbar mt-5">
         <div className="k-tabs" role="tablist" aria-label="Destination lists">
           {TABS.map((t) => {
             const count = t.id === 'explore' ? rows.length : t.id === 'saved' ? saved.size : t.id === 'interested' ? interested.size : visited.size
-            const active = tab === t.id
             return (
-              <button key={t.id} type="button" role="tab" aria-selected={active} onClick={() => setTab(t.id)} className="k-tab">
+              <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)} className="k-tab">
                 {t.label} <span className="k-count">{count}</span>
               </button>
             )
@@ -143,117 +171,181 @@ export function DestinationsBrowser({ rows, profileComplete }: { rows: DestRow[]
         </div>
       </div>
 
-      {/* Filters — search full width, the three dropdowns side by side */}
-      <div className="mt-4 space-y-3">
-        <div className="relative">
-          <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />
-          <input className="field pl-9" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search destinations" aria-label="Search destinations" />
-        </div>
-        <div className="grid gap-3 sm:grid-cols-3">
-          <select className="field" value={region} onChange={(e) => setRegion(e.target.value)} aria-label="Filter by region">
-            <option value="">All regions</option>
-            {regions.map((r) => <option key={r}>{r}</option>)}
-          </select>
-          <select className="field" value={visa} onChange={(e) => setVisa(e.target.value)} aria-label="Filter by visa type">
-            <option value="">All visa types</option>
-            {visas.map((v) => <option key={v}>{v}</option>)}
-          </select>
-          <select className="field" value={cost} onChange={(e) => setCost(e.target.value)} aria-label="Filter by cost of living">
-            <option value="">Any cost</option>
-            {costs.map((c) => <option key={c} value={c}>{c === '$' ? '$ — lower' : '$$ — moderate'}</option>)}
-          </select>
-        </div>
-      </div>
+      <div className="mt-4 grid gap-5 lg:grid-cols-[248px_minmax(0,1fr)]">
+        {/* Filter sidebar */}
+        <aside className="card-surface h-fit p-5">
+          <p className="text-base font-bold text-navy">Filter destinations</p>
+          <div className="mt-4 space-y-4">
+            <FilterField label="Region">
+              <select className="field" value={draftRegion} onChange={(e) => setDraftRegion(e.target.value)} aria-label="Filter by region">
+                <option value="">All regions</option>
+                {regions.map((r) => <option key={r}>{r}</option>)}
+              </select>
+            </FilterField>
+            <FilterField label="Visa pathway">
+              <select className="field" value={draftVisa} onChange={(e) => setDraftVisa(e.target.value)} aria-label="Filter by visa pathway">
+                <option value="">All visa types</option>
+                {visas.map((v) => <option key={v}>{v}</option>)}
+              </select>
+            </FilterField>
+            <FilterField label="Cost of living">
+              <select className="field" value={draftCost} onChange={(e) => setDraftCost(e.target.value)} aria-label="Filter by cost of living">
+                <option value="">Any cost</option>
+                {costs.map((c) => <option key={c} value={c}>{c === '$' ? '$ — Low' : '$$ — Moderate'}</option>)}
+              </select>
+            </FilterField>
+            {/* Not yet tracked — shown for continuity, disabled rather than faked. */}
+            <FilterField label="Travel advisory">
+              <select className="field cursor-not-allowed opacity-50" disabled title="Coming soon — advisory data isn't tracked yet" aria-label="Filter by travel advisory (coming soon)">
+                <option>All advisory levels</option>
+              </select>
+            </FilterField>
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Programs</p>
+              <label className="mt-2 flex cursor-not-allowed items-center gap-2 text-sm text-muted opacity-50" title="Coming soon — program data isn't tracked yet">
+                <input type="checkbox" disabled className="size-4 rounded border-line-strong" /> Fulbright
+              </label>
+            </div>
+          </div>
+          <div className="mt-5 space-y-2">
+            <button type="button" onClick={clearFilters} className="w-full rounded-[var(--radius-btn)] border border-line px-3.5 py-2.5 text-sm font-bold text-navy hover:bg-canvas">Clear filters</button>
+            <button type="button" onClick={applyFilters} className="gold-button w-full">Apply filters</button>
+          </div>
+        </aside>
 
-      {/* List — country panels side by side (two columns on desktop) */}
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        {filtered.length === 0 ? (
-          <p className="p-8 text-center text-sm text-muted sm:col-span-2">
-            {tab === 'explore'
-              ? 'No destinations match your filters.'
-              : `No ${tab} destinations yet. Tap the ${tab === 'interested' ? 'star' : tab === 'visited' ? 'star' : 'heart'} on any destination to add it here.`}
-          </p>
-        ) : (
-          filtered.map((r) => (
-            <Row
-              key={r.slug}
-              row={r}
-              profileComplete={profileComplete}
-              saved={saved.has(r.slug)}
-              interested={interested.has(r.slug)}
-              onSave={() => toggle('saved', r.slug)}
-              onInterested={() => toggle('interested', r.slug)}
-            />
-          ))
-        )}
+        {/* Results */}
+        <div>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative min-w-0 flex-1">
+              <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />
+              <input className="field pl-9" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search destinations" aria-label="Search destinations" />
+            </div>
+            <span className="shrink-0 text-sm text-muted">{filtered.length} destination{filtered.length === 1 ? '' : 's'}</span>
+            <select className="field w-auto shrink-0" value={sort} onChange={(e) => setSort(e.target.value as 'best' | 'name')} aria-label="Sort destinations">
+              <option value="best">Sort: Best match</option>
+              <option value="name">Sort: Name (A–Z)</option>
+            </select>
+            <div className="flex shrink-0 overflow-hidden rounded-[var(--radius-btn)] border border-line" role="group" aria-label="View mode">
+              <button type="button" onClick={() => setView('grid')} aria-pressed={view === 'grid'} aria-label="Grid view" className={`grid size-10 place-items-center ${view === 'grid' ? 'bg-gold-soft text-navy' : 'bg-white text-muted hover:bg-canvas'}`}><Grid2x2 size={16} /></button>
+              <button type="button" onClick={() => setView('list')} aria-pressed={view === 'list'} aria-label="List view" className={`grid size-10 place-items-center border-l border-line ${view === 'list' ? 'bg-gold-soft text-navy' : 'bg-white text-muted hover:bg-canvas'}`}><List size={16} /></button>
+            </div>
+          </div>
+
+          {filtered.length === 0 ? (
+            <p className="mt-6 p-8 text-center text-sm text-muted">
+              {tab === 'explore' ? 'No destinations match your filters.' : `No ${tab} destinations yet. Tap Save or Interested on any destination to add it here.`}
+            </p>
+          ) : (
+            <div className={`mt-4 ${view === 'grid' ? 'grid gap-4 sm:grid-cols-2 xl:grid-cols-3' : 'space-y-3'}`}>
+              {filtered.map((r) => (
+                <Card
+                  key={r.slug}
+                  row={r}
+                  view={view}
+                  saved={saved.has(r.slug)}
+                  interested={interested.has(r.slug)}
+                  onSave={() => toggle('saved', r.slug)}
+                  onInterested={() => toggle('interested', r.slug)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
 }
 
-function Row({
-  row,
-  profileComplete,
-  saved,
-  interested,
-  onSave,
-  onInterested,
-}: {
-  row: DestRow
-  profileComplete: boolean
-  saved: boolean
-  interested: boolean
-  onSave: () => void
-  onInterested: () => void
-}) {
-  const fit = row.reason ?? (row.locked ? 'In your top matches — unlock the score with Plus' : `${row.region}`)
+function FilterField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <Link
-      href={`/nextinations/${row.slug}/v2/overview`}
-      className="flex items-center gap-3 rounded-card border border-line bg-white px-3 py-3 transition hover:border-gold/40 hover:bg-gold-soft/20 sm:px-4"
-    >
-      <img
-        src={`https://flagcdn.com/${row.code}.svg`}
-        alt=""
-        width={26}
-        height={20}
-        className="h-5 w-[26px] shrink-0 rounded-sm object-cover ring-1 ring-line"
-        loading="lazy"
-      />
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-bold text-navy">{row.name}</p>
-        <p className="truncate text-xs text-muted">{fit}</p>
-      </div>
-
-      <div className="hidden shrink-0 items-center sm:flex">
-        {row.match !== null ? (
-          <span className="rounded-pill bg-gold-soft px-2.5 py-1 text-xs font-bold text-gold-deep">{row.match}% match</span>
-        ) : row.locked ? (
-          <span className="inline-flex items-center gap-1 rounded-pill bg-canvas px-2.5 py-1 text-xs font-bold text-muted"><Lock size={11} /> Plus</span>
-        ) : profileComplete ? null : (
-          <span className="rounded-pill bg-canvas px-2.5 py-1 text-xs font-semibold text-muted">Take the quiz</span>
-        )}
-      </div>
-
-      <button
-        type="button"
-        aria-label={saved ? `Remove ${row.name} from saved` : `Save ${row.name}`}
-        aria-pressed={saved}
-        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onSave() }}
-        className="grid size-8 shrink-0 place-items-center rounded-full text-muted hover:bg-canvas hover:text-danger"
-      >
-        <Heart size={16} className={saved ? 'fill-danger text-danger' : ''} />
-      </button>
-      <button
-        type="button"
-        aria-label={interested ? `Remove ${row.name} from interested` : `Mark ${row.name} interested`}
-        aria-pressed={interested}
-        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onInterested() }}
-        className="grid size-8 shrink-0 place-items-center rounded-full text-muted hover:bg-canvas hover:text-gold-deep"
-      >
-        <Star size={16} className={interested ? 'fill-gold text-gold-deep' : ''} />
-      </button>
-      <ChevronRight size={16} className="shrink-0 text-muted" aria-hidden="true" />
-    </Link>
+    <div>
+      <p className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-muted">{label}</p>
+      {children}
+    </div>
   )
+}
+
+function Card({ row, view, saved, interested, onSave, onInterested }: {
+  row: DestRow; view: 'grid' | 'list'
+  saved: boolean; interested: boolean
+  onSave: () => void; onInterested: () => void
+}) {
+  const flag = `https://flagcdn.com/${row.code}.svg`
+  const badge = row.match !== null
+    ? <span className="rounded-pill bg-gold-soft px-2.5 py-1 text-xs font-bold text-gold-deep">{row.match}% match</span>
+    : row.locked
+      ? <span className="inline-flex items-center gap-1 rounded-pill bg-white/90 px-2.5 py-1 text-xs font-bold text-muted"><Lock size={11} /> Plus</span>
+      : null
+
+  const chips = (
+    <div className="flex flex-wrap gap-1.5">
+      {row.visaType && <Chip tone="warn">Visa: {row.visaType}</Chip>}
+      {row.cost && <Chip tone="info">Cost: {costLabel(row.cost)}</Chip>}
+    </div>
+  )
+
+  const actions = (
+    <div className="flex items-center gap-2">
+      <button type="button" onClick={onSave} aria-pressed={saved} className={`inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-[var(--radius-btn)] border px-3 text-xs font-bold transition ${saved ? 'border-gold bg-gold-soft text-navy' : 'border-line text-navy hover:bg-canvas'}`}>
+        <Bookmark size={14} className={saved ? 'fill-gold-deep text-gold-deep' : ''} /> Save
+      </button>
+      <button type="button" onClick={onInterested} aria-pressed={interested} className={`inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-[var(--radius-btn)] border px-3 text-xs font-bold transition ${interested ? 'border-danger/40 bg-danger/10 text-danger' : 'border-line text-navy hover:bg-canvas'}`}>
+        <Heart size={14} className={interested ? 'fill-danger text-danger' : ''} /> Interested
+      </button>
+      <Link href={`/nextinations/${row.slug}/v2/overview`} className="inline-flex min-h-9 flex-1 items-center justify-center rounded-[var(--radius-btn)] bg-navy px-3 text-xs font-bold text-white hover:bg-navy-deep">
+        Explore destination
+      </Link>
+    </div>
+  )
+
+  if (view === 'list') {
+    return (
+      <div className="card-surface flex flex-wrap items-center gap-4 p-4">
+        <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-[var(--radius-tile)] ring-1 ring-line">
+          <img src={flag} alt="" className="h-full w-full object-cover" loading="lazy" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <p className="truncate text-sm font-bold text-navy">{row.name}</p>
+            {badge}
+          </div>
+          <p className="truncate text-xs text-muted">{fitHeadline(row.match)}{row.reason ? ` · ${row.reason}` : ''}</p>
+        </div>
+        <div className="hidden sm:block">{chips}</div>
+        <Link href={`/nextinations/${row.slug}/v2/overview`} className="inline-flex min-h-9 shrink-0 items-center rounded-[var(--radius-btn)] bg-navy px-3.5 text-xs font-bold text-white hover:bg-navy-deep">Explore</Link>
+      </div>
+    )
+  }
+
+  return (
+    <div className="card-surface flex flex-col overflow-hidden">
+      <div className="relative flex h-28 items-center justify-center bg-gradient-to-br from-navy to-navy-deep">
+        <img src={flag} alt={`Flag of ${row.name}`} className="h-12 w-[64px] rounded-sm object-cover shadow-card ring-1 ring-white/30" loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none' }} />
+        {badge && <span className="absolute right-2.5 top-2.5">{badge}</span>}
+      </div>
+      <div className="flex flex-1 flex-col p-4">
+        <div className="flex items-center gap-2.5">
+          <span className="grid size-8 shrink-0 place-items-center overflow-hidden rounded-[8px] ring-1 ring-line">
+            <img src={flag} alt="" className="h-full w-full object-cover" loading="lazy" />
+          </span>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-bold text-navy">{row.name}</p>
+            <p className="truncate text-xs text-muted">{row.region}</p>
+          </div>
+        </div>
+        <p className="mt-3 text-sm font-semibold text-navy">{fitHeadline(row.match)}.</p>
+        {row.reason && <p className="mt-0.5 line-clamp-2 text-xs leading-5 text-muted">{row.reason}</p>}
+        <div className="mt-3">{chips}</div>
+        <div className="mt-4 flex-1" />
+        {actions}
+      </div>
+    </div>
+  )
+}
+
+function Chip({ tone, children }: { tone: 'warn' | 'info'; children: React.ReactNode }) {
+  const cls = tone === 'warn'
+    ? 'bg-warn-soft text-warn'
+    : 'bg-info-soft text-info'
+  return <span className={`inline-flex items-center gap-1 rounded-pill px-2 py-0.5 text-[11px] font-bold ${cls}`}>{children}</span>
 }
