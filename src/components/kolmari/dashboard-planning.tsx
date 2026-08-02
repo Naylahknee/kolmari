@@ -40,10 +40,8 @@ function deadlineTag(date: string): Tag {
   return 'Watch'
 }
 
-function planningItems(plan: NexitPlan | null, profileComplete: boolean): PlanningItem[] {
+function planningItems(plan: NexitPlan | null): PlanningItem[] {
   const items: PlanningItem[] = []
-  if (!profileComplete) items.push({ title: 'Complete your profile', due: 'No due date', tag: 'Blocker' })
-
   if (plan) {
     for (const deadline of upcomingDeadlines(plan)) {
       items.push({
@@ -52,20 +50,6 @@ function planningItems(plan: NexitPlan | null, profileComplete: boolean): Planni
         tag: deadlineTag(deadline.date),
       })
       if (items.length === 3) return items
-    }
-    const setup = [
-      !plan.saved_nextination ? 'Choose a destination' : null,
-      !plan.selected_pathway ? 'Select a pathway' : null,
-      !plan.target_move_date ? 'Set your target move date' : null,
-    ].filter((item): item is string => Boolean(item))
-    for (const title of setup) {
-      items.push({ title, due: 'No due date', tag: 'Watch' })
-      if (items.length === 3) break
-    }
-  } else {
-    for (const title of ['Choose a destination', 'Select a pathway']) {
-      items.push({ title, due: 'No due date', tag: 'Watch' })
-      if (items.length === 3) break
     }
   }
   return items.slice(0, 3)
@@ -76,7 +60,7 @@ export function DashboardPlanningColumn({ plan, profileComplete, dependents }: {
   profileComplete: boolean
   dependents: number | null
 }) {
-  const blockers = planningItems(plan, profileComplete)
+  const blockers = planningItems(plan)
   const documents = plan ? docCounts(plan) : null
   const budgetCategories = plan ? budgetEnteredCount(plan) : 0
   const schoolTask = plan?.checklist.find((item) => /school|education|childcare/i.test(item.text))
@@ -135,7 +119,7 @@ export function DashboardPlanningColumn({ plan, profileComplete, dependents }: {
               <span className={`shrink-0 text-[10px] font-bold uppercase ${TAG_STYLE[item.tag]}`}>{item.tag}</span>
             </div>
           )) : (
-            <p className="text-sm text-muted">No open deadlines or blockers.</p>
+            <p className="text-sm text-muted">No dated deadlines or blockers yet.</p>
           )}
         </div>
       </section>

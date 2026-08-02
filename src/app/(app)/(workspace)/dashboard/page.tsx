@@ -5,18 +5,16 @@ import { COUNTRIES } from '@/lib/countries'
 import {
   budgetEffective,
   getNexitPlan,
-  journeyStageLabel,
   nextBestAction,
   type BudgetLine,
 } from '@/lib/kolmari-plan'
 import { evaluatePathways } from '@/lib/pathways'
-import { getProfile, hasCompletedProfile, isPaid } from '@/lib/profile'
+import { getProfile, hasCompletedProfile } from '@/lib/profile'
 import { rankNextinations } from '@/lib/userProfile'
 import { BudgetDonut, BUDGET_COLORS, type BudgetSlice } from '@/components/kolmari/rings'
 import { DashboardDestinations, type DestinationPanel } from '@/components/kolmari/dashboard-destinations'
 import { DashboardPlanningColumn } from '@/components/kolmari/dashboard-planning'
 import { DashboardWelcome } from '@/components/kolmari/dashboard-onboarding'
-import { DestinationVisaPlanner, type PlannerDestination, type PlannerPathway } from '@/components/kolmari/destination-visa-planner'
 import { KolmariTracker } from '@/components/kolmari/kolmari-tracker'
 
 // Monthly recurring lines feed the dashboard cost-snapshot donut.
@@ -31,7 +29,6 @@ export default async function DashboardPage() {
   const user = await requireCurrentUser()
   const [profile, plan] = await Promise.all([getProfile(user.id), getNexitPlan(user.id)])
   const complete = hasCompletedProfile(profile)
-  const paid = isPaid(profile)
   const firstName = profile.display_name || user.email.split('@')[0]
   const evaluated = complete ? evaluatePathways(profile) : []
   const strong = evaluated.filter((item) => item.status === 'Strong Match')
@@ -52,26 +49,6 @@ export default async function DashboardPage() {
     ? rankedList.slice(0, 3).map((item) => ({ country: item.country, match: item.match.score }))
     : COUNTRIES.slice(0, 3).map((country) => ({ country, match: null }))
   const destinationsRanked = rankedList.length > 0
-
-  // Retain the existing Explorer-tier planner below the merged dashboard.
-  const pathwaysFor = (name: string): PlannerPathway[] =>
-    evaluated
-      .filter((pathway) => pathway.country === name)
-      .map((pathway) => ({ id: pathway.id, name: pathway.name, category: pathway.category, status: pathway.status }))
-  const plannerBase = rankedList.length > 0
-    ? rankedList.map((item) => ({ country: item.country, match: item.match.score as number | null }))
-    : COUNTRIES.map((country) => ({ country, match: null as number | null }))
-  const plannerDestinations: PlannerDestination[] = plannerBase.map(({ country, match }, index) => ({
-    slug: country.slug,
-    name: country.name,
-    code: country.code,
-    city: country.city,
-    region: country.region,
-    visaType: country.visaType,
-    match,
-    locked: index >= 3,
-    pathways: pathwaysFor(country.name),
-  }))
 
   const planHref = action && action.tab !== 'overview' ? `/my-plan?tab=${action.tab}` : '/my-plan'
   const pathwayValue = plan?.selected_pathway ?? (complete ? `${strong.length} strong signal${strong.length === 1 ? '' : 's'}` : '—')
@@ -121,9 +98,9 @@ export default async function DashboardPage() {
           />
           <StatCard
             icon={NotebookTabs}
-            label="Plan stage"
-            value={plan ? journeyStageLabel(plan.journey_stage) : 'Not started'}
-            detail={action?.title}
+            label="Next action"
+            value={action?.title ?? 'Start your plan'}
+            detail={action?.detail ?? 'Choose your destination, pathway, and target move date.'}
             href={planHref}
             action={action ? 'Take Action' : 'Open My Plan'}
           />
@@ -210,14 +187,6 @@ export default async function DashboardPage() {
           </Link>
         </section>
       </div>
-
-      {!paid && (
-        <DestinationVisaPlanner
-          destinations={plannerDestinations}
-          ranked={destinationsRanked}
-          profileComplete={complete}
-        />
-      )}
 
       <section className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-card)] border border-line bg-white px-5 py-4 shadow-tile" aria-label="Stay on track">
         <div className="flex items-center gap-3">
