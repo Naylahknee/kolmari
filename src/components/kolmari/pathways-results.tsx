@@ -35,7 +35,7 @@ function fitOrder(status: PathwayMatchStatus) {
 }
 
 function FitBadge({ status }: { status: PathwayMatchStatus }) {
-  return <span className={`shrink-0 rounded-pill px-2.5 py-1 text-[11px] font-bold ${FIT_TONES[status]}`}>{FIT_LABELS[status]}</span>
+  return <span className={`shrink-0 rounded-pill px-2 py-0.5 text-[10.5px] font-bold ${FIT_TONES[status]}`}>{FIT_LABELS[status]}</span>
 }
 
 // ─── Page ───────────────────────────────────────────────────────────────
@@ -93,12 +93,12 @@ export function PathwaysResults({ profile, savedDestination, selectedPathway, do
   return (
     <div className="space-y-4">
       {/* 1 — Header */}
-      <header className="overflow-hidden rounded-[var(--radius-card)] bg-navy-deep p-7 text-white sm:p-10">
+      <header className="overflow-hidden rounded-[var(--radius-card)] bg-navy-deep px-6 py-6 text-white sm:px-7">
         <p className="text-[10.5px] font-bold uppercase tracking-[0.13em] text-gold">Kolmari Pathways</p>
-        <h1 className="mt-3 max-w-[18ch] text-3xl font-bold leading-tight tracking-[-0.02em] sm:text-[40px]">
+        <h1 className="mt-1.5 max-w-[34ch] text-[26px] font-bold leading-tight tracking-[-0.02em]">
           Research the routes that fit your facts.
         </h1>
-        <p className="mt-3 max-w-[62ch] text-sm leading-6 text-white/70">
+        <p className="mt-1.5 max-w-[68ch] text-[13.5px] leading-[1.62] text-white/70">
           Your Kolmari Profile supplies the inputs. This page organizes official Pathway research. It does not
           determine your eligibility or guarantee any outcome.
         </p>
@@ -187,7 +187,7 @@ export function PathwaysResults({ profile, savedDestination, selectedPathway, do
                 <p className="text-[10px] font-bold uppercase tracking-[0.11em] text-muted-soft">{pathway.category}</p>
                 <FitBadge status={pathway.status} />
               </div>
-              <h3 className="mt-2 text-[16.5px] font-bold tracking-[-0.01em] text-navy">{pathway.name}</h3>
+              <h3 className="mt-1.5 text-[15px] font-bold tracking-[-0.01em] text-navy">{pathway.name}</h3>
               <p className="text-[12.5px] text-muted-soft">{pathway.country}</p>
               <p className="mt-2 text-[12.8px] leading-[1.6] text-muted">{pathway.incomeThreshold}</p>
               <ul className="mt-3 space-y-1.5 border-t border-[#f0f3f7] pt-3">
@@ -220,7 +220,7 @@ export function PathwaysResults({ profile, savedDestination, selectedPathway, do
         <div className="mt-5 grid items-end gap-x-6 gap-y-5 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]">
           <div>
             <label htmlFor="pw-income" className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted-soft">Monthly income</label>
-            <p className="mt-1 text-[22px] font-extrabold leading-none text-navy">
+            <p className="mt-1 text-[20px] font-extrabold leading-none text-navy">
               {income === null ? 'Not set' : `$${income >= 1000 ? `${(income / 1000).toFixed(1)}k` : income}`}
               <span className="ml-1.5 text-[11px] font-semibold text-muted-soft">per month</span>
             </p>
@@ -234,7 +234,7 @@ export function PathwaysResults({ profile, savedDestination, selectedPathway, do
 
           <div>
             <label htmlFor="pw-savings" className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted-soft">Savings available</label>
-            <p className="mt-1 text-[22px] font-extrabold leading-none text-navy">
+            <p className="mt-1 text-[20px] font-extrabold leading-none text-navy">
               {savings === null ? 'Not set' : `$${(savings / 1000).toFixed(0)}k`}
             </p>
             <input
@@ -277,7 +277,7 @@ export function PathwaysResults({ profile, savedDestination, selectedPathway, do
       {/* 6 — All routes */}
       <section id="pw-routes" className="scroll-mt-4" aria-labelledby="pw-routes-heading">
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          <h2 id="pw-routes-heading" className="text-[17px] font-bold tracking-[-0.01em] text-navy">Explore all Pathways</h2>
+          <h2 id="pw-routes-heading" className="text-[16px] font-bold tracking-[-0.01em] text-navy">Explore all Pathways</h2>
           <span className="text-[11.5px] text-muted-soft">{evaluated.length} researched routes</span>
         </div>
 
@@ -292,7 +292,7 @@ export function PathwaysResults({ profile, savedDestination, selectedPathway, do
                   aria-pressed={active}
                   onClick={() => setCategory(item)}
                   className={[
-                    'shrink-0 rounded-pill border px-3.5 py-2 text-xs font-bold transition-colors',
+                    'shrink-0 rounded-pill border px-3 py-1.5 text-[12px] font-semibold transition-colors',
                     active ? 'border-navy bg-navy text-white' : 'border-line bg-white text-muted hover:border-navy/30 hover:text-navy',
                   ].join(' ')}
                 >
@@ -316,7 +316,7 @@ export function PathwaysResults({ profile, savedDestination, selectedPathway, do
       {/* 7 — Lesser-known routes */}
       <section id="pw-lesser" className="scroll-mt-4" aria-labelledby="pw-lesser-heading">
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          <h2 id="pw-lesser-heading" className="text-[17px] font-bold tracking-[-0.01em] text-navy">Lesser-known routes most people miss</h2>
+          <h2 id="pw-lesser-heading" className="text-[16px] font-bold tracking-[-0.01em] text-navy">Lesser-known routes most people miss</h2>
           <span className="text-[11.5px] text-muted-soft">Often faster or cheaper than the headline visa</span>
         </div>
         <div className="mt-3 grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(300px,1fr))]">
@@ -356,20 +356,20 @@ export function PathwaysResults({ profile, savedDestination, selectedPathway, do
 
 function Stepper({ label, value, min, onChange }: { label: string; value: number; min: number; onChange: (v: number) => void }) {
   return (
-    <div className="flex items-center gap-2 rounded-[var(--radius-field)] border border-line bg-white px-2.5 py-1.5">
-      <span className="text-[12px] font-semibold text-muted">{label}</span>
+    <div className="flex items-center gap-1.5 rounded-[var(--radius-field)] border border-line bg-white px-2 py-1">
+      <span className="text-[11.5px] font-semibold text-muted">{label}</span>
       <button
         type="button" aria-label={`Decrease ${label}`}
         onClick={() => onChange(Math.max(min, value - 1))}
-        className="grid size-6 place-items-center rounded-[6px] border border-line text-muted hover:bg-canvas"
+        className="grid size-5 place-items-center rounded-[5px] border border-line text-muted hover:bg-canvas"
       >
         <Minus size={12} aria-hidden="true" />
       </button>
-      <span className="min-w-4 text-center text-[13px] font-bold text-navy">{value}</span>
+      <span className="min-w-3 text-center text-[12.5px] font-bold text-navy">{value}</span>
       <button
         type="button" aria-label={`Increase ${label}`}
         onClick={() => onChange(Math.min(20, value + 1))}
-        className="grid size-6 place-items-center rounded-[6px] border border-line text-muted hover:bg-canvas"
+        className="grid size-5 place-items-center rounded-[5px] border border-line text-muted hover:bg-canvas"
       >
         <Plus size={12} aria-hidden="true" />
       </button>
@@ -388,13 +388,13 @@ function RouteCard({ pathway, best }: { pathway: PathwayEvaluation; best: boolea
 
   return (
     <article
-      className="flex flex-col rounded-[var(--radius-card)] bg-white px-[18px] pb-[18px] pt-4 shadow-tile"
+      className="flex flex-col rounded-[var(--radius-card)] bg-white px-4 pb-4 pt-3.5 shadow-tile"
       style={{ border: `1px solid ${best ? 'var(--color-gold)' : 'var(--color-line)'}` }}
     >
       <div className="flex items-start gap-3">
         <div className="min-w-0 flex-1">
           <p className="text-[10px] font-bold uppercase tracking-[0.11em] text-muted-soft">{pathway.country}</p>
-          <h3 className="mt-0.5 text-[16.5px] font-bold tracking-[-0.01em] text-navy">{pathway.name}</h3>
+          <h3 className="mt-0.5 text-[15.5px] font-bold tracking-[-0.01em] text-navy">{pathway.name}</h3>
         </div>
         {best && <span className="shrink-0 rounded-pill bg-gold-soft px-2.5 py-[3px] text-[10px] font-bold text-[#7a5c05]">Best match</span>}
       </div>
