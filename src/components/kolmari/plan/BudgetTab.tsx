@@ -1,25 +1,17 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
-import { BarChart3 } from 'lucide-react'
+import { X } from 'lucide-react'
 import {
-  applyBudgetBenchmark,
-  benchmarkCategoryTotal,
-  getBudgetBenchmark,
-  type BudgetBenchmark,
-} from '@/lib/budget-benchmarks'
-import { budgetEffective, formatAmount, formatMonthYear, type BudgetLine, type BudgetStage } from '@/lib/plan-types'
-import { BudgetBenchmarkDialog } from '../budget-benchmark-dialog'
+  budgetCustomizedCount, budgetEffective, formatAmount, formatMonthYear,
+  monthlyTotal, upfrontTotal, type BudgetLine,
+} from '@/lib/plan-types'
+import { baselineGdp, baselineSource } from '@/lib/budget-baselines'
 import { SaveChip, type PlanCtx } from './shared'
 
-function stageTotal(lines: BudgetLine[], stage: BudgetStage): number | null {
-  const values = lines
-    .filter((line) => line.chronologicalStage === stage)
-    .map(budgetEffective)
-    .filter((value): value is number => value !== null)
-  return values.length ? values.reduce((sum, value) => sum + value, 0) : null
-}
+// A custom entry this far below the baseline trips the reality-check warning.
+const VARIANCE_THRESHOLD = 0.5
 
 export function BudgetTab({ ctx }: { ctx: PlanCtx }) {
   const { plan, update, saveStatus, retry, monthlyIncome } = ctx
@@ -29,11 +21,7 @@ export function BudgetTab({ ctx }: { ctx: PlanCtx }) {
   const upfront = stageTotal(calculatedBudget, 'ONE_TIME')
   const customized = plan.budget.filter((line) => line.isCustom).length
   const eyebrow = [plan.saved_nextination, plan.household_members ? `Household of ${plan.household_members}` : null].filter(Boolean).join(' · ')
-  const [activeCategory, setActiveCategory] = useState<string | null>(null)
-  const oneTime = calculatedBudget.filter((line) => line.chronologicalStage === 'ONE_TIME')
-  const recurring = calculatedBudget.filter((line) => line.chronologicalStage === 'MONTHLY_RECURRING')
-  const verdict = getVerdict(monthlyIncome, monthly)
-  const remaining = monthlyIncome === null || monthly === null ? null : monthlyIncome - monthly
+  const [benchmarkLine, setBenchmarkLine] = useState<BudgetLine | null>(null)
 
   function setOverride(id: string, raw: string) {
     const parsed = raw === '' ? null : Math.max(0, Math.min(100_000_000, Math.round(Number(raw))))
@@ -50,18 +38,16 @@ export function BudgetTab({ ctx }: { ctx: PlanCtx }) {
     } : line))
   }
 
-  function saveDetails(category: string, details: Record<string, number>) {
-    const total = Object.values(details).reduce((sum, value) => sum + value, 0)
-    const benchmarkLine = benchmark?.categories.find((item) => item.category === category)
-    update('budget', plan.budget.map((line) => line.category === category ? {
-      ...line,
-      systemBaseline: benchmarkLine ? benchmarkCategoryTotal(benchmarkLine) : line.systemBaseline,
-      systemBaselineKey: benchmark?.key ?? line.systemBaselineKey,
-      userOverride: total,
-      isCustom: true,
-      detailOverrides: details,
-    } : line))
-  }
+  const oneTime = plan.budget.filter((l) => l.chronologicalStage === 'ONE_TIME')
+  const recurring = plan.budget.filter((l) => l.chronologicalStage === 'MONTHLY_RECURRING')
+  const gdp = baselineGdp(plan.saved_nextination)
+
+  // Reality-check variance: a custom entry >=50% below its baseline is flagged.
+  // Baselines are empty until cost data is added, so this stays inert for now.
+  const flagged = plan.budget.filter((l) => (
+    l.systemBaseline !== null && l.userOverride !== null && l.systemBaseline > 0
+    && (l.systemBaseline - l.userOverride) / l.systemBaseline >= VARIANCE_THRESHOLD
+  ))
 
   return (
     <div className="space-y-6">
@@ -129,59 +115,53 @@ export function BudgetTab({ ctx }: { ctx: PlanCtx }) {
               <ContextRow label="Household" value={plan.household_members ? `${plan.household_members} people` : null} />
               <ContextRow label="Target move" value={formatMonthYear(plan.target_move_date) || null} />
             </dl>
-          </section>
-
-          <section className="card-surface p-5">
-            <p className="text-base font-bold text-navy">Assumptions log</p>
-            {benchmark ? (
-              <>
-                <p className="mt-1 text-xs text-muted">{benchmark.sourceLabel} · Reviewed {benchmark.lastReviewed}</p>
-                <ul className="mt-3 space-y-2 text-xs leading-5 text-muted">
-                  {benchmark.assumptions.map((assumption) => <li key={assumption}>• {assumption}</li>)}
-                </ul>
-              </>
-            ) : (
-              <p className="mt-2 text-sm leading-6 text-muted">No system assumptions are being applied. Totals come from your entries.</p>
+            {gdp && (
+              <div className="mt-3 border-t border-line pt-3">
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="text-xs font-semibold text-muted">GDP per capita (PPP)</p>
+                  <p className="text-sm font-bold text-navy">${formatAmount(gdp.value)}</p>
+                </div>
+                <p className="mt-1 text-[10px] leading-4 text-muted">{gdp.source}</p>
+              </div>
             )}
           </section>
 
-          <section className="rounded-[var(--radius-card)] border border-teal/25 bg-teal-soft p-5">
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-teal-deep">Reality check</p>
-            <p className="mt-3 text-sm font-semibold text-navy">Compare this estimate with local housing and healthcare research before deciding.</p>
-            <Link href="/greenbook" className="mt-3 inline-flex min-h-9 items-center rounded-[var(--radius-btn)] border border-teal/40 bg-white px-3.5 text-xs font-bold text-teal-deep hover:bg-teal-soft">Review Greenbook costs</Link>
-          </section>
+          {flagged.length > 0 ? (
+            <section className="rounded-[var(--radius-card)] border border-warn/40 bg-warn-soft p-5">
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-warn">Reality check</p>
+              <p className="mt-3 text-sm font-semibold text-navy">These estimates are well below typical local costs — double-check them:</p>
+              <ul className="mt-2 list-disc pl-5 text-sm text-navy">
+                {flagged.map((l) => <li key={l.id}>{l.label}</li>)}
+              </ul>
+            </section>
+          ) : (
+            <section className="rounded-[var(--radius-card)] border border-teal/25 bg-teal-soft p-5">
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-teal-deep">Reality check</p>
+              <p className="mt-3 text-sm font-semibold text-navy">Compare this estimate with local housing and healthcare research before deciding.</p>
+              <Link href="/greenbook" className="mt-3 inline-flex min-h-9 items-center rounded-[var(--radius-btn)] border border-teal/40 bg-white px-3.5 text-xs font-bold text-teal-deep hover:bg-teal-soft">Review Greenbook costs</Link>
+            </section>
+          )}
         </aside>
       </div>
 
-      {benchmark && activeCategory && (
-        <BudgetBenchmarkDialog
-          benchmark={benchmark}
-          lines={calculatedBudget}
-          initialCategory={activeCategory}
-          onClose={() => setActiveCategory(null)}
-          onSave={saveDetails}
+      {benchmarkLine && (
+        <BenchmarkModal
+          line={benchmarkLine}
+          destination={plan.saved_nextination}
+          source={baselineSource(plan.saved_nextination, benchmarkLine.category)}
+          onClose={() => setBenchmarkLine(null)}
         />
       )}
     </div>
   )
 }
 
-function BudgetGroup({
-  title,
-  hint,
-  lines,
-  benchmark,
-  onEdit,
-  onOpenBenchmark,
-}: {
-  title: string
-  hint: string
-  lines: BudgetLine[]
-  benchmark: BudgetBenchmark | null
+function BudgetGroup({ title, hint, lines, onEdit, onBenchmarks }: {
+  title: string; hint: string; lines: BudgetLine[]
   onEdit: (id: string, raw: string) => void
-  onOpenBenchmark: (category: string) => void
+  onBenchmarks: (line: BudgetLine) => void
 }) {
-  const total = lines.map(budgetEffective).filter((value): value is number => value !== null).reduce((sum, value) => sum + value, 0)
+  const total = lines.map(budgetEffective).filter((v): v is number => v !== null).reduce((a, b) => a + b, 0)
   return (
     <section className="card-surface p-5" aria-label={title}>
       <div className="flex items-start justify-between gap-3">
@@ -192,46 +172,68 @@ function BudgetGroup({
         <span className="shrink-0 text-sm font-bold text-navy">${formatAmount(total)}</span>
       </div>
       <div className="mt-4 divide-y divide-line">
-        {lines.map((line) => {
-          const hasBenchmark = benchmark?.categories.some((category) => category.category === line.category)
-          return (
-            <div key={line.id} className="grid gap-3 py-4 sm:grid-cols-[minmax(0,1fr)_150px] sm:items-center">
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-sm font-bold text-navy">{line.label}</p>
-                  {line.isCustom && <span className="rounded-full bg-gold-soft px-2 py-0.5 text-[10px] font-bold text-gold-deep">Custom</span>}
-                </div>
-                <p className="mt-1 text-xs text-muted">
-                  {line.isCustom ? 'Using your planning value.' : line.systemBaseline !== null ? 'Using the local planning baseline.' : 'Enter your own researched amount.'}
-                </p>
-                {hasBenchmark ? (
-                  <button type="button" onClick={() => onOpenBenchmark(line.category)} className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-gold-deep hover:underline">
-                    <BarChart3 size={14} aria-hidden="true" /> View local benchmarks
-                  </button>
-                ) : (
-                  <span className="mt-2 inline-flex text-xs font-semibold text-muted">Local benchmark unavailable</span>
-                )}
-              </div>
-              <span className="relative block">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-muted" aria-hidden="true">$</span>
-                <input
-                  className={`field h-11 w-full pl-7 text-right font-semibold placeholder:italic ${line.isCustom ? '!border-gold !bg-gold-soft/30' : 'placeholder:text-muted'}`}
-                  type="number"
-                  min="0"
-                  max="100000000"
-                  inputMode="decimal"
-                  value={line.userOverride ?? ''}
-                  onChange={(event) => onEdit(line.id, event.target.value)}
-                  aria-label={`${line.label} cost in USD`}
-                  placeholder={line.systemBaseline !== null ? String(line.systemBaseline) : 'Enter amount'}
-                />
-              </span>
+        {lines.map((line) => (
+          <div key={line.id} className="flex items-center justify-between gap-4 py-3.5">
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-navy">{line.label}{line.isCustom && <span className="ml-2 rounded-full bg-gold-soft px-1.5 py-0.5 text-[10px] font-bold text-gold-deep">Custom</span>}</p>
+              <button type="button" onClick={() => onBenchmarks(line)} className="mt-0.5 text-[11px] font-semibold text-gold-deep hover:underline">View local benchmarks</button>
             </div>
-          )
-        })}
+            <div className="relative shrink-0">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-muted" aria-hidden="true">$</span>
+              <input
+                className={`field h-11 w-32 pl-7 text-right ${line.isCustom ? 'font-bold text-navy' : 'font-semibold italic text-muted'}`}
+                type="number"
+                min="0"
+                inputMode="numeric"
+                value={line.userOverride ?? ''}
+                onChange={(e) => onEdit(line.id, e.target.value)}
+                aria-label={`${line.label} cost in USD`}
+                placeholder={line.systemBaseline !== null ? String(line.systemBaseline) : '0'}
+              />
+            </div>
+          </div>
+        ))}
         {lines.length === 0 && <p className="py-4 text-sm text-muted">No categories in this group.</p>}
       </div>
     </section>
+  )
+}
+
+function BenchmarkModal({ line, destination, source, onClose }: { line: BudgetLine; destination: string | null; source: string | null; onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  const hasBaseline = line.systemBaseline !== null
+
+  return (
+    <div className="fixed inset-0 z-[120] grid place-items-center bg-navy/40 p-4" role="dialog" aria-modal="true" aria-label={`${line.label} benchmarks`} onClick={onClose}>
+      <div className="card-surface w-full max-w-md p-5" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-bold text-navy">{line.label} · local benchmark</h2>
+          <button type="button" onClick={onClose} aria-label="Close" className="grid size-8 place-items-center rounded-full text-muted hover:bg-canvas hover:text-navy"><X size={16} /></button>
+        </div>
+
+        {hasBaseline ? (
+          <>
+            <p className="mt-4 text-3xl font-bold text-navy">${formatAmount(line.systemBaseline as number)}<span className="ml-1 text-sm font-semibold text-muted">{line.chronologicalStage === 'ONE_TIME' ? 'one-time' : '/ month'}</span></p>
+            <p className="mt-1 text-xs text-muted">Typical baseline{destination ? ` for ${destination}` : ''} at your selected tier. Adjust the field to your own figure.</p>
+            {source && <p className="mt-3 rounded-[var(--radius-field)] bg-canvas p-3 text-[11px] leading-5 text-muted"><span className="font-bold text-navy">Source: </span>{source}</p>}
+          </>
+        ) : (
+          <p className="mt-4 text-sm text-muted">
+            A sourced benchmark{destination ? ` for ${destination}` : ''} isn&rsquo;t available for this category yet. Research real figures and enter your own estimate.
+          </p>
+        )}
+
+        <div className="mt-4 grid gap-2">
+          <Link href="/cost-calculator" className="rounded-[var(--radius-btn)] border border-line-strong bg-white px-3.5 py-2.5 text-center text-xs font-bold text-navy hover:bg-canvas">Open Cost Calculator</Link>
+          <Link href="/greenbook" className="rounded-[var(--radius-btn)] border border-line-strong bg-white px-3.5 py-2.5 text-center text-xs font-bold text-navy hover:bg-canvas">Research in Greenbook</Link>
+        </div>
+      </div>
+    </div>
   )
 }
 

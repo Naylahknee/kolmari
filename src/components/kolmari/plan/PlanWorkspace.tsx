@@ -1,10 +1,10 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Pencil, X } from 'lucide-react'
-import { documentStep, formatMonthYear, journeyStageLabel, type NexitPlan } from '@/lib/plan-types'
-import { applyBudgetBenchmark, getBudgetBenchmark } from '@/lib/budget-benchmarks'
-import { useLocalStorageWorkspace } from '@/hooks/useLocalStorageWorkspace'
+import { Download, Pencil, Printer, X } from 'lucide-react'
+import { LIFESTYLE_TIERS, budgetEffective, documentStep, formatMonthYear, journeyStageLabel, type LifestyleTier, type NexitPlan } from '@/lib/plan-types'
+import { applyBaselines, baselinesDiffer } from '@/lib/budget-baselines'
+import { useLocalStorageState, useLocalStorageWorkspace } from '@/hooks/useLocalStorageWorkspace'
 import { PLAN_TABS, SaveChip, type PlanCtx, type SaveStatus, type TabId } from './shared'
 import { OverviewTab } from './OverviewTab'
 import { ChecklistTab } from './ChecklistTab'
@@ -89,7 +89,36 @@ function Select({ label, value, options, placeholder, onChange }: {
   )
 }
 
-function PlanDetailsDialog({ ctx, onClose }: { ctx: PlanCtx; onClose: () => void }) {
+function csvCell(value: string): string {
+  return `"${value.replace(/"/g, '""')}"`
+}
+// Export the live plan to a CSV the browser downloads (module scope so
+// `document` is the global, not the shadowing documentStep() variable below).
+function exportPlanCsv(plan: NexitPlan) {
+  const rows: string[][] = [['Section', 'Item', 'Detail']]
+  rows.push(['Plan', 'Destination', plan.saved_nextination ?? ''])
+  rows.push(['Plan', 'City', plan.destination_city ?? ''])
+  rows.push(['Plan', 'Pathway', plan.selected_pathway ?? ''])
+  rows.push(['Plan', 'Target move', plan.target_move_date ?? ''])
+  rows.push(['Plan', 'Household', plan.household_members?.toString() ?? ''])
+  rows.push(['Plan', 'Move stage', plan.timeline_stage])
+  for (const c of plan.checklist) rows.push(['Checklist', c.text, [c.done ? 'Done' : 'Open', c.stage, c.due ? `due ${c.due}` : ''].filter(Boolean).join(' · ')])
+  for (const d of plan.documents) rows.push(['Document', d.name, [d.status, d.expirationDate ? `expires ${d.expirationDate}` : ''].filter(Boolean).join(' · ')])
+  for (const b of plan.budget) {
+    const v = budgetEffective(b)
+    if (v !== null) rows.push(['Budget', b.label, `${b.chronologicalStage === 'ONE_TIME' ? 'one-time' : 'monthly'} · $${v}`])
+  }
+  const csv = rows.map((r) => r.map(csvCell).join(',')).join('\n')
+  const blob = new Blob([csv], { type: 'text/csv' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `Expat_Relocation_Report_${(plan.destination_city || plan.saved_nextination || 'Plan').replace(/[^a-z0-9]+/gi, '_')}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+function PlanDetailsDialog({ ctx, tier, setTier, onClose }: { ctx: PlanCtx; tier: LifestyleTier; setTier: (t: LifestyleTier) => void; onClose: () => void }) {
   const { plan, update, nextinations, pathways } = ctx
   const firstRef = useRef<HTMLSelectElement>(null)
 
@@ -117,6 +146,10 @@ function PlanDetailsDialog({ ctx, onClose }: { ctx: PlanCtx; onClose: () => void
               {nextinations.map((item) => <option key={item}>{item}</option>)}
             </select>
           </label>
+          <label className="block text-xs font-semibold text-navy">
+            City
+            <input className="field mt-2" value={plan.destination_city ?? ''} onChange={(event) => update('destination_city', event.target.value || null)} placeholder="e.g. Lisbon" />
+          </label>
           <Select label="Pathway" value={plan.selected_pathway} options={pathways} placeholder="Not selected" onChange={(value) => update('selected_pathway', value)} />
           <label className="block text-xs font-semibold text-navy">
             Target move date
@@ -125,6 +158,12 @@ function PlanDetailsDialog({ ctx, onClose }: { ctx: PlanCtx; onClose: () => void
           <label className="block text-xs font-semibold text-navy">
             Household members
             <input className="field mt-2" type="number" min="1" max="20" value={plan.household_members ?? ''} onChange={(event) => update('household_members', event.target.value ? Math.max(1, Math.min(20, Number(event.target.value))) : null)} />
+          </label>
+          <label className="block text-xs font-semibold text-navy">
+            Lifestyle tier
+            <select className="field mt-2" value={tier} onChange={(event) => setTier(event.target.value as LifestyleTier)}>
+              {LIFESTYLE_TIERS.map((t) => <option key={t}>{t}</option>)}
+            </select>
           </label>
         </div>
         <div className="mt-5 flex items-center justify-between">
@@ -157,6 +196,17 @@ export function PlanWorkspace({ initial, nextinations, pathways, profileHousehol
   const { setCountry, setCity } = useLocalStorageWorkspace()
   useEffect(() => { setCountry(plan.saved_nextination) }, [plan.saved_nextination, setCountry])
   useEffect(() => { setCity(plan.destination_city) }, [plan.destination_city, setCity])
+  // Lifestyle tier preference (drives baseline arrays once cost data exists).
+  const [tier, setTier] = useLocalStorageState<LifestyleTier>('lifestyle_tier', 'Standard')
+
+  // Keep each budget line's systemBaseline in sync with the destination + tier
+  // from the sourced baselines table. Converges (differ→false after applying)
+  // and no-ops for destinations without baseline data.
+  useEffect(() => {
+    if (baselinesDiffer(plan.budget, plan.saved_nextination, tier)) {
+      update('budget', applyBaselines(plan.budget, plan.saved_nextination, tier))
+    }
+  }, [plan.budget, plan.saved_nextination, tier, update])
 
   const [tab, setTab] = useState<TabId>(initialTab)
   const [detailsOpen, setDetailsOpen] = useState(false)
@@ -238,6 +288,14 @@ export function PlanWorkspace({ initial, nextinations, pathways, profileHousehol
             <button type="button" onClick={() => setDetailsOpen(true)} className="gold-button text-sm">
               <Pencil size={14} aria-hidden="true" /> Edit plan details
             </button>
+            <div className="no-print flex gap-2">
+              <button type="button" onClick={() => exportPlanCsv(plan)} className="inline-flex min-h-9 items-center gap-1.5 rounded-[var(--radius-btn)] border border-white/25 bg-white/10 px-3 text-xs font-bold text-white hover:bg-white/20">
+                <Download size={13} aria-hidden="true" /> CSV
+              </button>
+              <button type="button" onClick={() => window.print()} className="inline-flex min-h-9 items-center gap-1.5 rounded-[var(--radius-btn)] border border-white/25 bg-white/10 px-3 text-xs font-bold text-white hover:bg-white/20">
+                <Printer size={13} aria-hidden="true" /> Print
+              </button>
+            </div>
             <SaveChip status={saveStatus} onRetry={retry} className="!bg-white/10 !text-white/75" />
           </div>
         </div>
@@ -282,7 +340,7 @@ export function PlanWorkspace({ initial, nextinations, pathways, profileHousehol
         {tab === 'notes' && <NotesTab ctx={ctx} />}
       </div>
 
-      {detailsOpen && <PlanDetailsDialog ctx={ctx} onClose={() => setDetailsOpen(false)} />}
+      {detailsOpen && <PlanDetailsDialog ctx={ctx} tier={tier} setTier={setTier} onClose={() => setDetailsOpen(false)} />}
     </div>
   )
 }

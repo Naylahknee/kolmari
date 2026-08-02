@@ -296,3 +296,22 @@ aside[aria-label="Workspace navigation"] > div::-webkit-scrollbar,
   html { scroll-behavior: auto; }
   *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
 }
+
+/* Print / PDF export: strip app chrome and interactive controls, flatten fills,
+   and let content flow full-width onto paper. */
+@media print {
+  .topbar, .rail, .rail-backdrop, .announce, nav, select, button, .no-print { display: none !important; }
+  body, .card-surface, .shell, .main, .main.workspace-main {
+    background: #fff !important;
+    color: #000 !important;
+    box-shadow: none !important;
+  }
+  .main, .main.workspace-main, .shell {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+  .card-surface { border-color: #ccc !important; break-inside: avoid; }
+}
