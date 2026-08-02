@@ -7,7 +7,7 @@ import { TopBar } from './TopBar'
 import { Sidebar } from './Sidebar'
 import { CountryHero } from './CountryHero'
 import { TabBar, type TabSlug } from './TabBar'
-import { RightRail } from './RightRail'
+import { RightRail, type RailMatch } from './RightRail'
 
 type TemplateCountry = { slug: string; name: string; code: string; city: string; region: string }
 type LatLng = { lat: number; lng: number }
@@ -18,7 +18,7 @@ type LatLng = { lat: number; lng: number }
    `rich` is true only for Portugal (the fully verified dataset), which renders
    the approved hero metrics and rail. Every other country renders the same
    frame with honest, data-driven content and a real map. */
-export function CountryTemplate({ slug, active, fromQuiz = false, country, center = null, visaType, rich = false, children }:
+export function CountryTemplate({ slug, active, fromQuiz = false, country, center = null, visaType, rich = false, match = null, children }:
   {
     slug: string
     active: TabSlug
@@ -27,6 +27,7 @@ export function CountryTemplate({ slug, active, fromQuiz = false, country, cente
     center?: LatLng | null
     visaType?: string
     rich?: boolean
+    match?: RailMatch | null
     children: React.ReactNode
   }) {
   const router = useRouter()
@@ -49,7 +50,7 @@ export function CountryTemplate({ slug, active, fromQuiz = false, country, cente
             <TabBar slug={slug} active={active} />
             <div className="cols">
               <div>{children}</div>
-              <RightRail rich={rich} country={country} />
+              <RightRail rich={rich} country={country} match={match} />
             </div>
           </main>
         </div>
