@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { COUNTRIES, getDiscoverableCountry, type CountryDetail } from '@/lib/countries'
 import { requireCurrentUser } from '@/lib/auth'
 import { getProfile, isPaid } from '@/lib/profile'
+import { rankNextinations } from '@/lib/userProfile'
 import { getCountryCenter } from '@/lib/country-geo'
 import { SimpleCountryView } from '@/components/country-template/SimpleCountryView'
 import { CountryTemplate } from '@/components/country-template/CountryTemplate'
@@ -95,6 +96,14 @@ export default async function CountryV2Page({ params, searchParams }: Props) {
   const source = (await searchParams).source
   const fromQuiz = source === 'quiz'
 
+  // Real Match Score from the user's profile ranking (null when unscored /
+  // profile incomplete) — the right rail renders this instead of a placeholder.
+  const ranked = rankNextinations(profile)
+  const rankIdx = ranked.findIndex((r) => r.country.slug === countrySlug)
+  const matchInfo = rankIdx >= 0
+    ? { score: ranked[rankIdx].match.score, rank: rankIdx + 1, total: ranked.length, reasons: ranked[rankIdx].match.reasons }
+    : null
+
   // Portugal is the only fully verified dataset — it renders the approved rich
   // tabs. Every other country renders the same rich frame with honest,
   // data-driven content.
@@ -111,7 +120,7 @@ export default async function CountryV2Page({ params, searchParams }: Props) {
     }[active]
 
     return (
-      <CountryTemplate slug={countrySlug} active={active} fromQuiz={fromQuiz} country={templateCountry} center={center} rich>
+      <CountryTemplate slug={countrySlug} active={active} fromQuiz={fromQuiz} country={templateCountry} center={center} match={matchInfo} rich>
         {tab}
       </CountryTemplate>
     )
@@ -136,6 +145,7 @@ export default async function CountryV2Page({ params, searchParams }: Props) {
       country={templateCountry}
       center={center}
       visaType={detail?.visaType}
+      match={matchInfo}
     >
       {body}
     </CountryTemplate>
