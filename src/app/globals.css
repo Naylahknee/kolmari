@@ -225,14 +225,15 @@ textarea:focus-visible {
 }
 .k-journey.is-collapsed { width: 56px; }
 
+/* Expanded, the panel stays in normal flow so it defines the column's height —
+   the journey list is never clipped by a shorter content column. Collapsing
+   lifts it out of flow so the column can shrink to the rail width. */
 .k-journey-panel {
-  position: absolute;
-  top: 0;
-  right: 0;
+  position: relative;
+  margin-left: auto;
   display: flex;
   flex-direction: column;
   width: 322px;
-  max-height: 100%;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card);
   background: #fff;
@@ -240,6 +241,9 @@ textarea:focus-visible {
   transition: transform .42s var(--ease-panel), opacity .42s var(--ease-panel);
 }
 .k-journey.is-collapsed .k-journey-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
   transform: translateX(112%);
   opacity: 0;
   pointer-events: none;
@@ -281,7 +285,7 @@ textarea:focus-visible {
   color: var(--color-muted);
   font-size: 12px;
 }
-.k-journey-pct { color: var(--color-navy); font-size: 13px; font-weight: 700; }
+.k-journey-pct { color: var(--color-gold-deep); font-size: 13px; font-weight: 700; }
 .k-journey-bar { margin-top: 7px; height: 5px; border-radius: 9999px; background: #eef1f6; overflow: hidden; }
 .k-journey-bar > span { display: block; height: 100%; border-radius: 9999px; background: var(--color-gold); }
 
@@ -392,7 +396,9 @@ textarea:focus-visible {
 }
 .k-journey-cta {
   display: inline-flex;
+  flex: 1;
   align-items: center;
+  justify-content: center;
   border-radius: var(--radius-btn);
   background: var(--color-navy);
   padding: 9px 14px;
@@ -464,10 +470,10 @@ textarea:focus-visible {
 @media (max-width: 900px) {
   .k-journey,
   .k-journey.is-collapsed { width: 100%; }
-  .k-journey-panel {
+  .k-journey-panel,
+  .k-journey.is-collapsed .k-journey-panel {
     position: static;
     width: 100%;
-    max-height: none;
   }
   .k-journey.is-collapsed .k-journey-panel {
     transform: none;

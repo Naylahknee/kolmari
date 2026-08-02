@@ -342,6 +342,8 @@ export type JourneyTask = { id: string; text: string; status: JourneyTaskStatus;
 export type JourneyStageState = 'done' | 'current' | 'upcoming'
 export type JourneyStageRow = {
   stage: PlanStage
+  /** Short display label used by the tracker; see JOURNEY_STAGE_LABELS. */
+  label: string
   /** 1-based position in PLAN_STAGES. */
   index: number
   state: JourneyStageState
@@ -349,6 +351,22 @@ export type JourneyStageRow = {
   tasks: JourneyTask[]
   doneCount: number
   blockerCount: number
+}
+
+/**
+ * Display labels for the journey tracker. The stored stage values in
+ * nexit_plans.timeline_stage are unchanged — this maps them to the shorter
+ * names the tracker shows, so no database migration is involved.
+ */
+export const JOURNEY_STAGE_LABELS: Record<PlanStage, string> = {
+  Explore: 'Discover',
+  Assess: 'Fit check',
+  Shortlist: 'Compare',
+  Decide: 'Decide',
+  Prepare: 'Plan',
+  Apply: 'Apply',
+  Move: 'Move',
+  'Settle In': 'Settle',
 }
 
 function stageMeta(state: JourneyStageState, total: number, done: number, blockers: number): string {
@@ -386,7 +404,16 @@ export function journeyStages(plan: NexitPlan | null, today: Date): JourneyStage
       })
     const doneCount = tasks.filter((task) => task.status === 'done').length
     const blockerCount = tasks.filter((task) => task.status === 'blocked').length
-    return { stage, index, state, tasks, doneCount, blockerCount, meta: stageMeta(state, tasks.length, doneCount, blockerCount) }
+    return {
+      stage,
+      label: JOURNEY_STAGE_LABELS[stage],
+      index,
+      state,
+      tasks,
+      doneCount,
+      blockerCount,
+      meta: stageMeta(state, tasks.length, doneCount, blockerCount),
+    }
   })
 }
 

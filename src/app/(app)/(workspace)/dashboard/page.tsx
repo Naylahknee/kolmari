@@ -1,34 +1,26 @@
 import Link from 'next/link'
-import { ArrowRight, CheckCircle2, Globe2, Route, Sparkles, UserRound, Wallet } from 'lucide-react'
 import { requireCurrentUser } from '@/lib/auth'
 import { COUNTRIES } from '@/lib/countries'
 import {
-  budgetEffective,
   formatShortDate,
   getNexitPlan,
   journeyPercent,
-  journeyStageLabel,
   journeyStages,
+  JOURNEY_STAGE_LABELS,
+  journeyStageLabel,
   nextBestAction,
   PLAN_STAGES,
-  type BudgetLine,
 } from '@/lib/kolmari-plan'
-import { evaluatePathways } from '@/lib/pathways'
 import { getProfile, hasCompletedProfile } from '@/lib/profile'
 import { rankNextinations } from '@/lib/userProfile'
-import { BudgetDonut, BUDGET_COLORS, type BudgetSlice } from '@/components/kolmari/rings'
-import { DashboardDestinations, type DestinationPanel } from '@/components/kolmari/dashboard-destinations'
 import { DashboardDeadlinesCard, DashboardPlanningAreasCard } from '@/components/kolmari/dashboard-planning'
+import {
+  DashboardActivePathwayCard,
+  DashboardDestinationsCard,
+  type DestinationRow,
+} from '@/components/kolmari/dashboard-side-cards'
 import { DashboardWelcome } from '@/components/kolmari/dashboard-onboarding'
 import { JourneyDrawer } from '@/components/kolmari/journey-drawer'
-
-// Monthly recurring lines feed the dashboard cost-snapshot donut.
-function budgetSlices(budget: BudgetLine[]): BudgetSlice[] {
-  return budget
-    .filter((line) => line.chronologicalStage === 'MONTHLY_RECURRING')
-    .map((line, index) => ({ label: line.label, amount: budgetEffective(line) ?? 0, color: BUDGET_COLORS[index % BUDGET_COLORS.length] }))
-    .filter((slice) => slice.amount > 0)
-}
 
 /** Last-saved time for the tracker footer, formatted server-side in UTC so the markup hydrates unchanged. */
 function savedAtLabel(updatedAt: string | null): string | null {
@@ -41,15 +33,10 @@ function savedAtLabel(updatedAt: string | null): string | null {
 export default async function DashboardPage() {
   const user = await requireCurrentUser()
   const [profile, plan] = await Promise.all([getProfile(user.id), getNexitPlan(user.id)])
+  const today = new Date()
+
   const complete = hasCompletedProfile(profile)
   const firstName = profile.display_name || user.email.split('@')[0]
-  const evaluated = complete ? evaluatePathways(profile) : []
-  const strong = evaluated.filter((item) => item.status === 'Strong Match')
-  const selectedPathway = plan?.selected_pathway
-    ? evaluated.find((item) => `${item.country} — ${item.name}` === plan.selected_pathway)
-    : null
-  const slices = plan ? budgetSlices(plan.budget) : []
-  const budgetTotal = slices.reduce((sum, slice) => sum + slice.amount, 0)
   const action = plan ? nextBestAction(plan) : null
   const currentStage = plan?.journey_stage ?? 1
   const firstVisitCandidate =
@@ -58,24 +45,34 @@ export default async function DashboardPage() {
     !plan
 
   // Kolmari Tracker rows come straight from the saved journey stage and checklist.
-  const stageRows = journeyStages(plan, new Date())
+  const stageRows = journeyStages(plan, today)
   const percent = journeyPercent(stageRows, currentStage)
 
   const rankedList = complete ? rankNextinations(profile) : []
-  const destinationPanels: DestinationPanel[] = rankedList.length > 0
-    ? rankedList.slice(0, 3).map((item) => ({ country: item.country, match: item.match.score }))
-    : COUNTRIES.slice(0, 3).map((country) => ({ country, match: null }))
-  const destinationsRanked = rankedList.length > 0
+  const destinationRows: DestinationRow[] = rankedList.length > 0
+    ? rankedList.slice(0, 2).map((item) => ({ country: item.country, match: item.match.score }))
+    : COUNTRIES.slice(0, 2).map((country) => ({ country, match: null }))
+
+  const savedCountry = plan?.saved_nextination
+    ? COUNTRIES.find((c) => c.name === plan.saved_nextination || c.slug === plan.saved_nextination) ?? null
+    : null
 
   const planHref = action && action.tab !== 'overview' ? `/my-plan?tab=${action.tab}` : '/my-plan'
-  const pathwayValue = plan?.selected_pathway ?? (complete ? `${strong.length} strong signal${strong.length === 1 ? '' : 's'}` : '—')
+
   const pathwayDetail = plan?.selected_pathway
-    ? selectedPathway?.status ?? 'Selected pathway'
-    : 'Compare the routes that fit your profile.'
+    ? 'Official requirements still control eligibility. Review the route before you file.'
+    : complete
+      ? 'No pathway saved to your plan yet. Compare the routes that fit your profile.'
+      : 'Finish the Profile Wizard before Pathway signals are calculated.'
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4">
       <DashboardWelcome firstName={firstName} firstVisitCandidate={firstVisitCandidate} profileComplete={complete} />
+
+      <div>
+        <p className="text-[10.5px] font-bold uppercase tracking-[0.13em] text-gold-deep">Your relocation journey</p>
+        <h1 className="mt-1.5 text-[26px] font-bold tracking-[-0.02em] text-navy">Good morning, {firstName}</h1>
+      </div>
 
       {!complete && (
         <section className="rounded-[var(--radius-card)] border border-gold/30 bg-gold-soft/50 p-5 sm:flex sm:items-center sm:justify-between sm:gap-6">
@@ -85,197 +82,71 @@ export default async function DashboardPage() {
               Until then, no budget, work setup, household type, Match Score, or readiness score is assumed.
             </p>
           </div>
-          <Link href="/profile-wizard" className="gold-button mt-4 shrink-0 sm:mt-0">
-            Start Wizard
-          </Link>
+          <Link href="/profile-wizard" className="gold-button mt-4 shrink-0 sm:mt-0">Start Wizard</Link>
         </section>
       )}
 
       {/* Content column + the Kolmari Tracker drawer. The drawer animates its own
           width, so this column reflows wider whenever it is collapsed. */}
-      <div className="flex flex-col gap-5 min-[901px]:flex-row min-[901px]:items-start">
-        <div className="min-w-0 flex-1 space-y-5">
+      <div className="flex flex-col gap-4 min-[901px]:flex-row min-[901px]:items-start">
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
+
           <section
-            className="hero-grid rounded-[var(--radius-card)] bg-navy-deep p-6 text-white shadow-shell"
+            className="rounded-[var(--radius-card)] px-[22px] py-5 text-white"
+            style={{
+              background: 'linear-gradient(135deg,#0d1b39 0%,#17305b 58%,#1b3f68 100%)',
+              boxShadow: '0 10px 30px -18px rgba(13,27,57,.45)',
+            }}
             aria-labelledby="next-action-heading"
           >
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-gold">Recommended next action</p>
-            <h2 id="next-action-heading" className="mt-2 text-xl font-bold leading-snug tracking-[-0.01em]">
+            <p className="text-[10.5px] font-bold uppercase tracking-[0.13em] text-gold">Recommended next action</p>
+            <h2 id="next-action-heading" className="mt-[9px] text-[20px] font-bold tracking-[-0.015em]">
               {action?.title ?? 'Start your Kolmari Plan'}
             </h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">
+            <p className="mt-2 max-w-[56ch] text-[13.5px] leading-[1.62] text-white/80">
               {action?.detail ?? 'Choose your destination, pathway, and target move date to begin tracking your move.'}
             </p>
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-              <Link href={planHref} className="gold-button">
-                {action ? 'Take Action' : 'Open My Plan'} <ArrowRight size={15} />
+            <div className="mt-4 flex flex-wrap items-center gap-[9px]">
+              <Link
+                href={planHref}
+                className="inline-flex items-center gap-[7px] rounded-[var(--radius-btn)] bg-gold px-[17px] py-2.5 text-[13px] font-bold text-navy-deep transition-colors duration-150 hover:bg-[#e0b40c]"
+              >
+                {action ? 'Open in My Plan' : 'Open My Plan'}
               </Link>
               {action?.dueDate && (
-                <span className="rounded-pill border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/85">
+                <span className="rounded-[var(--radius-btn)] border border-white/24 px-[15px] py-2.5 text-[13px] font-semibold text-white">
                   Due {formatShortDate(action.dueDate)}
                 </span>
               )}
-              <span className="text-xs text-white/55">
-                Stage {currentStage} of {PLAN_STAGES.length} · {journeyStageLabel(currentStage)}
+              <span className="text-[12px] text-white/55">
+                Stage {currentStage} of {PLAN_STAGES.length} · {JOURNEY_STAGE_LABELS[journeyStageLabel(currentStage)]}
               </span>
             </div>
           </section>
 
           <DashboardPlanningAreasCard plan={plan} profileComplete={complete} dependents={profile.dependents} />
 
-          <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(252px,1fr))]">
-            <StatCard
-              icon={UserRound}
-              label="Profile"
-              value={complete ? 'Complete' : 'Not started'}
-              href="/profile-wizard"
-              action={complete ? 'Edit profile' : 'Start Wizard'}
-            />
-            <StatCard
-              icon={Route}
-              label="Strong Pathway signals"
-              value={pathwayValue}
+          <div className="grid items-start gap-4 [grid-template-columns:repeat(auto-fit,minmax(252px,1fr))]">
+            <DashboardDeadlinesCard plan={plan} today={today} />
+            <DashboardDestinationsCard rows={destinationRows} ranked={rankedList.length > 0} />
+            <DashboardActivePathwayCard
+              pathway={plan?.selected_pathway ?? null}
               detail={pathwayDetail}
-              href="/pathways"
-              action="Review Pathways"
+              countryName={savedCountry?.name ?? null}
+              countrySlug={savedCountry?.slug ?? null}
             />
-            <StatCard
-              icon={CheckCircle2}
-              label="Saved plan tasks"
-              value={plan ? String(plan.checklist.length) : '0'}
-              href="/flutter"
-              action="Open Flutter Mode"
-            />
-
-            <DashboardDeadlinesCard plan={plan} />
-
-            <section className="card-surface p-5" aria-labelledby="budget-heading">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Budget</p>
-                  <h2 id="budget-heading" className="mt-1 text-base font-bold text-navy">Monthly cost snapshot</h2>
-                </div>
-                <span className="grid size-10 shrink-0 place-items-center rounded-[var(--radius-field)] bg-gold-soft" aria-hidden="true">
-                  <Wallet size={17} />
-                </span>
-              </div>
-              {budgetTotal > 0 ? (
-                <div className="mt-5">
-                  <BudgetDonut slices={slices} total={budgetTotal} />
-                </div>
-              ) : (
-                <div className="mt-4 rounded-[var(--radius-field)] bg-canvas p-4 text-sm text-muted">
-                  Add your monthly budget in the Cost Calculator to see your budget breakdown.
-                  <Link href="/cost-calculator" className="mt-2 flex items-center gap-1 text-xs font-bold text-gold-deep">
-                    Open Cost Calculator <ArrowRight size={12} />
-                  </Link>
-                </div>
-              )}
-            </section>
-
-            <section className="card-surface p-5" aria-labelledby="pathways-heading">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Pathways</p>
-                  <h2 id="pathways-heading" className="mt-1 text-base font-bold text-navy">Your Pathway matches</h2>
-                </div>
-                <Globe2 size={20} className="mt-1 shrink-0 text-muted" aria-hidden="true" />
-              </div>
-              {complete ? (
-                <>
-                  <p className="mt-3 text-sm text-muted">
-                    Your saved goals currently show {strong.length} strong Pathway signal{strong.length === 1 ? '' : 's'}. Official requirements still control eligibility.
-                  </p>
-                  {strong.length > 0 ? (
-                    <div className="mt-4 space-y-2">
-                      {strong.slice(0, 3).map((item) => (
-                        <div key={item.id} className="flex items-center justify-between gap-3 rounded-[var(--radius-field)] bg-canvas px-4 py-3">
-                          <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold text-navy">{item.country} — {item.name}</p>
-                            <p className="text-xs text-ok">{item.status}</p>
-                          </div>
-                          <ArrowRight size={14} className="shrink-0 text-muted" aria-hidden="true" />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="mt-4 rounded-[var(--radius-field)] bg-canvas px-4 py-3 text-sm text-muted">
-                      No strong signals yet. Review Possible Matches and missing requirements in Pathways.
-                    </div>
-                  )}
-                </>
-              ) : (
-                <p className="mt-3 text-sm text-muted">
-                  Finish the Profile Wizard before Pathway signals are calculated.
-                </p>
-              )}
-              <Link href={complete ? '/pathways' : '/profile-wizard'} className="gold-button mt-5 inline-flex items-center gap-2">
-                {complete ? 'View My Pathways' : 'Build My Kolmari Plan'} <ArrowRight size={15} />
-              </Link>
-            </section>
           </div>
-
-          <DashboardDestinations panels={destinationPanels} ranked={destinationsRanked} />
-
-          <section className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-card)] border border-line bg-white px-5 py-4 shadow-tile" aria-label="Stay on track">
-            <div className="flex items-center gap-3">
-              <span className="grid size-9 shrink-0 place-items-center rounded-[var(--radius-field)] bg-gold-soft text-gold-deep" aria-hidden="true">
-                <Sparkles size={16} />
-              </span>
-              <div>
-                <p className="text-sm font-bold text-navy">Stay on track!</p>
-                <p className="text-xs text-muted">Keep your next action, deadlines, and move stage moving forward.</p>
-              </div>
-            </div>
-            <Link href="/my-plan" className="rounded-[var(--radius-btn)] bg-navy px-4 py-2 text-xs font-bold text-white transition hover:bg-navy-deep">
-              View My Plan
-            </Link>
-          </section>
         </div>
 
         <JourneyDrawer
           rows={stageRows}
           currentStage={currentStage}
-          currentStageName={journeyStageLabel(currentStage)}
+          currentStageName={JOURNEY_STAGE_LABELS[journeyStageLabel(currentStage)]}
           percent={percent}
           totalStages={PLAN_STAGES.length}
           savedAt={savedAtLabel(plan?.updated_at ?? null)}
         />
       </div>
     </div>
-  )
-}
-
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-  detail,
-  href,
-  action,
-}: {
-  icon: typeof Globe2
-  label: string
-  value: string
-  detail?: string
-  href: string
-  action: string
-}) {
-  return (
-    <article className="card-surface flex min-h-[154px] flex-col p-5">
-      <div className="flex items-start gap-3">
-        <span className="grid size-9 shrink-0 place-items-center rounded-[var(--radius-field)] bg-gold-soft" aria-hidden="true">
-          <Icon size={16} />
-        </span>
-        <div className="min-w-0">
-          <p className="text-xs text-muted">{label}</p>
-          <p className="mt-0.5 line-clamp-2 font-bold text-navy">{value}</p>
-          {detail && <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted">{detail}</p>}
-        </div>
-      </div>
-      <Link href={href} className="mt-auto inline-flex items-center gap-1 pt-4 text-xs font-bold text-gold-deep">
-        {action} <ArrowRight size={12} />
-      </Link>
-    </article>
   )
 }

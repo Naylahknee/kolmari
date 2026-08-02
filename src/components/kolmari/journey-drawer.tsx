@@ -44,7 +44,7 @@ export function JourneyDrawer({
   const panelHidden = collapsed && !compact
 
   return (
-    <div className={`k-journey${collapsed ? ' is-collapsed' : ''}`}>
+    <div id="dashboard-progress" className={`k-journey${collapsed ? ' is-collapsed' : ''}`}>
       <section className="k-journey-panel" aria-labelledby="journey-heading" aria-hidden={panelHidden}>
         <header className="k-journey-head">
           <div className="k-journey-head-top">
@@ -97,7 +97,7 @@ export function JourneyDrawer({
                   </span>
                   <span className="k-journey-label">
                     <span className="k-journey-name">
-                      {row.stage}
+                      {row.label}
                       {row.state === 'current' && <span className="sr-only"> (current stage)</span>}
                     </span>
                     <span className="k-journey-meta">{row.meta}</span>
