@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
 import { YourWorld } from '@/components/kolmari/your-world'
 import type { RecCard } from '@/components/kolmari/your-world'
+import { YourWorldGated, type QuizMatch } from '@/components/kolmari/your-world-gated'
 import type { WorldPin } from '@/components/kolmari/your-world-map'
 import { requireCurrentUser } from '@/lib/auth'
 import { COUNTRIES, DISCOVERABLE_COUNTRIES } from '@/lib/countries'
 import { getCountryCenter } from '@/lib/country-geo'
-import { getProfile, hasCompletedProfile } from '@/lib/profile'
+import { getProfile, hasCompletedProfile, isPaid } from '@/lib/profile'
 import { rankNextinations } from '@/lib/userProfile'
 
 export const metadata: Metadata = {
@@ -22,6 +23,17 @@ export default async function YourWorldPage() {
   const profile = await getProfile(user.id)
   const complete = hasCompletedProfile(profile)
   const ranked = complete ? rankNextinations(profile) : []
+
+  // Free tier gets the browse-and-upsell view; scoring/filtering/saving are Pro.
+  if (!isPaid(profile)) {
+    const quizMatches: QuizMatch[] = ranked.map(({ country }) => ({
+      slug: country.slug,
+      name: country.name,
+      code: country.code,
+      region: regionLabel(country.region),
+    }))
+    return <YourWorldGated matches={quizMatches} />
+  }
 
   const pins: WorldPin[] = ranked.flatMap(({ country, match }) => {
     const center = getCountryCenter(country.slug)

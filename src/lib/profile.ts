@@ -2,15 +2,18 @@ import 'server-only'
 
 import { isAdminEmail } from './admin'
 import { getSql } from './db'
+import { PLAN_TIERS, type PlanTier } from './plan-tiers'
+
+export { PLAN_TIERS, type PlanTier } from './plan-tiers'
 
 export const WIZARD_STATUSES = ['not_started', 'in_progress', 'completed', 'skipped'] as const
 export type WizardStatus = (typeof WIZARD_STATUSES)[number]
 
 // Subscription tier. Maps to the landing pricing: free = Explorer, plus = Plus,
-// navigator = Navigator. There is no billing yet — everyone is 'free' and the
-// column is settable manually for testing until checkout is built.
-export const PLAN_TIERS = ['free', 'plus', 'navigator'] as const
-export type PlanTier = (typeof PLAN_TIERS)[number]
+// navigator = Navigator. There is no billing yet — the column is settable by
+// admins (see /admin) until checkout is built. PLAN_TIERS/PlanTier are defined
+// in ./plan-tiers (pure module) and re-exported above so client components can
+// import them without pulling in this server-only file.
 
 export const PATHWAY_GOALS = [
   'Remote Work',

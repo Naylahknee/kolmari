@@ -1,4 +1,5 @@
 import { getRequestUser } from '@/lib/auth'
+import { isAdminUser } from '@/lib/admin'
 import { getProfile, saveProfile } from '@/lib/profile'
 import { profileUpdateSchema } from '@/lib/schemas'
 import { isSameOrigin } from '@/lib/security'
@@ -8,7 +9,8 @@ export async function GET(request: Request) {
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    return Response.json(await getProfile(user.id))
+    const [profile, isAdmin] = await Promise.all([getProfile(user.id), isAdminUser(user)])
+    return Response.json({ ...profile, isAdmin })
   } catch (error) {
     console.error('Profile load failed', error)
     return Response.json({ error: 'Unable to load your profile.' }, { status: 500 })

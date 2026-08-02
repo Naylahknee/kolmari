@@ -1,10 +1,11 @@
 'use client'
 
-/* eslint-disable @next/next/no-img-element */
-
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { LoaderCircle, MapPinned, RefreshCw } from 'lucide-react'
+import mapboxgl from 'mapbox-gl'
+import { MapPinned } from 'lucide-react'
+import 'mapbox-gl/dist/mapbox-gl.css'
+import './your-world-map.css'
 
 export type WorldPin = {
   slug: string
@@ -44,44 +45,130 @@ function frame(pins: WorldPin[]) {
   const maxLat = Math.max(...lats)
   const lng = (minLng + maxLng) / 2
   const lat = (minLat + maxLat) / 2
-  if (pins.length === 1) return { lng, lat, zoom: 3.4 }
-  const lngSpan = Math.max((maxLng - minLng) / 360, 0.01)
-  const latSpan = Math.max(Math.abs(mercY(minLat) - mercY(maxLat)), 0.01)
-  const zoomX = Math.log2((W * 0.78) / (TILE * lngSpan))
-  const zoomY = Math.log2((H * 0.78) / (TILE * latSpan))
-  return { lng, lat, zoom: Math.max(0.6, Math.min(4.2, Math.min(zoomX, zoomY))) }
+  if (pins.length === 1) return { lng, lat, zoom: 3.4, isSingle: true }
+  return { minLng, maxLng, minLat, maxLat, lng, lat, isSingle: false }
+}
+
+function MapFallback({ pins }: { pins: WorldPin[] }) {
+  return (
+    <div className="rounded-[16px] border border-line bg-[#CFE6F5] p-5 sm:p-6">
+      <div className="flex items-center gap-2 text-navy/80">
+        <MapPinned size={18} className="text-gold" aria-hidden="true" />
+        <p className="text-sm font-semibold">
+          {pins.length > 0 ? 'Your matched destinations' : 'Your world map'}
+        </p>
+      </div>
+      {pins.length === 0 ? (
+        <p className="mt-2 text-sm text-navy/55">
+          Complete your Kolmari Profile to plot your matched destinations here.
+        </p>
+      ) : (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {pins.map((p) => (
+            <Link
+              key={p.slug}
+              href={`/nextinations/${p.slug}/v2/overview`}
+              className="inline-flex items-center gap-2 rounded-full border border-navy/20 bg-white/40 px-3 py-1.5 text-sm font-semibold text-navy transition hover:border-navy hover:bg-white"
+            >
+              <span className="grid size-5 place-items-center rounded-full bg-gold text-[10px] font-bold text-navy">
+                {p.code}
+              </span>
+              {p.name}
+              {p.score !== null && <span className="text-xs text-gold-deep">{p.score}%</span>}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }
 
 export function YourWorldMap({ pins }: { pins: WorldPin[] }) {
-  const [loadAttempt, setLoadAttempt] = useState(0)
-  const [retryCycle, setRetryCycle] = useState(0)
-  const [loadStatus, setLoadStatus] = useState<MapLoadStatus>('loading')
+  const containerRef = useRef<HTMLDivElement>(null)
+  const mapRef = useRef<mapboxgl.Map | null>(null)
+  const markersRef = useRef<mapboxgl.Marker[]>([])
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
-  const view = frame(pins)
-  const cx = projectX(view.lng, view.zoom)
-  const cy = projectY(view.lat, view.zoom)
+  const [mapError, setMapError] = useState(false)
 
-  const placed = pins.map((p) => ({
-    ...p,
-    left: ((W / 2 + (projectX(p.lng, view.zoom) - cx)) / W) * 100,
-    top: ((H / 2 + (projectY(p.lat, view.zoom) - cy)) / H) * 100,
-  }))
+  useEffect(() => {
+    if (!token || mapError || !containerRef.current || mapRef.current) return
 
-  const retryLoad = useCallback(() => {
-    setLoadAttempt((current) => {
-      if (current + 1 >= MAX_LOAD_ATTEMPTS) {
-        setLoadStatus('failed')
-        return current
+    const map = new mapboxgl.Map({
+      accessToken: token,
+      container: containerRef.current,
+      style: 'mapbox://styles/mapbox/light-v11',
+      center: [0, 20],
+      zoom: 1.5,
+      projection: 'mercator',
+      attributionControl: true,
+    })
+    mapRef.current = map
+
+    map.on('load', () => {
+      map.resize()
+
+      // Add markers for each pin
+      for (const pin of pins) {
+        const el = document.createElement('button')
+        el.className = 'your-world-map-marker'
+        el.type = 'button'
+        el.setAttribute('aria-label', `${pin.name}${pin.score !== null ? `, ${pin.score}% fit` : ''}`)
+
+        const codeEl = document.createElement('span')
+        codeEl.className = 'your-world-map-marker__code'
+        codeEl.textContent = pin.code
+        el.appendChild(codeEl)
+
+        const infoEl = document.createElement('div')
+        infoEl.className = 'your-world-map-marker__info'
+        const nameEl = document.createElement('span')
+        nameEl.className = 'your-world-map-marker__name'
+        nameEl.textContent = pin.name
+        infoEl.appendChild(nameEl)
+        if (pin.score !== null) {
+          const scoreEl = document.createElement('span')
+          scoreEl.className = 'your-world-map-marker__score'
+          scoreEl.textContent = `${pin.score}%`
+          infoEl.appendChild(scoreEl)
+        }
+        el.appendChild(infoEl)
+
+        el.addEventListener('click', () => {
+          window.location.href = `/nextinations/${pin.slug}/v2/overview`
+        })
+
+        const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+          .setLngLat([pin.lng, pin.lat])
+          .addTo(map)
+
+        markersRef.current.push(marker)
+      }
+
+      // Fit camera to pins
+      const view = frame(pins)
+      if (view.isSingle !== false) {
+        map.flyTo({ center: [view.lng, view.lat], zoom: view.zoom })
+      } else if (
+        view.minLng !== undefined &&
+        view.maxLng !== undefined &&
+        view.minLat !== undefined &&
+        view.maxLat !== undefined
+      ) {
+        map.fitBounds(
+          [
+            [view.minLng, view.minLat],
+            [view.maxLng, view.maxLat],
+          ],
+          { padding: 40, maxZoom: 4.2 }
+        )
       }
       return current + 1
     })
-  }, [])
 
-  const restartLoad = useCallback(() => {
-    setRetryCycle((current) => current + 1)
-    setLoadAttempt(0)
-    setLoadStatus('loading')
-  }, [])
+    map.on('error', (event) => {
+      const message = (event.error as Error | undefined)?.message ?? ''
+      if (/access token|unauthorized|401/i.test(message)) setMapError(true)
+    })
 
   useEffect(() => {
     if (!token || loadStatus !== 'loading') return

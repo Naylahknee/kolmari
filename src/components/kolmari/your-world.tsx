@@ -93,10 +93,10 @@ export function YourWorld({ pins, cards, complete }: { pins: WorldPin[]; cards: 
   const activeCount = [region, budget, visa].filter(Boolean).length
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div>
       <div>
         <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Explore</p>
-        <h1 className="mt-1 text-2xl font-bold text-navy sm:text-3xl">Your World</h1>
+        <h1 className="mt-1 font-display text-3xl font-bold text-navy sm:text-4xl">Your World</h1>
         <p className="mt-1 text-sm text-muted">Your matched destinations on the map, and a ranked shortlist built from your Kolmari Profile.</p>
       </div>
 
