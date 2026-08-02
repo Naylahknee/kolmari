@@ -54,8 +54,7 @@ export function CountryHero({
   if (rich) {
     return (
       <section className="hero">
-        <div className="hero-bg"></div>
-        <HeroMap country={country} center={center} />
+        <div className="hero-bg hero-bg-portugal" aria-hidden="true"></div>
         <div className="scrim"></div>
         <div className="hero-body">
           {fromQuiz && (
