@@ -118,3 +118,41 @@ Build an auto-saving notation scratchpad that shifts its visual prompt anchors b
 **File to Modify:** Toolbar elements wrapper & Global CSS configurations.
 
 ### 🛠️ Layout & Logic Requirements
+1.  **Dual Location Controller**: Place an active location select box and a `⚡ Run Setup Wizard` button in the top banner bar. The wizard must step through a country/city selector and a lifestyle tier profile choice (`Budget`, `Standard`, `Premium`) to load the correct baseline array data.
+2.  **Spreadsheet CSV Blob Handler**: Construct a standard data URI string compiler parsing your live arrays. Trigger automated anchor asset actions to prompt a browser file download labeled `Expat_Relocation_Report_[City].csv`.
+3.  **Fidelity PDF Exporter & Media Styles**: Bind the PDF report action button to invoke `window.print()`. Append explicit print formatting rules inside your stylesheet to hide UI layout controls, collapse background fills, and condense text tracking boundaries cleanly onto standard A4 paper dimensions.
+
+```css
+@media print {
+  /* Hide interactive web components on paper layout */
+  select, 
+  button, 
+  nav, 
+  .fixed, 
+  .action-buttons-bar, 
+  .reset-link-button { 
+    display: none !important; 
+  }
+  
+  /* Flatten presentation layers to solid ink-saving white canvas */
+  body, 
+  .bg-slate-50, 
+  .bg-slate-50\/30, 
+  .bg-white { 
+    background: #ffffff !important; 
+    color: #000000 !important; 
+  }
+  
+  /* Force columns to fit within a standard printable A4 layout view */
+  .max-w-6xl, 
+  .main-dashboard-grid { 
+    max-width: 100% !important; 
+    width: 100% !important; 
+    margin: 0 !important; 
+    padding: 0 !important; 
+    box-shadow: none !important; 
+    display: block !important; 
+  }
+}
+```
+
