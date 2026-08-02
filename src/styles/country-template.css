@@ -264,7 +264,7 @@ body.rail-collapsed .country-template-root .rail .icon-btn svg{transform:scaleX(
 .country-template-root .rightcol{position:sticky;top:132px;display:flex;flex-direction:column;gap:14px}
 .country-template-root .match{padding:18px 18px 16px}
 .country-template-root .match-top{display:flex;gap:15px;align-items:center}
-.country-template-root .ring{position:relative;width:84px;height:84px;flex:0 0 auto}
+.country-template-root .ring{position:relative;width:84px;height:84px;flex:0 0 auto;box-shadow:none}
 .country-template-root .ring svg{transform:rotate(-90deg)}
 .country-template-root .ring-n{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
 .country-template-root .ring-n .v{font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1}
