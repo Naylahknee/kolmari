@@ -27,7 +27,7 @@ const PRO_FEATURES: string[] = [
 
 export function YourWorldGated({ matches }: { matches: QuizMatch[] }) {
   return (
-    <div className="mx-auto max-w-6xl">
+    <div>
       {/* Upgrade banner */}
       <section className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-gold/40 bg-gold-soft/40 px-4 py-3.5 sm:px-5">
         <div className="flex items-center gap-3">
