@@ -55,12 +55,42 @@ function planningItems(plan: NexitPlan | null): PlanningItem[] {
   return items.slice(0, 3)
 }
 
-export function DashboardPlanningColumn({ plan, profileComplete, dependents }: {
+export function DashboardDeadlinesCard({ plan }: { plan: NexitPlan | null }) {
+  const blockers = planningItems(plan)
+
+  return (
+    <section className="card-surface p-5" aria-labelledby="deadlines-heading">
+      <div className="flex items-center gap-2">
+        <CalendarClock size={17} className="text-gold-deep" aria-hidden="true" />
+        <h2 id="deadlines-heading" className="text-base font-bold text-navy">Deadlines &amp; Blockers</h2>
+      </div>
+      <div className="mt-4 divide-y divide-line">
+        {blockers.length ? blockers.map((item) => (
+          <div key={`${item.title}-${item.due}`} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
+            <AlertTriangle size={15} className="mt-0.5 shrink-0 text-muted" aria-hidden="true" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-navy">{item.title}</p>
+              <p className="mt-0.5 text-xs text-muted">{item.due}</p>
+            </div>
+            <span className={`shrink-0 text-[10px] font-bold uppercase ${TAG_STYLE[item.tag]}`}>{item.tag}</span>
+          </div>
+        )) : (
+          <p className="text-sm text-muted">No dated deadlines or blockers yet.</p>
+        )}
+      </div>
+    </section>
+  )
+}
+
+/**
+ * Planning-area progress. Sits full width under the hero on the Dashboard, so
+ * its rows lay out in an auto-fit grid rather than a single stacked list.
+ */
+export function DashboardPlanningAreasCard({ plan, profileComplete, dependents }: {
   plan: NexitPlan | null
   profileComplete: boolean
   dependents: number | null
 }) {
-  const blockers = planningItems(plan)
   const documents = plan ? docCounts(plan) : null
   const budgetCategories = plan ? budgetEnteredCount(plan) : 0
   const schoolTask = plan?.checklist.find((item) => /school|education|childcare/i.test(item.text))
@@ -102,44 +132,21 @@ export function DashboardPlanningColumn({ plan, profileComplete, dependents }: {
   ]
 
   return (
-    <aside className="space-y-4">
-      <section className="card-surface p-5" aria-labelledby="deadlines-heading">
-        <div className="flex items-center gap-2">
-          <CalendarClock size={17} className="text-gold-deep" aria-hidden="true" />
-          <h2 id="deadlines-heading" className="text-base font-bold text-navy">Deadlines &amp; Blockers</h2>
-        </div>
-        <div className="mt-4 divide-y divide-line">
-          {blockers.length ? blockers.map((item) => (
-            <div key={`${item.title}-${item.due}`} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
-              <AlertTriangle size={15} className="mt-0.5 shrink-0 text-muted" aria-hidden="true" />
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-navy">{item.title}</p>
-                <p className="mt-0.5 text-xs text-muted">{item.due}</p>
-              </div>
-              <span className={`shrink-0 text-[10px] font-bold uppercase ${TAG_STYLE[item.tag]}`}>{item.tag}</span>
+    <section className="card-surface p-5" aria-labelledby="planning-progress-heading">
+      <h2 id="planning-progress-heading" className="text-base font-bold text-navy">Progress by planning area</h2>
+      <div className="mt-4 grid gap-x-5 gap-y-4 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
+        {progress.map(({ icon: Icon, label, status }) => (
+          <div key={label} className="flex items-start gap-3">
+            <span className="grid size-8 shrink-0 place-items-center rounded-[var(--radius-field)] bg-canvas text-navy" aria-hidden="true">
+              <Icon size={14} />
+            </span>
+            <div>
+              <p className="text-sm font-bold text-navy">{label}</p>
+              <p className="mt-0.5 text-xs leading-5 text-muted">{status}</p>
             </div>
-          )) : (
-            <p className="text-sm text-muted">No dated deadlines or blockers yet.</p>
-          )}
-        </div>
-      </section>
-
-      <section className="card-surface p-5" aria-labelledby="planning-progress-heading">
-        <h2 id="planning-progress-heading" className="text-base font-bold text-navy">Progress by planning area</h2>
-        <div className="mt-3 divide-y divide-line">
-          {progress.map(({ icon: Icon, label, status }) => (
-            <div key={label} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
-              <span className="grid size-8 shrink-0 place-items-center rounded-[var(--radius-field)] bg-canvas text-navy" aria-hidden="true">
-                <Icon size={14} />
-              </span>
-              <div>
-                <p className="text-sm font-bold text-navy">{label}</p>
-                <p className="mt-0.5 text-xs leading-5 text-muted">{status}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-    </aside>
+          </div>
+        ))}
+      </div>
+    </section>
   )
 }
