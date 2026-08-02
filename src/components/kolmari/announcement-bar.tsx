@@ -1,18 +1,30 @@
-/* Reusable full-width announcement slot that sits above the workspace header.
-   It is intentionally empty by default — drop launch, promo, or status copy
-   into ANNOUNCEMENT below (optionally with a link) and the bar appears. Leave
-   it null and nothing renders, so the header stays flush. */
+/* Full-width announcement slot above the workspace header. Content is managed
+   by admins in /admin and stored in site_settings; the bar renders nothing when
+   no announcement is published, so the header stays flush. */
+'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
-type Announcement = { text: string; href?: string; linkLabel?: string }
-
-// Empty reusable slot. Set to an object to publish a message across the app.
-const ANNOUNCEMENT: Announcement | null = null
+type Announcement = { text: string; href?: string | null; linkLabel?: string | null }
 
 export function AnnouncementBar() {
-  if (!ANNOUNCEMENT) return null
-  const { text, href, linkLabel } = ANNOUNCEMENT
+  const [announcement, setAnnouncement] = useState<Announcement | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/announcement')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        const a = data?.announcement
+        if (!cancelled && a && typeof a.text === 'string' && a.text.trim()) setAnnouncement(a)
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [])
+
+  if (!announcement) return null
+  const { text, href, linkLabel } = announcement
   return (
     <div className="announce" role="region" aria-label="Announcement">
       <span className="announce-text">{text}</span>

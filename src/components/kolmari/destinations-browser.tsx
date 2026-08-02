@@ -60,6 +60,9 @@ export function DestinationsBrowser({ rows, profileComplete }: { rows: DestRow[]
     setSaved(loadSet(STORAGE.saved))
     setInterested(loadSet(STORAGE.interested))
     setVisited(loadSet(STORAGE.visited))
+    // Seed the search from ?q= (e.g. arriving from the top-bar global search).
+    const q = new URLSearchParams(window.location.search).get('q')
+    if (q) setQuery(q)
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [])
 

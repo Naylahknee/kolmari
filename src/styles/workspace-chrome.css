@@ -80,6 +80,38 @@
 .mark b { color: var(--color-gold-deep); }
 .tb-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 
+/* Global search field in the top bar (non-country pages). */
+.tb-search {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 460px;
+  margin: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 40px;
+  padding: 0 14px;
+  background: #fff;
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-field);
+  color: var(--color-muted);
+  transition: border-color .14s, box-shadow .14s;
+}
+.tb-search:focus-within { border-color: var(--color-gold-deep); box-shadow: 0 0 0 3px rgba(243, 197, 22, 0.16); }
+.tb-search svg { flex: 0 0 auto; color: var(--color-muted); }
+.tb-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 13.5px;
+  color: var(--color-navy);
+}
+.tb-search input::placeholder { color: var(--color-muted-soft); }
+.tb-search input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+@media (max-width: 720px) { .tb-search { display: none; } }
+
 /* Country display preferences — one compact pill with two related selector
    groups. The selected values use the approved navy header treatment. */
 .view-control {
@@ -156,6 +188,53 @@
   letter-spacing: .02em;
 }
 .profile-name { font-size: 12.5px; font-weight: 600; color: var(--color-navy); white-space: nowrap; }
+.profile-pill { cursor: pointer; }
+
+/* Account dropdown anchored under the profile pill (Settings + Sign out). */
+.profile-menu { position: relative; }
+.profile-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 60;
+  min-width: 208px;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  box-shadow: 0 12px 30px -8px rgba(13, 27, 57, 0.22);
+}
+.profile-dropdown-name {
+  padding: 6px 10px 8px;
+  margin: 0 0 4px;
+  border-bottom: 1px solid var(--color-line);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--color-navy);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.profile-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-navy);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color .14s;
+}
+.profile-dropdown-item:hover { background: var(--color-canvas); }
+.profile-dropdown-signout { color: var(--color-danger); }
+.profile-dropdown-signout:hover { background: rgba(240, 99, 122, 0.1); }
+.profile-dropdown-item:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .page-title-button {
   display: inline-flex;
@@ -227,7 +306,10 @@ body.rail-collapsed .rail .icon-btn svg { transform: scaleX(-1); }
 .sb-label:first-of-type { margin-top: 6px; }
 .sb-item { display: flex; align-items: center; gap: 11px; width: 100%; text-align: left; padding: 9px 10px; border-radius: var(--radius-sidebar-row); color: #9fb0cc; font-size: 13.5px; font-weight: 500; transition: .14s; margin-bottom: 1px; }
 .sb-item:hover { background: rgba(255,255,255,.05); color: #fff; }
-.sb-item.active { background: rgba(255,255,255,.09); color: #fff; font-weight: 600; }
+/* Active nav item: solid gold pill with navy text, per the approved design. */
+.sb-item.active,
+.sb-item.active:hover { background: var(--color-gold); color: var(--color-navy-deep); font-weight: 700; box-shadow: var(--shadow-gold); }
+.sb-item.active .ic { color: var(--color-navy-deep); }
 .sb-item .ic { width: 17px; height: 17px; flex: 0 0 auto; stroke-width: 1.9; }
 .sb-item .lbl { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sb-item .chev { width: 14px; height: 14px; flex: 0 0 auto; transition: transform .2s; opacity: .65; stroke-width: 2.2; }
