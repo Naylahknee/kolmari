@@ -7,7 +7,7 @@ export const PRODUCT_COPY = {
   plan: 'My Plan',
   flutterMode: 'Flutter Mode',
   documents: 'Documents',
-  kolmariKlub: 'Kolmari Klub',
+  kolmariKlub: 'Kolmari Club',
   costCalculator: 'Cost Calculator',
   greenbook: 'Greenbook',
   settings: 'Settings',

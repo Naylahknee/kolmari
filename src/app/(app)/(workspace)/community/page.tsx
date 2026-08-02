@@ -5,6 +5,8 @@ import { KolmariClub } from '@/components/kolmari/kolmari-club'
 import { requireCurrentUser } from '@/lib/auth'
 import { COUNTRIES } from '@/lib/countries'
 import { getNexitPlan } from '@/lib/kolmari-plan'
+import { getProfile, hasCompletedProfile } from '@/lib/profile'
+import { rankNextinations } from '@/lib/userProfile'
 
 const relatedActions = [
   { href: '/greenbook', title: 'Greenbook Insights', copy: 'Sourced planning context to research daily life and Community Fit.', icon: BookOpen },
@@ -13,12 +15,20 @@ const relatedActions = [
 
 export default async function CommunityPage() {
   const user = await requireCurrentUser()
-  const plan = await getNexitPlan(user.id)
-  const groups = COUNTRIES.map((c) => ({ slug: c.slug, name: c.name }))
-  // Open the group for the destination the user has chosen, if any.
+  const [plan, profile] = await Promise.all([getNexitPlan(user.id), getProfile(user.id)])
+
+  // Every member is in the Welcome group; a country group opens for each
+  // destination the user matches (no manual joining, no dropdown).
+  const matched = hasCompletedProfile(profile)
+    ? rankNextinations(profile).map((r) => ({ slug: r.country.slug, name: r.country.name }))
+    : []
+  const groups = [{ slug: 'welcome', name: 'Welcome' }, ...matched]
+
+  // Open the group for the destination the user has chosen, if it's one of
+  // their matched groups; otherwise start in Welcome.
   const saved = plan?.saved_nextination ?? null
-  const initial =
-    COUNTRIES.find((c) => c.slug === saved || c.name === saved)?.slug ?? groups[0]?.slug ?? 'portugal'
+  const savedSlug = COUNTRIES.find((c) => c.slug === saved || c.name === saved)?.slug
+  const initial = savedSlug && groups.some((g) => g.slug === savedSlug) ? savedSlug : 'welcome'
 
   return (
     <div>

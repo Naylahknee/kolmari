@@ -73,19 +73,31 @@ export function KolmariClub({ groups, initialCountry }: { groups: Group[]; initi
   const groupName = groups.find((g) => g.slug === country)?.name ?? country
 
   return (
-    <section className="mt-6" aria-label="Kolmari Club destination groups">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="text-sm font-bold text-navy">Destination groups</p>
-          <p className="text-xs text-muted">Talk with others heading to {groupName}. Rooms fill in as people post — the community writes its own FAQ.</p>
-        </div>
-        <label className="text-xs font-bold text-navy">
-          <span className="sr-only">Choose a destination group</span>
-          <select className="field w-auto" value={country} onChange={(e) => setCountry(e.target.value)} aria-label="Destination group">
-            {groups.map((g) => <option key={g.slug} value={g.slug}>{g.name}</option>)}
-          </select>
-        </label>
+    <section className="mt-6" aria-label="Kolmari Club groups">
+      <div>
+        <p className="text-sm font-bold text-navy">Your groups</p>
+        <p className="text-xs text-muted">You&rsquo;re in the Welcome group. A group opens for each destination you match — no manual joining. Now viewing {groupName}.</p>
       </div>
+      <div className="mt-3 flex flex-wrap gap-2" role="tablist" aria-label="Your groups">
+        {groups.map((g) => {
+          const active = country === g.slug
+          return (
+            <button
+              key={g.slug}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => setCountry(g.slug)}
+              className={`rounded-pill border px-3.5 py-1.5 text-sm font-semibold transition ${active ? 'border-gold bg-gold-soft text-navy' : 'border-line bg-white text-muted hover:border-gold/40 hover:text-navy'}`}
+            >
+              {g.name}
+            </button>
+          )
+        })}
+      </div>
+      {groups.length === 1 && (
+        <p className="mt-2 text-xs text-muted">Complete your profile to match destinations and open their groups.</p>
+      )}
 
       <form onSubmit={submit} className="card-surface mt-4 p-4">
         <textarea
