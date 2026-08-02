@@ -16,7 +16,7 @@ export function AdminClient({
   currentUserId: number
 }) {
   return (
-    <div className="mx-auto max-w-5xl space-y-8">
+    <div className="space-y-8">
       <div>
         <p className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-gold-deep">
           <ShieldCheck size={14} aria-hidden="true" /> Admin

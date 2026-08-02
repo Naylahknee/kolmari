@@ -100,7 +100,7 @@ export function DestinationsBrowser({ rows, profileComplete }: { rows: DestRow[]
 
   if (!profileComplete) {
     return (
-      <div className="mx-auto max-w-4xl">
+      <div>
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Explore</p>
           <h1 className="mt-1 text-2xl font-bold text-navy sm:text-3xl">Destinations</h1>
@@ -121,7 +121,7 @@ export function DestinationsBrowser({ rows, profileComplete }: { rows: DestRow[]
   }
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div>
       <div>
         <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Explore</p>
         <h1 className="mt-1 text-2xl font-bold text-navy sm:text-3xl">Destinations</h1>
