@@ -319,6 +319,76 @@ export function processingBuckets(plan: NexitPlan): ProcessingBuckets {
   }
 }
 
+// --- Journey tracker derivations (Dashboard progress drawer) ---
+//
+// Every value below is derived from persisted plan data: the saved journey
+// stage and the user's own checklist items. Nothing is invented — a stage with
+// no saved tasks reports that it has none rather than showing filler.
+
+export type JourneyTaskStatus = 'done' | 'blocked' | 'todo'
+export type JourneyTask = { id: string; text: string; status: JourneyTaskStatus; tag: string | null }
+export type JourneyStageState = 'done' | 'current' | 'upcoming'
+export type JourneyStageRow = {
+  stage: PlanStage
+  /** 1-based position in PLAN_STAGES. */
+  index: number
+  state: JourneyStageState
+  meta: string
+  tasks: JourneyTask[]
+  doneCount: number
+  blockerCount: number
+}
+
+function stageMeta(state: JourneyStageState, total: number, done: number, blockers: number): string {
+  if (total === 0) {
+    if (state === 'done') return 'Complete'
+    return state === 'current' ? 'In progress' : 'No tasks yet'
+  }
+  if (done === total) return 'Complete'
+  const blockerSuffix = blockers > 0 ? ` · ${blockers} blocker${blockers === 1 ? '' : 's'}` : ''
+  if (state === 'upcoming') return `${total} task${total === 1 ? '' : 's'}${blockerSuffix}`
+  return `${done} of ${total}${blockerSuffix}`
+}
+
+/**
+ * One row per plan stage, with the saved checklist items that belong to it.
+ * A task counts as blocked only when it carries a real due date that has
+ * already passed. `today` is supplied by the caller so the server renders the
+ * same result the client hydrates.
+ */
+export function journeyStages(plan: NexitPlan | null, today: Date): JourneyStageRow[] {
+  const current = plan?.journey_stage ?? 1
+  return PLAN_STAGES.map((stage, i) => {
+    const index = i + 1
+    const state: JourneyStageState = index < current ? 'done' : index === current ? 'current' : 'upcoming'
+    const tasks: JourneyTask[] = (plan?.checklist ?? [])
+      .filter((item) => item.stage === stage)
+      .map((item) => {
+        const overdue = !item.done && item.due !== null && (daysUntil(item.due, today) ?? 0) < 0
+        return {
+          id: item.id,
+          text: item.text,
+          status: item.done ? 'done' : overdue ? 'blocked' : 'todo',
+          tag: overdue ? 'Blocker' : null,
+        }
+      })
+    const doneCount = tasks.filter((task) => task.status === 'done').length
+    const blockerCount = tasks.filter((task) => task.status === 'blocked').length
+    return { stage, index, state, tasks, doneCount, blockerCount, meta: stageMeta(state, tasks.length, doneCount, blockerCount) }
+  })
+}
+
+/**
+ * Journey completion as a percentage: fully-passed stages plus the share of the
+ * current stage's saved tasks that are done. A current stage with no saved
+ * tasks contributes nothing rather than assuming partial credit.
+ */
+export function journeyPercent(rows: JourneyStageRow[], currentStage: JourneyStage): number {
+  const currentRow = rows[currentStage - 1]
+  const fraction = currentRow && currentRow.tasks.length > 0 ? currentRow.doneCount / currentRow.tasks.length : 0
+  return Math.round(((currentStage - 1 + fraction) / PLAN_STAGES.length) * 100)
+}
+
 export type NextAction = {
   title: string
   detail: string
