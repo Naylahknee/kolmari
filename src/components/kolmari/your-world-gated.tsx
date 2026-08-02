@@ -44,7 +44,7 @@ export function YourWorldGated({ matches }: { matches: QuizMatch[] }) {
       {/* Heading */}
       <div className="mt-6">
         <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Explore</p>
-        <h1 className="mt-1 text-2xl font-bold text-navy sm:text-3xl">Your World</h1>
+        <h1 className="mt-1 font-display text-3xl font-bold text-navy sm:text-4xl">Your World</h1>
         <p className="mt-1 max-w-2xl text-sm text-muted">
           Browse the world map and read any country&rsquo;s overview for free. Filtering, scoring, and saving are Pro.
         </p>

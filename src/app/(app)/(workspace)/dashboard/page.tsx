@@ -71,7 +71,7 @@ export default async function DashboardPage() {
 
       <div>
         <p className="text-[10.5px] font-bold uppercase tracking-[0.13em] text-gold-deep">Your relocation journey</p>
-        <h1 className="mt-1.5 text-[26px] font-bold tracking-[-0.02em] text-navy">Good morning, {firstName}</h1>
+        <h1 className="mt-1.5 font-display text-[30px] font-bold tracking-[-0.01em] text-navy">Good morning, {firstName}</h1>
       </div>
 
       {!complete && (

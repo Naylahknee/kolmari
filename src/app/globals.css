@@ -42,23 +42,27 @@
   --color-sidebar-active-text: #0d1b39;
 
   /* ─── Geometry ──────────────────────────────────────── */
-  --radius-card: 12px;
-  --radius-tile: 12px;
+  /* Softer, rounder surfaces per the approved design (card 16 / tile 14 /
+     field 12). Pills stay fully round to preserve existing chip shapes. */
+  --radius-card: 16px;
+  --radius-tile: 14px;
   --radius-pill: 9999px;
-  --radius-field: 8px;
-  --radius-btn: 8px;
-  --radius-sidebar-row: 6px;
+  --radius-field: 12px;
+  --radius-btn: 10px;
+  --radius-sidebar-row: 8px;
 
   /* ─── Typography ────────────────────────────────────── */
   --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
-  --font-display: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
+  /* Serif display face for headline typography (Playfair Display). */
+  --font-display: var(--font-playfair), "Playfair Display", Georgia, "Times New Roman", serif;
 
   /* ─── Shadows ───────────────────────────────────────── */
-  --shadow-card: 0 1px 3px 0 rgba(16, 34, 68, 0.08), 0 1px 2px -1px rgba(16, 34, 68, 0.06);
-  --shadow-tile: 0 1px 3px 0 rgba(16, 34, 68, 0.08);
-  --shadow-gold: 0 8px 20px -8px rgba(216, 169, 4, 0.6);
-  --shadow-shell: 0 4px 24px -8px rgba(16, 34, 68, 0.18);
+  /* Deeper, softer elevation matching the design's card treatment. */
+  --shadow-card: 0 10px 30px -24px rgba(16, 34, 68, 0.5);
+  --shadow-tile: 0 10px 30px -26px rgba(16, 34, 68, 0.5);
+  --shadow-gold: 0 10px 22px -10px rgba(216, 169, 4, 0.7);
+  --shadow-shell: 0 40px 90px -40px rgba(16, 34, 68, 0.55);
   --shadow-drawer: 0 8px 40px -8px rgba(13, 27, 57, 0.35);
 
   /* ─── Motion ────────────────────────────────────────── */
