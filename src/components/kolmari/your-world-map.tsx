@@ -15,8 +15,6 @@ export type WorldPin = {
   score: number | null
 }
 
-// Logical size the static image is requested at. Overlay pins are positioned
-// as percentages of this box, so the projection below must use the same size.
 const W = 960
 const H = 480
 const TILE = 512
@@ -25,8 +23,6 @@ const LOAD_TIMEOUT_MS = 12_000
 
 type MapLoadStatus = 'loading' | 'ready' | 'failed'
 
-// Web Mercator (matches Mapbox's static projection) so our own clickable pins
-// land exactly on the rendered basemap.
 function mercY(latDeg: number) {
   const lat = (Math.max(-85, Math.min(85, latDeg)) * Math.PI) / 180
   return (1 - Math.log(Math.tan(Math.PI / 4 + lat / 2)) / Math.PI) / 2
@@ -77,7 +73,6 @@ export function YourWorldMap({ pins }: { pins: WorldPin[] }) {
         setLoadStatus('failed')
         return current
       }
-
       return current + 1
     })
   }, [])
@@ -90,19 +85,19 @@ export function YourWorldMap({ pins }: { pins: WorldPin[] }) {
 
   useEffect(() => {
     if (!token || loadStatus !== 'loading') return
-
     const timeout = window.setTimeout(retryLoad, LOAD_TIMEOUT_MS)
     return () => window.clearTimeout(timeout)
   }, [loadAttempt, loadStatus, retryCycle, retryLoad, token])
 
-  // No token (or all image attempts failed): a calm navy panel listing the pins as
-  // clickable gold chips — the map is an enhancement, never the only path in.
+  // The map surface uses the approved light locator-blue canvas. This keeps the
+  // loading and fallback states visually consistent with other Kolmari map panels
+  // instead of flashing a dark navy block before the basemap appears.
   if (!token || loadStatus === 'failed') {
     return (
-      <div className="rounded-[16px] border border-white/10 bg-[#0D1B39] p-5 sm:p-6">
+      <div className="rounded-[16px] border border-line bg-[#CFE6F5] p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-white/80">
-            <MapPinned size={18} className="text-gold" aria-hidden="true" />
+          <div className="flex items-center gap-2 text-navy/80">
+            <MapPinned size={18} className="text-gold-deep" aria-hidden="true" />
             <p className="text-sm font-semibold">
               {pins.length > 0 ? 'Your matched destinations' : 'Your world map'}
             </p>
@@ -111,19 +106,19 @@ export function YourWorldMap({ pins }: { pins: WorldPin[] }) {
             <button
               type="button"
               onClick={restartLoad}
-              className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/20 px-3 text-xs font-bold text-white transition hover:border-gold hover:text-gold"
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-navy/20 px-3 text-xs font-bold text-navy transition hover:border-gold-deep hover:text-gold-deep"
             >
               <RefreshCw size={13} aria-hidden="true" /> Retry map
             </button>
           )}
         </div>
         {token && (
-          <p className="mt-2 text-sm text-white/55">
+          <p className="mt-2 text-sm text-navy/60">
             The map image could not be reached. Your destination links are still available below.
           </p>
         )}
         {pins.length === 0 ? (
-          <p className="mt-2 text-sm text-white/55">
+          <p className="mt-2 text-sm text-navy/60">
             Complete your Kolmari Profile to plot your matched destinations here.
           </p>
         ) : (
@@ -132,13 +127,13 @@ export function YourWorldMap({ pins }: { pins: WorldPin[] }) {
               <Link
                 key={p.slug}
                 href={`/nextinations/${p.slug}/v2/overview`}
-                className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-white/5 px-3 py-1.5 text-sm font-semibold text-white transition hover:border-gold hover:bg-white/10"
+                className="inline-flex items-center gap-2 rounded-full border border-navy/15 bg-white/70 px-3 py-1.5 text-sm font-semibold text-navy transition hover:border-gold-deep hover:bg-white"
               >
                 <span className="grid size-5 place-items-center rounded-full bg-gold text-[10px] font-bold text-navy">
                   {p.code}
                 </span>
                 {p.name}
-                {p.score !== null && <span className="text-xs text-gold">{p.score}%</span>}
+                {p.score !== null && <span className="text-xs text-gold-deep">{p.score}%</span>}
               </Link>
             ))}
           </div>
@@ -147,13 +142,11 @@ export function YourWorldMap({ pins }: { pins: WorldPin[] }) {
     )
   }
 
-  // Vary valid zoom precision between attempts so the browser does not reuse a
-  // cached failed image response. The numeric camera position stays unchanged.
   const zoomPrecision = Math.min(10, 2 + retryCycle * MAX_LOAD_ATTEMPTS + loadAttempt)
   const src = `https://api.mapbox.com/styles/v1/mapbox/light-v11/static/${view.lng},${view.lat},${view.zoom.toFixed(zoomPrecision)},0/${W}x${H}@2x?access_token=${encodeURIComponent(token)}&attribution=false&logo=false`
 
   return (
-    <div className="relative overflow-hidden rounded-[16px] border border-[#0D1B39]/15 bg-[#0D1B39]" style={{ aspectRatio: `${W} / ${H}` }}>
+    <div className="relative overflow-hidden rounded-[16px] border border-line bg-[#CFE6F5]" style={{ aspectRatio: `${W} / ${H}` }}>
       <img
         key={src}
         src={src}
@@ -163,9 +156,9 @@ export function YourWorldMap({ pins }: { pins: WorldPin[] }) {
         className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${loadStatus === 'ready' ? 'opacity-100' : 'opacity-0'}`}
       />
       {loadStatus === 'loading' && (
-        <div className="absolute inset-0 z-20 grid place-items-center bg-[#0D1B39] text-white" role="status" aria-live="polite">
+        <div className="absolute inset-0 z-20 grid place-items-center bg-[#CFE6F5] text-navy" role="status" aria-live="polite">
           <span className="flex items-center gap-2 text-sm font-semibold">
-            <LoaderCircle size={17} className="animate-spin text-gold" aria-hidden="true" /> Loading your world…
+            <LoaderCircle size={17} className="animate-spin text-gold-deep" aria-hidden="true" /> Loading your world…
           </span>
         </div>
       )}
