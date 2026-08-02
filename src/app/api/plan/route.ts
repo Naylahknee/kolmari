@@ -1,5 +1,5 @@
 import { getRequestUser } from '@/lib/auth'
-import { emptyNexitPlan, getNexitPlan, saveNexitPlan } from '@/lib/kolmari-plan'
+import { emptyNexitPlan, getNexitPlan, normalizeBudget, saveNexitPlan } from '@/lib/kolmari-plan'
 import { nexitPlanUpdateSchema } from '@/lib/schemas'
 import { isSameOrigin } from '@/lib/security'
 
@@ -18,6 +18,7 @@ export async function PUT(request: Request) {
     const parsed = nexitPlanUpdateSchema.safeParse(await request.json())
     if (!parsed.success) return Response.json({ error: 'Some plan details are invalid.' }, { status: 400 })
     const current = (await getNexitPlan(user.id)) ?? emptyNexitPlan(user.id)
-    return Response.json(await saveNexitPlan({ ...current, ...parsed.data, user_id: user.id }))
+    const budget = parsed.data.budget ? normalizeBudget(parsed.data.budget) : current.budget
+    return Response.json(await saveNexitPlan({ ...current, ...parsed.data, budget, user_id: user.id }))
   } catch (error) { console.error('Plan update failed', error); return Response.json({ error: 'Unable to save your Move Plan.' }, { status: 500 }) }
 }

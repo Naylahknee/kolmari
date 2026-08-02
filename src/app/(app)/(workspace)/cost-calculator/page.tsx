@@ -1,6 +1,7 @@
 import { CostCalculator } from '@/components/kolmari/cost-calculator'
 import { PlusGate } from '@/components/kolmari/plus-gate'
 import { requireCurrentUser } from '@/lib/auth'
+import { emptyNexitPlan, getNexitPlan } from '@/lib/kolmari-plan'
 import { getProfile, isPaid } from '@/lib/profile'
 
 export default async function CostCalculatorPage() {
@@ -12,16 +13,25 @@ export default async function CostCalculatorPage() {
       <PlusGate
         eyebrow="Cost Calculator"
         title="Unlock the full Cost Calculator with Plus"
-        description="Plus opens the full monthly cost breakdown for your Destinations — housing, food, transport, healthcare, and more — measured against your income and budget."
+        description="Plus separates one-time moving cash from ongoing monthly costs, then compares the plan with your income."
         bullets={[
-          'Detailed monthly cost breakdown by category',
-          'Compared against your income and budget',
-          'Solo, couple, and family estimates',
-          'Save figures into your Kolmari Plan',
+          'One-time arrival costs and monthly living costs',
+          'Available local planning baselines with manual overrides',
+          'Monthly runway outlook and assumptions log',
+          'Save the same figures into My Plan',
         ]}
       />
     )
   }
 
-  return <CostCalculator income={profile.wizard_status === 'completed' ? profile.monthly_income : null} profileComplete={profile.wizard_status === 'completed'} />
+  const existingPlan = await getNexitPlan(user.id)
+
+  return (
+    <CostCalculator
+      initialPlan={existingPlan ?? emptyNexitPlan(user.id)}
+      income={profile.wizard_status === 'completed' ? profile.monthly_income : null}
+      profileComplete={profile.wizard_status === 'completed'}
+      profileHousehold={profile.wizard_status === 'completed' ? profile.family_size : null}
+    />
+  )
 }

@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
-import { PathwaysResults, type Fit, type Pathway } from '@/components/kolmari/pathways-results'
+import { PathwaysResults } from '@/components/kolmari/pathways-results'
 import { PlusGate } from '@/components/kolmari/plus-gate'
 import { requireCurrentUser } from '@/lib/auth'
 import { getProfile, isPaid } from '@/lib/profile'
-import { evaluatePathways, PATHWAYS } from '@/lib/pathways'
+import { PATHWAYS } from '@/lib/pathways'
 
 export const metadata: Metadata = { title: 'Pathways | Kolmari', description: 'Compare official residency and visa Pathways using your Profile.' }
 
@@ -52,45 +52,6 @@ export default async function PathwaysPage() {
       />
     )
   }
-  const evaluated = profile.wizard_status === 'completed'
-    ? evaluatePathways(profile)
-    : PATHWAYS.map((pathway) => ({
-        ...pathway,
-        status: 'Missing Requirements' as const,
-        requirementsMet: [],
-        missingRequirements: [],
-      }))
-  const countryCodes: Record<string, string> = {
-    Canada: 'CA',
-    Germany: 'DE',
-    Ireland: 'IE',
-    'New Zealand': 'NZ',
-    Portugal: 'PT',
-    Spain: 'ES',
-  }
-  const fitByStatus = {
-    'Strong Match': 'likely',
-    'Possible Match': 'possible',
-    'Missing Requirements': 'unknown',
-  } as const satisfies Record<(typeof evaluated)[number]['status'], Fit>
-  const pathways: Pathway[] = evaluated.map((pathway) => ({
-    id: pathway.id,
-    category: pathway.category,
-    title: pathway.name,
-    country: pathway.country,
-    countryCode: countryCodes[pathway.country] ?? pathway.country.slice(0, 2).toUpperCase(),
-    fit: fitByStatus[pathway.status],
-    incomeGuide: pathway.incomeThreshold,
-    dependents: pathway.dependentsAllowed,
-    workRights: pathway.localWorkRights,
-    fees: pathway.estimatedFees,
-    processing: pathway.estimatedProcessingTime,
-    lastVerified: pathway.lastVerified,
-    sourceUrl: pathway.officialSource,
-    sourceLabel: pathway.sourceLabel,
-    met: pathway.requirementsMet,
-    missing: pathway.missingRequirements,
-  }))
-
-  return <PathwaysResults profile={profile} pathways={pathways} />
+  // Signals are evaluated client-side so the explorer controls can recompute them live.
+  return <PathwaysResults profile={profile} />
 }

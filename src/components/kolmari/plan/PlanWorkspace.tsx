@@ -11,6 +11,7 @@ import { ChecklistTab } from './ChecklistTab'
 import { DocumentsTab } from './DocumentsTab'
 import { BudgetTab } from './BudgetTab'
 import { NotesTab } from './NotesTab'
+import { applyBudgetBenchmark, getBudgetBenchmark } from '@/lib/budget-benchmarks'
 
 const TAB_LABELS: Record<TabId, string> = {
   overview: 'Overview',
@@ -175,14 +176,20 @@ function PlanDetailsDialog({ ctx, tier, setTier, onClose }: { ctx: PlanCtx; tier
   )
 }
 
-export function PlanWorkspace({ initial, nextinations, pathways, profileHousehold, initialTab }: {
+export function PlanWorkspace({ initial, nextinations, pathways, profileHousehold, profileMonthlyIncome, initialTab }: {
   initial: NexitPlan
   nextinations: string[]
   pathways: string[]
   profileHousehold: number | null
+  profileMonthlyIncome: number | null
   initialTab: TabId
 }) {
-  const seeded: NexitPlan = { ...initial, household_members: initial.household_members ?? profileHousehold }
+  const seededHousehold = initial.household_members ?? profileHousehold
+  const seeded: NexitPlan = {
+    ...initial,
+    household_members: seededHousehold,
+    budget: applyBudgetBenchmark(initial.budget, getBudgetBenchmark(initial.saved_nextination, seededHousehold)),
+  }
   const { plan, update, saveStatus, savedAtLabel, retry } = usePlanState(seeded)
 
   // Instant localStorage cache (complements the canonical server autosave):
@@ -247,6 +254,7 @@ export function PlanWorkspace({ initial, nextinations, pathways, profileHousehol
     retry,
     nextinations,
     pathways,
+    monthlyIncome: profileMonthlyIncome,
   }
 
   const document = documentStep(plan)

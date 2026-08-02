@@ -41,3 +41,13 @@ Never fabricate:
 - Task completion
 
 When real data does not exist, display a clear empty state.
+
+## Budget compatibility
+
+`nexit_plans.budget` remains JSONB and uses the existing line-item array. Each line may include:
+
+- `systemBaseline` and `systemBaselineKey` for an explicitly identified planning reference;
+- `userOverride` and `isCustom` for the user's aggregate category value;
+- `detailOverrides` for optional sub-category values saved from the benchmark dialog.
+
+The aggregate `userOverride` remains the compatibility value used by existing dashboard and readiness calculations. Baselines must be cleared when their destination/household key no longer matches the active plan.
