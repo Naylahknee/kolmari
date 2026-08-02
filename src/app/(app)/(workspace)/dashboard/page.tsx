@@ -3,10 +3,11 @@ import { ArrowRight, CheckCircle2, Globe2, NotebookTabs, Route, Sparkles, UserRo
 import { requireCurrentUser } from '@/lib/auth'
 import { COUNTRIES } from '@/lib/countries'
 import {
+  budgetEffective,
   getNexitPlan,
   journeyStageLabel,
   nextBestAction,
-  type PlanBudget,
+  type BudgetLine,
 } from '@/lib/kolmari-plan'
 import { evaluatePathways } from '@/lib/pathways'
 import { getProfile, hasCompletedProfile, isPaid } from '@/lib/profile'
@@ -18,17 +19,11 @@ import { DashboardWelcome } from '@/components/kolmari/dashboard-onboarding'
 import { DestinationVisaPlanner, type PlannerDestination, type PlannerPathway } from '@/components/kolmari/destination-visa-planner'
 import { KolmariTracker } from '@/components/kolmari/kolmari-tracker'
 
-const BUDGET_LABELS: Record<keyof PlanBudget, string> = {
-  housing: 'Housing',
-  food: 'Food',
-  transport: 'Transport',
-  healthcare: 'Healthcare',
-  other: 'Other',
-}
-
-function budgetSlices(budget: PlanBudget): BudgetSlice[] {
-  return (Object.keys(BUDGET_LABELS) as (keyof PlanBudget)[])
-    .map((key, index) => ({ label: BUDGET_LABELS[key], amount: budget[key] ?? 0, color: BUDGET_COLORS[index % BUDGET_COLORS.length] }))
+// Monthly recurring lines feed the dashboard cost-snapshot donut.
+function budgetSlices(budget: BudgetLine[]): BudgetSlice[] {
+  return budget
+    .filter((line) => line.chronologicalStage === 'MONTHLY_RECURRING')
+    .map((line, index) => ({ label: line.label, amount: budgetEffective(line) ?? 0, color: BUDGET_COLORS[index % BUDGET_COLORS.length] }))
     .filter((slice) => slice.amount > 0)
 }
 

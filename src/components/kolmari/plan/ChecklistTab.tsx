@@ -32,7 +32,7 @@ export function ChecklistTab({ ctx }: { ctx: PlanCtx }) {
   function add(value: string, atStage: PlanStage) {
     const clean = value.trim()
     if (!clean || items.some((i) => i.text.toLowerCase() === clean.toLowerCase())) return
-    setItems([...items, { id: newId('c'), text: clean, done: false, stage: atStage, due: null }])
+    setItems([...items, { id: newId('c'), text: clean, done: false, stage: atStage, due: null, isSystemTemplate: false }])
   }
   function patch(id: string, changes: Partial<ChecklistItem>) { setItems(items.map((i) => (i.id === id ? { ...i, ...changes } : i))) }
   function remove(id: string) {

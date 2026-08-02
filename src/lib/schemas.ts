@@ -63,7 +63,7 @@ export const profileUpdateSchema = z.object({
   completed_at: z.string().datetime().nullable().optional(),
 }).strict()
 
-const nullableMoney = z.number().int().min(0).max(100_000_000).nullable()
+const nullableMoney = z.number().min(0).max(100_000_000).nullable()
 
 const checklistItemSchema = z.object({
   id: z.string().max(64),
@@ -71,27 +71,37 @@ const checklistItemSchema = z.object({
   done: z.boolean(),
   stage: z.enum(['Explore', 'Assess', 'Shortlist', 'Decide', 'Prepare', 'Apply', 'Move', 'Settle In']).nullable(),
   due: z.string().date().nullable(),
+  isSystemTemplate: z.boolean(),
 }).strict()
 
 const documentItemSchema = z.object({
   id: z.string().max(64),
   name: z.string().trim().min(1).max(160),
-  status: z.enum(['not_started', 'in_progress', 'needs_review', 'ready']),
-  apostille: z.boolean(),
-  translate: z.boolean(),
-  due: z.string().date().nullable(),
+  status: z.enum(['MISSING', 'UPLOADED', 'TRANSLATED', 'APOSTILLED', 'APPROVED']),
+  expirationDate: z.string().date().nullable(),
   note: z.string().trim().max(400).nullable(),
+}).strict()
+
+const budgetLineSchema = z.object({
+  id: z.string().max(64),
+  category: z.string().trim().min(1).max(60),
+  label: z.string().trim().min(1).max(80),
+  chronologicalStage: z.enum(['ONE_TIME', 'MONTHLY_RECURRING']),
+  systemBaseline: nullableMoney,
+  userOverride: nullableMoney,
+  isCustom: z.boolean(),
 }).strict()
 
 export const nexitPlanUpdateSchema = z.object({
   saved_nextination: z.string().trim().max(100).nullable().optional(),
+  destination_city: z.string().trim().max(120).nullable().optional(),
   selected_pathway: z.string().trim().max(180).nullable().optional(),
   target_move_date: z.string().date().nullable().optional(),
   household_members: z.number().int().min(1).max(20).nullable().optional(),
   journey_stage: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5), z.literal(6), z.literal(7), z.literal(8)]).optional(),
   timeline_stage: z.enum(['Explore', 'Assess', 'Shortlist', 'Decide', 'Prepare', 'Apply', 'Move', 'Settle In']).optional(),
   checklist: z.array(checklistItemSchema).max(200).optional(),
-  budget: z.object({ housing: nullableMoney, food: nullableMoney, transport: nullableMoney, healthcare: nullableMoney, other: nullableMoney }).strict().optional(),
+  budget: z.array(budgetLineSchema).max(100).optional(),
   documents: z.array(documentItemSchema).max(200).optional(),
   notes: z.string().max(10_000).nullable().optional(),
 }).strict()
