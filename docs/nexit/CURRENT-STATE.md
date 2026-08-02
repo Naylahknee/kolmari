@@ -1087,3 +1087,40 @@ card). Everything else is real user input.
 
 ### Tests: tsc pass · next build pass · ESLint no new errors. Legacy string
 checklist/documents rows verified to normalize into the structured shape.
+
+## Cost Calculator + My Plan hybrid budget redesign
+
+Completed the previously partial budget redesign without replacing the existing
+routes, plan table, autosave flow, API contract, or Kolmari design tokens.
+
+- The standalone Cost Calculator now uses the same nine-line plan budget model as
+  My Plan instead of a separate five-field blank slate.
+- Both surfaces separate one-time arrival costs from ongoing monthly costs and
+  show upfront cash, monthly run-rate, and user-verified row counts.
+- Added one transparent benchmark set for the explicitly approved context:
+  Portugal, household of five. The UI identifies it as a planning reference,
+  shows its assumptions and August 2026 review date, and does not imply an
+  official quote. Other contexts retain an honest manual-entry state.
+- Baselines appear as muted placeholders but participate in totals. A user entry
+  becomes the effective custom value and receives a visible Custom status.
+- New shared `BudgetBenchmarkDialog` provides category navigation, editable
+  sub-costs, a live category total, focus containment, Escape/backdrop close,
+  body-scroll lock, and focus restoration. Saving rolls the sub-cost total into
+  the existing parent budget line.
+- Added a sticky monthly outlook that compares stored/entered monthly income with
+  recurring costs using three honest classifications: Appears manageable,
+  Limited cushion, or Budget gap. It does not create an unsupported score.
+- Cost Calculator now saves the budget to the existing `/api/plan` route; My Plan
+  keeps its existing debounced autosave. CSV export now includes both phases,
+  baseline, custom, and effective values.
+- Budget JSON remains backward-compatible. Optional `systemBaselineKey` and
+  `detailOverrides` fields are normalized at the API boundary; no SQL migration
+  is required.
+
+### Validation
+
+- TypeScript: passed (`npx tsc --noEmit`)
+- Focused ESLint: passed
+- Diff check: passed
+- Production build: blocked before application compilation because the sandbox
+  does not allow `fonts.googleapis.com`; TypeScript and focused ESLint passed.
