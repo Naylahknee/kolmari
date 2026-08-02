@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { PlanWorkspace } from '@/components/kolmari/plan/PlanWorkspace'
+import { PlanHeaderLocator } from '@/components/kolmari/plan/PlanHeaderLocator'
 import { requireCurrentUser } from '@/lib/auth'
 import { COUNTRIES } from '@/lib/countries'
 import { emptyNexitPlan, getNexitPlan } from '@/lib/kolmari-plan'
@@ -14,15 +15,19 @@ export default async function NexitPlanPage({ searchParams }: { searchParams: Pr
   const [profile, existing, params] = await Promise.all([getProfile(user.id), getNexitPlan(user.id), searchParams])
   const requested = params?.tab
   const initialTab: TabId = PLAN_TABS.includes(requested as TabId) ? (requested as TabId) : 'overview'
+  const plan = existing ?? emptyNexitPlan(user.id)
 
   return (
-    <PlanWorkspace
-      initial={existing ?? emptyNexitPlan(user.id)}
-      nextinations={COUNTRIES.map((country) => country.name)}
-      pathways={PATHWAYS.map((pathway) => `${pathway.country} — ${pathway.name}`)}
-      profileHousehold={profile.wizard_status === 'completed' ? profile.family_size : null}
-      profileMonthlyIncome={profile.wizard_status === 'completed' ? profile.monthly_income : null}
-      initialTab={initialTab}
-    />
+    <div className="relative">
+      <PlanHeaderLocator country={plan.saved_nextination} city={plan.destination_city} />
+      <PlanWorkspace
+        initial={plan}
+        nextinations={COUNTRIES.map((country) => country.name)}
+        pathways={PATHWAYS.map((pathway) => `${pathway.country} — ${pathway.name}`)}
+        profileHousehold={profile.wizard_status === 'completed' ? profile.family_size : null}
+        profileMonthlyIncome={profile.wizard_status === 'completed' ? profile.monthly_income : null}
+        initialTab={initialTab}
+      />
+    </div>
   )
 }
