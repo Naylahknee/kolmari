@@ -1,4 +1,5 @@
 import { CountrySnapshotMap } from '@/components/country-workspace/CountrySnapshotMap'
+import { countryFacts } from '@/lib/country-facts'
 
 /* The country page hero.
 
@@ -136,6 +137,17 @@ export function CountryHero({
           Your research workspace for {country.name}. Figures appear here only once they are verified from
           official sources — never estimated or borrowed from another country.
         </p>
+        {(() => {
+          const facts = countryFacts(country.slug)
+          if (!facts || !(facts.schengen || facts.eu || facts.nato)) return null
+          return (
+            <div className="badges">
+              {facts.schengen && <span className="badge-h b-sch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18" /></svg> Schengen Area</span>}
+              {facts.eu && <span className="badge-h b-eu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 6.6l.9 1.9 2 .3-1.5 1.4.4 2-1.8-1-1.8 1 .4-2-1.5-1.4 2-.3z" fill="currentColor" stroke="none" /></svg> EU Member</span>}
+              {facts.nato && <span className="badge-h b-nato"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2l8 3.6v6.1c0 4.6-3.3 8.7-8 10.3-4.7-1.6-8-5.7-8-10.3V5.6z" /><path d="M12 7v10M7.5 12h9" /></svg> NATO Member</span>}
+            </div>
+          )
+        })()}
       </div>
       <div className="metrics">
         {visaType ? (
