@@ -69,11 +69,6 @@ export default async function DashboardPage() {
     <div className="flex flex-col gap-4">
       <DashboardWelcome firstName={firstName} firstVisitCandidate={firstVisitCandidate} profileComplete={complete} />
 
-      <div>
-        <p className="text-[10.5px] font-bold uppercase tracking-[0.13em] text-gold-deep">Your relocation journey</p>
-        <h1 className="mt-1.5 font-display text-[30px] font-bold tracking-[-0.01em] text-navy">Good morning, {firstName}</h1>
-      </div>
-
       {!complete && (
         <section className="rounded-[var(--radius-card)] border border-gold/30 bg-gold-soft/50 p-5 sm:flex sm:items-center sm:justify-between sm:gap-6">
           <div>
