@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { Download, Plus, Search } from 'lucide-react'
+import { AlertTriangle, Download, Plus, Search, UploadCloud, X } from 'lucide-react'
 import {
-  DOC_STATUS_LABELS, DOC_STATUS_ORDER, DOC_STEPS, docCounts, documentStep,
+  DOC_STATUS_LABELS, DOC_STATUS_ORDER, DOC_STEPS, daysUntil, docCounts, documentStep,
   formatShortDate, newId, processingBuckets, type DocStatus, type DocumentItem,
 } from '@/lib/plan-types'
 import { StatusBadge, StatusDot, Stepper, type PlanCtx } from './shared'
@@ -57,7 +57,18 @@ export function DocumentsTab({ ctx }: { ctx: PlanCtx }) {
   const shown = showAll ? filtered : filtered.slice(0, 8)
   const eyebrow = [plan.saved_nextination, plan.selected_pathway].filter(Boolean).join(' · ')
 
+  // Expiration warning engine: flag a document that expires before — or within
+  // 90 days of — the target move date, so it can be renewed in time.
+  const moveDate = plan.target_move_date ? new Date(`${plan.target_move_date}T00:00:00Z`) : null
+  function expiresBeforeMove(doc: DocumentItem): boolean {
+    if (!doc.expirationDate || !moveDate || doc.status === 'APPROVED') return false
+    const d = daysUntil(doc.expirationDate, moveDate)
+    return d !== null && d <= 90
+  }
+  const editingDoc = docs.find((d) => d.id === editingId) ?? null
+
   return (
+    <>
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1.85fr)_minmax(260px,.85fr)]">
       <div className="space-y-5">
         {/* Header + progress */}
@@ -122,37 +133,27 @@ export function DocumentsTab({ ctx }: { ctx: PlanCtx }) {
           <ul className="mt-4 divide-y divide-line">
             {shown.length === 0 ? (
               <li className="py-6 text-center text-sm text-muted">{docs.length ? 'No documents match your filters.' : 'No documents yet — add the records your pathway requires.'}</li>
-            ) : shown.map((doc) => (
-              <li key={doc.id} className="py-3">
-                <div className="flex items-center gap-3">
-                  <StatusDot status={doc.status} />
-                  <button type="button" onClick={() => setEditingId(editingId === doc.id ? null : doc.id)} className="min-w-0 flex-1 text-left">
-                    <p className="truncate text-sm font-bold text-navy">{doc.name}</p>
-                    <p className="truncate text-xs text-muted">
-                      {doc.note ?? 'Tap to set status & expiration'}
-                      {doc.expirationDate ? ` · Expires ${formatShortDate(doc.expirationDate)}` : ''}
-                    </p>
-                  </button>
-                  <StatusBadge status={doc.status} />
-                </div>
-                {editingId === doc.id && (
-                  <div className="mt-3 space-y-3 rounded-[var(--radius-field)] bg-canvas p-3">
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      <label className="text-xs font-semibold text-navy">Status
-                        <select className="field mt-1" value={doc.status} onChange={(e) => patch(doc.id, { status: e.target.value as DocStatus })}>
-                          {DOC_STATUS_ORDER.map((s) => <option key={s} value={s}>{DOC_STATUS_LABELS[s]}</option>)}
-                        </select>
-                      </label>
-                      <label className="text-xs font-semibold text-navy">Expiration / deadline
-                        <input className="field mt-1" type="date" value={doc.expirationDate ?? ''} onChange={(e) => patch(doc.id, { expirationDate: e.target.value || null })} />
-                      </label>
-                    </div>
-                    <input className="field" value={doc.note ?? ''} onChange={(e) => patch(doc.id, { note: e.target.value || null })} placeholder="Note (e.g. state-issued long form)" aria-label="Document note" />
-                    <button type="button" onClick={() => remove(doc.id)} className="text-xs font-bold text-danger hover:underline">Remove document</button>
+            ) : shown.map((doc) => {
+              const warn = expiresBeforeMove(doc)
+              return (
+                <li key={doc.id} className={`-mx-2 rounded-[var(--radius-field)] px-2 py-3 ${warn ? 'border-l-2 border-danger bg-danger/5' : ''}`}>
+                  <div className="flex items-center gap-3">
+                    <StatusDot status={doc.status} />
+                    <button type="button" onClick={() => setEditingId(doc.id)} className="min-w-0 flex-1 text-left">
+                      <p className="flex items-center gap-1.5 truncate text-sm font-bold text-navy">
+                        {doc.name}
+                        {warn && <AlertTriangle size={13} className="shrink-0 text-danger" aria-label="Expires before your move window" />}
+                      </p>
+                      <p className="truncate text-xs text-muted">
+                        {warn ? 'Expires before your move window' : (doc.note ?? 'Tap to set status & expiration')}
+                        {doc.expirationDate ? ` · Expires ${formatShortDate(doc.expirationDate)}` : ''}
+                      </p>
+                    </button>
+                    <StatusBadge status={doc.status} />
                   </div>
-                )}
-              </li>
-            ))}
+                </li>
+              )
+            })}
           </ul>
 
           <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
@@ -215,6 +216,87 @@ export function DocumentsTab({ ctx }: { ctx: PlanCtx }) {
           </div>
         </section>
       </aside>
+    </div>
+
+    {editingDoc && (
+      <DocDetailSlideOver
+        doc={editingDoc}
+        warn={expiresBeforeMove(editingDoc)}
+        onPatch={(changes) => patch(editingDoc.id, changes)}
+        onRemove={() => remove(editingDoc.id)}
+        onClose={() => setEditingId(null)}
+      />
+    )}
+    </>
+  )
+}
+
+function DocDetailSlideOver({ doc, warn, onPatch, onRemove, onClose }: {
+  doc: DocumentItem
+  warn: boolean
+  onPatch: (changes: Partial<DocumentItem>) => void
+  onRemove: () => void
+  onClose: () => void
+}) {
+  const fileRef = useRef<HTMLInputElement>(null)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  // No upload backend yet — record the chosen file's name and mark it uploaded.
+  function attach(file: File | null) {
+    if (!file) return
+    onPatch({ note: file.name, status: doc.status === 'MISSING' ? 'UPLOADED' : doc.status })
+  }
+
+  return (
+    <div className="fixed inset-0 z-[120] flex justify-end bg-navy/40" role="dialog" aria-modal="true" aria-label={`${doc.name} details`} onClick={onClose}>
+      <div className="h-full w-full max-w-md overflow-y-auto bg-white p-5 shadow-drawer sm:p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">Document</p>
+            <h2 className="mt-1 text-lg font-bold text-navy">{doc.name}</h2>
+          </div>
+          <button type="button" onClick={onClose} aria-label="Close" className="grid size-8 place-items-center rounded-full text-muted hover:bg-canvas hover:text-navy"><X size={16} /></button>
+        </div>
+
+        {warn && (
+          <div className="mt-4 flex items-start gap-2 rounded-[var(--radius-field)] border border-danger/30 bg-danger/5 p-3 text-xs font-semibold text-danger">
+            <AlertTriangle size={15} className="mt-0.5 shrink-0" aria-hidden="true" />
+            This document expires before your move window — plan to renew it in time.
+          </div>
+        )}
+
+        <label className="mt-5 block text-xs font-semibold text-navy">Status
+          <select className="field mt-1" value={doc.status} onChange={(e) => onPatch({ status: e.target.value as DocStatus })}>
+            {DOC_STATUS_ORDER.map((s) => <option key={s} value={s}>{DOC_STATUS_LABELS[s]}</option>)}
+          </select>
+        </label>
+
+        <label className="mt-4 block text-xs font-semibold text-navy">Expiration / deadline
+          <input className="field mt-1" type="date" value={doc.expirationDate ?? ''} onChange={(e) => onPatch({ expirationDate: e.target.value || null })} />
+        </label>
+
+        <label className="mt-4 block text-xs font-semibold text-navy">Note
+          <input className="field mt-1" value={doc.note ?? ''} onChange={(e) => onPatch({ note: e.target.value || null })} placeholder="e.g. state-issued long form" />
+        </label>
+
+        <div
+          className="mt-5 grid cursor-pointer place-items-center gap-2 rounded-[var(--radius-field)] border border-dashed border-line-strong bg-canvas px-4 py-6 text-center"
+          onClick={() => fileRef.current?.click()}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => { e.preventDefault(); attach(e.dataTransfer.files[0] ?? null) }}
+        >
+          <UploadCloud size={20} className="text-muted" aria-hidden="true" />
+          <p className="text-xs font-semibold text-navy">Drop a file or click to select</p>
+          <p className="text-[11px] text-muted">Records the file name and marks it uploaded. Secure file storage is coming soon.</p>
+          <input ref={fileRef} type="file" className="hidden" onChange={(e) => attach(e.target.files?.[0] ?? null)} />
+        </div>
+
+        <button type="button" onClick={onRemove} className="mt-6 text-xs font-bold text-danger hover:underline">Remove document</button>
+      </div>
     </div>
   )
 }

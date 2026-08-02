@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-import { ArrowRight, Check, Plus } from 'lucide-react'
-import { PLAN_STAGES, formatShortDate, newId, type ChecklistItem, type PlanStage } from '@/lib/plan-types'
+import { useEffect, useRef, useState } from 'react'
+import { ArrowRight, Check, Plus, Trash2 } from 'lucide-react'
+import { CHECKLIST_TEMPLATE, PLAN_STAGES, formatShortDate, newId, type ChecklistItem, type PlanStage } from '@/lib/plan-types'
 import { ProgressBar, type PlanCtx } from './shared'
 
 const SUGGESTED = ['Confirm passport validity', 'Verify official Pathway requirements', 'Research housing areas', 'Review healthcare coverage', 'Compare neighborhoods']
@@ -27,6 +27,15 @@ export function ChecklistTab({ ctx }: { ctx: PlanCtx }) {
 
   const doneCount = items.filter((i) => i.done).length
   const pct = items.length ? Math.round((doneCount / items.length) * 100) : 0
+
+  // Auto-populate a generic starter checklist once, when a destination is set
+  // and the list is empty. Marked isSystemTemplate so they read as suggestions.
+  const injected = useRef(false)
+  useEffect(() => {
+    if (injected.current || items.length > 0 || !plan.saved_nextination) return
+    injected.current = true
+    update('checklist', CHECKLIST_TEMPLATE.map((t) => ({ id: newId('c'), text: t.text, done: false, stage: t.stage, due: null, isSystemTemplate: true })))
+  }, [items.length, plan.saved_nextination, update])
 
   function setItems(next: ChecklistItem[]) { update('checklist', next) }
   function add(value: string, atStage: PlanStage) {
@@ -107,9 +116,11 @@ export function ChecklistTab({ ctx }: { ctx: PlanCtx }) {
                     </button>
                     <div className="min-w-0 flex-1">
                       <p className={`text-sm font-semibold ${item.done ? 'text-muted line-through' : 'text-navy'}`}>{item.text}</p>
-                      <p className="text-xs text-muted">{item.stage ?? 'Any stage'}{item.done ? '' : item.due ? ` · Due ${formatShortDate(item.due)}` : ''}</p>
+                      {!item.done && item.due && <p className="text-xs text-muted">Due {formatShortDate(item.due)}</p>}
                     </div>
+                    <span className="hidden shrink-0 rounded-full bg-canvas px-2.5 py-1 text-[10px] font-bold text-muted sm:inline">{item.stage ?? 'Any stage'}</span>
                     <button type="button" onClick={() => setEditingId(editingId === item.id ? null : item.id)} className="shrink-0 rounded-[var(--radius-btn)] border border-line px-3 py-1.5 text-xs font-bold text-navy hover:bg-canvas">Edit</button>
+                    <button type="button" onClick={() => remove(item.id)} aria-label={`Delete ${item.text}`} className="grid size-9 shrink-0 place-items-center rounded-[var(--radius-btn)] text-muted hover:bg-canvas hover:text-danger"><Trash2 size={15} aria-hidden="true" /></button>
                   </div>
                   {editingId === item.id && (
                     <div className="mt-3 grid gap-2 rounded-[var(--radius-field)] bg-canvas p-3 sm:grid-cols-[1fr_auto_auto]">

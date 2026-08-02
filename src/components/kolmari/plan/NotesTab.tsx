@@ -1,16 +1,27 @@
 'use client'
 
 import { useRef } from 'react'
-import { formatMonthYear } from '@/lib/plan-types'
+import { formatMonthYear, type PlanStage } from '@/lib/plan-types'
 import { SaveChip, type PlanCtx } from './shared'
 
 const PROMPTS = [
-  { label: 'Decision', prefix: 'DECISION: ' },
-  { label: 'Question', prefix: 'QUESTION: ' },
-  { label: 'Follow-up', prefix: 'FOLLOW-UP: ' },
-  { label: 'Research finding', prefix: 'RESEARCH: ' },
+  { label: 'Decision', prefix: '[DECISION]: ' },
+  { label: 'Question', prefix: '[QUESTION]: ' },
+  { label: 'Follow-up', prefix: '[FOLLOW-UP]: ' },
+  { label: 'Research finding', prefix: '[RESEARCH]: ' },
 ]
-const USEFUL_PROMPTS = ['What could delay this plan?', 'Which decision still needs evidence?', 'What needs to happen this month?']
+
+// Prompts adapt to the user's active move stage to guide research.
+const STAGE_PROMPTS: Record<PlanStage, string[]> = {
+  Explore: ['What timeline risks could delay this move?', 'Which regions fit our budget and lifestyle?'],
+  Assess: ['Do we meet the pathway requirements?', 'What evidence still needs gathering?'],
+  Shortlist: ['Which neighborhoods match our budget floor?', 'What are the trade-offs between our top options?'],
+  Decide: ['What would make this decision final?', 'Which pathway gives us the best odds?'],
+  Prepare: ['Which documents need an apostille or translation?', 'Is the budget realistic for our household?'],
+  Apply: ['Have we compiled all required background checks?', 'Are translation and apostille timelines accounted for?'],
+  Move: ['What must be booked or shipped, and when?', 'What needs to happen this month?'],
+  'Settle In': ['What must we register locally first?', 'What is still unresolved after arriving?'],
+}
 
 export function NotesTab({ ctx }: { ctx: PlanCtx }) {
   const { plan, update, saveStatus, savedAtLabel, retry } = ctx
@@ -79,10 +90,10 @@ export function NotesTab({ ctx }: { ctx: PlanCtx }) {
           </section>
 
           <section className="card-surface p-5">
-            <p className="text-base font-bold text-navy">Useful prompts</p>
-            <p className="mt-0.5 text-xs text-muted">Questions that move the plan forward.</p>
+            <p className="text-base font-bold text-navy">Prompts for your {plan.timeline_stage} stage</p>
+            <p className="mt-0.5 text-xs text-muted">Questions that move this stage forward.</p>
             <ul className="mt-3 divide-y divide-line">
-              {USEFUL_PROMPTS.map((prompt) => (
+              {STAGE_PROMPTS[plan.timeline_stage].map((prompt) => (
                 <li key={prompt}>
                   <button type="button" onClick={() => insert(`${prompt} `)} className="w-full py-3 text-left text-sm font-bold text-navy hover:text-gold-deep">{prompt}</button>
                 </li>
