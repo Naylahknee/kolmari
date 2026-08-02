@@ -19,6 +19,7 @@ export type PlanCtx = {
   retry: () => void
   nextinations: string[]
   pathways: string[]
+  monthlyIncome: number | null
 }
 
 export function SaveChip({ status, onRetry, className = '' }: { status: SaveStatus; onRetry?: () => void; className?: string }) {

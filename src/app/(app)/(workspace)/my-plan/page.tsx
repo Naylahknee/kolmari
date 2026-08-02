@@ -21,6 +21,7 @@ export default async function NexitPlanPage({ searchParams }: { searchParams: Pr
       nextinations={COUNTRIES.map((country) => country.name)}
       pathways={PATHWAYS.map((pathway) => `${pathway.country} — ${pathway.name}`)}
       profileHousehold={profile.wizard_status === 'completed' ? profile.family_size : null}
+      profileMonthlyIncome={profile.wizard_status === 'completed' ? profile.monthly_income : null}
       initialTab={initialTab}
     />
   )

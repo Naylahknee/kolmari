@@ -49,8 +49,12 @@ export type BudgetLine = {
   label: string
   chronologicalStage: BudgetStage
   systemBaseline: number | null
+  systemBaselineKey: string | null
   userOverride: number | null
   isCustom: boolean
+  // Optional sub-category values saved from the benchmark detail dialog.
+  // The aggregate remains in userOverride so older consumers keep working.
+  detailOverrides: Record<string, number> | null
 }
 
 const BUDGET_TEMPLATE: { category: string; label: string; chronologicalStage: BudgetStage }[] = [
@@ -65,11 +69,12 @@ const BUDGET_TEMPLATE: { category: string; label: string; chronologicalStage: Bu
   { category: 'logistics', label: 'Shipping & logistics', chronologicalStage: 'ONE_TIME' },
 ]
 
-/** Baseline template of budget lines with empty values (no fabricated baselines). */
+/** Baseline template of budget lines; approved context-specific values are applied separately. */
 export function defaultBudget(): BudgetLine[] {
   return BUDGET_TEMPLATE.map((t) => ({
     id: t.category, category: t.category, label: t.label,
-    chronologicalStage: t.chronologicalStage, systemBaseline: null, userOverride: null, isCustom: false,
+    chronologicalStage: t.chronologicalStage, systemBaseline: null, systemBaselineKey: null, userOverride: null, isCustom: false,
+    detailOverrides: null,
   }))
 }
 
@@ -176,14 +181,21 @@ function coerceBudgetLine(raw: unknown, index: number): BudgetLine | null {
   if (typeof r.category !== 'string' || !r.category) return null
   const stage: BudgetStage = r.chronologicalStage === 'ONE_TIME' ? 'ONE_TIME' : 'MONTHLY_RECURRING'
   const num = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : null)
+  const detailOverrides = r.detailOverrides && typeof r.detailOverrides === 'object'
+    ? Object.fromEntries(Object.entries(r.detailOverrides).filter((entry): entry is [string, number] => (
+        typeof entry[1] === 'number' && Number.isFinite(entry[1]) && entry[1] >= 0
+      )))
+    : null
   return {
     id: typeof r.id === 'string' && r.id ? r.id : `b-${index}`,
     category: r.category,
     label: typeof r.label === 'string' && r.label ? r.label : r.category,
     chronologicalStage: stage,
     systemBaseline: num(r.systemBaseline),
+    systemBaselineKey: typeof r.systemBaselineKey === 'string' && r.systemBaselineKey ? r.systemBaselineKey : null,
     userOverride: num(r.userOverride),
     isCustom: r.isCustom === true,
+    detailOverrides,
   }
 }
 

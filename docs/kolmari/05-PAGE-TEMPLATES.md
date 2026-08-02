@@ -39,7 +39,12 @@
 - Destination picker
 - Pathway picker
 - Checklist (add / complete / delete)
-- Budget fields
+- Budget tab uses the same hybrid line-item model as the Cost Calculator:
+  - one-time arrival costs and ongoing monthly costs are separate groups;
+  - an available local planning baseline is counted until the user supplies a custom value;
+  - benchmark details open in a focused dialog and sync back to the parent category;
+  - monthly income is compared with the ongoing monthly run-rate in a persistent outlook card;
+  - the assumptions and review date for any baseline remain visible.
 - Notes
 
 ### Flutter Mode
@@ -64,9 +69,17 @@
 
 ### Cost Calculator
 - Header: "Cost Calculator"
-- Budget fields (housing, food, transport, healthcare, other)
-- BudgetDonut preview
-- Save to My Plan action
+- No user-profile identity card in the page header
+- Three summary metrics: upfront moving cash, monthly living budget, and user-verified rows
+- One-time arrival costs: visa/legal fees, flights, housing deposits, shipping/logistics
+- Ongoing monthly costs: housing, food, transportation, healthcare, other
+- Local planning baselines appear as input placeholders and count in calculations until overridden
+- Custom entries use a visible custom state and replace the baseline for that row
+- "View local benchmarks" opens an accessible detail dialog with sub-category values and an aggregate sync action
+- Sticky monthly outlook compares ongoing costs with the stored monthly income without claiming certainty
+- Assumptions, provenance label, and review date remain visible
+- BudgetDonut is limited to the ongoing monthly breakdown
+- Save to My Plan and CSV export actions
 
 ### Greenbook
 - Header: "Greenbook Insights"

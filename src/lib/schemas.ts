@@ -88,8 +88,10 @@ const budgetLineSchema = z.object({
   label: z.string().trim().min(1).max(80),
   chronologicalStage: z.enum(['ONE_TIME', 'MONTHLY_RECURRING']),
   systemBaseline: nullableMoney,
+  systemBaselineKey: z.string().max(80).nullable().optional(),
   userOverride: nullableMoney,
   isCustom: z.boolean(),
+  detailOverrides: z.record(z.string().max(64), z.number().min(0).max(100_000_000)).nullable().optional(),
 }).strict()
 
 export const nexitPlanUpdateSchema = z.object({
