@@ -18,6 +18,10 @@ export type JourneyStage = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
 export const PLAN_TABS = ['overview', 'checklist', 'documents', 'budget', 'notes'] as const
 export type TabId = (typeof PLAN_TABS)[number]
 
+// Lifestyle tier chooses which baseline cost band to load for a destination.
+export const LIFESTYLE_TIERS = ['Budget', 'Standard', 'Premium'] as const
+export type LifestyleTier = (typeof LIFESTYLE_TIERS)[number]
+
 // --- Documents ---
 export type DocStatus = 'MISSING' | 'UPLOADED' | 'TRANSLATED' | 'APOSTILLED' | 'APPROVED'
 export const DOC_STATUS_LABELS: Record<DocStatus, string> = {

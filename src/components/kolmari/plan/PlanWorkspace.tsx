@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Download, Pencil, Printer, X } from 'lucide-react'
-import { budgetEffective, documentStep, formatMonthYear, journeyStageLabel, type NexitPlan } from '@/lib/plan-types'
+import { LIFESTYLE_TIERS, budgetEffective, documentStep, formatMonthYear, journeyStageLabel, type LifestyleTier, type NexitPlan } from '@/lib/plan-types'
+import { applyBaselines, baselinesDiffer } from '@/lib/budget-baselines'
 import { useLocalStorageState, useLocalStorageWorkspace } from '@/hooks/useLocalStorageWorkspace'
 import { PLAN_TABS, SaveChip, type PlanCtx, type SaveStatus, type TabId } from './shared'
 import { OverviewTab } from './OverviewTab'
@@ -87,9 +88,6 @@ function Select({ label, value, options, placeholder, onChange }: {
     </label>
   )
 }
-
-export const LIFESTYLE_TIERS = ['Budget', 'Standard', 'Premium'] as const
-export type LifestyleTier = (typeof LIFESTYLE_TIERS)[number]
 
 function csvCell(value: string): string {
   return `"${value.replace(/"/g, '""')}"`
@@ -194,6 +192,15 @@ export function PlanWorkspace({ initial, nextinations, pathways, profileHousehol
   useEffect(() => { setCity(plan.destination_city) }, [plan.destination_city, setCity])
   // Lifestyle tier preference (drives baseline arrays once cost data exists).
   const [tier, setTier] = useLocalStorageState<LifestyleTier>('lifestyle_tier', 'Standard')
+
+  // Keep each budget line's systemBaseline in sync with the destination + tier
+  // from the sourced baselines table. Converges (differ→false after applying)
+  // and no-ops for destinations without baseline data.
+  useEffect(() => {
+    if (baselinesDiffer(plan.budget, plan.saved_nextination, tier)) {
+      update('budget', applyBaselines(plan.budget, plan.saved_nextination, tier))
+    }
+  }, [plan.budget, plan.saved_nextination, tier, update])
 
   const [tab, setTab] = useState<TabId>(initialTab)
   const [detailsOpen, setDetailsOpen] = useState(false)
