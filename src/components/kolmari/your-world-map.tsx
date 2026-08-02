@@ -41,7 +41,7 @@ function frame(pins: WorldPin[]): {
 
 function MapFallback({ pins }: { pins: WorldPin[] }) {
   return (
-    <div className="rounded-[16px] border border-line bg-[#CFE6F5] p-5 sm:p-6">
+    <div className="rounded-[16px] border border-line bg-[#C9E3F2] p-5 sm:p-6">
       <div className="flex items-center gap-2 text-navy/80">
         <MapPinned size={18} className="text-gold" aria-hidden="true" />
         <p className="text-sm font-semibold">
@@ -86,11 +86,14 @@ export function YourWorldMap({ pins }: { pins: WorldPin[] }) {
     const map = new mapboxgl.Map({
       accessToken: token,
       container: containerRef.current,
-      style: 'mapbox://styles/mapbox/light-v11',
+      style: 'mapbox://styles/mamamissionnay/cmscbpz5y006c01rdf0jbaxbj',
       center: [0, 20],
       zoom: 1.5,
       projection: 'mercator',
       attributionControl: true,
+      dragRotate: false,
+      pitchWithRotate: false,
+      touchPitch: false,
     })
     mapRef.current = map
 
