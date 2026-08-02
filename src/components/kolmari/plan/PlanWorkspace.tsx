@@ -11,6 +11,7 @@ import { ChecklistTab } from './ChecklistTab'
 import { DocumentsTab } from './DocumentsTab'
 import { BudgetTab } from './BudgetTab'
 import { NotesTab } from './NotesTab'
+import { applyBudgetBenchmark, getBudgetBenchmark } from '@/lib/budget-benchmarks'
 
 const TAB_LABELS: Record<TabId, string> = {
   overview: 'Overview',

@@ -1,17 +1,26 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { X } from 'lucide-react'
 import {
-  budgetCustomizedCount, budgetEffective, formatAmount, formatMonthYear,
-  monthlyTotal, upfrontTotal, type BudgetLine,
+  budgetEffective, formatAmount, formatMonthYear, type BudgetLine,
 } from '@/lib/plan-types'
 import { baselineGdp, baselineSource } from '@/lib/budget-baselines'
+import { applyBudgetBenchmark, benchmarkCategoryTotal, getBudgetBenchmark } from '@/lib/budget-benchmarks'
 import { SaveChip, type PlanCtx } from './shared'
 
 // A custom entry this far below the baseline trips the reality-check warning.
 const VARIANCE_THRESHOLD = 0.5
+
+/** Sum of effective values for one chronological stage; null when no line carries a figure. */
+function stageTotal(lines: BudgetLine[], stage: BudgetLine['chronologicalStage']): number | null {
+  const values = lines
+    .filter((line) => line.chronologicalStage === stage)
+    .map(budgetEffective)
+    .filter((value): value is number => value !== null)
+  return values.length ? values.reduce((a, b) => a + b, 0) : null
+}
 
 export function BudgetTab({ ctx }: { ctx: PlanCtx }) {
   const { plan, update, saveStatus, retry, monthlyIncome } = ctx
@@ -22,6 +31,9 @@ export function BudgetTab({ ctx }: { ctx: PlanCtx }) {
   const customized = plan.budget.filter((line) => line.isCustom).length
   const eyebrow = [plan.saved_nextination, plan.household_members ? `Household of ${plan.household_members}` : null].filter(Boolean).join(' · ')
   const [benchmarkLine, setBenchmarkLine] = useState<BudgetLine | null>(null)
+
+  const remaining = monthlyIncome === null || monthly === null ? null : monthlyIncome - monthly
+  const verdict = getVerdict(monthlyIncome, monthly)
 
   function setOverride(id: string, raw: string) {
     const parsed = raw === '' ? null : Math.max(0, Math.min(100_000_000, Math.round(Number(raw))))
@@ -79,17 +91,15 @@ export function BudgetTab({ ctx }: { ctx: PlanCtx }) {
             title="One-time arrival costs"
             hint="Visas, flights, deposits, and relocation logistics."
             lines={oneTime}
-            benchmark={benchmark}
             onEdit={setOverride}
-            onOpenBenchmark={setActiveCategory}
+            onBenchmarks={setBenchmarkLine}
           />
           <BudgetGroup
             title="Ongoing monthly costs"
             hint="Housing, food, transport, healthcare, and other recurring costs."
             lines={recurring}
-            benchmark={benchmark}
             onEdit={setOverride}
-            onOpenBenchmark={setActiveCategory}
+            onBenchmarks={setBenchmarkLine}
           />
           <Link href="/cost-calculator" className="inline-flex min-h-9 items-center rounded-[var(--radius-btn)] border border-line bg-white px-3.5 text-xs font-bold text-navy hover:bg-canvas">Open full Cost Calculator</Link>
         </div>
