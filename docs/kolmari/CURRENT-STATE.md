@@ -61,36 +61,3 @@ Chromium at 420px, 1024px, and 1440px in both expanded and collapsed states.
 move date. Documents is approved/total. Budget is entered/total cost lines. Housing and
 Healthcare report whether that budget line carries a figure. Schools reflects a school-related
 checklist task and is marked not applicable when the profile lists no dependents.
-
-
-## Pathways
-
-**Layout.** Navy hero, then a sticky status summary (Strong Match / Possible Match /
-More information needed counts), a two-column explorer on
-`minmax(0,1.1fr) minmax(0,0.9fr)`, category chips, the grouped route list, and the
-sources note.
-
-**Explorer.** `src/components/kolmari/pathways-results.tsx` — the left card
-("Tell us about your situation") carries monthly income, a remote-work segmented control,
-a savings slider (0–$60k+), and household size. The right dark panel ("Live Pathway Match")
-shows the top three routes with the share of signals met, a progress bar, and the route's
-status, ordered by status first so a route still needing information never outranks a
-Strong Match on percentage alone.
-
-Signals are evaluated **client-side** via the pure `evaluatePathways()` so the controls
-recompute live. `src/lib/profile.ts` is `server-only`, so the component imports the profile
-type only and takes values from the client-safe `src/lib/pathways.ts`.
-
-**Data integrity.** The controls are exploratory: they adjust a local copy of the profile
-and never write to the saved Kolmari Profile. When any value differs from the stored
-profile the card says so and offers "Reset to my Profile". Percentages are the share of
-*researched requirement signals met* (`met / (met + missing)`) — labelled as such, never
-presented as an eligibility decision or an approval probability. Status labels stay on
-Strong Match / Possible Match / More information needed rather than the
-"You Qualify" / "May Qualify" wording in the older prompt, since Kolmari does not assert
-visa eligibility. Before the wizard is complete every route reports that more information
-is needed; nothing is assumed.
-
-**Route cards.** Each row carries a MatchRing (share of signals met, coloured by status),
-the met/unconfirmed requirement ledger, the fact table, the official source link, and an
-"Add to plan" action.
