@@ -101,6 +101,7 @@ The standard tab style across the app (My Plan, Account, Destinations, Kolmari K
 
 The workspace header (`TopBar`) is a frosted bar (`rgba(247,248,251,.6)`, `backdrop-filter: blur+saturate`, 56px, bottom hairline). Right cluster:
 
+- **View preference pill** `.view-control` — one white, `1px solid --color-line`, radius-full container labeled `VIEW`. Currency (`USD` / `EUR`) and measurement system (`US` / `Metric`) live inside the same pill. Each option is radius-full; the selected option uses `--color-navy-deep` with white text. Do not render separate rectangular segmented controls.
 - **Notification bell** `.tb-bell` — 32×32, radius 8px, icon `--color-muted`, hover `--color-canvas` + navy.
 - **Profile pill** `.profile-pill` — white, `1px solid --color-line`, radius-full, `padding 3px 10px 3px 3px`, hover border `--color-line-strong` + bg `#FBFCFE`. Contains `.profile-avatar` (26px circle, **navy bg + gold initials**) and `.profile-name` (12.5px/600 navy, first name). Initials come from the real account `display_name` — never a placeholder name.
 

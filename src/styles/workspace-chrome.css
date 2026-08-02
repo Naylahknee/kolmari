@@ -80,6 +80,41 @@
 .mark b { color: var(--color-gold-deep); }
 .tb-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 
+/* Country display preferences — one compact pill with two related selector
+   groups. The selected values use the approved navy header treatment. */
+.view-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 4px 3px 10px;
+  background: #fff;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+.view-label {
+  margin-right: 3px;
+  color: var(--color-muted-soft);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+.view-options { display: inline-flex; align-items: center; gap: 2px; }
+.view-option {
+  min-height: 26px;
+  padding: 0 9px;
+  border-radius: var(--radius-pill);
+  color: var(--color-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  transition: background-color var(--duration-fast), color var(--duration-fast);
+}
+.view-option:hover { background: var(--color-canvas); color: var(--color-navy); }
+.view-option[aria-pressed="true"] { background: var(--color-navy-deep); color: #fff; }
+.view-option:focus-visible { outline: 2px solid var(--color-gold-deep); outline-offset: 1px; }
+
 /* Notification bell — transparent ghost button, muted icon. */
 .tb-bell {
   position: relative;
