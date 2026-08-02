@@ -6,8 +6,8 @@
   aspect-ratio: 960 / 480;
   border-radius: 16px;
   overflow: hidden;
-  background: #CFE6F5;
-  border: 1px solid rgba(13, 27, 57, 0.1);
+  background: #C9E3F2;
+  border: 1px solid rgba(16, 34, 68, 0.1);
 }
 
 .your-world-map-container .mapboxgl-ctrl-group {
@@ -45,11 +45,11 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #F3C516;
-  border: 2px solid white;
+  background: #F4C20D;
+  border: 2px solid #FFFFFF;
   font-size: 9px;
   font-weight: 700;
-  color: #17305B;
+  color: #102244;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
@@ -61,7 +61,7 @@
   margin-bottom: 6px;
   padding: 6px 8px;
   border-radius: 6px;
-  background: #17305B;
+  background: #102244;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   white-space: nowrap;
   opacity: 0;
@@ -77,14 +77,14 @@
 .your-world-map-marker__name {
   font-size: 11px;
   font-weight: 700;
-  color: white;
+  color: #FFFFFF;
   line-height: 1.2;
 }
 
 .your-world-map-marker__score {
   font-size: 10px;
   font-weight: 800;
-  color: #F3C516;
+  color: #F4C20D;
   letter-spacing: 0.02em;
 }
 
