@@ -1,10 +1,11 @@
 'use client'
 
-/* eslint-disable @next/next/no-img-element */
-
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { LoaderCircle, MapPinned, RefreshCw } from 'lucide-react'
+import mapboxgl from 'mapbox-gl'
+import { MapPinned } from 'lucide-react'
+import 'mapbox-gl/dist/mapbox-gl.css'
+import './your-world-map.css'
 
 export type WorldPin = {
   slug: string
@@ -15,30 +16,16 @@ export type WorldPin = {
   score: number | null
 }
 
-// Logical size the static image is requested at. Overlay pins are positioned
-// as percentages of this box, so the projection below must use the same size.
-const W = 960
-const H = 480
-const TILE = 512
-const MAX_LOAD_ATTEMPTS = 3
-const LOAD_TIMEOUT_MS = 12_000
-
-type MapLoadStatus = 'loading' | 'ready' | 'failed'
-
-// Web Mercator (matches Mapbox's static projection) so our own clickable pins
-// land exactly on the rendered basemap.
-function mercY(latDeg: number) {
-  const lat = (Math.max(-85, Math.min(85, latDeg)) * Math.PI) / 180
-  return (1 - Math.log(Math.tan(Math.PI / 4 + lat / 2)) / Math.PI) / 2
-}
-function projectX(lng: number, zoom: number) {
-  return TILE * Math.pow(2, zoom) * (lng / 360 + 0.5)
-}
-function projectY(lat: number, zoom: number) {
-  return TILE * Math.pow(2, zoom) * mercY(lat)
-}
-
-function frame(pins: WorldPin[]) {
+function frame(pins: WorldPin[]): {
+  lng: number
+  lat: number
+  zoom?: number
+  minLng?: number
+  maxLng?: number
+  minLat?: number
+  maxLat?: number
+  isSingle?: boolean
+} {
   if (pins.length === 0) return { lng: 0, lat: 20, zoom: 1.3 }
   const lngs = pins.map((p) => p.lng)
   const lats = pins.map((p) => p.lat)
@@ -48,147 +35,151 @@ function frame(pins: WorldPin[]) {
   const maxLat = Math.max(...lats)
   const lng = (minLng + maxLng) / 2
   const lat = (minLat + maxLat) / 2
-  if (pins.length === 1) return { lng, lat, zoom: 3.4 }
-  const lngSpan = Math.max((maxLng - minLng) / 360, 0.01)
-  const latSpan = Math.max(Math.abs(mercY(minLat) - mercY(maxLat)), 0.01)
-  const zoomX = Math.log2((W * 0.78) / (TILE * lngSpan))
-  const zoomY = Math.log2((H * 0.78) / (TILE * latSpan))
-  return { lng, lat, zoom: Math.max(0.6, Math.min(4.2, Math.min(zoomX, zoomY))) }
+  if (pins.length === 1) return { lng, lat, zoom: 3.4, isSingle: true }
+  return { minLng, maxLng, minLat, maxLat, lng, lat, isSingle: false }
+}
+
+function MapFallback({ pins }: { pins: WorldPin[] }) {
+  return (
+    <div className="rounded-[16px] border border-line bg-[#CFE6F5] p-5 sm:p-6">
+      <div className="flex items-center gap-2 text-navy/80">
+        <MapPinned size={18} className="text-gold" aria-hidden="true" />
+        <p className="text-sm font-semibold">
+          {pins.length > 0 ? 'Your matched destinations' : 'Your world map'}
+        </p>
+      </div>
+      {pins.length === 0 ? (
+        <p className="mt-2 text-sm text-navy/55">
+          Complete your Kolmari Profile to plot your matched destinations here.
+        </p>
+      ) : (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {pins.map((p) => (
+            <Link
+              key={p.slug}
+              href={`/nextinations/${p.slug}/v2/overview`}
+              className="inline-flex items-center gap-2 rounded-full border border-navy/20 bg-white/40 px-3 py-1.5 text-sm font-semibold text-navy transition hover:border-navy hover:bg-white"
+            >
+              <span className="grid size-5 place-items-center rounded-full bg-gold text-[10px] font-bold text-navy">
+                {p.code}
+              </span>
+              {p.name}
+              {p.score !== null && <span className="text-xs text-gold-deep">{p.score}%</span>}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }
 
 export function YourWorldMap({ pins }: { pins: WorldPin[] }) {
-  const [loadAttempt, setLoadAttempt] = useState(0)
-  const [retryCycle, setRetryCycle] = useState(0)
-  const [loadStatus, setLoadStatus] = useState<MapLoadStatus>('loading')
+  const containerRef = useRef<HTMLDivElement>(null)
+  const mapRef = useRef<mapboxgl.Map | null>(null)
+  const markersRef = useRef<mapboxgl.Marker[]>([])
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
-  const view = frame(pins)
-  const cx = projectX(view.lng, view.zoom)
-  const cy = projectY(view.lat, view.zoom)
-
-  const placed = pins.map((p) => ({
-    ...p,
-    left: ((W / 2 + (projectX(p.lng, view.zoom) - cx)) / W) * 100,
-    top: ((H / 2 + (projectY(p.lat, view.zoom) - cy)) / H) * 100,
-  }))
-
-  const retryLoad = useCallback(() => {
-    setLoadAttempt((current) => {
-      if (current + 1 >= MAX_LOAD_ATTEMPTS) {
-        setLoadStatus('failed')
-        return current
-      }
-
-      return current + 1
-    })
-  }, [])
-
-  const restartLoad = useCallback(() => {
-    setRetryCycle((current) => current + 1)
-    setLoadAttempt(0)
-    setLoadStatus('loading')
-  }, [])
+  const [mapError, setMapError] = useState(false)
 
   useEffect(() => {
-    if (!token || loadStatus !== 'loading') return
+    if (!token || mapError || !containerRef.current || mapRef.current) return
 
-    const timeout = window.setTimeout(retryLoad, LOAD_TIMEOUT_MS)
-    return () => window.clearTimeout(timeout)
-  }, [loadAttempt, loadStatus, retryCycle, retryLoad, token])
+    const map = new mapboxgl.Map({
+      accessToken: token,
+      container: containerRef.current,
+      style: 'mapbox://styles/mapbox/light-v11',
+      center: [0, 20],
+      zoom: 1.5,
+      projection: 'mercator',
+      attributionControl: true,
+    })
+    mapRef.current = map
 
-  // No token (or all image attempts failed): a calm navy panel listing the pins as
-  // clickable gold chips — the map is an enhancement, never the only path in.
-  if (!token || loadStatus === 'failed') {
-    return (
-      <div className="rounded-[16px] border border-white/10 bg-[#0D1B39] p-5 sm:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-white/80">
-            <MapPinned size={18} className="text-gold" aria-hidden="true" />
-            <p className="text-sm font-semibold">
-              {pins.length > 0 ? 'Your matched destinations' : 'Your world map'}
-            </p>
-          </div>
-          {token && (
-            <button
-              type="button"
-              onClick={restartLoad}
-              className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/20 px-3 text-xs font-bold text-white transition hover:border-gold hover:text-gold"
-            >
-              <RefreshCw size={13} aria-hidden="true" /> Retry map
-            </button>
-          )}
-        </div>
-        {token && (
-          <p className="mt-2 text-sm text-white/55">
-            The map image could not be reached. Your destination links are still available below.
-          </p>
-        )}
-        {pins.length === 0 ? (
-          <p className="mt-2 text-sm text-white/55">
-            Complete your Kolmari Profile to plot your matched destinations here.
-          </p>
-        ) : (
-          <div className="mt-4 flex flex-wrap gap-2">
-            {pins.map((p) => (
-              <Link
-                key={p.slug}
-                href={`/nextinations/${p.slug}/v2/overview`}
-                className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-white/5 px-3 py-1.5 text-sm font-semibold text-white transition hover:border-gold hover:bg-white/10"
-              >
-                <span className="grid size-5 place-items-center rounded-full bg-gold text-[10px] font-bold text-navy">
-                  {p.code}
-                </span>
-                {p.name}
-                {p.score !== null && <span className="text-xs text-gold">{p.score}%</span>}
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
-    )
+    map.on('load', () => {
+      map.resize()
+
+      // Add markers for each pin
+      for (const pin of pins) {
+        const el = document.createElement('button')
+        el.className = 'your-world-map-marker'
+        el.type = 'button'
+        el.setAttribute('aria-label', `${pin.name}${pin.score !== null ? `, ${pin.score}% fit` : ''}`)
+
+        const codeEl = document.createElement('span')
+        codeEl.className = 'your-world-map-marker__code'
+        codeEl.textContent = pin.code
+        el.appendChild(codeEl)
+
+        const infoEl = document.createElement('div')
+        infoEl.className = 'your-world-map-marker__info'
+        const nameEl = document.createElement('span')
+        nameEl.className = 'your-world-map-marker__name'
+        nameEl.textContent = pin.name
+        infoEl.appendChild(nameEl)
+        if (pin.score !== null) {
+          const scoreEl = document.createElement('span')
+          scoreEl.className = 'your-world-map-marker__score'
+          scoreEl.textContent = `${pin.score}%`
+          infoEl.appendChild(scoreEl)
+        }
+        el.appendChild(infoEl)
+
+        el.addEventListener('click', () => {
+          window.location.href = `/nextinations/${pin.slug}/v2/overview`
+        })
+
+        const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+          .setLngLat([pin.lng, pin.lat])
+          .addTo(map)
+
+        markersRef.current.push(marker)
+      }
+
+      // Fit camera to pins
+      const view = frame(pins)
+      if (view.isSingle !== false) {
+        map.flyTo({ center: [view.lng, view.lat], zoom: view.zoom })
+      } else if (
+        view.minLng !== undefined &&
+        view.maxLng !== undefined &&
+        view.minLat !== undefined &&
+        view.maxLat !== undefined
+      ) {
+        map.fitBounds(
+          [
+            [view.minLng, view.minLat],
+            [view.maxLng, view.maxLat],
+          ],
+          { padding: 40, maxZoom: 4.2 }
+        )
+      }
+
+      // Add navigation controls
+      map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right')
+    })
+
+    map.on('error', (event) => {
+      const message = (event.error as Error | undefined)?.message ?? ''
+      if (/access token|unauthorized|401/i.test(message)) setMapError(true)
+    })
+
+    return () => {
+      markersRef.current.forEach((m) => m.remove())
+      markersRef.current = []
+      if (mapRef.current) {
+        mapRef.current.remove()
+        mapRef.current = null
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, mapError, pins])
+
+  if (!token || mapError) {
+    return <MapFallback pins={pins} />
   }
 
-  // Vary valid zoom precision between attempts so the browser does not reuse a
-  // cached failed image response. The numeric camera position stays unchanged.
-  const zoomPrecision = Math.min(10, 2 + retryCycle * MAX_LOAD_ATTEMPTS + loadAttempt)
-  const src = `https://api.mapbox.com/styles/v1/mapbox/light-v11/static/${view.lng},${view.lat},${view.zoom.toFixed(zoomPrecision)},0/${W}x${H}@2x?access_token=${encodeURIComponent(token)}&attribution=false&logo=false`
-
   return (
-    <div className="relative overflow-hidden rounded-[16px] border border-[#0D1B39]/15 bg-[#0D1B39]" style={{ aspectRatio: `${W} / ${H}` }}>
-      <img
-        key={src}
-        src={src}
-        alt="Map of your matched destinations"
-        onLoad={() => setLoadStatus('ready')}
-        onError={retryLoad}
-        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${loadStatus === 'ready' ? 'opacity-100' : 'opacity-0'}`}
-      />
-      {loadStatus === 'loading' && (
-        <div className="absolute inset-0 z-20 grid place-items-center bg-[#0D1B39] text-white" role="status" aria-live="polite">
-          <span className="flex items-center gap-2 text-sm font-semibold">
-            <LoaderCircle size={17} className="animate-spin text-gold" aria-hidden="true" /> Loading your world…
-          </span>
-        </div>
-      )}
-      {placed.map((p) => (
-        <Link
-          key={p.slug}
-          href={`/nextinations/${p.slug}/v2/overview`}
-          aria-label={`${p.name}${p.score !== null ? `, ${p.score}% fit` : ''}`}
-          title={`${p.name}${p.score !== null ? ` · ${p.score}% fit` : ''}`}
-          className="group absolute z-10 -translate-x-1/2 -translate-y-full"
-          style={{ left: `${p.left}%`, top: `${p.top}%` }}
-        >
-          <span className="flex flex-col items-center">
-            <span className="rounded-full bg-navy px-2 py-0.5 text-[10px] font-bold text-white opacity-0 shadow-card transition group-hover:opacity-100">
-              {p.name}
-            </span>
-            <span className="mt-0.5 grid size-6 place-items-center rounded-full border-2 border-white bg-gold text-[9px] font-bold text-navy shadow-card transition group-hover:scale-110">
-              {p.code}
-            </span>
-          </span>
-        </Link>
-      ))}
-      <p className="absolute bottom-1 right-1.5 rounded bg-white/85 px-1.5 py-0.5 text-[9px] text-navy">© Mapbox © OpenStreetMap</p>
+    <div className="your-world-map-container" role="region" aria-label="Your matched destinations map">
+      <div ref={containerRef} className="absolute inset-0" />
     </div>
   )
 }
