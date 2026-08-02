@@ -8,12 +8,18 @@ import {
   ShieldCheck,
 } from 'lucide-react'
 import {
+  budgetEffective,
   budgetEnteredCount,
   docCounts,
   formatShortDate,
   upcomingDeadlines,
   type NexitPlan,
 } from '@/lib/plan-types'
+
+function hasBudgetCategory(plan: NexitPlan | null, category: string): boolean {
+  const line = plan?.budget.find((l) => l.category === category)
+  return line ? budgetEffective(line) !== null : false
+}
 
 type Tag = 'Blocker' | 'At risk' | 'Watch'
 type PlanningItem = { title: string; due: string; tag: Tag }
@@ -88,17 +94,17 @@ export function DashboardPlanningColumn({ plan, profileComplete, dependents }: {
     {
       icon: FileCheck2,
       label: 'Documents / Budget',
-      status: `${documents ? `${documents.ready} of ${documents.total} documents ready` : 'No documents listed'} · ${budgetCategories} of 5 budget areas entered.`,
+      status: `${documents ? `${documents.APPROVED} of ${documents.total} documents ready` : 'No documents listed'} · ${budgetCategories} budget ${budgetCategories === 1 ? 'area' : 'areas'} entered.`,
     },
     {
       icon: Home,
       label: 'Housing',
-      status: plan?.budget.housing !== null && plan?.budget.housing !== undefined ? 'Monthly estimate added.' : 'Add a housing estimate.',
+      status: hasBudgetCategory(plan, 'housing') ? 'Monthly estimate added.' : 'Add a housing estimate.',
     },
     {
       icon: HeartPulse,
       label: 'Healthcare',
-      status: plan?.budget.healthcare !== null && plan?.budget.healthcare !== undefined ? 'Monthly estimate added.' : 'Add coverage research or an estimate.',
+      status: hasBudgetCategory(plan, 'healthcare') ? 'Monthly estimate added.' : 'Add coverage research or an estimate.',
     },
     {
       icon: School,

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Pencil, X } from 'lucide-react'
 import { documentStep, formatMonthYear, journeyStageLabel, type NexitPlan } from '@/lib/plan-types'
+import { useLocalStorageWorkspace } from '@/hooks/useLocalStorageWorkspace'
 import { PLAN_TABS, SaveChip, type PlanCtx, type SaveStatus, type TabId } from './shared'
 import { OverviewTab } from './OverviewTab'
 import { ChecklistTab } from './ChecklistTab'
@@ -143,6 +144,13 @@ export function PlanWorkspace({ initial, nextinations, pathways, profileHousehol
 }) {
   const seeded: NexitPlan = { ...initial, household_members: initial.household_members ?? profileHousehold }
   const { plan, update, saveStatus, savedAtLabel, retry } = usePlanState(seeded)
+
+  // Instant localStorage cache (complements the canonical server autosave):
+  // mirror the active location so tabs can hydrate it without a round-trip.
+  const { setCountry, setCity } = useLocalStorageWorkspace()
+  useEffect(() => { setCountry(plan.saved_nextination) }, [plan.saved_nextination, setCountry])
+  useEffect(() => { setCity(plan.destination_city) }, [plan.destination_city, setCity])
+
   const [tab, setTab] = useState<TabId>(initialTab)
   const [detailsOpen, setDetailsOpen] = useState(false)
   const tabsRef = useRef<HTMLDivElement>(null)

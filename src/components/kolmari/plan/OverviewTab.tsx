@@ -103,7 +103,7 @@ export function OverviewTab({ ctx }: { ctx: PlanCtx }) {
               <>
                 <p className="text-xl font-bold text-navy">{progress}% complete</p>
                 <p className="mt-3 text-sm text-muted">
-                  {counts.ready} ready · {counts.in_progress + counts.needs_review} in progress
+                  {counts.APPROVED} approved · {counts.UPLOADED + counts.TRANSLATED + counts.APOSTILLED} in progress
                 </p>
                 <ProgressBar value={progress} className="mt-5" />
               </>

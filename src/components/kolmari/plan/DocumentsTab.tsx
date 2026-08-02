@@ -19,18 +19,18 @@ export function DocumentsTab({ ctx }: { ctx: PlanCtx }) {
   const [editingId, setEditingId] = useState<string | null>(null)
 
   const counts = docCounts(plan)
-  const progressing = counts.ready + counts.in_progress + counts.needs_review
+  const progressing = counts.total - counts.MISSING
   const pct = counts.total ? Math.round((progressing / counts.total) * 100) : 0
   const step = documentStep(plan)
   const processing = processingBuckets(plan)
-  const deadlines = docs.filter((d) => d.due && d.status !== 'ready').sort((a, b) => (a.due ?? '').localeCompare(b.due ?? ''))
-  const nextDoc = docs.find((d) => d.status === 'in_progress' || d.status === 'needs_review') ?? docs.find((d) => d.status === 'not_started')
+  const deadlines = docs.filter((d) => d.expirationDate && d.status !== 'APPROVED').sort((a, b) => (a.expirationDate ?? '').localeCompare(b.expirationDate ?? ''))
+  const nextDoc = docs.find((d) => d.status === 'UPLOADED' || d.status === 'TRANSLATED' || d.status === 'APOSTILLED') ?? docs.find((d) => d.status === 'MISSING')
 
   function setDocs(next: DocumentItem[]) { update('documents', next) }
   function add() {
     const clean = name.trim()
     if (!clean || docs.some((d) => d.name.toLowerCase() === clean.toLowerCase())) return
-    setDocs([...docs, { id: newId('d'), name: clean, status: 'not_started', apostille: false, translate: false, due: null, note: null }])
+    setDocs([...docs, { id: newId('d'), name: clean, status: 'MISSING', expirationDate: null, note: null }])
     setName('')
   }
   function patch(id: string, changes: Partial<DocumentItem>) { setDocs(docs.map((d) => (d.id === id ? { ...d, ...changes } : d))) }
@@ -42,7 +42,7 @@ export function DocumentsTab({ ctx }: { ctx: PlanCtx }) {
   }
   function download() {
     if (!docs.length) return
-    const lines = docs.map((d) => `- [${d.status === 'ready' ? 'x' : ' '}] ${d.name}${d.apostille ? ' (apostille)' : ''}${d.translate ? ' (translation)' : ''}${d.due ? ` — due ${d.due}` : ''}`)
+    const lines = docs.map((d) => `- [${d.status === 'APPROVED' ? 'x' : ' '}] ${d.name}${d.note ? ` (${d.note})` : ''}${d.expirationDate ? ` — expires ${d.expirationDate}` : ''}`)
     const blob = new Blob([`My Plan — Documents\n\n${lines.join('\n')}\n`], { type: 'text/plain' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -129,8 +129,8 @@ export function DocumentsTab({ ctx }: { ctx: PlanCtx }) {
                   <button type="button" onClick={() => setEditingId(editingId === doc.id ? null : doc.id)} className="min-w-0 flex-1 text-left">
                     <p className="truncate text-sm font-bold text-navy">{doc.name}</p>
                     <p className="truncate text-xs text-muted">
-                      {[doc.apostille ? 'Apostille' : null, doc.translate ? 'Translation' : null].filter(Boolean).join(' + ') || (doc.note ?? 'Tap to set requirements')}
-                      {doc.due ? ` · Due ${formatShortDate(doc.due)}` : ''}
+                      {doc.note ?? 'Tap to set status & expiration'}
+                      {doc.expirationDate ? ` · Expires ${formatShortDate(doc.expirationDate)}` : ''}
                     </p>
                   </button>
                   <StatusBadge status={doc.status} />
@@ -144,12 +144,8 @@ export function DocumentsTab({ ctx }: { ctx: PlanCtx }) {
                         </select>
                       </label>
                       <label className="text-xs font-semibold text-navy">Expiration / deadline
-                        <input className="field mt-1" type="date" value={doc.due ?? ''} onChange={(e) => patch(doc.id, { due: e.target.value || null })} />
+                        <input className="field mt-1" type="date" value={doc.expirationDate ?? ''} onChange={(e) => patch(doc.id, { expirationDate: e.target.value || null })} />
                       </label>
-                    </div>
-                    <div className="flex flex-wrap gap-4">
-                      <label className="inline-flex items-center gap-2 text-xs font-semibold text-navy"><input type="checkbox" checked={doc.apostille} onChange={(e) => patch(doc.id, { apostille: e.target.checked })} /> Apostille required</label>
-                      <label className="inline-flex items-center gap-2 text-xs font-semibold text-navy"><input type="checkbox" checked={doc.translate} onChange={(e) => patch(doc.id, { translate: e.target.checked })} /> Translation required</label>
                     </div>
                     <input className="field" value={doc.note ?? ''} onChange={(e) => patch(doc.id, { note: e.target.value || null })} placeholder="Note (e.g. state-issued long form)" aria-label="Document note" />
                     <button type="button" onClick={() => remove(doc.id)} className="text-xs font-bold text-danger hover:underline">Remove document</button>
@@ -189,7 +185,7 @@ export function DocumentsTab({ ctx }: { ctx: PlanCtx }) {
           {nextDoc ? (
             <>
               <p className="mt-2 text-sm font-bold text-navy">{nextDoc.name}</p>
-              <p className="mt-1 text-xs text-muted">{DOC_STATUS_LABELS[nextDoc.status]}{nextDoc.due ? ` · due ${formatShortDate(nextDoc.due)}` : ''}</p>
+              <p className="mt-1 text-xs text-muted">{DOC_STATUS_LABELS[nextDoc.status]}{nextDoc.expirationDate ? ` · expires ${formatShortDate(nextDoc.expirationDate)}` : ''}</p>
               <button type="button" onClick={() => { setShowAll(true); setEditingId(nextDoc.id) }} className="gold-button mt-4 w-full text-xs">View details</button>
             </>
           ) : (
@@ -204,7 +200,7 @@ export function DocumentsTab({ ctx }: { ctx: PlanCtx }) {
             {deadlines.length === 0 ? <li className="text-xs text-muted">No document deadlines yet. Add an expiration date on a document to track it.</li> : deadlines.slice(0, 5).map((d) => (
               <li key={d.id} className="flex items-center justify-between gap-3 py-3 first:pt-0">
                 <span className="min-w-0 truncate font-semibold text-navy">{d.name}</span>
-                <span className="shrink-0 text-xs font-bold text-gold-deep">{formatShortDate(d.due)}</span>
+                <span className="shrink-0 text-xs font-bold text-gold-deep">{formatShortDate(d.expirationDate)}</span>
               </li>
             ))}
           </ul>

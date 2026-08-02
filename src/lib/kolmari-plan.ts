@@ -16,18 +16,22 @@ async function ensurePlanTable() {
         CREATE TABLE IF NOT EXISTS nexit_plans (
           user_id INT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
           saved_nextination TEXT,
+          destination_city TEXT,
           selected_pathway TEXT,
           target_move_date DATE,
           household_members INT CHECK (household_members BETWEEN 1 AND 20),
           journey_stage SMALLINT,
           timeline_stage TEXT NOT NULL DEFAULT 'Explore',
           checklist JSONB NOT NULL DEFAULT '[]'::jsonb,
-          budget JSONB NOT NULL DEFAULT '{"housing":null,"food":null,"transport":null,"healthcare":null,"other":null}'::jsonb,
+          budget JSONB NOT NULL DEFAULT '[]'::jsonb,
           documents JSONB NOT NULL DEFAULT '[]'::jsonb,
           notes TEXT,
           updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )
       `
+      // Phase 1 (My Plan overhaul): destination city + budget is now a line-item array.
+      await getSql()`ALTER TABLE nexit_plans ADD COLUMN IF NOT EXISTS destination_city TEXT`
+      await getSql()`ALTER TABLE nexit_plans ALTER COLUMN budget SET DEFAULT '[]'::jsonb`
       await getSql()`ALTER TABLE nexit_plans ADD COLUMN IF NOT EXISTS journey_stage SMALLINT`
       await getSql()`ALTER TABLE nexit_plans DROP CONSTRAINT IF EXISTS nexit_plans_timeline_stage_check`
       await getSql()`
@@ -75,10 +79,11 @@ export async function saveNexitPlan(plan: NexitPlan) {
   await ensurePlanTable()
   const stageLabel = journeyStageLabel(plan.journey_stage)
   const rows = await getSql()`
-    INSERT INTO nexit_plans (user_id, saved_nextination, selected_pathway, target_move_date, household_members, journey_stage, timeline_stage, checklist, budget, documents, notes, updated_at)
-    VALUES (${plan.user_id}, ${plan.saved_nextination}, ${plan.selected_pathway}, ${plan.target_move_date}, ${plan.household_members}, ${plan.journey_stage}, ${stageLabel}, ${JSON.stringify(plan.checklist)}::jsonb, ${JSON.stringify(plan.budget)}::jsonb, ${JSON.stringify(plan.documents)}::jsonb, ${plan.notes}, NOW())
+    INSERT INTO nexit_plans (user_id, saved_nextination, destination_city, selected_pathway, target_move_date, household_members, journey_stage, timeline_stage, checklist, budget, documents, notes, updated_at)
+    VALUES (${plan.user_id}, ${plan.saved_nextination}, ${plan.destination_city}, ${plan.selected_pathway}, ${plan.target_move_date}, ${plan.household_members}, ${plan.journey_stage}, ${stageLabel}, ${JSON.stringify(plan.checklist)}::jsonb, ${JSON.stringify(plan.budget)}::jsonb, ${JSON.stringify(plan.documents)}::jsonb, ${plan.notes}, NOW())
     ON CONFLICT (user_id) DO UPDATE SET
       saved_nextination = EXCLUDED.saved_nextination,
+      destination_city = EXCLUDED.destination_city,
       selected_pathway = EXCLUDED.selected_pathway,
       target_move_date = EXCLUDED.target_move_date,
       household_members = EXCLUDED.household_members,

@@ -51,13 +51,14 @@ export function ProgressBar({ value, className = '' }: { value: number; classNam
 }
 
 const STATUS_STYLES: Record<DocStatus, string> = {
-  ready: 'bg-ok-soft text-ok',
-  in_progress: 'bg-gold-soft text-gold-deep',
-  needs_review: 'bg-gold-soft text-gold-deep',
-  not_started: 'bg-canvas text-muted',
+  APPROVED: 'bg-ok-soft text-ok',
+  UPLOADED: 'bg-gold-soft text-gold-deep',
+  TRANSLATED: 'bg-gold-soft text-gold-deep',
+  APOSTILLED: 'bg-gold-soft text-gold-deep',
+  MISSING: 'bg-canvas text-muted',
 }
 const STATUS_DOT: Record<DocStatus, string> = {
-  ready: 'bg-ok', in_progress: 'bg-gold', needs_review: 'bg-gold', not_started: 'bg-muted/50',
+  APPROVED: 'bg-ok', UPLOADED: 'bg-gold', TRANSLATED: 'bg-gold', APOSTILLED: 'bg-gold', MISSING: 'bg-muted/50',
 }
 export function StatusDot({ status }: { status: DocStatus }) {
   return <span className={`size-2.5 shrink-0 rounded-full ${STATUS_DOT[status]}`} aria-hidden="true" />
