@@ -1,10 +1,14 @@
 import Link from 'next/link'
-import { CountryOutline } from '@/components/country-template/CountryOutline'
+import { CountrySnapshotMap } from '@/components/country-workspace/CountrySnapshotMap'
+import { CityCardImage } from '@/components/country-template/CityCardImage'
+import { getCountryVisualAssets } from '@/lib/country-visuals/data'
 
 /* Converted from the approved index.html mockup. Markup is verbatim.
    Content is still literal Portugal copy: replace with `content.*` per
    section as the model is extended. See README step 4. */
 export function OverviewTab({ slug }: { slug: string }) {
+  const assets = getCountryVisualAssets(slug)
+  const snap = assets?.snapshotMap
   return (
       <div className="tabpanel on" id="p-overview">
 
@@ -24,8 +28,9 @@ export function OverviewTab({ slug }: { slug: string }) {
                   <div className="map-col">
                     <Link className="map-card" href="/destinations/regions/europe?focus=portugal" aria-label="Open the interactive map of Portugal">
                       <span className="cmap">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/images/countries/portugal/portugal-flag-map.png" alt="Map of Portugal" style={{ display: 'block', width: '100%', height: 'auto' }} />
+                        {snap
+                          ? <CountrySnapshotMap countryName="Portugal" countryCode="PT" lat={snap.center[1]} lng={snap.center[0]} cityName={snap.capital?.name} alt="Locator map of Portugal" fallback="locator" />
+                          : <span className="map-fallback">Map of Portugal</span>}
                       </span>
                       <span className="map-expand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 3H3v6M21 15v6h-6M3 3l7 7M21 21l-7-7" /></svg></span>
                       <span className="map-foot">
@@ -66,7 +71,7 @@ export function OverviewTab({ slug }: { slug: string }) {
                 <div className="cities">
                   <article className="city">
                     <div className="city-map">
-                      <span className="cmap"><span style={{display:'grid',placeItems:'center',width:'100%',height:'100%',background:'linear-gradient(135deg,#122a52,#1b3f68)'}}><CountryOutline code="pt" fill="rgba(255,255,255,0.85)" style={{width:'62%',height:'62%'}} /></span></span>
+                      <span className="cmap"><CityCardImage imageSrc="/images/countries/portugal/cities/lisbon.webp" cityName="Lisbon" countryName="Portugal" countryCode="PT" className="city-photo" /></span>
                       <span className="city-flag"><span className="flag sm" role="img" aria-label="Portugal"><svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="360" height="600" fill="#006600" /><rect x="360" width="540" height="600" fill="#DA291C" /><g transform="translate(360 300)" fill="none" stroke="#FFE900" strokeWidth="15"><circle r="108" /><ellipse rx="108" ry="42" /><ellipse rx="42" ry="108" /><ellipse rx="108" ry="42" transform="rotate(38)" /><ellipse rx="108" ry="42" transform="rotate(-38)" /><path d="M-108 0H108" /></g><g transform="translate(360 300)"><path d="M-52-70h104v78c0 44-38 68-52 76-14-8-52-32-52-76z" fill="#DA291C" stroke="#fff" strokeWidth="13" /><path d="M-31-46h62v54c0 28-22 44-31 50-9-6-31-22-31-50z" fill="#fff" /><g fill="#003399"><rect x="-9" y="-38" width="18" height="26" rx="3" /><rect x="-9" y="12" width="18" height="26" rx="3" /><rect x="-34" y="-13" width="18" height="26" rx="3" /><rect x="16" y="-13" width="18" height="26" rx="3" /></g></g></svg><img src="https://flagcdn.com/pt.svg" alt="" /></span></span><span className="city-tag">Most infrastructure</span>
                     </div>
                     <div className="city-body">
@@ -83,7 +88,7 @@ export function OverviewTab({ slug }: { slug: string }) {
                   </article>
                   <article className="city">
                     <div className="city-map">
-                      <span className="cmap"><span style={{display:'grid',placeItems:'center',width:'100%',height:'100%',background:'linear-gradient(135deg,#122a52,#1b3f68)'}}><CountryOutline code="pt" fill="rgba(255,255,255,0.85)" style={{width:'62%',height:'62%'}} /></span></span>
+                      <span className="cmap"><CityCardImage imageSrc="/images/countries/portugal/cities/porto.webp" cityName="Porto" countryName="Portugal" countryCode="PT" className="city-photo" /></span>
                       <span className="city-flag"><span className="flag sm" role="img" aria-label="Portugal"><svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="360" height="600" fill="#006600" /><rect x="360" width="540" height="600" fill="#DA291C" /><g transform="translate(360 300)" fill="none" stroke="#FFE900" strokeWidth="15"><circle r="108" /><ellipse rx="108" ry="42" /><ellipse rx="42" ry="108" /><ellipse rx="108" ry="42" transform="rotate(38)" /><ellipse rx="108" ry="42" transform="rotate(-38)" /><path d="M-108 0H108" /></g><g transform="translate(360 300)"><path d="M-52-70h104v78c0 44-38 68-52 76-14-8-52-32-52-76z" fill="#DA291C" stroke="#fff" strokeWidth="13" /><path d="M-31-46h62v54c0 28-22 44-31 50-9-6-31-22-31-50z" fill="#fff" /><g fill="#003399"><rect x="-9" y="-38" width="18" height="26" rx="3" /><rect x="-9" y="12" width="18" height="26" rx="3" /><rect x="-34" y="-13" width="18" height="26" rx="3" /><rect x="16" y="-13" width="18" height="26" rx="3" /></g></g></svg><img src="https://flagcdn.com/pt.svg" alt="" /></span></span><span className="city-tag">Best value</span>
                     </div>
                     <div className="city-body">
@@ -100,7 +105,7 @@ export function OverviewTab({ slug }: { slug: string }) {
                   </article>
                   <article className="city">
                     <div className="city-map">
-                      <span className="cmap"><span style={{display:'grid',placeItems:'center',width:'100%',height:'100%',background:'linear-gradient(135deg,#122a52,#1b3f68)'}}><CountryOutline code="pt" fill="rgba(255,255,255,0.85)" style={{width:'62%',height:'62%'}} /></span></span>
+                      <span className="cmap"><CityCardImage imageSrc="/images/countries/portugal/cities/funchal.webp" cityName="Funchal" countryName="Portugal" countryCode="PT" className="city-photo" /></span>
                       <span className="city-flag"><span className="flag sm" role="img" aria-label="Portugal"><svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="360" height="600" fill="#006600" /><rect x="360" width="540" height="600" fill="#DA291C" /><g transform="translate(360 300)" fill="none" stroke="#FFE900" strokeWidth="15"><circle r="108" /><ellipse rx="108" ry="42" /><ellipse rx="42" ry="108" /><ellipse rx="108" ry="42" transform="rotate(38)" /><ellipse rx="108" ry="42" transform="rotate(-38)" /><path d="M-108 0H108" /></g><g transform="translate(360 300)"><path d="M-52-70h104v78c0 44-38 68-52 76-14-8-52-32-52-76z" fill="#DA291C" stroke="#fff" strokeWidth="13" /><path d="M-31-46h62v54c0 28-22 44-31 50-9-6-31-22-31-50z" fill="#fff" /><g fill="#003399"><rect x="-9" y="-38" width="18" height="26" rx="3" /><rect x="-9" y="12" width="18" height="26" rx="3" /><rect x="-34" y="-13" width="18" height="26" rx="3" /><rect x="16" y="-13" width="18" height="26" rx="3" /></g></g></svg><img src="https://flagcdn.com/pt.svg" alt="" /></span></span><span className="city-tag">Island living</span>
                     </div>
                     <div className="city-body">
@@ -117,7 +122,7 @@ export function OverviewTab({ slug }: { slug: string }) {
                   </article>
                   <article className="city">
                     <div className="city-map">
-                      <span className="cmap"><span style={{display:'grid',placeItems:'center',width:'100%',height:'100%',background:'linear-gradient(135deg,#122a52,#1b3f68)'}}><CountryOutline code="pt" fill="rgba(255,255,255,0.85)" style={{width:'62%',height:'62%'}} /></span></span>
+                      <span className="cmap"><CityCardImage imageSrc="/images/countries/portugal/cities/braga.webp" cityName="Braga" countryName="Portugal" countryCode="PT" className="city-photo" /></span>
                       <span className="city-flag"><span className="flag sm" role="img" aria-label="Portugal"><svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="360" height="600" fill="#006600" /><rect x="360" width="540" height="600" fill="#DA291C" /><g transform="translate(360 300)" fill="none" stroke="#FFE900" strokeWidth="15"><circle r="108" /><ellipse rx="108" ry="42" /><ellipse rx="42" ry="108" /><ellipse rx="108" ry="42" transform="rotate(38)" /><ellipse rx="108" ry="42" transform="rotate(-38)" /><path d="M-108 0H108" /></g><g transform="translate(360 300)"><path d="M-52-70h104v78c0 44-38 68-52 76-14-8-52-32-52-76z" fill="#DA291C" stroke="#fff" strokeWidth="13" /><path d="M-31-46h62v54c0 28-22 44-31 50-9-6-31-22-31-50z" fill="#fff" /><g fill="#003399"><rect x="-9" y="-38" width="18" height="26" rx="3" /><rect x="-9" y="12" width="18" height="26" rx="3" /><rect x="-34" y="-13" width="18" height="26" rx="3" /><rect x="16" y="-13" width="18" height="26" rx="3" /></g></g></svg><img src="https://flagcdn.com/pt.svg" alt="" /></span></span><span className="city-tag">Lowest cost</span>
                     </div>
                     <div className="city-body">

@@ -87,6 +87,14 @@ body.rail-collapsed .country-template-root .rail .icon-btn svg{transform:scaleX(
   background:linear-gradient(90deg,rgba(13,27,57,.54) 0%,rgba(13,27,57,.2) 58%,rgba(13,27,57,.08) 100%)
 }
 .country-template-root .hero-bg.hero-bg-portugal::after{display:none}
+
+/* Generic approved-hero artwork backdrop (flag + silhouette), resolved from the
+   Country Visual Asset record. background-image + object-position are set inline. */
+.country-template-root .hero-bg.hero-bg-artwork{background-size:cover;background-repeat:no-repeat}
+.country-template-root .hero-bg.hero-bg-artwork::before{
+  background:linear-gradient(90deg,rgba(13,27,57,.56) 0%,rgba(13,27,57,.22) 58%,rgba(13,27,57,.08) 100%)
+}
+.country-template-root .hero-bg.hero-bg-artwork::after{display:none}
 .country-template-root .hero-map{position:absolute;inset:0;z-index:-2}
 .country-template-root .hero-map > div{position:absolute;inset:0;height:100%;width:100%;aspect-ratio:auto;min-height:0}
 .country-template-root .hero-map img{height:100%;width:100%;object-fit:cover}
@@ -188,6 +196,11 @@ body.rail-collapsed .country-template-root .rail .icon-btn svg{transform:scaleX(
 .country-template-root .city-map .cmap{position:absolute;inset:0}
 .country-template-root .city-map .cmap > div{position:absolute;inset:0;aspect-ratio:auto;min-height:0;height:100%;width:100%}
 .country-template-root .city-map .cmap img{height:100%;width:100%;object-fit:cover}
+.country-template-root .city-map .cmap .city-img-fallback{position:absolute;inset:0;aspect-ratio:auto;min-height:0}
+/* City-card image fallbacks: approved photo → country flag → neutral placeholder. */
+.country-template-root .city-img-fallback{display:grid;place-items:center;gap:8px;width:100%;aspect-ratio:16/9;min-height:120px;padding:12px;text-align:center;background:linear-gradient(135deg,#122a52,#1b3f68);color:rgba(255,255,255,.9)}
+.country-template-root .city-img-flag img{width:54px;height:auto;border-radius:3px;border:1px solid rgba(255,255,255,.28);box-shadow:0 6px 16px -8px rgba(0,0,0,.5)}
+.country-template-root .city-img-placeholder .city-img-name{font-size:13px;font-weight:700}
 .country-template-root .city-flag{position:absolute;left:8px;top:8px;z-index:2;line-height:0}
 .country-template-root .city-tag{position:absolute;right:8px;top:8px;font-size:9.5px;font-weight:700;padding:3px 8px;border-radius:var(--r-pill);background:rgba(255,255,255,.94);color:var(--navy);border:1px solid var(--line)}
 .country-template-root .city-body{padding:12px 13px 13px}
