@@ -7,10 +7,10 @@ import { CountryOutline } from './CountryOutline'
    every other country it renders the same frame driven by the country record,
    with honest "being verified" metrics rather than borrowed figures.
 
-   The hero backdrop is the branded navy gradient with the country's own
-   outline sitting on the far right of the panel — never a map and never a
-   borrowed silhouette. Countries with no outline shape simply show the
-   gradient. */
+   The hero backdrop is the country's supplied flag-and-map artwork when we have
+   it (Portugal). Countries without artwork fall back to the branded navy
+   gradient with their own outline sitting on the far right — never a map and
+   never a borrowed silhouette. */
 
 type HeroCountry = { slug: string; name: string; code: string; city: string; region: string }
 type LatLng = { lat: number; lng: number }
@@ -24,13 +24,16 @@ export type CountryHeroData = {
   sources: Record<string, string>
 }
 
-/** Hero backdrop: branded navy gradient with the country's own outline sitting
- *  on the far right of the panel. When no outline shape exists for the country,
- *  only the gradient renders. */
-function HeroShape({ code, portugal = false }: { code: string; portugal?: boolean }) {
+/** Hero backdrop. With supplied flag-and-map artwork (Portugal) the artwork is
+ *  the backdrop on its own. Otherwise it falls back to the navy gradient with
+ *  the country's outline on the far right of the panel. */
+function HeroBackdrop({ code, hasArtwork, portugal = false }: { code: string; hasArtwork: boolean; portugal?: boolean }) {
+  if (hasArtwork) {
+    return <div className={`hero-bg${portugal ? ' hero-bg-portugal' : ''}`} aria-hidden="true" />
+  }
   return (
     <>
-      <div className={`hero-bg${portugal ? ' hero-bg-portugal' : ''}`} aria-hidden="true" />
+      <div className="hero-bg" aria-hidden="true" />
       <div className="hero-shape" aria-hidden="true">
         <CountryOutline code={code} fill="rgba(255,255,255,0.16)" style={{ height: '100%', width: 'auto' }} />
       </div>
@@ -81,7 +84,7 @@ export function CountryHero({
   if (rich) {
     return (
       <section className="hero">
-        <HeroShape code="PT" portugal />
+        <HeroBackdrop code="PT" hasArtwork portugal />
         <div className="hero-body">
           {fromQuiz && (
             <p className="hero-quizpill">
@@ -90,14 +93,9 @@ export function CountryHero({
             </p>
           )}
           <div className="hero-eyebrow">Western Europe · Atlantic coast</div>
-          <h1 className="hero-name">
-            <span className="flag hero-flag" role="img" aria-label="Flag of Portugal">
-              <svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="360" height="600" fill="#006600" /><rect x="360" width="540" height="600" fill="#DA291C" /><g transform="translate(360 300)" fill="none" stroke="#FFE900" strokeWidth="15"><circle r="108" /><ellipse rx="108" ry="42" /><ellipse rx="42" ry="108" /><ellipse rx="108" ry="42" transform="rotate(38)" /><ellipse rx="108" ry="42" transform="rotate(-38)" /><path d="M-108 0H108" /></g><g transform="translate(360 300)"><path d="M-52-70h104v78c0 44-38 68-52 76-14-8-52-32-52-76z" fill="#DA291C" stroke="#fff" strokeWidth="13" /><path d="M-31-46h62v54c0 28-22 44-31 50-9-6-31-22-31-50z" fill="#fff" /><g fill="#003399"><rect x="-9" y="-38" width="18" height="26" rx="3" /><rect x="-9" y="12" width="18" height="26" rx="3" /><rect x="-34" y="-13" width="18" height="26" rx="3" /><rect x="16" y="-13" width="18" height="26" rx="3" /></g></g></svg>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://flagcdn.com/pt.svg" alt="" onError={(e) => { e.currentTarget.style.display = 'none' }} />
-            </span>
-            Portugal
-          </h1>
+          {/* No inline flag icon here: the Portugal flag artwork is already the
+              hero backdrop, so a second small flag would be redundant. */}
+          <h1 className="hero-name">Portugal</h1>
           <p className="hero-blurb">Mild Atlantic climate, costs below the Western European average, and five legal routes open to non-EU nationals. Lisbon and Porto carry the infrastructure, while the Algarve and Alentejo trade pace for price.</p>
           <div className="badges">
             <span className="badge-h b-sch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18" /></svg> Schengen Area</span>
@@ -140,7 +138,7 @@ export function CountryHero({
   // may have is the visa route for the five mapped countries).
   return (
     <section className="hero">
-      <HeroShape code={country.code} />
+      <HeroBackdrop code={country.code} hasArtwork={false} />
       <div className="hero-body">
         {fromQuiz && (
           <p className="hero-quizpill">
