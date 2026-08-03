@@ -14,6 +14,15 @@ import { countryFacts } from '@/lib/country-facts'
 
 type HeroCountry = { slug: string; name: string; code: string; city: string; region: string }
 type LatLng = { lat: number; lng: number }
+// Verified figures for the hero metric panels (all optional; null → honest
+// "being verified" state). Sourced values come from the country_data table.
+export type CountryHeroData = {
+  primaryVisaRoute: string | null
+  monthlyCostUsd: number | null
+  timeToResidency: string | null
+  pathToCitizenship: string | null
+  sources: Record<string, string>
+}
 
 /** Real map background layer, only rendered when a token + center are present. */
 function HeroMap({ country, center }: { country: HeroCountry; center: LatLng | null }) {
@@ -37,6 +46,19 @@ function VerifyingMetric({ label, icon }: { label: string; icon: React.ReactNode
   )
 }
 
+/** Metric card that shows a verified value + its note/source, or the honest
+ *  "being verified" state when the value is null. */
+function DataMetric({ label, icon, value, note }: { label: string; icon: React.ReactNode; value: string | null; note?: string | null }) {
+  if (!value) return <VerifyingMetric label={label} icon={icon} />
+  return (
+    <div className="metric">
+      <span className="m-l">{icon} {label}</span>
+      <span className="m-v" style={{ fontSize: 20 }}>{value}</span>
+      {note && <span className="m-n">{note}</span>}
+    </div>
+  )
+}
+
 export function CountryHero({
   go,
   fromQuiz = false,
@@ -44,6 +66,7 @@ export function CountryHero({
   center = null,
   visaType,
   rich = false,
+  data = null,
 }: {
   go: (s: string) => void
   fromQuiz?: boolean
@@ -51,6 +74,7 @@ export function CountryHero({
   center?: LatLng | null
   visaType?: string
   rich?: boolean
+  data?: CountryHeroData | null
 }) {
   if (rich) {
     return (
@@ -150,18 +174,30 @@ export function CountryHero({
         })()}
       </div>
       <div className="metrics">
-        {visaType ? (
-          <div className="metric" aria-disabled="true">
-            <span className="m-l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="6" cy="6" r="2.5" /><circle cx="18" cy="18" r="2.5" /><path d="M8.5 6H15a3 3 0 010 6H9a3 3 0 000 6h6.5" /></svg> Primary route</span>
-            <span className="m-v" style={{ fontSize: 20 }}>{visaType}</span>
-            <span className="m-n">Confirm your eligibility with the official authority</span>
-          </div>
-        ) : (
-          <VerifyingMetric label="Primary route" icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="6" cy="6" r="2.5" /><circle cx="18" cy="18" r="2.5" /><path d="M8.5 6H15a3 3 0 010 6H9a3 3 0 000 6h6.5" /></svg>} />
-        )}
-        <VerifyingMetric label="Cost vs your budget" icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /></svg>} />
-        <VerifyingMetric label="Time to residency" icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>} />
-        <VerifyingMetric label="Path to citizenship" icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="3" width="16" height="18" rx="2" /><circle cx="12" cy="10" r="2.6" /><path d="M8.5 17c.9-1.8 2-2.6 3.5-2.6s2.6.8 3.5 2.6" /></svg>} />
+        <DataMetric
+          label="Primary route"
+          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="6" cy="6" r="2.5" /><circle cx="18" cy="18" r="2.5" /><path d="M8.5 6H15a3 3 0 010 6H9a3 3 0 000 6h6.5" /></svg>}
+          value={data?.primaryVisaRoute ?? visaType ?? null}
+          note={data?.sources?.primaryVisaRoute ?? 'Confirm your eligibility with the official authority'}
+        />
+        <DataMetric
+          label="Cost vs your budget"
+          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /></svg>}
+          value={data?.monthlyCostUsd != null ? `$${data.monthlyCostUsd.toLocaleString()}/mo` : null}
+          note={data?.sources?.monthlyCostUsd ?? null}
+        />
+        <DataMetric
+          label="Time to residency"
+          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>}
+          value={data?.timeToResidency ?? null}
+          note={data?.sources?.timeToResidency ?? null}
+        />
+        <DataMetric
+          label="Path to citizenship"
+          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="3" width="16" height="18" rx="2" /><circle cx="12" cy="10" r="2.6" /><path d="M8.5 17c.9-1.8 2-2.6 3.5-2.6s2.6.8 3.5 2.6" /></svg>}
+          value={data?.pathToCitizenship ?? null}
+          note={data?.sources?.pathToCitizenship ?? null}
+        />
       </div>
     </section>
   )

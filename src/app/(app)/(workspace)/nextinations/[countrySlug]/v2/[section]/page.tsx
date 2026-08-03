@@ -4,6 +4,7 @@ import { requireCurrentUser } from '@/lib/auth'
 import { getProfile, isPaid } from '@/lib/profile'
 import { rankNextinations } from '@/lib/userProfile'
 import { getCountryCenter } from '@/lib/country-geo'
+import { getCountryData } from '@/lib/country-data'
 import { SimpleCountryView } from '@/components/country-template/SimpleCountryView'
 import { CountryTemplate } from '@/components/country-template/CountryTemplate'
 import { TAB_SLUGS, type TabSlug } from '@/components/country-template/TabBar'
@@ -104,6 +105,16 @@ export default async function CountryV2Page({ params, searchParams }: Props) {
     ? { score: ranked[rankIdx].match.score, rank: rankIdx + 1, total: ranked.length, reasons: ranked[rankIdx].match.reasons }
     : null
 
+  // Verified relocation figures for the hero panels (honest empties when unset).
+  const cd = await getCountryData(countrySlug)
+  const heroData = {
+    primaryVisaRoute: cd.primary_visa_route,
+    monthlyCostUsd: cd.monthly_cost_usd,
+    timeToResidency: cd.time_to_residency,
+    pathToCitizenship: cd.path_to_citizenship,
+    sources: cd.sources,
+  }
+
   // Portugal is the only fully verified dataset — it renders the approved rich
   // tabs. Every other country renders the same rich frame with honest,
   // data-driven content.
@@ -120,7 +131,7 @@ export default async function CountryV2Page({ params, searchParams }: Props) {
     }[active]
 
     return (
-      <CountryTemplate slug={countrySlug} active={active} fromQuiz={fromQuiz} country={templateCountry} center={center} match={matchInfo} rich>
+      <CountryTemplate slug={countrySlug} active={active} fromQuiz={fromQuiz} country={templateCountry} center={center} match={matchInfo} data={heroData} rich>
         {tab}
       </CountryTemplate>
     )
@@ -146,6 +157,7 @@ export default async function CountryV2Page({ params, searchParams }: Props) {
       center={center}
       visaType={detail?.visaType}
       match={matchInfo}
+      data={heroData}
     >
       {body}
     </CountryTemplate>
