@@ -21,6 +21,7 @@ import {
 } from '@/components/kolmari/dashboard-side-cards'
 import { DashboardWelcome } from '@/components/kolmari/dashboard-onboarding'
 import { JourneyDrawer } from '@/components/kolmari/journey-drawer'
+import { DecisionWorkspaceStarter } from '@/components/kolmari/decision-workspace-starter'
 
 /** Last-saved time for the tracker footer, formatted server-side in UTC so the markup hydrates unchanged. */
 function savedAtLabel(updatedAt: string | null): string | null {
@@ -68,6 +69,8 @@ export default async function DashboardPage() {
   return (
     <div className="flex flex-col gap-4">
       <DashboardWelcome firstName={firstName} firstVisitCandidate={firstVisitCandidate} profileComplete={complete} />
+
+      <DecisionWorkspaceStarter />
 
       {!complete && (
         <section className="rounded-[var(--radius-card)] border border-gold/30 bg-gold-soft/50 p-5 sm:flex sm:items-center sm:justify-between sm:gap-6">

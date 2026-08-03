@@ -2,6 +2,32 @@
 
 Running log of implemented page state. Update this file when application code changes.
 
+## Decision Workspace home — 2026-08-03
+
+The existing dashboard now begins with a bounded conversational doorway while preserving the
+current visual system and all existing planning panels below it.
+
+- `src/components/kolmari/decision-workspace-starter.tsx` adds one plain-language question field
+  and six guided question routes for Destinations, Pathways, affordability, planning, community
+  context, and documents.
+- `src/lib/decision-routing.ts` classifies the submitted question deterministically and routes it
+  to an existing Kolmari workflow. It does not answer the question, infer profile information,
+  place user text in the URL, or persist the text.
+- The dashboard remains server-rendered for profile and plan data. Only the question starter is a
+  focused Client Component.
+- Existing Dashboard recommendations, progress, Destinations, Pathway, deadlines, and Kolmari
+  Tracker behavior remain unchanged.
+- The welcome header now identifies the page as the user's decision workspace and explains that
+  users can ask a question, continue research, or take the next planning step.
+
+Validation for this slice:
+
+- TypeScript (`npx tsc --noEmit`) passes.
+- ESLint passes for all changed application files.
+- Six focused intent-routing checks pass.
+- The repository-wide lint command still reports pre-existing errors in unrelated country-tab
+  components and Flutter Mode; none are in this slice.
+
 ## Dashboard
 
 **Layout.** Eyebrow + greeting, then a two-column flex row:
