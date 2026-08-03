@@ -1,5 +1,6 @@
 'use client'
 
+import { flagSrc } from '@/lib/flags'
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Coins, Heart, Search, ShieldCheck, SlidersHorizontal, Stamp } from 'lucide-react'
@@ -189,7 +190,7 @@ function CardArt({ card }: { card: RecCard }) {
       ) : (
         <>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={`https://flagcdn.com/${card.code.toLowerCase()}.svg`} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+          <img src={flagSrc(card.code)} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
           <span className="absolute right-[5%] top-1/2 h-[74%] w-[38%] -translate-y-1/2" style={{ filter: 'drop-shadow(0 6px 16px rgba(0,0,0,.3))' }}>
             <CountryOutline code={card.code} fill="rgba(0,0,0,0.3)" style={{ width: '100%', height: '100%' }} />
           </span>

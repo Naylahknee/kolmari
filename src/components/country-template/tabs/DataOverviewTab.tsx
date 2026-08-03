@@ -1,3 +1,4 @@
+import { flagSrc } from '@/lib/flags'
 import Link from 'next/link'
 import {
   ArrowRight, CarFront, Clock3, Coins, Globe2, Landmark, Languages,
@@ -8,7 +9,6 @@ import { CityCardImage } from '@/components/country-template/CityCardImage'
 import { getCountryCenter } from '@/lib/country-geo'
 import { getCountryFacts } from '@/lib/country-workspace/country-facts'
 import { getCountryCityOverviews } from '@/lib/country-workspace/country-cities'
-import { cityAssetPath } from '@/lib/country-visuals/schema'
 
 type DataCountry = { slug: string; name: string; code: string; region: string; city: string }
 
@@ -109,8 +109,8 @@ export function DataOverviewTab({
             {cities.map((city) => (
               <article className="city" key={city.id}>
                 <div className="city-map">
-                  <span className="cmap"><CityCardImage imageSrc={cityAssetPath(country.slug, toCitySlug(city.cityName))} cityName={city.cityName} countryName={country.name} countryCode={country.code} className="city-photo" /></span>
-                  <span className="city-flag"><span className="flag sm" role="img" aria-label={country.name}>{/* eslint-disable-next-line @next/next/no-img-element */}<img src={`https://flagcdn.com/${country.code.toLowerCase()}.svg`} alt="" /></span></span>
+                  <span className="cmap"><CityCardImage imageSrc={`/api/country-asset?slug=${country.slug}&type=city&city=${toCitySlug(city.cityName)}`} cityName={city.cityName} countryName={country.name} countryCode={country.code} className="city-photo" /></span>
+                  <span className="city-flag"><span className="flag sm" role="img" aria-label={country.name}>{/* eslint-disable-next-line @next/next/no-img-element */}<img src={flagSrc(country.code)} alt="" /></span></span>
                 </div>
                 <div className="city-body">
                   <div className="city-name">{city.cityName}</div>

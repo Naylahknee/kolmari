@@ -2,6 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 
+import { flagSrc } from '@/lib/flags'
 import { useState } from 'react'
 import { Building2 } from 'lucide-react'
 import { focalToObjectPosition } from '@/lib/country-visuals/schema'
@@ -44,7 +45,7 @@ export function CityCardImage({
     return (
       <span className="city-img-fallback city-img-flag" role="img" aria-label={`${cityName}${countryName ? `, ${countryName}` : ''}`}>
         <img
-          src={`https://flagcdn.com/${countryCode.toLowerCase()}.svg`}
+          src={flagSrc(countryCode)}
           alt=""
           onError={() => setStage('placeholder')}
         />

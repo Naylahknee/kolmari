@@ -1,3 +1,4 @@
+import { flagSrc } from '@/lib/flags'
 import { countryFacts } from '@/lib/country-facts'
 import { CountryOutline } from './CountryOutline'
 import { focalToObjectPosition } from '@/lib/country-visuals/schema'
@@ -54,7 +55,7 @@ function HeroBackdrop({ code, artwork }: { code: string; artwork?: HeroArtwork |
       />
     )
   }
-  const flag = code ? `https://flagcdn.com/${code.toLowerCase()}.svg` : null
+  const flag = code ? flagSrc(code) : null
   return (
     <>
       {flag

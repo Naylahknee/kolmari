@@ -1,3 +1,4 @@
+import { flagSrc } from '@/lib/flags'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, BookOpen, Building2, FileSearch, MapPinned } from 'lucide-react'
@@ -14,7 +15,7 @@ export function CountryResearchPage({ country }: { country: DiscoverableCountry 
 
       <section className="hero-grid overflow-hidden rounded-card bg-navy-deep p-7 text-white sm:p-10">
         <div className="max-w-2xl">
-          <Image src={`https://flagcdn.com/${country.code.toLowerCase()}.svg`} alt={`${country.name} flag`} width={80} height={48} className="h-12 w-20 rounded-sm object-cover shadow-card" />
+          <Image src={flagSrc(country.code)} alt={`${country.name} flag`} width={80} height={48} className="h-12 w-20 rounded-sm object-cover shadow-card" />
           <p className="mt-6 text-xs font-bold uppercase tracking-widest text-gold">Explore this Destination</p>
           <h1 className="mt-2 text-4xl font-bold sm:text-5xl">{country.name}</h1>
           <p className="mt-4 max-w-xl leading-7 text-white/75">

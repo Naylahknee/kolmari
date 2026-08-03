@@ -1,4 +1,5 @@
 'use client'
+import { flagSrc } from '@/lib/flags'
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { BarChart3, Building2, Check, Stamp } from 'lucide-react'
@@ -99,7 +100,7 @@ export function SimpleCountryView({
                 <h1 className="mt-2 flex items-center gap-3 text-3xl font-extrabold text-navy sm:text-4xl">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={`https://flagcdn.com/${country.code.toLowerCase()}.svg`}
+                    src={flagSrc(country.code)}
                     alt=""
                     className="h-7 w-10 rounded-sm object-cover shadow"
                     onError={(e) => {
@@ -131,7 +132,7 @@ export function SimpleCountryView({
                     style={{ background: '#0f2247' }}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={`https://flagcdn.com/${country.code.toLowerCase()}.svg`} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                    <img src={flagSrc(country.code)} alt="" className="absolute inset-0 h-full w-full object-cover" />
                     <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg,rgba(13,27,57,.5),rgba(13,27,57,.14) 60%,transparent)' }} />
                     <span className="absolute right-[4%] top-1/2 h-[80%] w-[34%] -translate-y-1/2" style={{ filter: 'drop-shadow(0 8px 20px rgba(0,0,0,.28))' }}>
                       <CountryOutline code={country.code} fill="rgba(0,0,0,0.3)" style={{ width: '100%', height: '100%' }} />
