@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { PRODUCT_COPY } from '@/config/product-copy'
+import { ButterflyMark } from '@/components/kolmari/butterfly-mark'
+import { flutterReadiness } from '@/lib/flutter-plan'
 
 function Icon({ children }: { children: React.ReactNode }) {
   return <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor">{children}</svg>
@@ -30,6 +32,20 @@ export function Sidebar() {
     return () => {
       cancelled = true
     }
+  }, [])
+
+  // Relocation-plan progress drives the Flutter Mode butterfly: outline until the
+  // plan is > 75% complete, then a filled butterfly.
+  const [planReady, setPlanReady] = useState(0)
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/profile')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && Array.isArray(data?.completed_tasks)) setPlanReady(flutterReadiness(data.completed_tasks))
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
   }, [])
 
   const onCountry = pathname.startsWith('/nextinations/')
@@ -106,7 +122,7 @@ export function Sidebar() {
           <span className="lbl">{PRODUCT_COPY.plan}</span>
         </Link>
         <Link className={`sb-item${active('/flutter') || active('/checklist') ? ' active' : ''}`} href="/flutter">
-          <Icon><path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" /></Icon>
+          <ButterflyMark className="ic" filled={planReady > 75} />
           <span className="lbl">{PRODUCT_COPY.flutterMode}</span>
         </Link>
         <Link className={`sb-item${active('/documents') ? ' active' : ''}`} href="/documents">
