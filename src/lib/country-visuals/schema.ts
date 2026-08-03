@@ -34,6 +34,7 @@ export const heroImageInputSchema = z.object({
   shadowOpacity: z.number().int().min(5).max(60).default(22),
   shadowDepth: z.string().trim().min(2).max(160).default('gentle embossed relief with soft edge definition'),
   flagTextureIntensity: z.string().trim().min(2).max(160).default('subtle matte woven fabric with soft folds'),
+  focalPoint: z.object({ x: z.number().min(0).max(100), y: z.number().min(0).max(100) }).default({ x: 50, y: 50 }),
   quality,
 })
 export type HeroImageInput = z.infer<typeof heroImageInputSchema>

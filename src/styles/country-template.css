@@ -119,6 +119,12 @@ body.rail-collapsed .country-template-root .rail .icon-btn svg{transform:scaleX(
 .country-template-root .hero-eyebrow{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--gold);margin-bottom:10px}
 .country-template-root .hero-name{font-family:var(--font-sans);font-weight:700;font-size:clamp(38px,5vw,60px);line-height:1.04;letter-spacing:-.015em;display:flex;align-items:center;gap:15px}
 .country-template-root .hero-blurb{margin-top:12px;font-size:14.5px;line-height:1.62;color:rgba(255,255,255,.84);max-width:640px}
+/* Required hero status indicators — compact real-data chips. */
+.country-template-root .hero-status{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.country-template-root .hero-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:var(--r-pill);font-size:11.5px;font-weight:700;letter-spacing:.01em;background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(6px)}
+.country-template-root .hero-chip.hc-gold{background:rgba(243,197,22,.9);color:var(--navy-deep);border-color:transparent}
+.country-template-root .hero-chip.hc-good{background:rgba(52,199,142,.22);color:#eafff5;border-color:rgba(52,199,142,.5)}
+.country-template-root .hero-chip.hc-muted{background:rgba(255,255,255,.1);color:rgba(255,255,255,.8)}
 .country-template-root .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
 .country-template-root .badge-h{display:inline-flex;align-items:center;gap:7px;padding:6px 12px 6px 9px;border-radius:var(--r-pill);font-size:12px;font-weight:600;background:rgba(13,27,57,.5);border:1px solid rgba(255,255,255,.2);color:#fff;backdrop-filter:blur(6px)}
 .country-template-root .badge-h svg{width:15px;height:15px;flex:0 0 auto;stroke-width:2.1}
