@@ -1,8 +1,5 @@
 import Link from 'next/link'
-import type { CountryContent } from '@/lib/country-workspace/country-content'
-import { CountrySnapshotMap } from '@/components/country-workspace/CountrySnapshotMap'
 import { CountryOutline } from '@/components/country-template/CountryOutline'
-import { getCountryCenter } from '@/lib/country-geo'
 
 /* Converted from the approved index.html mockup. Markup is verbatim.
    Content is still literal Portugal copy: replace with `content.*` per
@@ -27,12 +24,8 @@ export function OverviewTab({ slug }: { slug: string }) {
                   <div className="map-col">
                     <Link className="map-card" href="/destinations/regions/europe?focus=portugal" aria-label="Open the interactive map of Portugal">
                       <span className="cmap">
-                        {(() => {
-                          const c = getCountryCenter('portugal')
-                          return c
-                            ? <CountrySnapshotMap countryName="Portugal" lat={c.lat} lng={c.lng} alt="Map of Portugal" />
-                            : <span className="map-fallback">Map of Portugal</span>
-                        })()}
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/images/countries/portugal/portugal-flag-map.png" alt="Map of Portugal" style={{ display: 'block', width: '100%', height: 'auto' }} />
                       </span>
                       <span className="map-expand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 3H3v6M21 15v6h-6M3 3l7 7M21 21l-7-7" /></svg></span>
                       <span className="map-foot">
