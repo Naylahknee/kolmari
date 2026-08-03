@@ -11,12 +11,14 @@ import {
   CITY_IMAGE_TYPES,
   heroAssetPath,
   cityAssetPath,
+  focalToObjectPosition,
   type HeroImageInput,
   type CityImageInput,
   type SnapshotMapConfig,
 } from '@/lib/country-visuals/schema'
+import { DEFAULT_COUNTRY_PAGE_LAYOUT } from '@/lib/country-page/default-layout'
 
-type EngineTab = 'hero' | 'snapshot' | 'city'
+type EngineTab = 'hero' | 'layout' | 'snapshot' | 'city' | 'content'
 type Device = 'desktop' | 'tablet' | 'mobile'
 
 type GeneratedImage = {
@@ -43,6 +45,7 @@ const MEXICO_SHADOW_STANDARD: HeroImageInput = {
   shadowOpacity: 22,
   shadowDepth: 'gentle embossed relief with soft edge definition',
   flagTextureIntensity: 'subtle matte woven fabric with soft diagonal folds',
+  focalPoint: { x: 50, y: 50 },
   quality: 'high',
 }
 
@@ -203,6 +206,12 @@ function HeroTab() {
           <Field label={`Shadow opacity ${form.shadowOpacity}%`}>
             <input type="range" min={5} max={60} value={form.shadowOpacity} onChange={(e) => set('shadowOpacity', Number(e.target.value))} className="w-full" />
           </Field>
+          <Field label={`Focal point X ${form.focalPoint.x}%`} help="Horizontal object-position when the hero is cropped.">
+            <input type="range" min={0} max={100} value={form.focalPoint.x} onChange={(e) => set('focalPoint', { ...form.focalPoint, x: Number(e.target.value) })} className="w-full" />
+          </Field>
+          <Field label={`Focal point Y ${form.focalPoint.y}%`}>
+            <input type="range" min={0} max={100} value={form.focalPoint.y} onChange={(e) => set('focalPoint', { ...form.focalPoint, y: Number(e.target.value) })} className="w-full" />
+          </Field>
         </div>
 
         <div className="mt-6 flex flex-wrap items-center gap-5 border-t border-neutral-200 pt-6">
@@ -237,7 +246,7 @@ function HeroTab() {
           <div style={{ width: DEVICE_WIDTH[device], maxWidth: '100%' }} className="shrink-0">
             <div className="relative overflow-hidden rounded-xl border border-neutral-300" style={{ aspectRatio: '3 / 1' }}>
               {generated ? (
-                <img src={generated.imageDataUrl} alt="Generated hero" className="absolute inset-0 h-full w-full object-cover" />
+                <img src={generated.imageDataUrl} alt="Generated hero" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: focalToObjectPosition(form.focalPoint) }} />
               ) : (
                 <div className="absolute inset-0 bg-gradient-to-br from-[#122a52] to-[#1b3f68]" />
               )}
@@ -459,33 +468,134 @@ function CityTab() {
 }
 
 // ===========================================================================
+// Page Layout tab (Kolmari Country Page Standard — read-only reference + preview)
+// ===========================================================================
+function PageLayoutTab() {
+  const [device, setDevice] = useState<Device>('desktop')
+  const cfg = DEFAULT_COUNTRY_PAGE_LAYOUT
+  return (
+    <>
+      <div className="mb-5">
+        <h2 className="text-xl font-semibold text-neutral-950">Page Layout</h2>
+        <p className="text-sm font-semibold text-neutral-500">Kolmari Country Page Standard</p>
+        <p className="mt-1 max-w-2xl text-sm text-neutral-500">
+          One shared layout for every country (reference implementation: Portugal). Foundational spacing and structure are fixed; only limited, explicit fields are overridable.
+        </p>
+      </div>
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.9fr)]">
+        <section className="rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-7">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h3 className="text-lg font-semibold text-neutral-950">Responsive skeleton</h3>
+            <DeviceTabs device={device} onChange={setDevice} />
+          </div>
+          <div className="flex justify-center overflow-x-auto rounded-2xl bg-neutral-200/60 p-4">
+            <div style={{ width: DEVICE_WIDTH[device], maxWidth: '100%' }} className="shrink-0 space-y-2">
+              {/* hero + metric strip */}
+              <div className="overflow-hidden rounded-lg border border-neutral-300">
+                <div className="relative bg-gradient-to-br from-[#122a52] to-[#1b3f68]" style={{ height: device === 'mobile' ? 150 : 110 }}>
+                  <div className="absolute bottom-2 left-3 h-4 w-24 rounded bg-white/80" />
+                </div>
+                <div className={`grid ${device === 'mobile' ? 'grid-cols-2' : 'grid-cols-4'} divide-x divide-white/10 bg-[#0f2247]`}>
+                  {cfg.hero.metrics.map((m) => (
+                    <div key={m.id} className="p-2"><div className="h-2 w-10 rounded bg-white/40" /><div className="mt-1 h-3 w-12 rounded bg-white/70" /></div>
+                  ))}
+                </div>
+              </div>
+              {/* tabs */}
+              <div className="flex gap-1.5 overflow-hidden rounded-lg border border-neutral-300 bg-white p-1.5">
+                {cfg.tabs.slice(0, device === 'mobile' ? 4 : 8).map((t) => <div key={t.id} className="h-4 flex-1 rounded bg-neutral-200" />)}
+              </div>
+              {/* main + sidebar */}
+              <div className={`grid gap-2 ${device === 'mobile' ? 'grid-cols-1' : 'grid-cols-[3fr_0.9fr]'}`}>
+                <div className="space-y-2">
+                  <div className="h-16 rounded-lg border border-neutral-300 bg-white" />
+                  <div className="h-24 rounded-lg border border-neutral-300 bg-white" />
+                  <div className={`grid gap-2 ${device === 'mobile' ? 'grid-cols-1' : 'grid-cols-4'}`}>
+                    {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-16 rounded-lg border border-neutral-300 bg-white" />)}
+                  </div>
+                </div>
+                <div className="h-40 rounded-lg border border-neutral-300 bg-white" />
+              </div>
+            </div>
+          </div>
+          <p className="mt-3 text-xs text-neutral-500">Order: hero → tabs → Personalized Summary + Match Score → Country Snapshot + Recommended Actions → Top Cities → remaining sections.</p>
+        </section>
+        <section className="rounded-3xl border border-neutral-200 bg-neutral-50 p-5 sm:p-7">
+          <p className="mb-2 text-sm font-medium text-neutral-900">CountryPageLayoutConfig (default)</p>
+          <pre className="max-h-[520px] overflow-auto rounded-xl border border-neutral-200 bg-white p-4 text-xs leading-5 text-neutral-700">{JSON.stringify(cfg, null, 2)}</pre>
+        </section>
+      </div>
+    </>
+  )
+}
+
+// ===========================================================================
+// Country Content tab (structured content reference)
+// ===========================================================================
+function CountryContentTab() {
+  const groups: Array<{ title: string; fields: string[] }> = [
+    { title: 'Hero', fields: ['regionEyebrow', 'countryName', 'introduction', 'statusIndicators[]', 'heroMetrics[4]'] },
+    { title: 'Personalized Summary', fields: ['summary', 'explanation', 'overallFit', 'blockingIssue', 'outcome', 'callouts[]', 'rank', 'categoryScores[]'] },
+    { title: 'Country Snapshot', fields: ['snapshotEyebrow', 'summaryParagraphs[]', 'honestTradeoff', 'facts[]', 'mapCaption', 'climate{winter,summer,timeDiff}'] },
+    { title: 'Top Cities', fields: ['cities[]{name,description,badges,imageSrc,metrics,editorialNote}'] },
+    { title: 'Sidebar', fields: ['matchScore', 'comparisonTarget', 'recommendedFirstActions[]'] },
+  ]
+  return (
+    <>
+      <div className="mb-5">
+        <h2 className="text-xl font-semibold text-neutral-950">Country Content</h2>
+        <p className="text-sm font-semibold text-neutral-500">Structured content model</p>
+        <p className="mt-1 max-w-2xl text-sm text-neutral-500">
+          The shared content structure every country page reads from. Classify each value as verified data, user-calculated, editorial, or unavailable — never silently convert editorial estimates into verified facts, and never fabricate.
+        </p>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {groups.map((g) => (
+          <div key={g.title} className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+            <h3 className="text-sm font-bold text-neutral-950">{g.title}</h3>
+            <ul className="mt-2 space-y-1">
+              {g.fields.map((f) => <li key={f} className="text-xs text-neutral-600"><code className="rounded bg-neutral-100 px-1 py-0.5">{f}</code></li>)}
+            </ul>
+          </div>
+        ))}
+      </div>
+      <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        Data classification is required: <b>verified</b> · <b>user-calculated</b> · <b>editorial</b> · <b>unavailable</b>. Unavailable data renders an honest empty state, not a fabricated value.
+      </div>
+    </>
+  )
+}
+
+// ===========================================================================
 // Page shell
 // ===========================================================================
-export default function CountryVisualAssetEnginePage() {
+export default function CountryPageGeneratorEnginePage() {
   const [tab, setTab] = useState<EngineTab>('hero')
   const tabs: Array<{ id: EngineTab; label: string }> = [
     { id: 'hero', label: 'Hero Image' },
+    { id: 'layout', label: 'Page Layout' },
     { id: 'snapshot', label: 'Snapshot Map' },
     { id: 'city', label: 'City Images' },
+    { id: 'content', label: 'Country Content' },
   ]
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
       <div className="mb-6 max-w-3xl">
         <p className="mb-2 text-sm font-medium uppercase tracking-[0.18em] text-neutral-500">Kolmari design tools</p>
-        <h1 className="text-3xl font-semibold tracking-tight text-neutral-950">Country Visual Asset Engine</h1>
+        <h1 className="text-3xl font-semibold tracking-tight text-neutral-950">Country Page Generator Engine</h1>
         <p className="mt-3 text-base leading-7 text-neutral-600">
-          Generate and configure every country-page visual — the flag + silhouette hero, the Mapbox snapshot locator, and premium city photography — then review and download before committing to <code>/public</code>. Nothing publishes automatically.
+          The Country Design System control panel — hero artwork (National Flag Shadow Hero), the Kolmari Country Page Standard layout, the Mapbox snapshot locator, city photography, and country content. Review and download before committing to <code>/public</code>. Nothing publishes automatically.
         </p>
       </div>
 
-      <div className="mb-6 inline-flex rounded-full border border-neutral-200 bg-white p-1 text-sm font-semibold shadow-sm">
+      <div className="mb-6 inline-flex flex-wrap rounded-2xl border border-neutral-200 bg-white p-1 text-sm font-semibold shadow-sm">
         {tabs.map((t) => (
           <button
             key={t.id}
             type="button"
             onClick={() => setTab(t.id)}
-            className={`rounded-full px-4 py-2 transition ${tab === t.id ? 'bg-neutral-950 text-white' : 'text-neutral-600 hover:text-neutral-900'}`}
+            className={`rounded-xl px-4 py-2 transition ${tab === t.id ? 'bg-neutral-950 text-white' : 'text-neutral-600 hover:text-neutral-900'}`}
           >
             {t.label}
           </button>
@@ -493,8 +603,10 @@ export default function CountryVisualAssetEnginePage() {
       </div>
 
       {tab === 'hero' && <HeroTab />}
+      {tab === 'layout' && <PageLayoutTab />}
       {tab === 'snapshot' && <SnapshotTab />}
       {tab === 'city' && <CityTab />}
+      {tab === 'content' && <CountryContentTab />}
     </main>
   )
 }

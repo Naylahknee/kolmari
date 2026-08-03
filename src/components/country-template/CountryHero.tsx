@@ -3,6 +3,20 @@ import { CountryOutline } from './CountryOutline'
 import { focalToObjectPosition } from '@/lib/country-visuals/schema'
 
 export type HeroArtwork = { src: string; focalPoint: { x: number; y: number } }
+export type HeroStatusChip = { label: string; tone?: 'gold' | 'good' | 'muted' }
+
+/** Required hero status indicators (Country Design System) — compact, real-data
+ *  chips. Renders nothing when there are none, never fabricated. */
+function HeroStatus({ chips }: { chips?: HeroStatusChip[] }) {
+  if (!chips || chips.length === 0) return null
+  return (
+    <div className="hero-status">
+      {chips.map((c, i) => (
+        <span key={i} className={`hero-chip${c.tone ? ` hc-${c.tone}` : ''}`}>{c.label}</span>
+      ))}
+    </div>
+  )
+}
 
 /* The country page hero.
 
@@ -85,6 +99,7 @@ export function CountryHero({
   rich = false,
   data = null,
   heroArtwork = null,
+  statusChips = [],
 }: {
   go: (s: string) => void
   fromQuiz?: boolean
@@ -94,6 +109,7 @@ export function CountryHero({
   rich?: boolean
   data?: CountryHeroData | null
   heroArtwork?: HeroArtwork | null
+  statusChips?: HeroStatusChip[]
 }) {
   if (rich) {
     return (
@@ -116,6 +132,7 @@ export function CountryHero({
             <span className="badge-h b-eu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 6.6l.9 1.9 2 .3-1.5 1.4.4 2-1.8-1-1.8 1 .4-2-1.5-1.4 2-.3z" fill="currentColor" stroke="none" /></svg> EU Member</span>
             <span className="badge-h b-nato"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2l8 3.6v6.1c0 4.6-3.3 8.7-8 10.3-4.7-1.6-8-5.7-8-10.3V5.6z" /><path d="M12 7v10M7.5 12h9" /></svg> NATO Member</span>
           </div>
+          <HeroStatus chips={statusChips} />
         </div>
         <div className="metrics">
           <button className="metric" onClick={() => go('cost-housing')} aria-label="Cost against your budget. Opens Cost and Housing.">
@@ -178,6 +195,7 @@ export function CountryHero({
             </div>
           )
         })()}
+        <HeroStatus chips={statusChips} />
       </div>
       {/* Same four categories, order and spacing as the Portugal hero — with
           per-country verified figures, or an honest "being verified" state. */}

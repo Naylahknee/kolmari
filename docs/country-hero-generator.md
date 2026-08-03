@@ -1,8 +1,14 @@
-# Country Visual Asset Engine
+# Country Page Generator Engine
+
+> Part of the **Country Design System** — see `docs/country-design-system.md` for
+> the full system (layout standard, Personalized Summary, status indicators,
+> fallbacks, responsive rules). This file documents the generator engine itself.
 
 Kolmari includes an authenticated internal tool at:
 
 `/settings/country-hero`
+
+Tabs: **Hero Image · Page Layout · Snapshot Map · City Images · Country Content**.
 
 It manages the three visual assets every country page needs. Two are AI-generated
 and reviewed before download; one configures the existing interactive map.

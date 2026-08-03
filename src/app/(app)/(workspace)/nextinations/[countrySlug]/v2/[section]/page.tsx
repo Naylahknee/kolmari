@@ -6,6 +6,7 @@ import { rankNextinations } from '@/lib/userProfile'
 import { getCountryCenter } from '@/lib/country-geo'
 import { getCountryData } from '@/lib/country-data'
 import { getApprovedHero } from '@/lib/country-visuals/data'
+import { PersonalizedCountrySummary } from '@/components/country-template/PersonalizedCountrySummary'
 import { SimpleCountryView } from '@/components/country-template/SimpleCountryView'
 import { CountryTemplate } from '@/components/country-template/CountryTemplate'
 import { TAB_SLUGS, type TabSlug } from '@/components/country-template/TabBar'
@@ -101,8 +102,9 @@ export default async function CountryV2Page({ params, searchParams }: Props) {
   // profile incomplete) — the right rail renders this instead of a placeholder.
   const ranked = rankNextinations(profile)
   const rankIdx = ranked.findIndex((r) => r.country.slug === countrySlug)
+  const rankedMatch = rankIdx >= 0 ? ranked[rankIdx].match : null
   const matchInfo = rankIdx >= 0
-    ? { score: ranked[rankIdx].match.score, rank: rankIdx + 1, total: ranked.length, reasons: ranked[rankIdx].match.reasons }
+    ? { score: rankedMatch!.score, rank: rankIdx + 1, total: ranked.length, reasons: rankedMatch!.reasons }
     : null
 
   // Approved hero artwork (flag + silhouette) when committed; else the hero
@@ -119,12 +121,44 @@ export default async function CountryV2Page({ params, searchParams }: Props) {
     sources: cd.sources,
   }
 
+  // Required hero status indicators (Country Design System) — real data only.
+  const statusChips: Array<{ label: string; tone?: 'gold' | 'good' | 'muted' }> = []
+  if (matchInfo) statusChips.push({ label: `Matched · #${matchInfo.rank} of ${matchInfo.total}`, tone: 'gold' })
+  const routeLabel = cd.primary_visa_route ?? detail?.visaType
+  if (routeLabel) statusChips.push({ label: `Route: ${routeLabel}`, tone: 'good' })
+  statusChips.push(cd.last_verified ? { label: 'Data verified', tone: 'good' } : { label: 'Data being verified', tone: 'muted' })
+
+  // Personalized Summary (Country Design System): shown only on the Overview tab
+  // when we have real, calculated Match Score data — never fabricated, never an
+  // empty placeholder. Expanded by default for the user's #1 match.
+  const overviewPrefix = active === 'overview' && matchInfo && rankedMatch ? (
+    <PersonalizedCountrySummary
+      countrySlug={countrySlug}
+      summary={`${record.name} is your #${matchInfo.rank} match of ${matchInfo.total}.`}
+      explanation={rankedMatch.reasons.join(' ') || rankedMatch.tradeoff}
+      overallFit={matchInfo.score}
+      blockingIssue={detail?.visaType
+        ? { label: 'Route identified', detail: `Primary route: ${detail.visaType}` }
+        : { label: 'Visa pathway', detail: 'No qualifying route confirmed for your profile yet' }}
+      outcome={{
+        label: 'Naturalization',
+        value: cd.path_to_citizenship ?? 'Being verified',
+        detail: cd.path_to_citizenship ? undefined : 'Shown once confirmed from official sources',
+      }}
+      callouts={rankedMatch.tradeoff ? [{ title: 'Honest tradeoff', body: rankedMatch.tradeoff }] : []}
+      rank={matchInfo.rank}
+      totalRanked={matchInfo.total}
+      categoryScores={[]}
+      defaultOpen={matchInfo.rank === 1}
+    />
+  ) : null
+
   // Portugal is the only fully verified dataset — it renders the approved rich
   // tabs. Every other country renders the same rich frame with honest,
   // data-driven content.
   if (countrySlug === 'portugal') {
     const tab = {
-      'overview': <OverviewTab slug={countrySlug} />,
+      'overview': <>{overviewPrefix}<OverviewTab slug={countrySlug} /></>,
       'move-there': <MoveThereTab />,
       'cost-housing': <CostHousingTab slug={countrySlug} />,
       'work-study': <WorkStudyTab slug={countrySlug} />,
@@ -135,7 +169,7 @@ export default async function CountryV2Page({ params, searchParams }: Props) {
     }[active]
 
     return (
-      <CountryTemplate slug={countrySlug} active={active} fromQuiz={fromQuiz} country={templateCountry} center={center} match={matchInfo} data={heroData} heroArtwork={heroArtwork} rich>
+      <CountryTemplate slug={countrySlug} active={active} fromQuiz={fromQuiz} country={templateCountry} center={center} match={matchInfo} data={heroData} heroArtwork={heroArtwork} statusChips={statusChips} rich>
         {tab}
       </CountryTemplate>
     )
@@ -143,12 +177,15 @@ export default async function CountryV2Page({ params, searchParams }: Props) {
 
   const body = active === 'overview'
     ? (
-      <DataOverviewTab
-        country={templateCountry}
-        visaType={detail?.visaType}
-        incomeRequired={detail?.incomeRequired}
-        summary={detail?.summary}
-      />
+      <>
+        {overviewPrefix}
+        <DataOverviewTab
+          country={templateCountry}
+          visaType={detail?.visaType}
+          incomeRequired={detail?.incomeRequired}
+          summary={detail?.summary}
+        />
+      </>
     )
     : <ResearchingTab name={record.name} label={TAB_LABEL[active]} />
 
@@ -163,6 +200,7 @@ export default async function CountryV2Page({ params, searchParams }: Props) {
       match={matchInfo}
       data={heroData}
       heroArtwork={heroArtwork}
+      statusChips={statusChips}
     >
       {body}
     </CountryTemplate>

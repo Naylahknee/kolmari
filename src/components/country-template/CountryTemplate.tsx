@@ -5,7 +5,7 @@ import { UnitsProvider } from './client/UnitsControl'
 import { AnnouncementBar } from '@/components/kolmari/announcement-bar'
 import { TopBar } from './TopBar'
 import { Sidebar } from './Sidebar'
-import { CountryHero, type CountryHeroData, type HeroArtwork } from './CountryHero'
+import { CountryHero, type CountryHeroData, type HeroArtwork, type HeroStatusChip } from './CountryHero'
 import { TabBar, type TabSlug } from './TabBar'
 import { RightRail, type RailMatch } from './RightRail'
 
@@ -18,7 +18,7 @@ type LatLng = { lat: number; lng: number }
    `rich` is true only for Portugal (the fully verified dataset), which renders
    the approved hero metrics and rail. Every other country renders the same
    frame with honest, data-driven content and a real map. */
-export function CountryTemplate({ slug, active, fromQuiz = false, country, center = null, visaType, rich = false, match = null, data = null, heroArtwork = null, children }:
+export function CountryTemplate({ slug, active, fromQuiz = false, country, center = null, visaType, rich = false, match = null, data = null, heroArtwork = null, statusChips = [], children }:
   {
     slug: string
     active: TabSlug
@@ -30,6 +30,7 @@ export function CountryTemplate({ slug, active, fromQuiz = false, country, cente
     match?: RailMatch | null
     data?: CountryHeroData | null
     heroArtwork?: HeroArtwork | null
+    statusChips?: HeroStatusChip[]
     children: React.ReactNode
   }) {
   const router = useRouter()
@@ -48,7 +49,7 @@ export function CountryTemplate({ slug, active, fromQuiz = false, country, cente
           <button type="button" className="rail-backdrop" onClick={toggleRail} aria-label="Close navigation" />
           <Sidebar />
           <main className="main">
-            <CountryHero go={go} fromQuiz={fromQuiz} country={country} center={center} visaType={visaType} rich={rich} data={data} heroArtwork={heroArtwork} />
+            <CountryHero go={go} fromQuiz={fromQuiz} country={country} center={center} visaType={visaType} rich={rich} data={data} heroArtwork={heroArtwork} statusChips={statusChips} />
             <TabBar slug={slug} active={active} />
             <div className="cols">
               <div>{children}</div>
