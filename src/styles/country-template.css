@@ -300,6 +300,13 @@ body.rail-collapsed .country-template-root .rail .icon-btn svg{transform:scaleX(
 .country-template-root .sbadge{font-size:10.5px;font-weight:600;padding:2px 9px;border-radius:var(--r-pill);background:var(--ok-soft);color:var(--ok)}
 .country-template-root .sbadge.rev{background:var(--info-soft);color:var(--info)}
 .country-template-root .note{margin-top:10px;font-size:11.5px;color:var(--muted-soft)}
+.country-template-root .fact .v.soft{color:var(--muted-soft);font-weight:600}
+/* Ways In (data-driven overview) */
+.country-template-root .ways-in{padding-top:2px}
+.country-template-root .ways-in .wi-route{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:var(--navy)}
+.country-template-root .ways-in .wi-route svg{color:var(--gold-deep)}
+.country-template-root .ways-in .wi-note{margin-top:8px;font-size:13px;line-height:1.6;color:var(--muted)}
+.country-template-root .ways-in .wi-link{display:inline-flex;align-items:center;gap:5px;margin-top:12px;font-size:12px;font-weight:700;color:var(--gold-deep)}
 
 /* placeholder panels */
 .country-template-root .stub{padding:22px}
