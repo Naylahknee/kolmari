@@ -1,17 +1,8 @@
 import Link from 'next/link'
 import type { CountryContent } from '@/lib/country-workspace/country-content'
 import { CountrySnapshotMap } from '@/components/country-workspace/CountrySnapshotMap'
-import { CityMapImage } from '@/components/country-workspace/CityMapImage'
+import { CountryOutline } from '@/components/country-template/CountryOutline'
 import { getCountryCenter } from '@/lib/country-geo'
-
-// Real map coordinates for Portugal's featured cities (replaces the former
-// decorative shape-maps). Public city centroids.
-const PT_CITY_COORDS: Record<string, { lat: number; lng: number }> = {
-  Lisbon: { lat: 38.7223, lng: -9.1393 },
-  Porto: { lat: 41.1579, lng: -8.6291 },
-  Funchal: { lat: 32.6669, lng: -16.9241 },
-  Braga: { lat: 41.5454, lng: -8.4265 },
-}
 
 /* Converted from the approved index.html mockup. Markup is verbatim.
    Content is still literal Portugal copy: replace with `content.*` per
@@ -82,7 +73,7 @@ export function OverviewTab({ slug }: { slug: string }) {
                 <div className="cities">
                   <article className="city">
                     <div className="city-map">
-                      <span className="cmap"><CityMapImage cityName="Lisbon" countryName="Portugal" lat={PT_CITY_COORDS.Lisbon.lat} lng={PT_CITY_COORDS.Lisbon.lng} alt="Map of Lisbon, Portugal" /></span>
+                      <span className="cmap"><span style={{display:'grid',placeItems:'center',width:'100%',height:'100%',background:'linear-gradient(135deg,#122a52,#1b3f68)'}}><CountryOutline code="pt" fill="rgba(255,255,255,0.85)" style={{width:'62%',height:'62%'}} /></span></span>
                       <span className="city-flag"><span className="flag sm" role="img" aria-label="Portugal"><svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="360" height="600" fill="#006600" /><rect x="360" width="540" height="600" fill="#DA291C" /><g transform="translate(360 300)" fill="none" stroke="#FFE900" strokeWidth="15"><circle r="108" /><ellipse rx="108" ry="42" /><ellipse rx="42" ry="108" /><ellipse rx="108" ry="42" transform="rotate(38)" /><ellipse rx="108" ry="42" transform="rotate(-38)" /><path d="M-108 0H108" /></g><g transform="translate(360 300)"><path d="M-52-70h104v78c0 44-38 68-52 76-14-8-52-32-52-76z" fill="#DA291C" stroke="#fff" strokeWidth="13" /><path d="M-31-46h62v54c0 28-22 44-31 50-9-6-31-22-31-50z" fill="#fff" /><g fill="#003399"><rect x="-9" y="-38" width="18" height="26" rx="3" /><rect x="-9" y="12" width="18" height="26" rx="3" /><rect x="-34" y="-13" width="18" height="26" rx="3" /><rect x="16" y="-13" width="18" height="26" rx="3" /></g></g></svg><img src="https://flagcdn.com/pt.svg" alt="" /></span></span><span className="city-tag">Most infrastructure</span>
                     </div>
                     <div className="city-body">
@@ -99,7 +90,7 @@ export function OverviewTab({ slug }: { slug: string }) {
                   </article>
                   <article className="city">
                     <div className="city-map">
-                      <span className="cmap"><CityMapImage cityName="Porto" countryName="Portugal" lat={PT_CITY_COORDS.Porto.lat} lng={PT_CITY_COORDS.Porto.lng} alt="Map of Porto, Portugal" /></span>
+                      <span className="cmap"><span style={{display:'grid',placeItems:'center',width:'100%',height:'100%',background:'linear-gradient(135deg,#122a52,#1b3f68)'}}><CountryOutline code="pt" fill="rgba(255,255,255,0.85)" style={{width:'62%',height:'62%'}} /></span></span>
                       <span className="city-flag"><span className="flag sm" role="img" aria-label="Portugal"><svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="360" height="600" fill="#006600" /><rect x="360" width="540" height="600" fill="#DA291C" /><g transform="translate(360 300)" fill="none" stroke="#FFE900" strokeWidth="15"><circle r="108" /><ellipse rx="108" ry="42" /><ellipse rx="42" ry="108" /><ellipse rx="108" ry="42" transform="rotate(38)" /><ellipse rx="108" ry="42" transform="rotate(-38)" /><path d="M-108 0H108" /></g><g transform="translate(360 300)"><path d="M-52-70h104v78c0 44-38 68-52 76-14-8-52-32-52-76z" fill="#DA291C" stroke="#fff" strokeWidth="13" /><path d="M-31-46h62v54c0 28-22 44-31 50-9-6-31-22-31-50z" fill="#fff" /><g fill="#003399"><rect x="-9" y="-38" width="18" height="26" rx="3" /><rect x="-9" y="12" width="18" height="26" rx="3" /><rect x="-34" y="-13" width="18" height="26" rx="3" /><rect x="16" y="-13" width="18" height="26" rx="3" /></g></g></svg><img src="https://flagcdn.com/pt.svg" alt="" /></span></span><span className="city-tag">Best value</span>
                     </div>
                     <div className="city-body">
@@ -116,7 +107,7 @@ export function OverviewTab({ slug }: { slug: string }) {
                   </article>
                   <article className="city">
                     <div className="city-map">
-                      <span className="cmap"><CityMapImage cityName="Funchal" countryName="Portugal" lat={PT_CITY_COORDS.Funchal.lat} lng={PT_CITY_COORDS.Funchal.lng} alt="Map of Funchal, Madeira" /></span>
+                      <span className="cmap"><span style={{display:'grid',placeItems:'center',width:'100%',height:'100%',background:'linear-gradient(135deg,#122a52,#1b3f68)'}}><CountryOutline code="pt" fill="rgba(255,255,255,0.85)" style={{width:'62%',height:'62%'}} /></span></span>
                       <span className="city-flag"><span className="flag sm" role="img" aria-label="Portugal"><svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="360" height="600" fill="#006600" /><rect x="360" width="540" height="600" fill="#DA291C" /><g transform="translate(360 300)" fill="none" stroke="#FFE900" strokeWidth="15"><circle r="108" /><ellipse rx="108" ry="42" /><ellipse rx="42" ry="108" /><ellipse rx="108" ry="42" transform="rotate(38)" /><ellipse rx="108" ry="42" transform="rotate(-38)" /><path d="M-108 0H108" /></g><g transform="translate(360 300)"><path d="M-52-70h104v78c0 44-38 68-52 76-14-8-52-32-52-76z" fill="#DA291C" stroke="#fff" strokeWidth="13" /><path d="M-31-46h62v54c0 28-22 44-31 50-9-6-31-22-31-50z" fill="#fff" /><g fill="#003399"><rect x="-9" y="-38" width="18" height="26" rx="3" /><rect x="-9" y="12" width="18" height="26" rx="3" /><rect x="-34" y="-13" width="18" height="26" rx="3" /><rect x="16" y="-13" width="18" height="26" rx="3" /></g></g></svg><img src="https://flagcdn.com/pt.svg" alt="" /></span></span><span className="city-tag">Island living</span>
                     </div>
                     <div className="city-body">
@@ -133,7 +124,7 @@ export function OverviewTab({ slug }: { slug: string }) {
                   </article>
                   <article className="city">
                     <div className="city-map">
-                      <span className="cmap"><CityMapImage cityName="Braga" countryName="Portugal" lat={PT_CITY_COORDS.Braga.lat} lng={PT_CITY_COORDS.Braga.lng} alt="Map of Braga, Portugal" /></span>
+                      <span className="cmap"><span style={{display:'grid',placeItems:'center',width:'100%',height:'100%',background:'linear-gradient(135deg,#122a52,#1b3f68)'}}><CountryOutline code="pt" fill="rgba(255,255,255,0.85)" style={{width:'62%',height:'62%'}} /></span></span>
                       <span className="city-flag"><span className="flag sm" role="img" aria-label="Portugal"><svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="360" height="600" fill="#006600" /><rect x="360" width="540" height="600" fill="#DA291C" /><g transform="translate(360 300)" fill="none" stroke="#FFE900" strokeWidth="15"><circle r="108" /><ellipse rx="108" ry="42" /><ellipse rx="42" ry="108" /><ellipse rx="108" ry="42" transform="rotate(38)" /><ellipse rx="108" ry="42" transform="rotate(-38)" /><path d="M-108 0H108" /></g><g transform="translate(360 300)"><path d="M-52-70h104v78c0 44-38 68-52 76-14-8-52-32-52-76z" fill="#DA291C" stroke="#fff" strokeWidth="13" /><path d="M-31-46h62v54c0 28-22 44-31 50-9-6-31-22-31-50z" fill="#fff" /><g fill="#003399"><rect x="-9" y="-38" width="18" height="26" rx="3" /><rect x="-9" y="12" width="18" height="26" rx="3" /><rect x="-34" y="-13" width="18" height="26" rx="3" /><rect x="16" y="-13" width="18" height="26" rx="3" /></g></g></svg><img src="https://flagcdn.com/pt.svg" alt="" /></span></span><span className="city-tag">Lowest cost</span>
                     </div>
                     <div className="city-body">
