@@ -40,11 +40,14 @@ function HeroBackdrop({ code, artwork }: { code: string; artwork?: HeroArtwork |
       />
     )
   }
+  const flag = code ? `https://flagcdn.com/${code.toLowerCase()}.svg` : null
   return (
     <>
-      <div className="hero-bg" aria-hidden="true" />
-      <div className="hero-shape" aria-hidden="true">
-        <CountryOutline code={code} fill="rgba(255,255,255,0.16)" style={{ height: '100%', width: 'auto' }} />
+      {flag
+        ? <div className="hero-bg hero-bg-flag" aria-hidden="true" style={{ backgroundImage: `url("${flag}")` }} />
+        : <div className="hero-bg" aria-hidden="true" />}
+      <div className="hero-flag-shape" aria-hidden="true">
+        <CountryOutline code={code} fill="rgba(0,0,0,0.32)" style={{ width: '100%', height: '100%' }} />
       </div>
     </>
   )
