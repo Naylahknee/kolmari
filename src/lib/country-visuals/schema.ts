@@ -25,6 +25,10 @@ const slug = z
 export const heroImageInputSchema = z.object({
   countryName: z.string().trim().min(2).max(80),
   countrySlug: slug,
+  // Optional ISO-3166-1 alpha-2 code. When set, the generator can feed the
+  // country's own flag raster (public/flags-png/{code}.png) to the image-edits
+  // endpoint so the output preserves the real flag instead of inventing one.
+  flagCode: z.string().trim().length(2).optional(),
   protectedSymbolDescription: z.string().trim().min(2).max(240),
   protectedSymbolPosition: z.string().trim().min(2).max(200),
   safeZonePercent: z.number().int().min(5).max(40).default(15),
@@ -59,7 +63,17 @@ export type CityImageInput = z.infer<typeof cityImageInputSchema>
 // The POST body for the generator route is a discriminated union on assetType.
 // (Snapshot maps are not AI-generated, so they never hit this endpoint.)
 export const generatorRequestSchema = z.discriminatedUnion('assetType', [
-  heroImageInputSchema.extend({ assetType: z.literal('hero') }),
+  heroImageInputSchema.extend({
+    assetType: z.literal('hero'),
+    // Optional base64 data URL of a style-reference image (e.g. an approved hero).
+    // When present it is passed to the image-edits endpoint as a style exemplar so
+    // the generated hero matches its fabric/shadow/silhouette look.
+    styleReferenceDataUrl: z
+      .string()
+      .regex(/^data:image\/[a-z+.-]+;base64,/i, 'Expected a base64 image data URL.')
+      .max(8_000_000)
+      .optional(),
+  }),
   cityImageInputSchema.extend({ assetType: z.literal('city') }),
 ])
 export type GeneratorRequest = z.infer<typeof generatorRequestSchema>

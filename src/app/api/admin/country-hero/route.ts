@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getRequestUser } from '@/lib/auth'
 import { generatorRequestSchema, type GeneratedAssetType } from '@/lib/country-visuals/schema'
-import { buildHeroPrompt, buildCityPrompt } from '@/lib/country-visuals/prompt'
+import { buildHeroPrompt, buildHeroEditPrompt, buildCityPrompt } from '@/lib/country-visuals/prompt'
 
 export const runtime = 'nodejs'
 export const maxDuration = 120
@@ -9,6 +9,17 @@ export const maxDuration = 120
 type OpenAIImageResponse = {
   data?: Array<{ b64_json?: string }>
   error?: { message?: string }
+}
+
+// A base64 image data URL → Blob for a multipart image input. Returns null when
+// the string is not a recognizable image data URL.
+function dataUrlToImage(dataUrl: string): { blob: Blob; filename: string } | null {
+  const match = /^data:(image\/[a-z+.-]+);base64,(.+)$/i.exec(dataUrl)
+  if (!match) return null
+  const [, contentType, base64] = match
+  const bytes = Buffer.from(base64, 'base64')
+  const ext = (contentType.split('/')[1] ?? 'png').replace('+xml', '').replace('jpeg', 'jpg')
+  return { blob: new Blob([bytes], { type: contentType }), filename: `image.${ext}` }
 }
 
 function isAllowedAdmin(email: string) {
@@ -61,11 +72,36 @@ export async function POST(request: Request) {
 
   const data = parsed.data
   const assetType: GeneratedAssetType = data.assetType
+
+  // For a hero, gather any image inputs (the country's own flag raster + an
+  // optional style reference). When at least one is available we use the
+  // image-*edits* endpoint so the output preserves the real flag and matches the
+  // reference look; otherwise we fall back to plain text-to-image generation.
+  const heroImages: Array<{ blob: Blob; filename: string }> = []
+  if (data.assetType === 'hero') {
+    if (data.flagCode) {
+      try {
+        const flagUrl = new URL(`/flags-png/${data.flagCode.toLowerCase()}.png`, request.url)
+        const flagRes = await fetch(flagUrl)
+        if (flagRes.ok) {
+          const flagBytes = Buffer.from(await flagRes.arrayBuffer())
+          heroImages.push({ blob: new Blob([flagBytes], { type: 'image/png' }), filename: `${data.flagCode.toLowerCase()}.png` })
+        }
+      } catch {
+        // No flag raster available — fall through (text prompt or reference-only).
+      }
+    }
+    if (data.styleReferenceDataUrl) {
+      const ref = dataUrlToImage(data.styleReferenceDataUrl)
+      if (ref) heroImages.push({ blob: ref.blob, filename: `reference.${ref.filename.split('.').pop()}` })
+    }
+  }
+
   let prompt: string
   let size: string
   let filename: string
   if (data.assetType === 'hero') {
-    prompt = buildHeroPrompt(data)
+    prompt = heroImages.length ? buildHeroEditPrompt(data, { hasStyleRef: Boolean(data.styleReferenceDataUrl) }) : buildHeroPrompt(data)
     size = '1536x1024'
     filename = `${data.countrySlug}-hero.webp`
   } else {
@@ -74,26 +110,48 @@ export async function POST(request: Request) {
     filename = `${data.citySlug}.webp`
   }
 
+  // Hero with image inputs → multipart edits; everything else → JSON generations.
+  const useEdits = data.assetType === 'hero' && heroImages.length > 0
+
   let response: Response
   try {
-    response = await fetch('https://api.openai.com/v1/images/generations', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-image-2',
-        prompt,
-        size,
-        quality: parsed.data.quality,
-        output_format: 'webp',
-        background: 'opaque',
-        n: 1,
-      }),
-      // gpt-image-2 can take a while; bound it so a hung request fails cleanly.
-      signal: AbortSignal.timeout(115_000),
-    })
+    if (useEdits) {
+      const form = new FormData()
+      form.append('model', 'gpt-image-2')
+      form.append('prompt', prompt)
+      form.append('size', size)
+      form.append('quality', parsed.data.quality)
+      form.append('output_format', 'webp')
+      form.append('background', 'opaque')
+      form.append('n', '1')
+      for (const img of heroImages) form.append('image[]', img.blob, img.filename)
+      response = await fetch('https://api.openai.com/v1/images/edits', {
+        method: 'POST',
+        // No Content-Type header — fetch sets the multipart boundary from FormData.
+        headers: { Authorization: `Bearer ${apiKey}` },
+        body: form,
+        signal: AbortSignal.timeout(115_000),
+      })
+    } else {
+      response = await fetch('https://api.openai.com/v1/images/generations', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-image-2',
+          prompt,
+          size,
+          quality: parsed.data.quality,
+          output_format: 'webp',
+          background: 'opaque',
+          n: 1,
+        }),
+        // gpt-image-2 can take a while; bound it so a hung request fails cleanly.
+        signal: AbortSignal.timeout(115_000),
+      })
+    }
   } catch (caught) {
     // Log only the failure kind — never the request (which carries the key).
     console.error('OpenAI image request failed', caught instanceof Error ? caught.name : 'unknown')

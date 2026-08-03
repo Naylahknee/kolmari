@@ -18,6 +18,17 @@ and reviewed before download; one configures the existing interactive map.
    inherits the flag colors ("Mexico Shadow Standard"). No parchment cutout, no
    pin, no text. The national emblem is always protected. Output `1536×1024`
    WebP, filename `{country-slug}-hero.webp`.
+   - **Reference-guided generation.** Provide a **Flag code (ISO-2)** and/or a
+     **Style reference** image and the hero is produced with OpenAI's
+     image-**edits** endpoint instead of text-to-image: the country's own flag
+     raster (`public/flags-png/{code}.png`) is the subject and the reference is a
+     style exemplar, so the output preserves the real flag and matches an approved
+     hero's look. With neither, it falls back to text-to-image on the written
+     prompt (unchanged behavior).
+   - **Use your own finished art.** The Hero and City tabs each have an upload
+     card — pick a PNG/JPEG/WebP (≤6 MB) and "Save to site" stores it as-is via
+     `POST /api/admin/country-asset`, no AI involved. Best when you already have
+     the exact image.
 2. **Snapshot Map** — a configuration + preview tool for the existing Mapbox
    locator (`CountrySnapshotMap`). **Never AI-generated.** Produces a
    `CountryVisualAssets.snapshotMap` block to copy into the registry.
@@ -33,13 +44,20 @@ and reviewed before download; one configures the existing interactive map.
   (`CountryVisualAssets`). Path helpers `heroAssetPath` / `cityAssetPath` and
   `focalToObjectPosition`.
 - `src/lib/country-visuals/prompt.ts` — `buildHeroPrompt` (Mexico Shadow
-  Standard) and `buildCityPrompt`.
+  Standard, text-to-image), `buildHeroEditPrompt` (image-edits, flag + optional
+  style reference), and `buildCityPrompt`.
+- `public/flags-png/{code}.png` — raster (1024px) versions of the local flag
+  SVGs, used as the subject image for reference-guided hero edits (the edits
+  endpoint needs raster, not SVG). Regenerate with `@resvg/resvg-js` from
+  `public/flags/{code}.svg`.
 - `src/lib/country-visuals/data.ts` — the per-country registry + resolvers
   (`getCountryVisualAssets`, `getApprovedHero`, `hasApprovedHero`,
   `getSnapshotMapConfig`). Pure, so both server and client import it.
 - `src/app/api/admin/country-hero/route.ts` — one authenticated endpoint,
   discriminated on `assetType` (`hero` | `city`); returns `imageDataUrl`,
-  `filename`, `prompt`, `model`, `assetType`.
+  `filename`, `prompt`, `model`, `assetType`. A hero request with a `flagCode`
+  and/or `styleReferenceDataUrl` routes to `/v1/images/edits`; otherwise
+  `/v1/images/generations`.
 - `src/app/(app)/(workspace)/settings/country-hero/page.tsx` — the tabbed admin
   UI (Hero / Snapshot Map / City Images) with responsive preview frames.
 - `src/components/country-template/CityCardImage.tsx` — the city-card image with

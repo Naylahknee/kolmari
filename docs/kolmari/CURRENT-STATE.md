@@ -134,3 +134,19 @@ uses the published insight for the saved destination and shows an empty state wh
 exists. Application status is self-reported and stored client-side; Kolmari never sets it.
 Waiting Room task completion persists through `PUT /api/profile` (`completed_tasks`), as
 before — `checklist.tsx` was folded into `flutter-mode.tsx`.
+
+## Country hero generation — reference-guided + direct upload
+
+The Hero tab of the Country Page Generator Engine now matches an uploaded look
+two ways. Root cause of the earlier mismatch: generation used OpenAI
+text-to-image, which never sees a reference image. Fixes:
+
+1. **Reference-guided generation.** A hero request carrying a `flagCode` (ISO-2)
+   and/or `styleReferenceDataUrl` routes to `/v1/images/edits`: the country's own
+   flag raster (`public/flags-png/{code}.png`) is the subject and the reference is
+   a style exemplar, so the flag/emblem stay real and the fabric/shadow/silhouette
+   look is copied. No image inputs → unchanged text-to-image path.
+2. **Direct upload.** Hero and City tabs have an "upload finished art" card that
+   saves the file as-is through the existing `POST /api/admin/country-asset`
+   (Neon-backed, served by `/api/country-asset`) — no AI. `OPENAI_API_KEY` stays
+   server-only; uploaded bytes travel only over the admin-only routes.
