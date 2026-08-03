@@ -1,72 +1,104 @@
-/* Your World Map — interactive Mapbox GL with country pin markers */
+/* Your World — token-free illustrated SVG map with matched Destination pins. */
 
 .your-world-map-container {
   position: relative;
   width: 100%;
-  aspect-ratio: 960 / 480;
+  aspect-ratio: 1000 / 520;
+  overflow: hidden;
+  border: 1px solid rgba(243, 197, 22, 0.22);
   border-radius: 16px;
-  overflow: hidden;
-  background: #C9E3F2;
-  border: 1px solid rgba(16, 34, 68, 0.1);
+  background: #0D1B39;
+  box-shadow: 0 12px 30px -22px rgba(13, 27, 57, 0.85);
 }
 
-.your-world-map-container .mapboxgl-ctrl-group {
-  border-radius: 8px !important;
-  overflow: hidden;
-}
-
-.your-world-map-container .mapboxgl-ctrl-logo,
-.your-world-map-container .mapboxgl-ctrl-attrib {
-  opacity: 0.6;
-}
-
-/* Country pin marker — displays code, reveals name and score on hover */
-.your-world-map-marker {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0;
-  border: none;
-  background: none;
-  cursor: pointer;
+.your-world-map-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
   font-family: inherit;
-  transition: transform 160ms ease;
 }
 
-.your-world-map-marker:hover,
-.your-world-map-marker:focus-visible {
-  transform: scale(1.1);
+.your-world-map-grid {
+  fill: none;
+  stroke: rgba(243, 197, 22, 0.16);
+  stroke-width: 1.2;
+}
+
+.your-world-map-region {
+  cursor: pointer;
   outline: none;
 }
 
-.your-world-map-marker__code {
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #F4C20D;
-  border: 2px solid #FFFFFF;
-  font-size: 9px;
-  font-weight: 700;
-  color: #102244;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+.your-world-map-region__shape {
+  fill: #17305B;
+  stroke: rgba(243, 197, 22, 0.76);
+  stroke-width: 2.4;
+  transition: fill 160ms ease, stroke 160ms ease;
 }
 
-/* Hidden info overlay — shown on hover/focus */
+.your-world-map-region__label {
+  fill: rgba(255, 255, 255, 0.72);
+  font-size: 13px;
+  font-weight: 750;
+  pointer-events: none;
+  transition: fill 160ms ease;
+}
+
+.your-world-map-region:hover .your-world-map-region__shape,
+.your-world-map-region:focus-visible .your-world-map-region__shape {
+  fill: #1D3B6C;
+  stroke: #F3C516;
+}
+
+.your-world-map-region:hover .your-world-map-region__label,
+.your-world-map-region:focus-visible .your-world-map-region__label {
+  fill: #FFFFFF;
+}
+
+.your-world-map-region:focus-visible .your-world-map-region__shape {
+  stroke-width: 5;
+}
+
+.your-world-map-marker {
+  cursor: pointer;
+  outline: none;
+}
+
+.your-world-map-marker__halo {
+  fill: rgba(243, 197, 22, 0.24);
+  transition: r 160ms ease, fill 160ms ease;
+}
+
+.your-world-map-marker__dot {
+  fill: #F3C516;
+  stroke: #FFFFFF;
+  stroke-width: 2.5;
+}
+
+.your-world-map-marker__code {
+  fill: #0D1B39;
+  font-size: 8px;
+  font-weight: 850;
+  pointer-events: none;
+}
+
 .your-world-map-marker__info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-bottom: 6px;
-  padding: 6px 8px;
-  border-radius: 6px;
-  background: #102244;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  white-space: nowrap;
   opacity: 0;
   pointer-events: none;
   transition: opacity 160ms ease;
+}
+
+.your-world-map-marker__info rect { fill: #FFFFFF; }
+.your-world-map-marker__info text {
+  fill: #17305B;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.your-world-map-marker:hover .your-world-map-marker__halo,
+.your-world-map-marker:focus-visible .your-world-map-marker__halo {
+  r: 20px;
+  fill: rgba(243, 197, 22, 0.36);
 }
 
 .your-world-map-marker:hover .your-world-map-marker__info,
@@ -74,44 +106,39 @@
   opacity: 1;
 }
 
-.your-world-map-marker__name {
-  font-size: 11px;
-  font-weight: 700;
-  color: #FFFFFF;
-  line-height: 1.2;
+.your-world-map-empty {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  left: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(13, 27, 57, 0.88);
+  box-shadow: 0 8px 24px rgba(5, 12, 27, 0.28);
+  backdrop-filter: blur(8px);
 }
 
-.your-world-map-marker__score {
-  font-size: 10px;
-  font-weight: 800;
-  color: #F4C20D;
-  letter-spacing: 0.02em;
-}
-
-/* Responsive adjustments for smaller screens */
-@media (max-width: 600px) {
+@media (max-width: 640px) {
   .your-world-map-container {
-    aspect-ratio: 960 / 480;
+    min-height: 290px;
+    aspect-ratio: auto;
     border-radius: 12px;
   }
 
-  .your-world-map-marker__code {
-    width: 22px;
-    height: 22px;
-    font-size: 8px;
-  }
+  .your-world-map-region__label { font-size: 11px; }
+  .your-world-map-empty { right: 10px; bottom: 10px; left: 10px; flex-wrap: wrap; }
+  .your-world-map-empty a { margin-left: 0; }
+}
 
+@media (prefers-reduced-motion: reduce) {
+  .your-world-map-region__shape,
+  .your-world-map-region__label,
+  .your-world-map-marker__halo,
   .your-world-map-marker__info {
-    padding: 4px 6px;
-    border-radius: 4px;
-    margin-bottom: 4px;
-  }
-
-  .your-world-map-marker__name {
-    font-size: 10px;
-  }
-
-  .your-world-map-marker__score {
-    font-size: 9px;
+    transition: none;
   }
 }

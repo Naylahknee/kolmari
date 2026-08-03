@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ArrowRight, Check, Lock } from 'lucide-react'
+import { YourWorldMap, type WorldPin } from './your-world-map'
 
 // Countries surfaced from the user's quiz/profile ranking. Names are shown free;
 // the Match Score behind them is a Pro feature, so only the top match links
@@ -10,8 +11,8 @@ const UPGRADE_HREF = '/coming-soon?feature=plus'
 
 // What free browsing includes. Descriptive copy only — no per-user data.
 const FREE_TILES: { title: string; body: string }[] = [
-  { title: 'The interactive map', body: 'Real boundary data. Click any country to open its overview.' },
-  { title: 'Country directory', body: 'Search by name or region and read the full Overview tab.' },
+  { title: 'The interactive map', body: 'Open any region or matched Destination from the illustrated world.' },
+  { title: 'Destination overviews', body: 'Read available Overview tabs without exposing a paid Match Score.' },
   { title: 'Region guides', body: 'What each region tends to be good and bad at.' },
   { title: 'Ways in, by country', body: 'The route families available, without the eligibility check.' },
 ]
@@ -25,7 +26,7 @@ const PRO_FEATURES: string[] = [
   'Side-by-side comparison',
 ]
 
-export function YourWorldGated({ matches }: { matches: QuizMatch[] }) {
+export function YourWorldGated({ matches, pins }: { matches: QuizMatch[]; pins: WorldPin[] }) {
   return (
     <div>
       {/* Upgrade banner */}
@@ -48,6 +49,10 @@ export function YourWorldGated({ matches }: { matches: QuizMatch[] }) {
         <p className="mt-1 max-w-2xl text-sm text-muted">
           Browse the world map and read any country&rsquo;s overview for free. Filtering, scoring, and saving are Pro.
         </p>
+      </div>
+
+      <div className="mt-5">
+        <YourWorldMap pins={pins} />
       </div>
 
       <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1.55fr)_minmax(300px,1fr)]">

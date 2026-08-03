@@ -7,6 +7,7 @@ import { LogOut, Settings as SettingsIcon, ShieldCheck } from 'lucide-react'
 import { BRAND } from '@/config/brand'
 import { PRODUCT_COPY } from '@/config/product-copy'
 import { UnitsControl } from './client/UnitsControl'
+import { routeWorkspaceInput } from '@/lib/decision-routing'
 
 const pageNames: Record<string, string> = {
   '/dashboard': PRODUCT_COPY.dashboard,
@@ -36,13 +37,15 @@ export function TopBar({ onToggleRail }: { onToggleRail: () => void }) {
   const pathname = usePathname()
   const router = useRouter()
 
-  // Global search: routes to the Destinations browser with the query, which
-  // seeds its own search field from ?q.
+  // Global decision field: questions route to the relevant existing workspace;
+  // short Destination lookups retain their query for Your World filtering.
   const [query, setQuery] = useState('')
   function onSearch(e: React.FormEvent) {
     e.preventDefault()
     const term = query.trim()
-    router.push(term ? `/your-world?q=${encodeURIComponent(term)}` : '/your-world')
+    if (!term) return
+    router.push(routeWorkspaceInput(term))
+    setQuery('')
   }
 
   // Real account name for the profile pill avatar — never a placeholder name.
@@ -133,8 +136,8 @@ export function TopBar({ onToggleRail }: { onToggleRail: () => void }) {
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search destinations, pathways, and more"
-              aria-label="Search destinations, pathways, and more"
+              placeholder="Ask Kolmari or search Destinations"
+              aria-label="Ask Kolmari or search Destinations"
             />
           </form>
         )}

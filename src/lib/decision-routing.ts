@@ -60,3 +60,16 @@ export function routeDecisionQuestion(question: string): DecisionRoute {
   return ROUTES[match?.intent ?? 'destinations']
 }
 
+/**
+ * Routes the persistent shell field. Plain destination lookups keep their
+ * query so Your World can filter its real catalog; question-like input only
+ * selects a workspace and is never copied into the URL.
+ */
+export function routeWorkspaceInput(input: string): string {
+  const normalized = input.trim()
+  const route = routeDecisionQuestion(normalized)
+  if (route.intent !== 'destinations') return route.href
+
+  const looksLikeLookup = normalized.split(/\s+/).length <= 3 && !/\b(can|could|how|should|what|where|which|who|why)\b/i.test(normalized)
+  return looksLikeLookup ? `${route.href}?q=${encodeURIComponent(normalized)}` : route.href
+}

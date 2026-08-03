@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useSyncExternalStore } from 'react'
 import {
   ArrowRight,
   ArrowUp,
   FileText,
   Globe2,
+  History,
   ListChecks,
   ShieldCheck,
   Stamp,
@@ -15,6 +16,11 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { routeDecisionQuestion } from '@/lib/decision-routing'
+import {
+  parseWorkspaceActivity,
+  WORKSPACE_ACTIVITY_EVENT,
+  WORKSPACE_ACTIVITY_STORAGE_KEY,
+} from '@/lib/workspace-activity'
 
 type Starter = {
   question: string
@@ -31,9 +37,30 @@ const STARTERS: Starter[] = [
   { question: 'What documents will I need?', href: '/documents', icon: FileText },
 ]
 
+function subscribeToWorkspaceActivity(onStoreChange: () => void) {
+  const onStorage = (event: StorageEvent) => {
+    if (event.key === WORKSPACE_ACTIVITY_STORAGE_KEY) onStoreChange()
+  }
+  window.addEventListener('storage', onStorage)
+  window.addEventListener(WORKSPACE_ACTIVITY_EVENT, onStoreChange)
+  return () => {
+    window.removeEventListener('storage', onStorage)
+    window.removeEventListener(WORKSPACE_ACTIVITY_EVENT, onStoreChange)
+  }
+}
+
+const readWorkspaceActivity = () => window.localStorage.getItem(WORKSPACE_ACTIVITY_STORAGE_KEY)
+const readServerWorkspaceActivity = () => null
+
 export function DecisionWorkspaceStarter() {
   const router = useRouter()
   const [question, setQuestion] = useState('')
+  const activityValue = useSyncExternalStore(
+    subscribeToWorkspaceActivity,
+    readWorkspaceActivity,
+    readServerWorkspaceActivity,
+  )
+  const activity = parseWorkspaceActivity(activityValue)
 
   function submitQuestion(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -83,6 +110,16 @@ export function DecisionWorkspaceStarter() {
             </button>
           </div>
         </form>
+        {activity && (
+          <Link
+            href={activity.href}
+            className="mt-3 inline-flex min-h-9 items-center gap-2 rounded-full border border-line bg-canvas/60 px-3 text-xs font-semibold text-navy transition hover:border-gold-deep hover:bg-gold-soft/25"
+          >
+            <History size={14} className="text-gold-deep" aria-hidden="true" />
+            Continue where you left off: <span className="font-bold">{activity.label}</span>
+            <ArrowRight size={13} aria-hidden="true" />
+          </Link>
+        )}
       </div>
 
       <div className="grid gap-px bg-line sm:grid-cols-2 xl:grid-cols-3">
@@ -103,4 +140,3 @@ export function DecisionWorkspaceStarter() {
     </section>
   )
 }
-
