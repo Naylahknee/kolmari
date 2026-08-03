@@ -42,7 +42,7 @@ export function TopBar({ onToggleRail }: { onToggleRail: () => void }) {
   function onSearch(e: React.FormEvent) {
     e.preventDefault()
     const term = query.trim()
-    router.push(term ? `/destinations?q=${encodeURIComponent(term)}` : '/destinations')
+    router.push(term ? `/your-world?q=${encodeURIComponent(term)}` : '/your-world')
   }
 
   // Real account name for the profile pill avatar — never a placeholder name.

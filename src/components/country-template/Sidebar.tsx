@@ -33,7 +33,7 @@ export function Sidebar() {
   }, [])
 
   const onCountry = pathname.startsWith('/nextinations/')
-  const destinationsActive = active('/destinations') || active('/nexitnation') || onCountry
+  const yourWorldActive = active('/your-world') || active('/destinations') || active('/nexitnation') || onCountry
   const [open, setOpen] = useState(false)
   // Auto-open the tree whenever the user is on a country page.
   useEffect(() => {
@@ -57,23 +57,19 @@ export function Sidebar() {
         </Link>
 
         <p className="sb-label" data-onboarding="explore-nav">Explore</p>
-        <Link className={`sb-item${active('/your-world') ? ' active' : ''}`} href="/your-world">
-          <Icon><path d="M12 21s-7-6.3-7-11a7 7 0 0114 0c0 4.7-7 11-7 11z" /><circle cx="12" cy="10" r="2.6" /></Icon>
-          <span className="lbl">Your World</span>
-        </Link>
         {matches.length > 0 ? (
           <>
             <button
               type="button"
-              className={`sb-item${destinationsActive ? ' active' : ''}`}
+              className={`sb-item${yourWorldActive ? ' active' : ''}`}
               aria-expanded={open}
               onClick={() => {
                 setOpen((prev) => !prev)
-                router.push('/destinations')
+                router.push('/your-world')
               }}
             >
-              <Icon><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18" /></Icon>
-              <span className="lbl">{PRODUCT_COPY.world}</span>
+              <Icon><path d="M12 21s-7-6.3-7-11a7 7 0 0114 0c0 4.7-7 11-7 11z" /><circle cx="12" cy="10" r="2.6" /></Icon>
+              <span className="lbl">Your World</span>
               <svg className="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 9l6 6 6-6" /></svg>
             </button>
             <div className="sb-tree" hidden={!open}>
@@ -87,16 +83,16 @@ export function Sidebar() {
                   <span className="nm">{m.name}</span>
                 </Link>
               ))}
-              <Link className="sb-country sb-country-all" href="/destinations">
+              <Link className="sb-country sb-country-all" href="/your-world">
                 <span className="sb-cc" aria-hidden="true">＋</span>
                 <span className="nm">Browse all</span>
               </Link>
             </div>
           </>
         ) : (
-          <Link className={`sb-item${active('/destinations') || active('/nexitnation') ? ' active' : ''}`} href="/destinations">
-            <Icon><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18" /></Icon>
-            <span className="lbl">{PRODUCT_COPY.world}</span>
+          <Link className={`sb-item${yourWorldActive ? ' active' : ''}`} href="/your-world">
+            <Icon><path d="M12 21s-7-6.3-7-11a7 7 0 0114 0c0 4.7-7 11-7 11z" /><circle cx="12" cy="10" r="2.6" /></Icon>
+            <span className="lbl">Your World</span>
           </Link>
         )}
 
