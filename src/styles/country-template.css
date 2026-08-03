@@ -113,8 +113,13 @@ body.rail-collapsed .country-template-root .rail .icon-btn svg{transform:scaleX(
 .country-template-root .hero-bg.hero-bg-flag::before{
   background:linear-gradient(90deg,rgba(13,27,57,.68) 0%,rgba(13,27,57,.34) 52%,rgba(13,27,57,.1) 100%)
 }
-.country-template-root .hero-bg.hero-bg-flag::after{display:none}
-.country-template-root .hero-flag-shape{position:absolute;z-index:-1;right:4%;top:50%;transform:translateY(-50%);width:34%;height:82%;pointer-events:none;filter:drop-shadow(0 8px 20px rgba(0,0,0,.28))}
+/* Woven-fabric + soft-fold overlay so the flat flag reads as matte cloth. */
+.country-template-root .hero-bg.hero-bg-flag::after{content:"";position:absolute;inset:0;display:block;pointer-events:none;mix-blend-mode:overlay;opacity:.92;
+  background:
+    repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 1px,transparent 1px 3px),
+    repeating-linear-gradient(0deg,rgba(0,0,0,.045) 0 1px,transparent 1px 3px),
+    linear-gradient(112deg,rgba(255,255,255,.08) 0%,transparent 20%,rgba(0,0,0,.16) 52%,transparent 74%,rgba(255,255,255,.06) 100%)}
+.country-template-root .hero-flag-shape{position:absolute;z-index:-1;right:4%;top:50%;transform:translateY(-50%);width:34%;height:82%;pointer-events:none;filter:drop-shadow(1.5px 2px 0 rgba(255,255,255,.07)) drop-shadow(0 9px 22px rgba(0,0,0,.32))}
 @media (max-width:1100px){.country-template-root .hero-flag-shape{width:30%;opacity:.9}}
 @media (max-width:700px){.country-template-root .hero-flag-shape{display:none}}
 .country-template-root .hero-map{position:absolute;inset:0;z-index:-2}
@@ -140,7 +145,7 @@ body.rail-collapsed .country-template-root .rail .icon-btn svg{transform:scaleX(
 .country-template-root .badge-h svg{width:15px;height:15px;flex:0 0 auto;stroke-width:2.1}
 .country-template-root .b-sch svg{color:var(--gold)} .country-template-root .b-eu svg{color:#93b6ff} .country-template-root .b-nato svg{color:#8fe0d3}
 .country-template-root .metrics{margin-top:26px;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(255,255,255,.16);background:rgba(13,27,57,.5);backdrop-filter:blur(14px)}
-.country-template-root .metric{position:relative;display:block;width:100%;text-align:left;padding:15px 34px 16px 18px;
+.country-template-root .metric{position:relative;display:flex;flex-direction:column;justify-content:center;width:100%;min-height:88px;text-align:left;padding:14px 30px 14px 18px;
   border-right:1px solid rgba(255,255,255,.12);color:#fff;transition:.15s;cursor:pointer}
 .country-template-root .metric:hover{background:rgba(255,255,255,.07)}
 .country-template-root .metric:focus-visible{outline:2px solid var(--gold);outline-offset:-3px}
@@ -152,7 +157,7 @@ body.rail-collapsed .country-template-root .rail .icon-btn svg{transform:scaleX(
 .country-template-root .m-l svg{width:13px;height:13px;stroke-width:2.1}
 .country-template-root .m-v{display:block;font-size:22px;font-weight:700;letter-spacing:-.02em;margin-top:5px;line-height:1.1}
 .country-template-root .m-v small{font-size:12px;font-weight:500;color:rgba(255,255,255,.58);letter-spacing:0}
-.country-template-root .m-n{display:block;font-size:11px;color:rgba(255,255,255,.56);margin-top:3px}
+.country-template-root .m-n{display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:11px;line-height:1.35;color:rgba(255,255,255,.56);margin-top:3px}
 .country-template-root .m-n b{color:#8fe0d3;font-weight:600}
 .country-template-root .m-n b.warn{color:var(--gold)}
 

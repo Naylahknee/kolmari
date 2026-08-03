@@ -72,8 +72,8 @@ function VerifyingMetric({ label, icon }: { label: string; icon: React.ReactNode
   return (
     <div className="metric" aria-disabled="true">
       <span className="m-l">{icon} {label}</span>
-      <span className="m-v" style={{ fontSize: 15, color: 'rgba(255,255,255,.72)' }}>Being verified</span>
-      <span className="m-n">Shown once confirmed from official sources</span>
+      <span className="m-v" style={{ fontSize: 16, color: 'rgba(255,255,255,.72)' }}>Being verified</span>
+      <span className="m-n">Pending an official source</span>
     </div>
   )
 }
@@ -85,7 +85,7 @@ function DataMetric({ label, icon, value, note }: { label: string; icon: React.R
   return (
     <div className="metric">
       <span className="m-l">{icon} {label}</span>
-      <span className="m-v" style={{ fontSize: 20 }}>{value}</span>
+      <span className="m-v">{value}</span>
       {note && <span className="m-n">{note}</span>}
     </div>
   )
