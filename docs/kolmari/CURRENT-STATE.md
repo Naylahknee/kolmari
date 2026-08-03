@@ -2,6 +2,58 @@
 
 Running log of implemented page state. Update this file when application code changes.
 
+## Your World map resilience — 2026-08-03
+
+The main map on `/your-world` no longer depends on an account-specific Mapbox style or a public
+token. It now follows the primary-discovery-map contract in `DESIGN.md`:
+
+- The repository's existing six-region SVG geometry always renders with no external map request.
+- Real matched-country coordinates are projected onto the illustrated board as linked markers.
+- Each region and Destination marker is keyboard reachable, visibly focusable, and routes to its
+  existing workspace; the card grid below remains the non-map path.
+- An honest profile-completion state appears over the world board when no matched markers exist.
+- Free accounts now receive the same illustrated map promised by the page; their markers omit
+  paid Match Scores while retaining links to available Destination overviews.
+- Detailed country, city, neighborhood, and Greenbook locator maps continue to use Mapbox.
+
+## Decision Workspace home — 2026-08-03
+
+The existing dashboard now begins with a bounded conversational doorway while preserving the
+current visual system and all existing planning panels below it.
+
+- `src/components/kolmari/decision-workspace-starter.tsx` adds one plain-language question field
+  and six guided question routes for Destinations, Pathways, affordability, planning, community
+  context, and documents.
+- `src/lib/decision-routing.ts` classifies the submitted question deterministically and routes it
+  to an existing Kolmari workflow. It does not answer the question, infer profile information,
+  place user text in the URL, or persist the text.
+- The dashboard remains server-rendered for profile and plan data. Only the question starter is a
+  focused Client Component.
+- Existing Dashboard recommendations, progress, Destinations, Pathway, deadlines, and Kolmari
+  Tracker behavior remain unchanged.
+- The welcome header now identifies the page as the user's decision workspace and explains that
+  users can ask a question, continue research, or take the next planning step.
+- The persistent shell field uses the same deterministic routing for Pathways, affordability,
+  documents, community context, planning, and Destinations. Short Destination lookups become a
+  Your World filter; question-like text is not placed in the URL.
+- The shell records only the last major workspace route and its display label in browser-local
+  storage. The dashboard uses that location for a `Continue where you left off` link. It does not
+  store question text or update the Kolmari Profile.
+- Your World now initializes its real catalog filter from the shell's `?q=` Destination lookup.
+
+Validation for this slice:
+
+- TypeScript (`npx tsc --noEmit`) passes.
+- Focused ESLint passes for all changed application files; the existing TopBar image warning is
+  unchanged.
+- Fifteen focused intent, resume-route, URL-safety, and map-projection checks pass.
+- An isolated Next.js render returned HTTP 200 and verified all six region links, a real
+  Destination marker, its overview link, and no Mapbox dependency in the rendered map.
+- The production Next.js build passes with local font responses replacing sandbox-blocked Google
+  Fonts requests.
+- The repository-wide lint command still reports 37 pre-existing errors in unrelated country-tab
+  components and Flutter Mode; none are in this slice.
+
 ## Dashboard
 
 **Layout.** Eyebrow + greeting, then a two-column flex row:

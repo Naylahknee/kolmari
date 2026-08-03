@@ -103,11 +103,11 @@ export function DashboardWelcome({ firstName, firstVisitCandidate, profileComple
     <>
       <div id="dashboard-header" className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-[10.5px] font-bold uppercase tracking-[0.13em] text-gold-deep">Your relocation journey</p>
+          <p className="text-[10.5px] font-bold uppercase tracking-[0.13em] text-gold-deep">Your decision workspace</p>
           <h1 className="mt-1 font-display text-3xl font-bold text-navy sm:text-4xl">
             {firstVisit ? 'Welcome' : 'Welcome back'}, {firstName}{firstVisit ? '' : '.'}
           </h1>
-          <p className="mt-1 text-sm text-muted">Continue building your move plan.</p>
+          <p className="mt-1 text-sm text-muted">Ask a hard question, continue your research, or take the next planning step.</p>
         </div>
         <Link href={profileComplete ? '/flutter' : '/profile-wizard'} className="gold-button">
           {profileComplete ? 'Enter Flutter Mode' : 'Build My Kolmari Plan'} <ArrowRight size={16} />

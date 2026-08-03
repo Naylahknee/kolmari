@@ -68,8 +68,8 @@ function Filters({
   )
 }
 
-export function YourWorld({ pins, cards, complete }: { pins: WorldPin[]; cards: RecCard[]; complete: boolean }) {
-  const [query, setQuery] = useState('')
+export function YourWorld({ pins, cards, complete, initialQuery = '' }: { pins: WorldPin[]; cards: RecCard[]; complete: boolean; initialQuery?: string }) {
+  const [query, setQuery] = useState(initialQuery)
   const [region, setRegion] = useState('')
   const [budget, setBudget] = useState('')
   const [visa, setVisa] = useState('')

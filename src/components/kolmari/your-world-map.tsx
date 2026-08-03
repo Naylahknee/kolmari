@@ -1,10 +1,7 @@
-'use client'
-
-import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import mapboxgl from 'mapbox-gl'
-import { MapPinned } from 'lucide-react'
-import 'mapbox-gl/dist/mapbox-gl.css'
+import { ArrowRight, MapPinned } from 'lucide-react'
+import { REGION_MAP_LABELS, REGION_MAP_SHAPES, type RegionSlug } from '@/lib/destinations-data'
+import { projectWorldCoordinate } from '@/lib/world-map'
 import './your-world-map.css'
 
 export type WorldPin = {
@@ -16,173 +13,85 @@ export type WorldPin = {
   score: number | null
 }
 
-function frame(pins: WorldPin[]): {
-  lng: number
-  lat: number
-  zoom?: number
-  minLng?: number
-  maxLng?: number
-  minLat?: number
-  maxLat?: number
-  isSingle?: boolean
-} {
-  if (pins.length === 0) return { lng: 0, lat: 20, zoom: 1.3 }
-  const lngs = pins.map((p) => p.lng)
-  const lats = pins.map((p) => p.lat)
-  const minLng = Math.min(...lngs)
-  const maxLng = Math.max(...lngs)
-  const minLat = Math.min(...lats)
-  const maxLat = Math.max(...lats)
-  const lng = (minLng + maxLng) / 2
-  const lat = (minLat + maxLat) / 2
-  if (pins.length === 1) return { lng, lat, zoom: 3.4, isSingle: true }
-  return { minLng, maxLng, minLat, maxLat, lng, lat, isSingle: false }
-}
-
-function MapFallback({ pins }: { pins: WorldPin[] }) {
-  return (
-    <div className="rounded-[16px] border border-line bg-[#C9E3F2] p-5 sm:p-6">
-      <div className="flex items-center gap-2 text-navy/80">
-        <MapPinned size={18} className="text-gold" aria-hidden="true" />
-        <p className="text-sm font-semibold">
-          {pins.length > 0 ? 'Your matched destinations' : 'Your world map'}
-        </p>
-      </div>
-      {pins.length === 0 ? (
-        <p className="mt-2 text-sm text-navy/55">
-          Complete your Kolmari Profile to plot your matched destinations here.
-        </p>
-      ) : (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {pins.map((p) => (
-            <Link
-              key={p.slug}
-              href={`/nextinations/${p.slug}/v2/overview`}
-              className="inline-flex items-center gap-2 rounded-full border border-navy/20 bg-white/40 px-3 py-1.5 text-sm font-semibold text-navy transition hover:border-navy hover:bg-white"
-            >
-              <span className="grid size-5 place-items-center rounded-full bg-gold text-[10px] font-bold text-navy">
-                {p.code}
-              </span>
-              {p.name}
-              {p.score !== null && <span className="text-xs text-gold-deep">{p.score}%</span>}
-            </Link>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
+const REGIONS: Array<{ slug: RegionSlug; label: string }> = [
+  { slug: 'north-america', label: 'North America' },
+  { slug: 'latin-america', label: 'Latin America' },
+  { slug: 'europe', label: 'Europe' },
+  { slug: 'africa', label: 'Africa' },
+  { slug: 'asia', label: 'Asia' },
+  { slug: 'oceania', label: 'Oceania' },
+]
 
 export function YourWorldMap({ pins }: { pins: WorldPin[] }) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const mapRef = useRef<mapboxgl.Map | null>(null)
-  const markersRef = useRef<mapboxgl.Marker[]>([])
-  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
-  const [mapError, setMapError] = useState(false)
-
-  useEffect(() => {
-    if (!token || mapError || !containerRef.current || mapRef.current) return
-
-    const map = new mapboxgl.Map({
-      accessToken: token,
-      container: containerRef.current,
-      style: 'mapbox://styles/mamamissionnay/cmscbpz5y006c01rdf0jbaxbj',
-      center: [0, 20],
-      zoom: 1.5,
-      projection: 'mercator',
-      attributionControl: true,
-      dragRotate: false,
-      pitchWithRotate: false,
-      touchPitch: false,
-    })
-    mapRef.current = map
-
-    map.on('load', () => {
-      map.resize()
-
-      // Add markers for each pin
-      for (const pin of pins) {
-        const el = document.createElement('button')
-        el.className = 'your-world-map-marker'
-        el.type = 'button'
-        el.setAttribute('aria-label', `${pin.name}${pin.score !== null ? `, ${pin.score}% fit` : ''}`)
-
-        const codeEl = document.createElement('span')
-        codeEl.className = 'your-world-map-marker__code'
-        codeEl.textContent = pin.code
-        el.appendChild(codeEl)
-
-        const infoEl = document.createElement('div')
-        infoEl.className = 'your-world-map-marker__info'
-        const nameEl = document.createElement('span')
-        nameEl.className = 'your-world-map-marker__name'
-        nameEl.textContent = pin.name
-        infoEl.appendChild(nameEl)
-        if (pin.score !== null) {
-          const scoreEl = document.createElement('span')
-          scoreEl.className = 'your-world-map-marker__score'
-          scoreEl.textContent = `${pin.score}%`
-          infoEl.appendChild(scoreEl)
-        }
-        el.appendChild(infoEl)
-
-        el.addEventListener('click', () => {
-          window.location.href = `/nextinations/${pin.slug}/v2/overview`
-        })
-
-        const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
-          .setLngLat([pin.lng, pin.lat])
-          .addTo(map)
-
-        markersRef.current.push(marker)
-      }
-
-      // Fit camera to pins
-      const view = frame(pins)
-      if (view.isSingle !== false) {
-        map.flyTo({ center: [view.lng, view.lat], zoom: view.zoom })
-      } else if (
-        view.minLng !== undefined &&
-        view.maxLng !== undefined &&
-        view.minLat !== undefined &&
-        view.maxLat !== undefined
-      ) {
-        map.fitBounds(
-          [
-            [view.minLng, view.minLat],
-            [view.maxLng, view.maxLat],
-          ],
-          { padding: 40, maxZoom: 4.2 }
-        )
-      }
-
-      // Add navigation controls
-      map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right')
-    })
-
-    map.on('error', (event) => {
-      const message = (event.error as Error | undefined)?.message ?? ''
-      if (/access token|unauthorized|401/i.test(message)) setMapError(true)
-    })
-
-    return () => {
-      markersRef.current.forEach((m) => m.remove())
-      markersRef.current = []
-      if (mapRef.current) {
-        mapRef.current.remove()
-        mapRef.current = null
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, mapError, pins])
-
-  if (!token || mapError) {
-    return <MapFallback pins={pins} />
-  }
-
   return (
-    <div className="your-world-map-container" role="region" aria-label="Your matched destinations map">
-      <div ref={containerRef} className="absolute inset-0" />
-    </div>
+    <section className="your-world-map-container" aria-labelledby="your-world-map-title">
+      <h2 id="your-world-map-title" className="sr-only">Your matched Destinations map</h2>
+      <svg viewBox="0 0 1000 520" className="your-world-map-svg" role="img" aria-describedby="your-world-map-description">
+        <desc id="your-world-map-description">
+          An illustrated world map with links to six regions and markers for matched Destinations.
+        </desc>
+        <rect width="1000" height="520" rx="20" fill="#0D1B39" />
+        <g className="your-world-map-grid" aria-hidden="true">
+          <path d="M50 145 Q500 10 950 145" />
+          <path d="M30 260 H970" />
+          <path d="M50 375 Q500 510 950 375" />
+          <ellipse cx="500" cy="260" rx="468" ry="228" />
+        </g>
+
+        {REGIONS.map(({ slug, label }) => {
+          const [labelX, labelY] = REGION_MAP_LABELS[slug]
+          return (
+            <Link
+              key={slug}
+              href={`/destinations/regions/${slug}`}
+              className="your-world-map-region"
+              aria-label={`Explore ${label}`}
+            >
+              <path className="your-world-map-region__shape" d={REGION_MAP_SHAPES[slug]} />
+              <text className="your-world-map-region__label" x={labelX} y={labelY} textAnchor="middle">
+                {label}
+              </text>
+            </Link>
+          )
+        })}
+
+        {pins.map((pin) => {
+          const point = projectWorldCoordinate(pin)
+          return (
+            <Link
+              key={pin.slug}
+              href={`/nextinations/${pin.slug}/v2/overview`}
+              className="your-world-map-marker"
+              aria-label={`${pin.name}${pin.score !== null ? `, ${pin.score}% Match Score` : ''}`}
+            >
+              <g transform={`translate(${point.x} ${point.y})`}>
+                <g className="your-world-map-marker__info" aria-hidden="true">
+                  <rect x="-46" y="-48" width="92" height="28" rx="7" />
+                  <text x="0" y="-31" textAnchor="middle">{pin.name}{pin.score !== null ? ` · ${pin.score}%` : ''}</text>
+                </g>
+                <circle className="your-world-map-marker__halo" r="16" />
+                <circle className="your-world-map-marker__dot" r="12" />
+                <text className="your-world-map-marker__code" x="0" y="3" textAnchor="middle">{pin.code}</text>
+              </g>
+            </Link>
+          )
+        })}
+      </svg>
+
+      {pins.length === 0 && (
+        <div className="your-world-map-empty">
+          <span className="grid size-9 place-items-center rounded-full bg-gold text-navy-deep" aria-hidden="true">
+            <MapPinned size={17} />
+          </span>
+          <div>
+            <p className="text-sm font-bold text-white">Plot your matched Destinations</p>
+            <p className="text-xs text-white/65">Complete your Kolmari Profile to add personalized markers.</p>
+          </div>
+          <Link href="/profile-wizard" className="ml-auto inline-flex min-h-9 items-center gap-1.5 rounded-full bg-white/10 px-3 text-xs font-bold text-white hover:bg-white/15">
+            Complete profile <ArrowRight size={13} aria-hidden="true" />
+          </Link>
+        </div>
+      )}
+    </section>
   )
 }

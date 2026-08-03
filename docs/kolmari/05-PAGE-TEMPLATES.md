@@ -3,6 +3,12 @@
 ## Page-by-page specifications
 
 ### Dashboard
+- Decision Workspace starter appears immediately after the welcome header
+- Plain-language questions route deterministically to the existing Destinations, Pathways, Cost Calculator, Documents, Greenbook Insights, or My Plan workspace
+- Six guided question starters provide the same routes without requiring the user to compose a prompt
+- The starter does not generate an answer, persist the question, or update the Kolmari Profile
+- The dashboard offers a browser-local link back to the last major workspace the user visited
+- The shell question field routes plain-language intent across existing workspaces; only short Destination lookups are retained as a `?q=` filter
 - Welcome header with user first name
 - Move Readiness ring
 - Destination summary (top 3 from COUNTRIES)
