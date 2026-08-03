@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { ShieldCheck } from 'lucide-react'
+import Link from 'next/link'
+import { ShieldCheck, Image as ImageIcon, ArrowRight } from 'lucide-react'
 import { PLAN_TIERS, type PlanTier } from '@/lib/plan-tiers'
 import type { AdminOverview, AdminUser, SiteAnnouncement } from '@/lib/admin-data'
 
@@ -25,10 +26,38 @@ export function AdminClient({
         <p className="mt-1 text-sm text-muted">Manage accounts, plan access, and site-wide content. Visible to admins only.</p>
       </div>
 
+      <ToolsSection />
       <OverviewSection overview={overview} />
       <UsersSection initialUsers={initialUsers} currentUserId={currentUserId} />
       <AnnouncementSection initial={announcement} />
     </div>
+  )
+}
+
+function ToolsSection() {
+  return (
+    <section>
+      <h2 className="text-lg font-bold text-navy">Content tools</h2>
+      <div className="mt-3 grid gap-4 sm:grid-cols-2">
+        <Link
+          href="/settings/country-hero"
+          className="card-surface group flex items-center gap-4 p-5 transition hover:shadow-md"
+        >
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy/5 text-navy">
+            <ImageIcon size={20} aria-hidden="true" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="flex items-center gap-1.5 font-bold text-navy">
+              Country Page Generator
+              <ArrowRight size={15} aria-hidden="true" className="transition group-hover:translate-x-0.5" />
+            </span>
+            <span className="mt-0.5 block text-xs text-muted">
+              Generate and save country hero images, city photos, and page content.
+            </span>
+          </span>
+        </Link>
+      </div>
+    </section>
   )
 }
 
