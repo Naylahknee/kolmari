@@ -196,6 +196,86 @@ function UploadImageField({ label, help, value, onChange }: { label: string; hel
 // ===========================================================================
 // Hero tab
 // ===========================================================================
+/* One-click "fill in every missing country hero". Loops the backfill endpoint
+ * (which generates one hero per call) until nothing is missing, showing live
+ * progress. New countries added later self-heal on first view, so this is mainly
+ * for covering the current list in one pass. */
+function BulkHeroBackfill() {
+  const [running, setRunning] = useState(false)
+  const [status, setStatus] = useState('')
+  const [error, setError] = useState('')
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null)
+
+  async function run() {
+    setRunning(true)
+    setError('')
+    setStatus('Starting…')
+    let guard = 0
+    try {
+      // Hard stop well above the country count in case the server keeps
+      // reporting work — avoids an unbounded client loop.
+      while (guard < 100) {
+        guard += 1
+        const res = await fetch('/api/admin/country-hero/backfill', { method: 'POST' })
+        const data = await res.json().catch(() => null)
+        if (!res.ok) {
+          setError(data?.error ?? 'Backfill failed.')
+          break
+        }
+        if (typeof data?.total === 'number' && typeof data?.remaining === 'number') {
+          const done = data.total - data.remaining
+          setProgress({ done, total: data.total })
+          if (data.generated?.name) setStatus(`Generated ${data.generated.name} · ${done} of ${data.total} covered`)
+          else setStatus(`${done} of ${data.total} covered`)
+        }
+        if (data?.done || data?.remaining === 0) {
+          setStatus(`All ${data?.total ?? ''} country heroes are covered.`)
+          break
+        }
+      }
+    } catch {
+      setError('Backfill was interrupted. You can run it again — completed countries are skipped.')
+    } finally {
+      setRunning(false)
+    }
+  }
+
+  const pct = progress && progress.total > 0 ? Math.round((progress.done / progress.total) * 100) : 0
+
+  return (
+    <div className="mb-6 rounded-2xl border border-neutral-200 bg-neutral-50 p-4 sm:p-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-neutral-900">Fill in missing heroes</p>
+          <p className="mt-0.5 text-xs text-neutral-500">
+            Generate a hero for every country that doesn&rsquo;t have one yet, in one pass. Countries already covered are skipped. Each image is generated and saved automatically.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={run}
+          disabled={running}
+          className="shrink-0 rounded-full bg-neutral-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:opacity-60"
+        >
+          {running ? 'Generating…' : 'Generate all missing heroes'}
+        </button>
+      </div>
+      {progress && (
+        <div className="mt-3">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-200">
+            <div className="h-full rounded-full bg-neutral-900 transition-all" style={{ width: `${pct}%` }} />
+          </div>
+        </div>
+      )}
+      {status && !error && <p className="mt-2 text-xs font-medium text-neutral-700">{status}</p>}
+      {error && <p className="mt-2 text-xs font-medium text-red-600">{error}</p>}
+      <p className="mt-2 text-[11px] text-neutral-400">
+        Generation runs one country at a time and can take a while for the full list. You can leave this tab open; each country is saved as it completes.
+      </p>
+    </div>
+  )
+}
+
 function HeroTab() {
   const [form, setForm] = useState<HeroImageInput>(MEXICO_SHADOW_STANDARD)
   const [generated, setGenerated] = useState<GeneratedImage | null>(null)
@@ -244,6 +324,7 @@ function HeroTab() {
           The official flag as full-bleed woven fabric with the country&rsquo;s silhouette as a translucent shadow that inherits the flag colors. The emblem stays in its official position. Mexico is the reference — every country uses its own flag, emblem, and outline.
         </p>
       </div>
+      <BulkHeroBackfill />
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(380px,0.95fr)]">
       <form onSubmit={submit} className="rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-7">
         <div className="mb-5 flex flex-wrap items-center gap-3">

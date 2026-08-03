@@ -156,3 +156,20 @@ committed at `public/references/national-flag-shadow-hero.webp` and is sent to t
 edits endpoint automatically as the default style exemplar whenever a hero is
 generated with a flag code (no upload needed). An uploaded style reference
 overrides it.
+
+**Automated hero coverage (backfill + self-heal).** Country heroes no longer
+depend on someone sitting in the admin panel:
+- **Backfill** — the Hero tab has a "Generate all missing heroes" button that
+  loops `POST /api/admin/country-hero/backfill` (admin-only; one hero per call
+  with live progress) until every country in `src/lib/countries.ts` has a saved
+  hero.
+- **Self-heal** — when a country page renders with no saved hero, a small client
+  trigger (`HeroAutoGenerate`) fires `POST /api/internal/country-hero/ensure`
+  once. That endpoint validates the slug against the fixed COUNTRIES list,
+  no-ops if a hero already exists, and uses a DB lock (`country_hero_jobs`) so at
+  most one generation runs per country — capping total spend at one image per
+  country regardless of traffic. The composite fallback shows meanwhile; the AI
+  hero swaps in on the next render.
+Both paths reuse `generateCountryHero`/`defaultHeroInput` in
+`src/lib/country-visuals/generate.ts`. Only the decorative hero image is ever
+auto-generated — page content and figures are never fabricated.
