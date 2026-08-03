@@ -41,7 +41,17 @@
 .country-template-root .tb-sep{width:1px;height:20px;background:var(--line)}
 .country-template-root .crumb{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}
 .country-template-root .crumb b{color:var(--navy);font-weight:700}
-.country-template-root .tb-right{margin-left:auto;display:flex;gap:8px}
+.country-template-root .tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+/* Re-assert the View (currency/units) pill styling inside the country shell.
+   The `.country-template-root *{padding:0}` + button reset above (loaded after
+   workspace-chrome.css) otherwise collapses these pills into cramped blobs. */
+.country-template-root .view-control{display:inline-flex;align-items:center;gap:6px;padding:3px 5px 3px 11px;background:#fff;border:1px solid var(--line);border-radius:var(--r-pill);white-space:nowrap;flex:0 0 auto}
+.country-template-root .view-label{margin-right:3px;color:var(--muted);font-size:9.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase}
+.country-template-root .view-options{display:inline-flex;align-items:center;gap:3px;flex:0 0 auto}
+.country-template-root .view-option{min-height:26px;padding:0 10px;border-radius:var(--r-pill);flex:0 0 auto;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.02em;transition:.15s}
+.country-template-root .view-option:hover{background:var(--canvas);color:var(--navy)}
+.country-template-root .view-option[aria-pressed="true"]{background:var(--navy-deep);color:#fff}
+.country-template-root .view-option:focus-visible{outline:2px solid var(--gold-deep);outline-offset:1px}
 .country-template-root .icon-btn{width:30px;height:30px;border-radius:var(--r-row);display:grid;place-items:center;color:var(--muted)}
 .country-template-root .icon-btn:hover{background:var(--canvas);color:var(--navy)}
 
