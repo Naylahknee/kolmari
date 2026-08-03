@@ -141,6 +141,7 @@ export default async function CountryV2Page({ params, searchParams }: Props) {
       countrySlug={countrySlug}
       summary={`${record.name} is your #${matchInfo.rank} match of ${matchInfo.total}.`}
       explanation={rankedMatch.reasons.join(' ') || rankedMatch.tradeoff}
+      reasons={rankedMatch.reasons}
       overallFit={matchInfo.score}
       blockingIssue={detail?.visaType
         ? { label: 'Route identified', detail: `Primary route: ${detail.visaType}` }
