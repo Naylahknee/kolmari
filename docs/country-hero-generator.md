@@ -1,10 +1,70 @@
-# Dynamic country hero generator
+# Country Visual Asset Engine
 
-Kolmari now includes an authenticated internal generator at:
+Kolmari includes an authenticated internal tool at:
 
 `/settings/country-hero`
 
-The tool converts structured destination details into the approved flag-and-map design prompt, sends it to OpenAI's image generation API, previews the result, and lets an administrator download the generated WebP asset.
+It manages the three visual assets every country page needs. Two are AI-generated
+and reviewed before download; one configures the existing interactive map.
+
+1. **Hero Image** — the official flag as full-bleed matte fabric with the
+   complete country silhouette rendered as a translucent superimposed shadow that
+   inherits the flag colors ("Mexico Shadow Standard"). No parchment cutout, no
+   pin, no text. The national emblem is always protected. Output `1536×1024`
+   WebP, filename `{country-slug}-hero.webp`.
+2. **Snapshot Map** — a configuration + preview tool for the existing Mapbox
+   locator (`CountrySnapshotMap`). **Never AI-generated.** Produces a
+   `CountryVisualAssets.snapshotMap` block to copy into the registry.
+3. **City Images** — premium editorial travel photography for city cards. No
+   text, no flags, no collage, no fabricated landmarks. Output `1024×1024` WebP,
+   filename `{city-slug}.webp`.
+
+## Code map
+
+- `src/lib/country-visuals/schema.ts` — Zod schemas: `heroImageInputSchema`,
+  `cityImageInputSchema`, `snapshotMapConfigSchema`, the discriminated
+  `generatorRequestSchema`, and the resolved `countryVisualAssetsSchema`
+  (`CountryVisualAssets`). Path helpers `heroAssetPath` / `cityAssetPath` and
+  `focalToObjectPosition`.
+- `src/lib/country-visuals/prompt.ts` — `buildHeroPrompt` (Mexico Shadow
+  Standard) and `buildCityPrompt`.
+- `src/lib/country-visuals/data.ts` — the per-country registry + resolvers
+  (`getCountryVisualAssets`, `getApprovedHero`, `hasApprovedHero`,
+  `getSnapshotMapConfig`). Pure, so both server and client import it.
+- `src/app/api/admin/country-hero/route.ts` — one authenticated endpoint,
+  discriminated on `assetType` (`hero` | `city`); returns `imageDataUrl`,
+  `filename`, `prompt`, `model`, `assetType`.
+- `src/app/(app)/(workspace)/settings/country-hero/page.tsx` — the tabbed admin
+  UI (Hero / Snapshot Map / City Images) with responsive preview frames.
+- `src/components/country-template/CityCardImage.tsx` — the city-card image with
+  the approved-photo → flag → placeholder fallback.
+
+## Asset resolution + fallback hierarchy
+
+The country-page template reads assets from the registry. An entry declares a
+`hero` block only once the WebP is committed to `/public`, which deterministically
+gates artwork vs fallback (no runtime filesystem check).
+
+```
+Country hero:     approved hero image → branded navy gradient + country outline
+Country Snapshot: interactive Mapbox locator → static locator fallback → flag
+City card:        approved city image → flag → neutral city placeholder
+```
+
+The hero sells the country, the snapshot answers "where is it?", and city images
+answer "what might living there feel like?" — so the flag-map hero never doubles
+as the snapshot, and the hero never doubles as a city-card fallback.
+
+## File conventions
+
+```
+public/images/countries/{country-slug}/{country-slug}-hero.webp
+public/images/countries/{country-slug}/cities/{city-slug}.webp
+```
+
+Generated images are **not** saved automatically. Review, download, commit the
+file, and (for a new hero) add the `hero` block to the country's entry in
+`src/lib/country-visuals/data.ts`.
 
 ## Required environment variables
 
@@ -15,48 +75,17 @@ npx wrangler secret put OPENAI_API_KEY
 npx wrangler secret put KOLMARI_ADMIN_EMAILS
 ```
 
-`KOLMARI_ADMIN_EMAILS` accepts a comma-separated allowlist of authenticated Kolmari account emails.
+`KOLMARI_ADMIN_EMAILS` is a comma-separated allowlist of authenticated Kolmari
+emails. In local development, add the same variables to `.dev.vars`. The API key
+stays server-side; the browser calls `/api/admin/country-hero` and never receives it.
 
-Example value:
+`NEXT_PUBLIC_MAPBOX_TOKEN` (build-time) upgrades the Snapshot locator from the
+schematic locator fallback to a real Mapbox map.
 
-```text
-owner@example.com,designer@example.com
-```
+## Safety controls
 
-In local development, add the same variables to `.dev.vars`:
-
-```text
-OPENAI_API_KEY=...
-KOLMARI_ADMIN_EMAILS=owner@example.com
-```
-
-The API key remains server-side. The browser calls `/api/admin/country-hero`; it never receives the key.
-
-## Current workflow
-
-1. Sign in with an email listed in `KOLMARI_ADMIN_EMAILS`.
-2. Visit `/settings/country-hero`.
-3. Enter the city, country, flag-symbol safety details, and geographic pin guidance.
-4. Generate the image.
-5. Review the result and generated prompt.
-6. Download the WebP and add it to the relevant country asset record.
-
-## Production storage follow-up
-
-The current implementation returns the generated image to the authenticated administrator for review and download. This approval step prevents an imperfect or geographically inaccurate AI-generated image from publishing automatically.
-
-A later storage phase can add an R2 binding and save approved assets under a stable key such as:
-
-```text
-country-heroes/{country-slug}/{city-slug}-flag-map.webp
-```
-
-Do not generate a new image on every visitor request. Generate once in the admin tool, approve it, store it, and serve the stored asset from the country page.
-
-## Cost and safety controls
-
-- The endpoint requires an authenticated user.
-- Production access is restricted to `KOLMARI_ADMIN_EMAILS`.
-- Quality is selected explicitly before each request.
+- Endpoint requires an authenticated user; production is restricted to
+  `KOLMARI_ADMIN_EMAILS`.
+- Quality is selected explicitly per request; one image per request.
 - The generated prompt is returned for review and reproducibility.
-- The endpoint generates one image per request.
+- No image is generated on a normal country-page visit.

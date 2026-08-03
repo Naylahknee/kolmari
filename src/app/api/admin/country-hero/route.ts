@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getRequestUser } from '@/lib/auth'
-import { buildCountryHeroPrompt, countryHeroInputSchema } from '@/lib/country-hero/prompt'
+import { generatorRequestSchema, type GeneratedAssetType } from '@/lib/country-visuals/schema'
+import { buildHeroPrompt, buildCityPrompt } from '@/lib/country-visuals/prompt'
 
 export const runtime = 'nodejs'
 export const maxDuration = 120
@@ -20,6 +21,10 @@ function isAllowedAdmin(email: string) {
   return configured.includes(email.toLowerCase())
 }
 
+// The Country Visual Asset Engine generates two AI asset types — the flag +
+// silhouette hero and premium city photography. (Snapshot maps are Mapbox and
+// never hit this endpoint.) Each type has its own prompt, output size, and
+// canonical filename.
 export async function POST(request: Request) {
   const user = await getRequestUser(request)
   if (!user) return NextResponse.json({ error: 'Authentication required.' }, { status: 401 })
@@ -42,15 +47,29 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'The request body must be valid JSON.' }, { status: 400 })
   }
 
-  const parsed = countryHeroInputSchema.safeParse(json)
+  const parsed = generatorRequestSchema.safeParse(json)
   if (!parsed.success) {
     return NextResponse.json(
-      { error: 'Please correct the highlighted destination details.', issues: parsed.error.flatten() },
+      { error: 'Please correct the highlighted fields.', issues: parsed.error.flatten() },
       { status: 400 },
     )
   }
 
-  const prompt = buildCountryHeroPrompt(parsed.data)
+  const data = parsed.data
+  const assetType: GeneratedAssetType = data.assetType
+  let prompt: string
+  let size: string
+  let filename: string
+  if (data.assetType === 'hero') {
+    prompt = buildHeroPrompt(data)
+    size = '1536x1024'
+    filename = `${data.countrySlug}-hero.webp`
+  } else {
+    prompt = buildCityPrompt(data)
+    size = '1024x1024'
+    filename = `${data.citySlug}.webp`
+  }
+
   const response = await fetch('https://api.openai.com/v1/images/generations', {
     method: 'POST',
     headers: {
@@ -60,7 +79,7 @@ export async function POST(request: Request) {
     body: JSON.stringify({
       model: 'gpt-image-2',
       prompt,
-      size: '1536x1024',
+      size,
       quality: parsed.data.quality,
       output_format: 'webp',
       background: 'opaque',
@@ -82,17 +101,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'The image service returned no image.' }, { status: 502 })
   }
 
-  const slug = `${parsed.data.countryName}-${parsed.data.cityName}`
-    .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-
   return NextResponse.json({
     imageDataUrl: `data:image/webp;base64,${base64}`,
-    filename: `${slug}-flag-map.webp`,
+    filename,
     prompt,
     model: 'gpt-image-2',
+    assetType,
   })
 }

@@ -1,5 +1,8 @@
 import { countryFacts } from '@/lib/country-facts'
 import { CountryOutline } from './CountryOutline'
+import { focalToObjectPosition } from '@/lib/country-visuals/schema'
+
+export type HeroArtwork = { src: string; focalPoint: { x: number; y: number } }
 
 /* The country page hero.
 
@@ -24,12 +27,18 @@ export type CountryHeroData = {
   sources: Record<string, string>
 }
 
-/** Hero backdrop. With supplied flag-and-map artwork (Portugal) the artwork is
- *  the backdrop on its own. Otherwise it falls back to the navy gradient with
- *  the country's outline on the far right of the panel. */
-function HeroBackdrop({ code, hasArtwork, portugal = false }: { code: string; hasArtwork: boolean; portugal?: boolean }) {
-  if (hasArtwork) {
-    return <div className={`hero-bg${portugal ? ' hero-bg-portugal' : ''}`} aria-hidden="true" />
+/** Hero backdrop, resolved from the Country Visual Asset record.
+ *  Fallback hierarchy: approved hero artwork → branded navy gradient with the
+ *  country's own outline on the far right. Never a map, never borrowed artwork. */
+function HeroBackdrop({ code, artwork }: { code: string; artwork?: HeroArtwork | null }) {
+  if (artwork) {
+    return (
+      <div
+        className="hero-bg hero-bg-artwork"
+        aria-hidden="true"
+        style={{ backgroundImage: `url("${artwork.src}")`, backgroundPosition: focalToObjectPosition(artwork.focalPoint) }}
+      />
+    )
   }
   return (
     <>
@@ -72,6 +81,7 @@ export function CountryHero({
   visaType,
   rich = false,
   data = null,
+  heroArtwork = null,
 }: {
   go: (s: string) => void
   fromQuiz?: boolean
@@ -80,11 +90,12 @@ export function CountryHero({
   visaType?: string
   rich?: boolean
   data?: CountryHeroData | null
+  heroArtwork?: HeroArtwork | null
 }) {
   if (rich) {
     return (
       <section className="hero">
-        <HeroBackdrop code="PT" hasArtwork portugal />
+        <HeroBackdrop code="PT" artwork={heroArtwork} />
         <div className="hero-body">
           {fromQuiz && (
             <p className="hero-quizpill">
@@ -138,7 +149,7 @@ export function CountryHero({
   // may have is the visa route for the five mapped countries).
   return (
     <section className="hero">
-      <HeroBackdrop code={country.code} hasArtwork={false} />
+      <HeroBackdrop code={country.code} artwork={heroArtwork} />
       <div className="hero-body">
         {fromQuiz && (
           <p className="hero-quizpill">

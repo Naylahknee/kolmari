@@ -4,12 +4,16 @@ import {
   MapPinned, ShieldCheck, Snowflake, Stamp, Sun, SunMedium, Users,
 } from 'lucide-react'
 import { CountrySnapshotMap } from '@/components/country-workspace/CountrySnapshotMap'
-import { CityMapImage } from '@/components/country-workspace/CityMapImage'
+import { CityCardImage } from '@/components/country-template/CityCardImage'
 import { getCountryCenter } from '@/lib/country-geo'
 import { getCountryFacts } from '@/lib/country-workspace/country-facts'
 import { getCountryCityOverviews } from '@/lib/country-workspace/country-cities'
+import { cityAssetPath } from '@/lib/country-visuals/schema'
 
 type DataCountry = { slug: string; name: string; code: string; city: string; region: string }
+
+const toCitySlug = (name: string) =>
+  name.toLowerCase().normalize('NFKD').replace(/\p{Diacritic}/gu, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
 const FACT_ICONS = [Landmark, Users, Coins, Languages, Landmark, Clock3, CarFront, ShieldCheck, Globe2, SunMedium] as const
 const FACT_LABELS = ['Capital', 'Population', 'Currency', 'Official Language', 'Government', 'Time Zone', 'Driving Side', 'Schengen Area', 'EU Member', 'Climate'] as const
@@ -73,7 +77,7 @@ export function DataOverviewTab({
           <div>
             <div className="overflow-hidden rounded-[var(--radius-card)] border border-line bg-canvas">
               {center ? (
-                <CountrySnapshotMap countryName={country.name} lat={center.lat} lng={center.lng} alt={`Country map showing ${country.name}`} />
+                <CountrySnapshotMap countryName={country.name} countryCode={country.code} lat={center.lat} lng={center.lng} alt={`Locator map showing ${country.name}`} fallback="locator" />
               ) : (
                 <div className="grid min-h-56 place-items-center gap-2 text-muted">
                   <MapPinned size={28} className="text-gold-deep" aria-hidden="true" /> Country map unavailable
@@ -144,7 +148,13 @@ export function DataOverviewTab({
           <div className="mt-5 flex snap-x gap-3 overflow-x-auto pb-3">
             {cities.map((city) => (
               <article key={city.id} className="min-w-[220px] snap-start overflow-hidden rounded-[var(--radius-card)] border border-line bg-white shadow-tile">
-                <CityMapImage cityName={city.cityName} countryName={country.name} lat={city.lat} lng={city.lng} alt={city.imageAlt} />
+                <CityCardImage
+                  imageSrc={cityAssetPath(country.slug, toCitySlug(city.cityName))}
+                  cityName={city.cityName}
+                  countryName={country.name}
+                  countryCode={country.code}
+                  className="aspect-[16/9] min-h-40 w-full object-cover"
+                />
                 <div className="p-4">
                   <h3 className="font-bold text-navy">{city.cityName}</h3>
                   {city.region && <p className="mt-0.5 text-[11px] text-muted">{city.region}</p>}
