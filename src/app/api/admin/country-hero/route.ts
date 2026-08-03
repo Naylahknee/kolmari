@@ -32,10 +32,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'You do not have permission to generate country artwork.' }, { status: 403 })
   }
 
-  const apiKey = process.env.OPENAI_API_KEY
+  // Server-only secret. On this project (Next.js App Router via OpenNext for
+  // Cloudflare) runtime secrets are read from process.env — the same mechanism
+  // that already powers process.env.DATABASE_URL / process.env.JWT_SECRET in
+  // production. The key is never sent to the browser and never logged.
+  const apiKey = process.env.OPENAI_API_KEY?.trim()
   if (!apiKey) {
     return NextResponse.json(
-      { error: 'OPENAI_API_KEY is not configured on the server.' },
+      { error: 'Image generation is unavailable: OPENAI_API_KEY is not configured on the server. Set it as an encrypted Cloudflare Worker secret and redeploy.' },
       { status: 503 },
     )
   }
@@ -70,25 +74,35 @@ export async function POST(request: Request) {
     filename = `${data.citySlug}.webp`
   }
 
-  const response = await fetch('https://api.openai.com/v1/images/generations', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'gpt-image-2',
-      prompt,
-      size,
-      quality: parsed.data.quality,
-      output_format: 'webp',
-      background: 'opaque',
-      n: 1,
-    }),
-  })
+  let response: Response
+  try {
+    response = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-image-2',
+        prompt,
+        size,
+        quality: parsed.data.quality,
+        output_format: 'webp',
+        background: 'opaque',
+        n: 1,
+      }),
+      // gpt-image-2 can take a while; bound it so a hung request fails cleanly.
+      signal: AbortSignal.timeout(115_000),
+    })
+  } catch (caught) {
+    // Log only the failure kind — never the request (which carries the key).
+    console.error('OpenAI image request failed', caught instanceof Error ? caught.name : 'unknown')
+    return NextResponse.json({ error: 'Could not reach the image service. Please try again.' }, { status: 504 })
+  }
 
-  const result = (await response.json()) as OpenAIImageResponse
+  const result = (await response.json().catch(() => ({}))) as OpenAIImageResponse
   if (!response.ok) {
+    // result.error?.message is OpenAI's message — it does not contain our key.
     console.error('OpenAI image generation failed', response.status, result.error?.message)
     return NextResponse.json(
       { error: result.error?.message ?? 'Image generation failed.' },
