@@ -11,6 +11,9 @@ export type PersonalizedCountrySummaryProps = {
   countrySlug: string
   summary: string
   explanation: string
+  /** Discrete reason phrases; rendered as a spaced list. Falls back to
+   *  `explanation` as a single paragraph when empty. */
+  reasons?: string[]
   overallFit: number
   blockingIssue: { label: string; detail?: string }
   outcome: { label: string; value: string; detail?: string }
@@ -32,8 +35,9 @@ function MetricCard({ label, value, detail }: { label: string; value: string; de
 }
 
 export function PersonalizedCountrySummary({
-  summary, explanation, overallFit, blockingIssue, outcome, callouts, rank, totalRanked, categoryScores, defaultOpen,
+  summary, explanation, reasons, overallFit, blockingIssue, outcome, callouts, rank, totalRanked, categoryScores, defaultOpen,
 }: PersonalizedCountrySummaryProps) {
+  const reasonList = (reasons ?? []).map((r) => r.trim()).filter(Boolean)
   const [open, setOpen] = useState(defaultOpen)
   const bodyId = useId()
 
@@ -56,9 +60,20 @@ export function PersonalizedCountrySummary({
 
       {open && (
         <div id={bodyId} className="border-t border-line p-5 pt-4">
-          <p className="max-w-3xl text-sm leading-6 text-navy/85">{explanation}</p>
+          {reasonList.length > 0 ? (
+            <ul className="max-w-3xl space-y-2">
+              {reasonList.map((reason, i) => (
+                <li key={i} className="flex gap-2.5 text-sm leading-6 text-navy/85">
+                  <span className="mt-[9px] size-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true" />
+                  <span>{reason}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="max-w-3xl text-sm leading-6 text-navy/85">{explanation}</p>
+          )}
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
             <MetricCard label="Overall Fit" value={`${overallFit}%`} detail={`Rank #${rank} of ${totalRanked}`} />
             <MetricCard label="Blocking Issue" value={blockingIssue.label} detail={blockingIssue.detail} />
             <MetricCard label={outcome.label} value={outcome.value} detail={outcome.detail} />
