@@ -5,19 +5,12 @@ import { useEffect, useMemo, useState } from 'react'
 import { ArrowRight, BellRing, Check, ChevronDown, Circle, LoaderCircle, Plus, Share2 } from 'lucide-react'
 import type { RelocationProfile } from '@/lib/profile'
 import type { NextAction } from '@/lib/plan-types'
+import { FLUTTER_GROUPS as GROUPS } from '@/lib/flutter-plan'
 
-const GROUPS = [
-  { title: 'Before you go', tasks: ['Passport valid', 'Research Pathways', 'Request official records', 'Arrange travel insurance'] },
-  { title: 'Documents', tasks: ['Prepare visa application', 'Make certified copies', 'Store digital document backups'] },
-  { title: 'Finances', tasks: ['Build a three-month emergency fund', 'Open international bank account', 'Notify current bank'] },
-  { title: 'Housing', tasks: ['Research neighborhoods', 'Book initial accommodation', 'Plan utilities and internet'] },
-  { title: 'Shipping & customs', tasks: ['Make an itemized inventory of belongings (many countries require it for duty-free clearance)', 'Get international shipping or moving quotes', 'Decide what to ship vs. replace on arrival', 'Insure your shipment'] },
-  { title: 'Winding down at home', tasks: ['Cancel or transfer utilities and subscriptions', 'Set up mail forwarding', 'Notify your bank and tax authority of your move', 'Plan your goodbyes'] },
-  { title: 'Arrival day', tasks: ['Map your airport → first accommodation route', 'Get a local SIM or eSIM', 'Register your local address', 'Locate the nearest pharmacy and clinic'] },
-]
-
+// The visa/residency application journey — this is a real, sequential status,
+// distinct from the move-readiness task checklist below.
 const APP_STATUS = ['Not filed', 'Submitted', 'Biometrics', 'Decision pending', 'Approved'] as const
-const APP_STATUS_KEY = 'kolmari:app-status'
+const APP_STATUS_KEY = 'kolmari:visa-application-status'
 
 export type ProtocolItem = { id: string; text: string; state: 'done' | 'overdue' | 'open'; meta: string }
 
@@ -90,13 +83,15 @@ export function FlutterMode({ initial, destination, action, actionDue, protocolI
 
       {error && <p role="alert" className="rounded-[var(--radius-card)] border border-danger/30 bg-danger/10 px-4 py-3 text-sm font-semibold text-danger">{error}</p>}
 
-      <section className="rounded-[var(--radius-card)] border border-danger/25 bg-[#fff7f7] px-5 py-4 shadow-tile" aria-labelledby="priority-heading">
+      {/* When there is an immediate priority the bar reads red (attention);
+          with no urgent task it reads green (all clear). */}
+      <section className={`rounded-[var(--radius-card)] border px-5 py-4 shadow-tile ${action ? 'border-danger/25 bg-[#fff7f7]' : 'border-ok/30 bg-[#f2fbf5]'}`} aria-labelledby="priority-heading">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-start gap-3">
-            <span className="grid size-10 shrink-0 place-items-center rounded-full bg-danger text-white"><BellRing size={18} aria-hidden="true" /></span>
-            <div className="min-w-0"><p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-danger">Immediate priority</p><h1 id="priority-heading" className="mt-1 text-lg font-extrabold text-navy">{action?.title ?? 'No urgent task right now'}</h1><p className="mt-1 text-sm text-muted">{action?.detail ?? 'Your plan has no current blocker or dated action.'}{actionDue ? ` · Due ${actionDue}` : ''}</p></div>
+            <span className={`grid size-10 shrink-0 place-items-center rounded-full text-white ${action ? 'bg-danger' : 'bg-ok'}`}>{action ? <BellRing size={18} aria-hidden="true" /> : <Check size={18} aria-hidden="true" />}</span>
+            <div className="min-w-0"><p className={`text-[10px] font-extrabold uppercase tracking-[0.12em] ${action ? 'text-danger' : 'text-ok'}`}>{action ? 'Immediate priority' : 'All clear'}</p><h1 id="priority-heading" className="mt-1 text-lg font-extrabold text-navy">{action?.title ?? 'No urgent task right now'}</h1><p className="mt-1 text-sm text-muted">{action?.detail ?? 'Your plan has no current blocker or dated action.'}{actionDue ? ` · Due ${actionDue}` : ''}</p></div>
           </div>
-          <Link href={action && action.tab !== 'overview' ? `/my-plan?tab=${action.tab}` : '/my-plan'} className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-[var(--radius-btn)] bg-navy px-4 text-sm font-bold text-white hover:bg-navy-deep">Take action <ArrowRight size={15} aria-hidden="true" /></Link>
+          <Link href={action && action.tab !== 'overview' ? `/my-plan?tab=${action.tab}` : '/my-plan'} className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-[var(--radius-btn)] bg-navy px-4 text-sm font-bold text-white hover:bg-navy-deep">{action ? 'Take action' : 'Open My Plan'} <ArrowRight size={15} aria-hidden="true" /></Link>
         </div>
       </section>
 
@@ -109,7 +104,7 @@ export function FlutterMode({ initial, destination, action, actionDue, protocolI
       </section>
 
       <section className="rounded-[var(--radius-card)] border border-line bg-white p-6 shadow-tile" aria-labelledby="application-heading">
-        <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted">Application progress</p><h2 id="application-heading" className="mt-1 text-xl font-extrabold text-navy">Where are you in the application?</h2></div><span className="rounded-pill bg-canvas px-3 py-1.5 text-xs font-bold text-muted">Saved on this device</span></div>
+        <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted">Visa application status</p><h2 id="application-heading" className="mt-1 text-xl font-extrabold text-navy">Where are you in your visa application?</h2><p className="mt-1 text-sm text-muted">Track your residency/visa filing from submission to decision.</p></div><span className="rounded-pill bg-canvas px-3 py-1.5 text-xs font-bold text-muted">Saved on this device</span></div>
         <ol className="mt-7 grid gap-3 sm:grid-cols-5">{APP_STATUS.map((label, i) => { const done = i < statusIndex; const active = i === statusIndex; return <li key={label}><button type="button" onClick={() => setStatus(i)} aria-current={active ? 'step' : undefined} className="group flex w-full flex-col items-center text-center"><span className={`grid size-9 place-items-center rounded-full border-2 text-xs font-extrabold ${active ? 'border-gold bg-gold text-navy' : done ? 'border-navy bg-navy text-white' : 'border-line bg-white text-muted'}`}>{done ? <Check size={15} /> : i + 1}</span><span className={`mt-2 text-xs font-semibold ${active ? 'text-navy' : 'text-muted'}`}>{label}</span>{active && <span className="mt-1 text-[9px] font-extrabold uppercase tracking-wider text-gold-deep">You are here</span>}</button></li> })}</ol>
       </section>
 
