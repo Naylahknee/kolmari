@@ -10,12 +10,12 @@ const csp = [
   "object-src 'none'",
   "frame-ancestors 'none'",
   "form-action 'self'",
-  "img-src 'self' data: blob: https://flagcdn.com https://*.mapbox.com",
+  "img-src 'self' data: blob: https://*.mapbox.com",
   "font-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
   "script-src 'self' 'unsafe-inline' blob:",
   "worker-src 'self' blob:",
-  "connect-src 'self' https://*.mapbox.com https://events.mapbox.com https://flagcdn.com",
+  "connect-src 'self' https://*.mapbox.com https://events.mapbox.com",
 ].join('; ')
 
 const securityHeaders = [
@@ -31,7 +31,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   images: {
-    remotePatterns: [{ protocol: 'https', hostname: 'flagcdn.com' }],
+    remotePatterns: [],
   },
   turbopack: {
     root: process.cwd(),

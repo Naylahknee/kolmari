@@ -114,6 +114,39 @@ function DeviceTabs({ device, onChange }: { device: Device; onChange: (d: Device
   )
 }
 
+// Saves an approved generated image to Neon so the country page serves it from
+// /api/country-asset without a redeploy.
+function SaveToSiteButton({ payload }: { payload: Record<string, unknown> }) {
+  const [saving, setSaving] = useState(false)
+  const [msg, setMsg] = useState('')
+  const [ok, setOk] = useState(false)
+  async function save() {
+    setSaving(true); setMsg(''); setOk(false)
+    try {
+      const res = await fetch('/api/admin/country-asset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const body = (await res.json().catch(() => ({}))) as { error?: string }
+      if (!res.ok) throw new Error(body.error || 'Save failed.')
+      setOk(true); setMsg('Saved — live on the country page.')
+    } catch (caught) {
+      setMsg(caught instanceof Error ? caught.message : 'Save failed.')
+    } finally {
+      setSaving(false)
+    }
+  }
+  return (
+    <span className="inline-flex items-center gap-2">
+      <button type="button" onClick={save} disabled={saving} className="rounded-full bg-neutral-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60">
+        {saving ? 'Saving…' : 'Save to site'}
+      </button>
+      {msg && <span className={`text-xs font-medium ${ok ? 'text-emerald-700' : 'text-red-700'}`}>{msg}</span>}
+    </span>
+  )
+}
+
 // ===========================================================================
 // Hero tab
 // ===========================================================================
@@ -263,9 +296,10 @@ function HeroTab() {
         {generated && (
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
             <code className="rounded bg-white px-2 py-1 text-xs text-neutral-700">{generated.filename}</code>
-            <a href={generated.imageDataUrl} download={generated.filename} className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-neutral-100">
-              Download WebP
-            </a>
+            <div className="flex flex-wrap items-center gap-2">
+              <a href={generated.imageDataUrl} download={generated.filename} className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-neutral-100">Download WebP</a>
+              <SaveToSiteButton payload={{ assetType: 'hero', countrySlug: form.countrySlug, imageDataUrl: generated.imageDataUrl }} />
+            </div>
           </div>
         )}
         {generated && (
@@ -445,7 +479,10 @@ function CityTab() {
         <div className="mb-4 flex items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-neutral-950">Preview</h2>
           {generated && (
-            <a href={generated.imageDataUrl} download={generated.filename} className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-neutral-100">Download</a>
+            <div className="flex flex-wrap items-center gap-2">
+              <a href={generated.imageDataUrl} download={generated.filename} className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-neutral-100">Download</a>
+              <SaveToSiteButton payload={{ assetType: 'city', countrySlug: form.countrySlug, citySlug: form.citySlug, imageDataUrl: generated.imageDataUrl }} />
+            </div>
           )}
         </div>
         {generated ? (

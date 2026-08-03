@@ -1,4 +1,5 @@
 'use client'
+import { flagSrc } from '@/lib/flags'
 import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, ChevronRight, Lock, Pencil } from 'lucide-react'
@@ -27,7 +28,7 @@ function Flag({ code, className }: { code: string; className?: string }) {
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={`https://flagcdn.com/${code.toLowerCase()}.svg`}
+      src={flagSrc(code)}
       alt=""
       className={className}
       onError={(e) => { e.currentTarget.style.display = 'none' }}

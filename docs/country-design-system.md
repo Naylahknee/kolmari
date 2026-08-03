@@ -72,15 +72,30 @@ The hero sells the country; the snapshot answers "where is it?"; city images
 answer "what might living there feel like?" No asset crosses roles — the hero is
 never a city-card fallback, and the flag-map hero is never the snapshot.
 
-## File conventions
+## Saving generated images (no redeploy)
+
+The Hero and City tabs each offer **Download** and **Save to site**. "Save to
+site" stores the approved image in Neon (`country_generated_assets`) via
+`POST /api/admin/country-asset` (admin-only). The country page then serves it
+from **`GET /api/country-asset?slug=…&type=hero`** (public, cached, versioned by
+`updated_at`) with no redeploy. Hero resolution order:
+
+```
+saved generated hero (Neon /api/country-asset) → committed /public artwork → flag + shadow composite → gradient
+```
+
+Committing a WebP to `/public` (below) still works and is the durable option.
 
 ```
 public/images/countries/{country-slug}/{country-slug}-hero.webp
 public/images/countries/{country-slug}/cities/{city-slug}.webp
 ```
 
-Generated images are reviewed and downloaded, then committed manually — nothing
-is written automatically.
+## Flags
+
+Country flags are **local, public-domain SVGs** under `public/flags/{code}.svg`
+(ISO-3166-1 alpha-2), resolved via `flagSrc()` in `src/lib/flags.ts`. There is no
+external flagcdn dependency (removed from the CSP and `next/image` config).
 
 ## Responsive
 

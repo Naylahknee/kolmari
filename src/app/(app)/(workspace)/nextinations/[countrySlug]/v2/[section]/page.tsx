@@ -6,6 +6,7 @@ import { rankNextinations } from '@/lib/userProfile'
 import { getCountryCenter } from '@/lib/country-geo'
 import { getCountryData } from '@/lib/country-data'
 import { getApprovedHero } from '@/lib/country-visuals/data'
+import { getGeneratedHeroVersion } from '@/lib/country-assets'
 import { PersonalizedCountrySummary } from '@/components/country-template/PersonalizedCountrySummary'
 import { SimpleCountryView } from '@/components/country-template/SimpleCountryView'
 import { CountryTemplate } from '@/components/country-template/CountryTemplate'
@@ -107,9 +108,13 @@ export default async function CountryV2Page({ params, searchParams }: Props) {
     ? { score: rankedMatch!.score, rank: rankIdx + 1, total: ranked.length, reasons: rankedMatch!.reasons }
     : null
 
-  // Approved hero artwork (flag + silhouette) when committed; else the hero
-  // falls back to the branded gradient + outline inside CountryHero.
-  const heroArtwork = getApprovedHero(countrySlug)
+  // Hero artwork resolution: a saved generated hero (Neon, served from
+  // /api/country-asset) wins → then committed /public artwork → then the
+  // branded gradient + outline fallback inside CountryHero.
+  const heroVersion = await getGeneratedHeroVersion(countrySlug)
+  const heroArtwork = heroVersion
+    ? { src: `/api/country-asset?slug=${countrySlug}&type=hero&v=${heroVersion}`, focalPoint: { x: 50, y: 50 } }
+    : getApprovedHero(countrySlug)
 
   // Verified relocation figures for the hero panels (honest empties when unset).
   const cd = await getCountryData(countrySlug)

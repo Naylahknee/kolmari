@@ -2,6 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 
+import { flagSrc } from '@/lib/flags'
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Bookmark, Grid2x2, Heart, List, Lock, Search } from 'lucide-react'
@@ -270,7 +271,7 @@ function Card({ row, view, saved, interested, onSave, onInterested }: {
   saved: boolean; interested: boolean
   onSave: () => void; onInterested: () => void
 }) {
-  const flag = `https://flagcdn.com/${row.code}.svg`
+  const flag = flagSrc(row.code)
   const badge = row.match !== null
     ? <span className="rounded-pill bg-gold-soft px-2.5 py-1 text-xs font-bold text-gold-deep">{row.match}% match</span>
     : row.locked

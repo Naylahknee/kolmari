@@ -1,3 +1,4 @@
+import { flagSrc } from '@/lib/flags'
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -93,7 +94,7 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
                 <div className="p-5">
                   <h3 className="text-lg font-extrabold text-navy">{country.name}</h3>
                   <p className="mt-1 flex items-center gap-2 text-sm text-muted">
-                    <Image src={`https://flagcdn.com/${country.code.toLowerCase()}.svg`} alt="" width={24} height={16} className="h-4 w-6 rounded-[2px] object-cover" />
+                    <Image src={flagSrc(country.code)} alt="" width={24} height={16} className="h-4 w-6 rounded-[2px] object-cover" />
                     <span>{country.city}</span>
                   </p>
                   {profileComplete && (country.pathway || country.communityFit || country.monthlyCost) ? (
