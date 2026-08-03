@@ -150,7 +150,15 @@ function HeroTab() {
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(380px,0.95fr)]">
+    <>
+      <div className="mb-5">
+        <h2 className="text-xl font-semibold text-neutral-950">Hero Image</h2>
+        <p className="text-sm font-semibold text-neutral-500">National Flag Shadow Hero (Standard)</p>
+        <p className="mt-1 max-w-2xl text-sm text-neutral-500">
+          The official flag as full-bleed woven fabric with the country&rsquo;s silhouette as a translucent shadow that inherits the flag colors. The emblem stays in its official position. Mexico is the reference — every country uses its own flag, emblem, and outline.
+        </p>
+      </div>
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(380px,0.95fr)]">
       <form onSubmit={submit} className="rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-7">
         <div className="mb-5 flex flex-wrap items-center gap-3">
           <button
@@ -158,7 +166,7 @@ function HeroTab() {
             onClick={() => setForm(MEXICO_SHADOW_STANDARD)}
             className="rounded-full border border-neutral-300 bg-neutral-50 px-3.5 py-2 text-xs font-semibold text-neutral-800 hover:bg-neutral-100"
           >
-            Load preset · Mexico Shadow Standard
+            Load preset · National Flag Shadow Hero (Mexico reference)
           </button>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -263,7 +271,8 @@ function HeroTab() {
           </p>
         )}
       </section>
-    </div>
+      </div>
+    </>
   )
 }
 

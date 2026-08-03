@@ -41,12 +41,11 @@ const OVERRIDES: Record<string, CountryVisualOverride> = {
   portugal: {
     countryName: 'Portugal',
     countryCode: 'PT',
-    // Approved, committed artwork (flag + country silhouette).
-    hero: {
-      src: '/images/countries/portugal/portugal-flag-map.png',
-      alt: 'Portugal flag with the country silhouette',
-      focalPoint: { x: 50, y: 50 },
-    },
+    // No committed hero yet: the old flag-map artwork used a raised-relief
+    // silhouette (a cutout), which the National Flag Shadow Hero standard
+    // rejects. Portugal falls back to the same flag + translucent-shadow hero as
+    // every other country until a to-standard fabric hero is generated and
+    // committed at /images/countries/portugal/portugal-hero.webp.
     snapshot: {
       center: [-8.0, 39.5],
       zoom: 5.2,

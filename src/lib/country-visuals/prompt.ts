@@ -2,10 +2,12 @@ import type { HeroImageInput, CityImageInput } from './schema'
 
 /* Prompt builders for the Country Visual Asset Engine.
  *
- * Hero: the "Mexico Shadow Standard" — the official flag as full-bleed matte
- * fabric with the complete country silhouette rendered as a translucent
- * superimposed shadow that inherits the flag colors beneath it. No parchment
- * cutout, no pin, no text. The national emblem is always protected.
+ * Hero: the "National Flag Shadow Hero" (Kolmari Standard) — the official flag as
+ * full-bleed woven fabric with the complete country silhouette rendered as a
+ * translucent superimposed shadow that inherits the flag colors beneath it. No
+ * parchment cutout, no pin, no text. The national emblem is always protected.
+ * Mexico is the visual reference, not the template. See
+ * docs/Kolmari/hero-image-standard.md.
  *
  * City: premium editorial travel photography of a real city environment. No
  * text, no flags, no collage, no fabricated landmarks. */
