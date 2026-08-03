@@ -18,13 +18,15 @@ and reviewed before download; one configures the existing interactive map.
    inherits the flag colors ("Mexico Shadow Standard"). No parchment cutout, no
    pin, no text. The national emblem is always protected. Output `1536×1024`
    WebP, filename `{country-slug}-hero.webp`.
-   - **Reference-guided generation.** Provide a **Flag code (ISO-2)** and/or a
-     **Style reference** image and the hero is produced with OpenAI's
-     image-**edits** endpoint instead of text-to-image: the country's own flag
-     raster (`public/flags-png/{code}.png`) is the subject and the reference is a
-     style exemplar, so the output preserves the real flag and matches an approved
-     hero's look. With neither, it falls back to text-to-image on the written
-     prompt (unchanged behavior).
+   - **Reference-guided generation.** Provide a **Flag code (ISO-2)** and the hero
+     is produced with OpenAI's image-**edits** endpoint instead of text-to-image:
+     the country's own flag raster (`public/flags-png/{code}.png`) is the subject
+     and the committed **National Flag Shadow Hero** standard
+     (`public/references/national-flag-shadow-hero.webp`) is applied automatically
+     as the style exemplar, so the output preserves the real flag and matches the
+     approved look with no extra steps. Uploading a **Style reference** overrides
+     that built-in exemplar. With no flag code and no reference, it falls back to
+     text-to-image on the written prompt (unchanged behavior).
    - **Use your own finished art.** The Hero and City tabs each have an upload
      card — pick a PNG/JPEG/WebP (≤6 MB) and "Save to site" stores it as-is via
      `POST /api/admin/country-asset`, no AI involved. Best when you already have
@@ -50,6 +52,11 @@ and reviewed before download; one configures the existing interactive map.
   SVGs, used as the subject image for reference-guided hero edits (the edits
   endpoint needs raster, not SVG). Regenerate with `@resvg/resvg-js` from
   `public/flags/{code}.svg`.
+- `public/references/national-flag-shadow-hero.webp` — the approved
+  National Flag Shadow Hero standard (woven-fabric flag + translucent
+  country-silhouette shadow). The route sends it to the edits endpoint as the
+  default style exemplar whenever a hero is generated with a flag code and no
+  uploaded reference.
 - `src/lib/country-visuals/data.ts` — the per-country registry + resolvers
   (`getCountryVisualAssets`, `getApprovedHero`, `hasApprovedHero`,
   `getSnapshotMapConfig`). Pure, so both server and client import it.

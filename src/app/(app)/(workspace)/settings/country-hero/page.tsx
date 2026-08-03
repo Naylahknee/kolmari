@@ -315,7 +315,7 @@ function HeroTab() {
         <div className="mt-6 border-t border-neutral-200 pt-6">
           <UploadImageField
             label="Style reference (optional)"
-            help="Upload an approved hero to copy its exact look. The AI keeps this country's real flag (via the flag code above) and matches the reference's fabric, shadow, and silhouette treatment. Without a flag code and reference, it uses the written prompt only."
+            help="With a flag code set, the built-in National Flag Shadow Hero standard is applied automatically. Upload here only to override it with a different approved hero — the AI keeps this country's real flag and matches the reference's fabric, shadow, and silhouette treatment. With no flag code and no reference, it uses the written prompt only."
             value={styleRef}
             onChange={setStyleRef}
           />
