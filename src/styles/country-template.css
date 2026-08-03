@@ -91,6 +91,10 @@ body.rail-collapsed .country-template-root .rail .icon-btn svg{transform:scaleX(
 .country-template-root .hero-map > div{position:absolute;inset:0;height:100%;width:100%;aspect-ratio:auto;min-height:0}
 .country-template-root .hero-map img{height:100%;width:100%;object-fit:cover}
 .country-template-root .scrim{position:absolute;inset:0;z-index:-1;background:linear-gradient(to top,rgba(13,27,57,.94) 0%,rgba(13,27,57,.74) 38%,rgba(13,27,57,.2) 78%,rgba(13,27,57,.34) 100%)}
+/* Photo hero: navy on the left fading into the scenic country image on the right. */
+.country-template-root .hero-photo{position:absolute;inset:0;z-index:-2}
+.country-template-root .hero-photo img{height:100%;width:100%;object-fit:cover;object-position:center right}
+.country-template-root .hero-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,rgba(13,27,57,.97) 0%,rgba(13,27,57,.88) 38%,rgba(13,27,57,.5) 68%,rgba(13,27,57,.22) 100%),linear-gradient(to top,rgba(13,27,57,.8) 0%,rgba(13,27,57,0) 52%)}
 .country-template-root .hero-body{padding:28px 30px 0;color:#fff;max-width:840px}
 .country-template-root .hero-eyebrow{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--gold);margin-bottom:10px}
 .country-template-root .hero-name{font-family:var(--font-sans);font-weight:700;font-size:clamp(38px,5vw,60px);line-height:1.04;letter-spacing:-.015em;display:flex;align-items:center;gap:15px}

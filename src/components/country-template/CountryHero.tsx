@@ -1,4 +1,11 @@
-import { CountrySnapshotMap } from '@/components/country-workspace/CountrySnapshotMap'
+// Scenic country hero images that ship in /public. Countries without one fall
+// back to the branded navy gradient (never a map).
+const COUNTRY_IMAGES: Record<string, string> = {
+  portugal: '/images/countries/portugal.webp',
+  spain: '/images/countries/spain.webp',
+  greece: '/images/countries/greece.webp',
+  estonia: '/images/countries/estonia.webp',
+}
 import { countryFacts } from '@/lib/country-facts'
 
 /* The country page hero.
@@ -25,12 +32,15 @@ export type CountryHeroData = {
 }
 
 /** Real map background layer, only rendered when a token + center are present. */
-function HeroMap({ country, center }: { country: HeroCountry; center: LatLng | null }) {
-  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
-  if (!token || !center) return null
+// Hero backdrop: navy gradient that fades into a scenic country image on the
+// right (never a map). Falls back to the plain navy gradient when no image.
+function HeroPhoto({ slug }: { slug: string }) {
+  const img = COUNTRY_IMAGES[slug]
+  if (!img) return <div className="hero-bg" aria-hidden="true" />
   return (
-    <div className="hero-map" aria-hidden="true">
-      <CountrySnapshotMap countryName={country.name} lat={center.lat} lng={center.lng} alt={`Map of ${country.name}`} />
+    <div className="hero-photo" aria-hidden="true">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={img} alt="" />
     </div>
   )
 }
@@ -63,7 +73,6 @@ export function CountryHero({
   go,
   fromQuiz = false,
   country,
-  center = null,
   visaType,
   rich = false,
   data = null,
@@ -79,8 +88,7 @@ export function CountryHero({
   if (rich) {
     return (
       <section className="hero">
-        <div className="hero-bg hero-bg-portugal" aria-hidden="true"></div>
-        <div className="scrim"></div>
+        <HeroPhoto slug="portugal" />
         <div className="hero-body">
           {fromQuiz && (
             <p className="hero-quizpill">
@@ -139,9 +147,7 @@ export function CountryHero({
   // may have is the visa route for the five mapped countries).
   return (
     <section className="hero">
-      <div className="hero-bg"></div>
-      <HeroMap country={country} center={center} />
-      <div className="scrim"></div>
+      <HeroPhoto slug={country.slug} />
       <div className="hero-body">
         {fromQuiz && (
           <p className="hero-quizpill">
