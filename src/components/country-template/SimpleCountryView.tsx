@@ -1,7 +1,7 @@
 'use client'
 import { useEffect } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Lock, MapPin, Sparkles, Stamp } from 'lucide-react'
+import { BarChart3, Building2, Check, MapPin, Stamp } from 'lucide-react'
 import { UnitsProvider } from './client/UnitsControl'
 import { CountrySnapshotMap } from '@/components/country-workspace/CountrySnapshotMap'
 import { TopBar } from './TopBar'
@@ -47,6 +47,23 @@ function VisaLine({ visaType, incomeRequired, name }: { visaType?: string; incom
   )
 }
 
+/** Blurred placeholder card standing in for a locked deep-info section. */
+function SkeletonCard({ title, rows }: { title: string; rows: number }) {
+  return (
+    <div className="card-surface p-5">
+      <p className="text-sm font-bold text-navy/70">{title}</p>
+      <div className="mt-3 space-y-2">
+        {Array.from({ length: rows }).map((_, i) => (
+          <div key={i} className="flex items-center justify-between gap-4">
+            <span className="h-3 w-24 rounded bg-line" />
+            <span className="h-3 w-12 rounded bg-line" />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export function SimpleCountryView({
   country,
   center,
@@ -73,7 +90,7 @@ export function SimpleCountryView({
           <button type="button" className="rail-backdrop" onClick={toggleRail} aria-label="Close navigation" />
           <Sidebar />
           <main className="main">
-            <div className="mx-auto max-w-3xl space-y-6">
+            <div className="mx-auto max-w-5xl space-y-6">
               {/* Country header */}
               <section className="card-surface p-6 sm:p-7">
                 <div className="text-xs font-bold uppercase tracking-widest text-gold-deep">
@@ -124,27 +141,49 @@ export function SimpleCountryView({
                 </div>
               </section>
 
-              {/* Upgrade CTA */}
-              <section className="relative overflow-hidden rounded-card border border-gold/40 bg-gold-soft/30 p-6">
-                <span className="inline-flex items-center gap-1.5 rounded-pill bg-white px-2.5 py-1 text-xs font-bold text-gold-deep">
-                  <Lock size={13} aria-hidden="true" /> Plus feature
-                </span>
-                <h2 className="mt-3 text-lg font-bold text-navy">Unlock the full {country.name} page</h2>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-navy/80">
-                  Plus opens the full research page for {country.name}: the country snapshot, top cities with
-                  maps, verified pathways and thresholds, your Match Score, cost breakdowns, and a step-by-step
-                  Move Plan. Explorer stays free.
-                </p>
-                <div className="mt-5 flex flex-wrap gap-3">
-                  <Link href="/coming-soon?feature=plus" className="gold-button">
-                    Build My Kolmari Plan <ArrowRight size={15} />
-                  </Link>
-                  <Link
-                    href="/cost-calculator"
-                    className="inline-flex min-h-11 items-center rounded-[var(--radius-btn)] border border-line bg-white px-5 text-sm font-bold text-navy"
-                  >
-                    <Sparkles size={15} className="mr-2 text-gold-deep" /> Open Cost Calculator
-                  </Link>
+              {/* Deep country information — blurred preview behind an upgrade overlay */}
+              <section aria-label="Country information (locked)">
+                <h2 className="text-lg font-bold text-navy">Country Information</h2>
+                <div className="relative mt-3">
+                  {/* Blurred skeleton of the deep sections */}
+                  <div className="pointer-events-none select-none blur-[6px] opacity-60" aria-hidden="true">
+                    <div className="grid gap-4 md:grid-cols-3">
+                      <SkeletonCard title="Country Overview" rows={4} />
+                      <SkeletonCard title="Key Metrics" rows={4} />
+                      <SkeletonCard title="Popular Cities" rows={4} />
+                    </div>
+                    <div className="mt-4 grid gap-4 md:grid-cols-2">
+                      <SkeletonCard title="Cost of Living" rows={3} />
+                      <SkeletonCard title="Pros & Cons" rows={3} />
+                    </div>
+                  </div>
+
+                  {/* Upgrade overlay */}
+                  <div className="absolute inset-0 grid place-items-center p-4">
+                    <div className="w-full max-w-md overflow-hidden rounded-card bg-white shadow-drawer">
+                      <div className="flex items-center justify-center gap-3 bg-gradient-to-r from-teal to-teal-deep p-4">
+                        {[BarChart3, Building2, Stamp].map((Icon, i) => (
+                          <span key={i} className="grid size-9 place-items-center rounded-[var(--radius-field)] bg-white/20 text-white"><Icon size={18} /></span>
+                        ))}
+                      </div>
+                      <div className="p-6 text-center">
+                        <h3 className="text-lg font-bold text-navy">Dive deeper into {country.name}</h3>
+                        <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-muted">
+                          Unlock detailed stats, cost of living, popular cities, pros &amp; cons, and visa pathways —
+                          everything you need to decide if {country.name} is right for you.
+                        </p>
+                        <ul className="mx-auto mt-4 grid max-w-sm grid-cols-1 gap-2 text-left sm:grid-cols-2">
+                          {['Country overview & stats', 'Cost of living breakdown', 'Popular cities to live', 'Pros & cons analysis', 'Visa option details', 'Key quality-of-life metrics'].map((f) => (
+                            <li key={f} className="flex items-start gap-1.5 text-sm text-navy/85">
+                              <Check size={15} className="mt-0.5 shrink-0 text-teal-deep" aria-hidden="true" /> {f}
+                            </li>
+                          ))}
+                        </ul>
+                        <Link href="/coming-soon?feature=plus" className="gold-button mt-5 w-full">View plans</Link>
+                        <p className="mt-2 text-xs text-muted">Included with paid Kolmari memberships</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </section>
             </div>
