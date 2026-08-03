@@ -161,13 +161,8 @@ export function CountryHero({
           </p>
         )}
         <div className="hero-eyebrow">{country.region} · {country.city}</div>
-        <h1 className="hero-name">
-          <span className="flag hero-flag" role="img" aria-label={`Flag of ${country.name}`}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`https://flagcdn.com/${country.code.toLowerCase()}.svg`} alt="" onError={(e) => { e.currentTarget.style.display = 'none' }} />
-          </span>
-          {country.name}
-        </h1>
+        {/* No inline flag beside the name — the flag is already the hero backdrop. */}
+        <h1 className="hero-name">{country.name}</h1>
         <p className="hero-blurb">
           Your research workspace for {country.name}. Figures appear here only once they are verified from
           official sources — never estimated or borrowed from another country.
@@ -184,18 +179,20 @@ export function CountryHero({
           )
         })()}
       </div>
+      {/* Same four categories, order and spacing as the Portugal hero — with
+          per-country verified figures, or an honest "being verified" state. */}
       <div className="metrics">
-        <DataMetric
-          label="Primary route"
-          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="6" cy="6" r="2.5" /><circle cx="18" cy="18" r="2.5" /><path d="M8.5 6H15a3 3 0 010 6H9a3 3 0 000 6h6.5" /></svg>}
-          value={data?.primaryVisaRoute ?? visaType ?? null}
-          note={data?.sources?.primaryVisaRoute ?? 'Confirm your eligibility with the official authority'}
-        />
         <DataMetric
           label="Cost vs your budget"
           icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /></svg>}
           value={data?.monthlyCostUsd != null ? `$${data.monthlyCostUsd.toLocaleString()}/mo` : null}
           note={data?.sources?.monthlyCostUsd ?? null}
+        />
+        <DataMetric
+          label="Your best route"
+          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="6" cy="6" r="2.5" /><circle cx="18" cy="18" r="2.5" /><path d="M8.5 6H15a3 3 0 010 6H9a3 3 0 000 6h6.5" /></svg>}
+          value={data?.primaryVisaRoute ?? visaType ?? null}
+          note={data?.sources?.primaryVisaRoute ?? 'Confirm your eligibility with the official authority'}
         />
         <DataMetric
           label="Time to residency"
