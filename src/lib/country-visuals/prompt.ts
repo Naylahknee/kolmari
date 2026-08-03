@@ -105,6 +105,39 @@ OUTPUT
 Opaque WebP`
 }
 
+/* Edit-mode hero prompt for OpenAI's /v1/images/edits endpoint. Unlike the
+ * text-to-image prompt above, this one is paired with attached input images:
+ *   - image 1: the country's official flag (raster) — the subject to transform
+ *   - image 2 (optional): a style reference (an approved hero) — the look to match
+ * so the output preserves the real flag + emblem and inherits the reference's
+ * fabric, shadow, and silhouette treatment instead of gpt-image inventing them. */
+export function buildHeroEditPrompt(input: HeroImageInput, opts: { hasStyleRef: boolean }) {
+  const styleClause = opts.hasStyleRef
+    ? `Match the exact visual treatment of the SECOND attached image (the style reference): the same woven-fabric texture, folds, lighting, translucent superimposed country-silhouette shadow, shadow opacity and embossed depth, edge softness, and overall premium editorial finish. Apply that treatment to ${input.countryName}'s flag and geography — do NOT copy the reference country's flag, colors, emblem, or outline.`
+    : `Render the flag as premium matte woven fabric (subtle folds, fine texture, soft directional light) with the complete geographic silhouette of ${input.countryName} laid across it as a translucent superimposed shadow (~${input.shadowOpacity}% opacity, gentle embossed depth) that inherits the flag colors beneath it. Fabric treatment: ${input.flagTextureIntensity}.`
+
+  return `Transform the FIRST attached image — the official national flag of ${input.countryName} — into a premium, wide-format country-page hero background for the Kolmari relocation platform.
+
+PRESERVE THE FLAG
+- Keep the flag's real colors, proportions, and layout exactly as in the attached image.
+- Keep the national symbol (${input.protectedSymbolDescription}, ${input.protectedSymbolPosition}) fully visible, in its official position, unaltered, uncovered, and never redesigned. Keep at least ${input.safeZonePercent}% clear space around it.
+
+TREATMENT
+${styleClause}
+
+COUNTRY SILHOUETTE
+- Include the complete geographic silhouette of ${input.countryName}: ${input.geographicRequirements}.
+- Silhouette scale: ${input.silhouetteScale}. Position: ${input.silhouettePosition}.
+- The silhouette must never cover or replace the national emblem, and must never look like parchment, stone, paper, or a separate cutout.
+
+LAYOUT & EXCLUSIONS
+- Wide editorial hero composition that works as a background behind left-aligned website content.
+- No text, labels, city names, pins, stickers, collage, photographs, travel icons, passport stamps, plants, or added symbols.
+
+OUTPUT
+1536 × 1024, opaque WebP.`
+}
+
 export function buildCityPrompt(input: CityImageInput) {
   const landmark = input.landmarkGuidance.trim()
     ? `Landmark guidance: ${input.landmarkGuidance.trim()}. Only depict landmarks that genuinely exist in ${input.cityName}; never invent or relocate a landmark.`

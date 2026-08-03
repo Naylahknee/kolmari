@@ -43,6 +43,12 @@ an ordinary page visit. Snapshot maps are Mapbox config, never AI.
 - Background is the **country's own flag** (fabric, full-bleed). The committed
   National Flag Shadow Hero WebP is used when present; otherwise the same design
   language is composed from the real flag + a translucent shadow silhouette.
+- **Generation modes.** The Hero tab produces the artwork two ways: give it a
+  flag code (ISO-2) and/or a style-reference image and it uses OpenAI
+  image-**edits** — the country's real flag raster (`public/flags-png/{code}.png`)
+  as subject, the reference as a style exemplar — so the look matches an approved
+  hero; with neither it uses text-to-image on the written prompt. Either can be
+  bypassed entirely by uploading finished art on the Hero tab.
 - **No flag badge next to the country title** — the flag already fills the hero.
   (Compact flag badges on city cards and other small contexts stay.)
 - **Required status indicators**: compact, real-data chips (matched status +

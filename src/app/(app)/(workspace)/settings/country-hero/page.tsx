@@ -35,6 +35,7 @@ type GeneratedImage = {
 const MEXICO_SHADOW_STANDARD: HeroImageInput = {
   countryName: 'Mexico',
   countrySlug: 'mexico',
+  flagCode: 'MX',
   protectedSymbolDescription:
     'the national coat of arms — a golden eagle perched on a prickly-pear cactus devouring a serpent, ringed by oak and laurel',
   protectedSymbolPosition: 'centered on the white middle band',
@@ -147,6 +148,51 @@ function SaveToSiteButton({ payload }: { payload: Record<string, unknown> }) {
   )
 }
 
+// Read a picked file as a base64 data URL, rejecting anything over the cap
+// (base64 inflates ~33%, and the bytes travel in a JSON/DB request body).
+function readFileAsDataUrl(file: File, maxBytes = 6_000_000): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if (file.size > maxBytes) {
+      reject(new Error(`Image is too large (max ${Math.round(maxBytes / 1_000_000)} MB).`))
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result))
+    reader.onerror = () => reject(new Error('Could not read that file.'))
+    reader.readAsDataURL(file)
+  })
+}
+
+// A file picker that hands back a base64 data URL and previews the selection.
+function UploadImageField({ label, help, value, onChange }: { label: string; help?: string; value: string; onChange: (dataUrl: string) => void }) {
+  const [err, setErr] = useState('')
+  async function pick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setErr('')
+    try {
+      onChange(await readFileAsDataUrl(file))
+    } catch (caught) {
+      setErr(caught instanceof Error ? caught.message : 'Upload failed.')
+      onChange('')
+    }
+  }
+  return (
+    <div>
+      <span className="mb-1.5 block text-sm font-medium text-neutral-800">{label}</span>
+      <input
+        type="file"
+        accept="image/png,image/jpeg,image/webp"
+        onChange={pick}
+        className="block w-full text-sm text-neutral-700 file:mr-3 file:rounded-full file:border-0 file:bg-neutral-900 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-neutral-800"
+      />
+      {help && <span className="mt-1 block text-xs text-neutral-500">{help}</span>}
+      {err && <span className="mt-1 block text-xs font-medium text-red-700">{err}</span>}
+      {value && <img src={value} alt="Upload preview" className="mt-3 max-h-44 w-full rounded-xl border border-neutral-200 object-contain" />}
+    </div>
+  )
+}
+
 // ===========================================================================
 // Hero tab
 // ===========================================================================
@@ -156,6 +202,10 @@ function HeroTab() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [device, setDevice] = useState<Device>('desktop')
+  // Optional style-reference image fed to the AI so its output matches an
+  // approved hero's look, and a separate finished-art upload saved as-is.
+  const [styleRef, setStyleRef] = useState('')
+  const [uploadArt, setUploadArt] = useState('')
 
   const set = <K extends keyof HeroImageInput>(k: K, v: HeroImageInput[K]) => setForm((f) => ({ ...f, [k]: v }))
 
@@ -173,7 +223,7 @@ function HeroTab() {
       const res = await fetch('/api/admin/country-hero', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assetType: 'hero', ...parsed.data }),
+        body: JSON.stringify({ assetType: 'hero', ...parsed.data, ...(styleRef ? { styleReferenceDataUrl: styleRef } : {}) }),
       })
       const body = (await res.json()) as GeneratedImage & { error?: string }
       if (!res.ok) throw new Error(body.error || 'Image generation failed.')
@@ -211,6 +261,9 @@ function HeroTab() {
           </Field>
           <Field label="Country slug">
             <input className={inputClass} value={form.countrySlug} onChange={(e) => set('countrySlug', e.target.value)} required />
+          </Field>
+          <Field label="Flag code (ISO-2)" wide help="e.g. PT, MX, ES. Feeds the country's real flag to the AI so it isn't reinvented. Leave blank to use the text prompt only.">
+            <input className={inputClass} value={form.flagCode ?? ''} maxLength={2} placeholder="PT" onChange={(e) => set('flagCode', e.target.value.toUpperCase() || undefined)} />
           </Field>
           <Field label="Protected national symbol" wide help="What must never be moved, covered, or recolored.">
             <input className={inputClass} value={form.protectedSymbolDescription} onChange={(e) => set('protectedSymbolDescription', e.target.value)} required />
@@ -257,6 +310,15 @@ function HeroTab() {
             </select>
           </label>
           <span className="text-xs text-neutral-500">Output: 1536 × 1024 WebP · {heroAssetPath(form.countrySlug || 'country')}</span>
+        </div>
+
+        <div className="mt-6 border-t border-neutral-200 pt-6">
+          <UploadImageField
+            label="Style reference (optional)"
+            help="Upload an approved hero to copy its exact look. The AI keeps this country's real flag (via the flag code above) and matches the reference's fabric, shadow, and silhouette treatment. Without a flag code and reference, it uses the written prompt only."
+            value={styleRef}
+            onChange={setStyleRef}
+          />
         </div>
 
         {error && <p role="alert" className="mt-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
@@ -315,6 +377,26 @@ function HeroTab() {
         )}
       </section>
       </div>
+
+      <section className="mt-8 rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-7">
+        <h3 className="text-lg font-semibold text-neutral-950">Use your own finished art</h3>
+        <p className="mt-1 max-w-2xl text-sm text-neutral-500">
+          Already have the exact hero image? Skip generation — upload it here and it saves to <code>{form.countrySlug || 'country'}</code> pixel-for-pixel. Uses the same <b>Country</b>/<b>Country slug</b> above.
+        </p>
+        <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.8fr)]">
+          <UploadImageField
+            label="Hero image file"
+            help="PNG, JPEG, or WebP up to 6 MB. Wide format (about 3:1) reads best."
+            value={uploadArt}
+            onChange={setUploadArt}
+          />
+          <div className="flex flex-col items-start justify-end gap-3">
+            {uploadArt
+              ? <SaveToSiteButton payload={{ assetType: 'hero', countrySlug: form.countrySlug, imageDataUrl: uploadArt }} />
+              : <p className="text-sm text-neutral-500">Choose a file to enable saving.</p>}
+          </div>
+        </div>
+      </section>
     </>
   )
 }
@@ -412,6 +494,7 @@ function CityTab() {
   const [generated, setGenerated] = useState<GeneratedImage | null>(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [uploadArt, setUploadArt] = useState('')
 
   const set = <K extends keyof CityImageInput>(k: K, v: CityImageInput[K]) => setForm((f) => ({ ...f, [k]: v }))
 
@@ -439,6 +522,7 @@ function CityTab() {
   }
 
   return (
+    <>
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(380px,0.95fr)]">
       <form onSubmit={submit} className="rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-7">
         <div className="grid gap-4 sm:grid-cols-2">
@@ -501,6 +585,27 @@ function CityTab() {
         )}
       </section>
     </div>
+
+    <section className="mt-8 rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-7">
+      <h3 className="text-lg font-semibold text-neutral-950">Use your own city photo</h3>
+      <p className="mt-1 max-w-2xl text-sm text-neutral-500">
+        Already have the photo? Upload it here and it saves to <code>{form.countrySlug || 'country'}</code> / <code>{form.citySlug || 'city'}</code> as-is. Uses the <b>Country slug</b> and <b>City slug</b> above.
+      </p>
+      <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.8fr)]">
+        <UploadImageField
+          label="City image file"
+          help="PNG, JPEG, or WebP up to 6 MB. Square (1:1) reads best on the card."
+          value={uploadArt}
+          onChange={setUploadArt}
+        />
+        <div className="flex flex-col items-start justify-end gap-3">
+          {uploadArt
+            ? <SaveToSiteButton payload={{ assetType: 'city', countrySlug: form.countrySlug, citySlug: form.citySlug, imageDataUrl: uploadArt }} />
+            : <p className="text-sm text-neutral-500">Choose a file to enable saving.</p>}
+        </div>
+      </div>
+    </section>
+    </>
   )
 }
 
