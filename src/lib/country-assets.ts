@@ -77,3 +77,61 @@ export async function getGeneratedHeroVersion(countrySlug: string): Promise<stri
   const row = rows[0]
   return row ? String(new Date(row.updated_at).getTime()) : null
 }
+
+/** The set of country slugs that already have a saved hero. One query, used by
+ *  the backfill to compute what's still missing without N round-trips. */
+export async function listSavedHeroSlugs(): Promise<Set<string>> {
+  await ensureTable()
+  const rows = (await getSql()`
+    SELECT country_slug FROM country_generated_assets
+    WHERE asset_type = 'hero' AND city_slug = ''
+  `) as { country_slug: string }[]
+  return new Set(rows.map((r) => r.country_slug))
+}
+
+// ---------------------------------------------------------------------------
+// Hero generation lock — dedupes automated (self-heal) generation so a country's
+// hero is generated at most once, not once per concurrent viewer. A short
+// staleness window lets a stalled/failed claim be retried later.
+// ---------------------------------------------------------------------------
+let jobTableReady: Promise<void> | null = null
+async function ensureJobTable() {
+  if (!jobTableReady) {
+    jobTableReady = (async () => {
+      await getSql()`
+        CREATE TABLE IF NOT EXISTS country_hero_jobs (
+          country_slug TEXT PRIMARY KEY,
+          status TEXT NOT NULL DEFAULT 'running',
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+      `
+    })().catch((error) => { jobTableReady = null; throw error })
+  }
+  await jobTableReady
+}
+
+/** Atomically try to claim generation for a country. Returns true when this
+ *  caller won the claim (no fresh in-progress claim existed) and should proceed
+ *  to generate; false when another caller is already handling it. */
+export async function claimHeroJob(countrySlug: string): Promise<boolean> {
+  await ensureJobTable()
+  const rows = (await getSql()`
+    INSERT INTO country_hero_jobs (country_slug, status, updated_at)
+    VALUES (${countrySlug}, 'running', NOW())
+    ON CONFLICT (country_slug) DO UPDATE
+      SET status = 'running', updated_at = NOW()
+      WHERE country_hero_jobs.status <> 'running'
+         OR country_hero_jobs.updated_at < NOW() - INTERVAL '5 minutes'
+    RETURNING country_slug
+  `) as { country_slug: string }[]
+  return rows.length > 0
+}
+
+/** Release a claim, recording the outcome. */
+export async function finishHeroJob(countrySlug: string, status: 'done' | 'failed'): Promise<void> {
+  await ensureJobTable()
+  await getSql()`
+    UPDATE country_hero_jobs SET status = ${status}, updated_at = NOW()
+    WHERE country_slug = ${countrySlug}
+  `
+}

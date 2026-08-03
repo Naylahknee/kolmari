@@ -1,6 +1,7 @@
 import { flagSrc } from '@/lib/flags'
 import { countryFacts } from '@/lib/country-facts'
 import { CountryOutline } from './CountryOutline'
+import { HeroAutoGenerate } from './HeroAutoGenerate'
 import { focalToObjectPosition } from '@/lib/country-visuals/schema'
 
 export type HeroArtwork = { src: string; focalPoint: { x: number; y: number } }
@@ -116,6 +117,7 @@ export function CountryHero({
     return (
       <section className="hero">
         <HeroBackdrop code="PT" artwork={heroArtwork} />
+        {!heroArtwork && <HeroAutoGenerate slug={country.slug} />}
         <div className="hero-body">
           {fromQuiz && (
             <p className="hero-quizpill">
@@ -171,6 +173,7 @@ export function CountryHero({
   return (
     <section className="hero">
       <HeroBackdrop code={country.code} artwork={heroArtwork} />
+      {!heroArtwork && <HeroAutoGenerate slug={country.slug} />}
       <div className="hero-body">
         {fromQuiz && (
           <p className="hero-quizpill">
