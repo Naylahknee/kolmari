@@ -78,6 +78,8 @@ export async function POST(request: Request) {
   // image-*edits* endpoint so the output preserves the real flag and matches the
   // reference look; otherwise we fall back to plain text-to-image generation.
   const heroImages: Array<{ blob: Blob; filename: string }> = []
+  let hasFlag = false
+  let hasStyleRef = false
   if (data.assetType === 'hero') {
     if (data.flagCode) {
       try {
@@ -86,14 +88,34 @@ export async function POST(request: Request) {
         if (flagRes.ok) {
           const flagBytes = Buffer.from(await flagRes.arrayBuffer())
           heroImages.push({ blob: new Blob([flagBytes], { type: 'image/png' }), filename: `${data.flagCode.toLowerCase()}.png` })
+          hasFlag = true
         }
       } catch {
         // No flag raster available — fall through (text prompt or reference-only).
       }
     }
+    // Style reference: an uploaded exemplar wins; otherwise fall back to the
+    // committed National Flag Shadow Hero standard so the approved look is
+    // applied automatically. The built-in reference is only attached alongside
+    // the country's own flag, so the reference's country identity can't bleed in.
     if (data.styleReferenceDataUrl) {
       const ref = dataUrlToImage(data.styleReferenceDataUrl)
-      if (ref) heroImages.push({ blob: ref.blob, filename: `reference.${ref.filename.split('.').pop()}` })
+      if (ref) {
+        heroImages.push({ blob: ref.blob, filename: `reference.${ref.filename.split('.').pop()}` })
+        hasStyleRef = true
+      }
+    } else if (hasFlag) {
+      try {
+        const refUrl = new URL('/references/national-flag-shadow-hero.webp', request.url)
+        const refRes = await fetch(refUrl)
+        if (refRes.ok) {
+          const refBytes = Buffer.from(await refRes.arrayBuffer())
+          heroImages.push({ blob: new Blob([refBytes], { type: 'image/webp' }), filename: 'reference.webp' })
+          hasStyleRef = true
+        }
+      } catch {
+        // No built-in reference available — proceed with the flag alone.
+      }
     }
   }
 
@@ -101,7 +123,7 @@ export async function POST(request: Request) {
   let size: string
   let filename: string
   if (data.assetType === 'hero') {
-    prompt = heroImages.length ? buildHeroEditPrompt(data, { hasStyleRef: Boolean(data.styleReferenceDataUrl) }) : buildHeroPrompt(data)
+    prompt = heroImages.length ? buildHeroEditPrompt(data, { hasStyleRef }) : buildHeroPrompt(data)
     size = '1536x1024'
     filename = `${data.countrySlug}-hero.webp`
   } else {

@@ -150,3 +150,9 @@ text-to-image, which never sees a reference image. Fixes:
    saves the file as-is through the existing `POST /api/admin/country-asset`
    (Neon-backed, served by `/api/country-asset`) — no AI. `OPENAI_API_KEY` stays
    server-only; uploaded bytes travel only over the admin-only routes.
+
+**Built-in style reference.** The approved National Flag Shadow Hero standard is
+committed at `public/references/national-flag-shadow-hero.webp` and is sent to the
+edits endpoint automatically as the default style exemplar whenever a hero is
+generated with a flag code (no upload needed). An uploaded style reference
+overrides it.
