@@ -54,6 +54,7 @@ export default async function YourWorldPage() {
     score: match.score,
     incomeRequired: country.incomeRequired,
     blurb: match.reasons[0] ?? match.tradeoff,
+    safety: country.safety === 'High' ? 'Very safe' : 'Safe',
     scored: true,
   }))
 
@@ -70,6 +71,7 @@ export default async function YourWorldPage() {
     score: null,
     incomeRequired: null,
     blurb: null,
+    safety: null,
     scored: false,
   }))
 

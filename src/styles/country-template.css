@@ -95,6 +95,18 @@ body.rail-collapsed .country-template-root .rail .icon-btn svg{transform:scaleX(
   background:linear-gradient(90deg,rgba(13,27,57,.56) 0%,rgba(13,27,57,.22) 58%,rgba(13,27,57,.08) 100%)
 }
 .country-template-root .hero-bg.hero-bg-artwork::after{display:none}
+
+/* Flag-composite hero: the country's real flag as the backdrop with its
+   silhouette as a translucent shadow on the right — the fallback for countries
+   without committed flag-map artwork, in the same design language. */
+.country-template-root .hero-bg.hero-bg-flag{background:#0f2247;background-size:cover;background-position:center;background-repeat:no-repeat}
+.country-template-root .hero-bg.hero-bg-flag::before{
+  background:linear-gradient(90deg,rgba(13,27,57,.68) 0%,rgba(13,27,57,.34) 52%,rgba(13,27,57,.1) 100%)
+}
+.country-template-root .hero-bg.hero-bg-flag::after{display:none}
+.country-template-root .hero-flag-shape{position:absolute;z-index:-1;right:4%;top:50%;transform:translateY(-50%);width:34%;height:82%;pointer-events:none;filter:drop-shadow(0 8px 20px rgba(0,0,0,.28))}
+@media (max-width:1100px){.country-template-root .hero-flag-shape{width:30%;opacity:.9}}
+@media (max-width:700px){.country-template-root .hero-flag-shape{display:none}}
 .country-template-root .hero-map{position:absolute;inset:0;z-index:-2}
 .country-template-root .hero-map > div{position:absolute;inset:0;height:100%;width:100%;aspect-ratio:auto;min-height:0}
 .country-template-root .hero-map img{height:100%;width:100%;object-fit:cover}

@@ -2,8 +2,11 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Search, SlidersHorizontal } from 'lucide-react'
+import { ArrowRight, Coins, Heart, Search, ShieldCheck, SlidersHorizontal, Stamp } from 'lucide-react'
 import { YourWorldMap, type WorldPin } from './your-world-map'
+import { CountryOutline } from '@/components/country-template/CountryOutline'
+import { getApprovedHero } from '@/lib/country-visuals/data'
+import { focalToObjectPosition } from '@/lib/country-visuals/schema'
 
 export type RecCard = {
   slug: string
@@ -16,6 +19,7 @@ export type RecCard = {
   score: number | null
   incomeRequired: number | null
   blurb: string | null
+  safety: string | null
   scored: boolean
 }
 
@@ -88,8 +92,6 @@ export function YourWorld({ pins, cards, complete }: { pins: WorldPin[]; cards: 
     })
   }, [cards, query, region, visa, budget])
 
-  const matched = filtered.filter((c) => c.scored)
-  const unmatched = filtered.filter((c) => !c.scored)
   const activeCount = [region, budget, visa].filter(Boolean).length
 
   return (
@@ -141,10 +143,10 @@ export function YourWorld({ pins, cards, complete }: { pins: WorldPin[]; cards: 
         <YourWorldMap pins={pins} />
       </div>
 
-      {/* Recommended grid */}
+      {/* Explore More — matched + discoverable destinations in one visual grid */}
       <div className="mt-8">
         <div className="flex items-end justify-between gap-3">
-          <h2 className="text-lg font-bold text-navy">Recommended for you</h2>
+          <h2 className="text-lg font-bold text-navy">Explore More</h2>
           <Link href="/destinations" className="inline-flex items-center gap-1 text-xs font-bold text-gold-deep">Browse all <ArrowRight size={13} aria-hidden="true" /></Link>
         </div>
 
@@ -155,23 +157,11 @@ export function YourWorld({ pins, cards, complete }: { pins: WorldPin[]; cards: 
           </div>
         )}
 
-        {matched.length > 0 && (
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {matched.map((c) => <Card key={c.slug} card={c} />)}
+        {filtered.length > 0 ? (
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filtered.map((c) => <DestinationCard key={c.slug} card={c} />)}
           </div>
-        )}
-
-        {unmatched.length > 0 && (
-          <>
-            <p className="mt-8 text-sm font-bold text-navy">More places to explore</p>
-            <p className="text-xs text-muted">Not yet scored for your profile — open one to research it.</p>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {unmatched.map((c) => <BrowseCard key={c.slug} card={c} />)}
-            </div>
-          </>
-        )}
-
-        {filtered.length === 0 && (
+        ) : (
           <p className="mt-6 p-8 text-center text-sm text-muted">No destinations match your filters.</p>
         )}
       </div>
@@ -179,57 +169,64 @@ export function YourWorld({ pins, cards, complete }: { pins: WorldPin[]; cards: 
   )
 }
 
-function Card({ card }: { card: RecCard }) {
+/** Fit label for the card badge, derived from the real Match Score. */
+function fitBadge(score: number | null): string {
+  if (score === null) return 'Explore'
+  if (score >= 70) return 'Strong Fit'
+  if (score >= 50) return 'Good Fit'
+  return 'Possible Fit'
+}
+
+/** Card artwork: approved flag-map artwork when committed, else the country's
+ *  real flag with its silhouette as a shadow — matching the country-page hero. */
+function CardArt({ card }: { card: RecCard }) {
+  const hero = getApprovedHero(card.slug)
   return (
-    <Link
-      href={`/nextinations/${card.slug}/v2/overview`}
-      className="flex flex-col rounded-card border border-line bg-white p-4 transition hover:border-gold/40 hover:bg-gold-soft/15"
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-2.5">
+    <div className="relative aspect-[16/10] overflow-hidden" style={{ background: '#0f2247' }}>
+      {hero ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={hero.src} alt="" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: focalToObjectPosition(hero.focalPoint) }} loading="lazy" />
+      ) : (
+        <>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={`https://flagcdn.com/${card.code.toLowerCase()}.svg`} alt="" width={30} height={22} className="h-[22px] w-[30px] shrink-0 rounded-sm object-cover ring-1 ring-line" loading="lazy" />
-          <div>
-            <p className="text-sm font-bold text-navy">{card.name}</p>
-            <p className="text-xs text-muted">{card.city} · {card.region}</p>
-          </div>
-        </div>
-        {card.score !== null && (
-          <span className="shrink-0 rounded-pill bg-gold-soft px-2.5 py-1 text-xs font-bold text-gold-deep">{card.score}% fit</span>
-        )}
+          <img src={`https://flagcdn.com/${card.code.toLowerCase()}.svg`} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+          <span className="absolute right-[5%] top-1/2 h-[74%] w-[38%] -translate-y-1/2" style={{ filter: 'drop-shadow(0 6px 16px rgba(0,0,0,.3))' }}>
+            <CountryOutline code={card.code} fill="rgba(0,0,0,0.3)" style={{ width: '100%', height: '100%' }} />
+          </span>
+        </>
+      )}
+      {/* Legibility scrim for the overlaid badge + name */}
+      <div className="absolute inset-0" style={{ background: 'linear-gradient(to top,rgba(8,18,40,.82) 0%,rgba(8,18,40,.12) 46%,rgba(8,18,40,.28) 100%)' }} />
+      <span className="absolute left-2.5 top-2.5 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-bold text-navy shadow-sm">{fitBadge(card.score)}</span>
+      <span className="absolute right-2.5 top-2.5 grid size-8 place-items-center rounded-full bg-black/25 text-white backdrop-blur-sm"><Heart size={16} aria-hidden="true" /></span>
+      <div className="absolute inset-x-0 bottom-0 p-3">
+        <p className="text-lg font-extrabold leading-tight text-white drop-shadow">{card.name}</p>
+        <p className="text-[11px] font-semibold text-white/85">{card.city} · {card.region}</p>
       </div>
-
-      {card.blurb && <p className="mt-3 flex-1 text-sm leading-6 text-navy/80">{card.blurb}</p>}
-
-      <dl className="mt-3 grid grid-cols-3 gap-2 border-t border-line pt-3 text-center">
-        <div>
-          <dt className="text-[10px] font-bold uppercase tracking-wide text-muted">Cost</dt>
-          <dd className="mt-0.5 text-xs font-semibold text-navy">{card.cost ? costLabel[card.cost] ?? card.cost : '—'}</dd>
-        </div>
-        <div>
-          <dt className="text-[10px] font-bold uppercase tracking-wide text-muted">Route</dt>
-          <dd className="mt-0.5 text-xs font-semibold text-navy">{card.route ?? '—'}</dd>
-        </div>
-        <div>
-          <dt className="text-[10px] font-bold uppercase tracking-wide text-muted">Citizenship</dt>
-          <dd className="mt-0.5 text-xs font-semibold text-muted">Not yet tracked</dd>
-        </div>
-      </dl>
-    </Link>
+    </div>
   )
 }
 
-function BrowseCard({ card }: { card: RecCard }) {
+function FooterChip({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return (
+    <div className="flex flex-col items-center gap-1 px-1 py-2.5 text-center">
+      <span className="text-gold-deep">{icon}</span>
+      <span className="w-full truncate text-[10.5px] font-semibold text-navy">{label}</span>
+    </div>
+  )
+}
+
+function DestinationCard({ card }: { card: RecCard }) {
   return (
     <Link
       href={`/nextinations/${card.slug}/v2/overview`}
-      className="flex items-center gap-2.5 rounded-card border border-line bg-white px-3 py-3 transition hover:border-gold/40 hover:bg-gold-soft/15"
+      className="group flex flex-col overflow-hidden rounded-card border border-line bg-white shadow-tile transition hover:-translate-y-0.5 hover:border-gold/40 hover:shadow-card"
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={`https://flagcdn.com/${card.code.toLowerCase()}.svg`} alt="" width={26} height={20} className="h-5 w-[26px] shrink-0 rounded-sm object-cover ring-1 ring-line" loading="lazy" />
-      <div className="min-w-0">
-        <p className="truncate text-sm font-bold text-navy">{card.name}</p>
-        <p className="truncate text-xs text-muted">{card.city} · {card.region}</p>
+      <CardArt card={card} />
+      <div className="grid grid-cols-3 divide-x divide-line border-t border-line">
+        <FooterChip icon={<Stamp size={15} aria-hidden="true" />} label={card.route ?? (card.scored ? 'Route TBD' : 'Not scored')} />
+        <FooterChip icon={<Coins size={15} aria-hidden="true" />} label={card.cost ? costLabel[card.cost] ?? card.cost : '—'} />
+        <FooterChip icon={<ShieldCheck size={15} aria-hidden="true" />} label={card.safety ?? '—'} />
       </div>
     </Link>
   )
