@@ -1,12 +1,5 @@
-// Scenic country hero images that ship in /public. Countries without one fall
-// back to the branded navy gradient (never a map).
-const COUNTRY_IMAGES: Record<string, string> = {
-  portugal: '/images/countries/portugal.webp',
-  spain: '/images/countries/spain.webp',
-  greece: '/images/countries/greece.webp',
-  estonia: '/images/countries/estonia.webp',
-}
 import { countryFacts } from '@/lib/country-facts'
+import { CountryOutline } from './CountryOutline'
 
 /* The country page hero.
 
@@ -14,10 +7,10 @@ import { countryFacts } from '@/lib/country-facts'
    every other country it renders the same frame driven by the country record,
    with honest "being verified" metrics rather than borrowed figures.
 
-   The decorative country silhouette has been replaced by a real Mapbox map:
-   when a map token and a country center are available, the hero background is a
-   real map under the navy scrim; otherwise it falls back to the navy gradient
-   (never a fake shape). */
+   The hero backdrop is the branded navy gradient with the country's own
+   outline sitting on the far right of the panel — never a map and never a
+   borrowed silhouette. Countries with no outline shape simply show the
+   gradient. */
 
 type HeroCountry = { slug: string; name: string; code: string; city: string; region: string }
 type LatLng = { lat: number; lng: number }
@@ -31,17 +24,17 @@ export type CountryHeroData = {
   sources: Record<string, string>
 }
 
-/** Real map background layer, only rendered when a token + center are present. */
-// Hero backdrop: navy gradient that fades into a scenic country image on the
-// right (never a map). Falls back to the plain navy gradient when no image.
-function HeroPhoto({ slug }: { slug: string }) {
-  const img = COUNTRY_IMAGES[slug]
-  if (!img) return <div className="hero-bg" aria-hidden="true" />
+/** Hero backdrop: branded navy gradient with the country's own outline sitting
+ *  on the far right of the panel. When no outline shape exists for the country,
+ *  only the gradient renders. */
+function HeroShape({ code, portugal = false }: { code: string; portugal?: boolean }) {
   return (
-    <div className="hero-photo" aria-hidden="true">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={img} alt="" />
-    </div>
+    <>
+      <div className={`hero-bg${portugal ? ' hero-bg-portugal' : ''}`} aria-hidden="true" />
+      <div className="hero-shape" aria-hidden="true">
+        <CountryOutline code={code} fill="rgba(255,255,255,0.16)" style={{ height: '100%', width: 'auto' }} />
+      </div>
+    </>
   )
 }
 
@@ -88,7 +81,7 @@ export function CountryHero({
   if (rich) {
     return (
       <section className="hero">
-        <HeroPhoto slug="portugal" />
+        <HeroShape code="PT" portugal />
         <div className="hero-body">
           {fromQuiz && (
             <p className="hero-quizpill">
@@ -147,7 +140,7 @@ export function CountryHero({
   // may have is the visa route for the five mapped countries).
   return (
     <section className="hero">
-      <HeroPhoto slug={country.slug} />
+      <HeroShape code={country.code} />
       <div className="hero-body">
         {fromQuiz && (
           <p className="hero-quizpill">
