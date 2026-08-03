@@ -1,16 +1,17 @@
 'use client'
 import { useEffect } from 'react'
 import Link from 'next/link'
-import { BarChart3, Building2, Check, MapPin, Stamp } from 'lucide-react'
+import { BarChart3, Building2, Check, Stamp } from 'lucide-react'
 import { UnitsProvider } from './client/UnitsControl'
-import { CountrySnapshotMap } from '@/components/country-workspace/CountrySnapshotMap'
+import { CountryOutline } from './CountryOutline'
+import { getApprovedHero } from '@/lib/country-visuals/data'
+import { focalToObjectPosition } from '@/lib/country-visuals/schema'
 import { TopBar } from './TopBar'
 import { Sidebar } from './Sidebar'
 
 // Structural shape shared by both country registries (CountryDetail and
 // DiscoverableCountry).
 type SimpleCountry = { slug: string; name: string; code: string; city: string; region: string }
-type LatLng = { lat: number; lng: number }
 
 /*
   The FREE country view. Every visitor on the free plan sees the same simple,
@@ -66,17 +67,16 @@ function SkeletonCard({ title, rows }: { title: string; rows: number }) {
 
 export function SimpleCountryView({
   country,
-  center,
   visaType,
   incomeRequired,
   summary,
 }: {
   country: SimpleCountry
-  center: LatLng | null
   visaType?: string
   incomeRequired?: number
   summary?: string
 }) {
+  const hero = getApprovedHero(country.slug)
   const toggleRail = () => document.body.classList.toggle('rail-collapsed')
   useEffect(() => {
     if (window.innerWidth <= 900) document.body.classList.remove('rail-collapsed')
@@ -111,22 +111,26 @@ export function SimpleCountryView({
                 {summary && <p className="mt-4 max-w-2xl text-sm leading-6 text-muted">{summary}</p>}
               </section>
 
-              {/* Small real map */}
+              {/* Hero panel: the country's flag + silhouette artwork (never a
+                  locator map). Falls back to the branded gradient + outline when
+                  no approved artwork is committed for this country. */}
               <section className="overflow-hidden rounded-card border border-line bg-white shadow-card">
-                {center ? (
-                  <CountrySnapshotMap
-                    countryName={country.name}
-                    lat={center.lat}
-                    lng={center.lng}
-                    alt={`Map of ${country.name}`}
+                {hero ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={hero.src}
+                    alt={`${country.name} flag with the country outline`}
+                    className="block aspect-[16/9] w-full object-cover"
+                    style={{ objectPosition: focalToObjectPosition(hero.focalPoint) }}
                   />
                 ) : (
                   <div
                     role="img"
-                    aria-label={`${country.name} map unavailable`}
-                    className="flex aspect-[16/9] min-h-48 items-center justify-center gap-2 bg-canvas text-sm font-semibold text-muted"
+                    aria-label={`${country.name} flag and outline`}
+                    className="relative grid aspect-[16/9] place-items-center overflow-hidden"
+                    style={{ background: 'linear-gradient(135deg,#122a52,#1b3f68)' }}
                   >
-                    <MapPin size={18} className="text-gold-deep" /> Map for {country.name} is being added
+                    <CountryOutline code={country.code} fill="rgba(255,255,255,0.18)" style={{ height: '76%', width: 'auto' }} />
                   </div>
                 )}
               </section>
