@@ -6,11 +6,12 @@
  * would hide that tension, so we keep the axes separate and let the user weigh
  * them.
  *
- * Data-integrity note: every country entry is editorial
- * (`assessmentType: 'kolmari-editorial'`) and must carry `lastReviewed`. Labeling
- * law and allergen prevalence are regulatory/statistical claims — never invent
- * them; cite a source where possible and show honest "being verified" states
- * when a value is not yet confirmed. */
+ * Data-integrity note: archetypes, cardioNote, and allergenPrevalence are
+ * Kolmari's own editorial assessment (assessmentType: 'kolmari-editorial'), not a
+ * certified medical or regulatory dataset. labelingLaw + sourceUrl are legal
+ * claims and must be verified/refreshed on a review cadence like the visa data.
+ * allergenPrevalence describes how commonly an allergen shows up in
+ * everyday/traditional cuisine — "common" is a caution flag, not a disqualifier. */
 
 // The 9 locked cuisine archetype tags.
 export const FOOD_ARCHETYPES = [
@@ -30,28 +31,22 @@ export type FoodArchetype = (typeof FOOD_ARCHETYPES)[number]
 export const TRACKED_ALLERGENS = ['shellfish', 'treeNuts', 'peanuts', 'dairy', 'gluten', 'eggs'] as const
 export type TrackedAllergen = (typeof TRACKED_ALLERGENS)[number]
 
-// How often an allergen shows up in everyday, typical cuisine.
+// How often an allergen shows up in everyday cuisine.
 export type AllergenPrevalence = 'common' | 'occasional' | 'rare'
 
-export type LabelingLaw = {
-  /** Plain-language summary of the country's food-allergen labeling regime. */
-  summary: string
-  /** Optional citation for the summary (statute, regulator, or official page). */
-  sourceUrl?: string
-}
-
-export type FoodCultureCountry = {
-  /** Must match a slug in src/lib/countries.ts. */
-  slug: string
-  name: string
+export type CountryFoodCulture = {
+  /** Must match a slug in src/lib/countries.ts where the country exists there. */
+  countrySlug: string
   archetypes: FoodArchetype[]
-  /** Prevalence per tracked allergen in everyday cuisine. */
   allergenPrevalence: Record<TrackedAllergen, AllergenPrevalence>
-  labelingLaw: LabelingLaw
+  /** Plain-language summary of the country's food-allergen labeling regime. */
+  labelingLaw: string
   /** Editorial note on cardiovascular/heart-health fit. */
   cardioNote: string
   /** All entries are editorial assessments, disclosed on every card. */
   assessmentType: 'kolmari-editorial'
+  /** Optional citation for the labeling summary. */
+  sourceUrl?: string
   /** ISO date (YYYY-MM-DD) the entry was last reviewed. */
   lastReviewed: string
 }
@@ -99,31 +94,16 @@ export const PREVALENCE_LABELS: Record<AllergenPrevalence, string> = {
 }
 
 // ---------------------------------------------------------------------------
-// Ranking
+// Ranking helpers
 // ---------------------------------------------------------------------------
 /** Flagging an allergen never removes a country — it flags it and breaks ranking
  *  ties toward safety. A country is "flagged" for a selected allergen when that
  *  allergen is `common` in its everyday cuisine. */
-export function allergenFlagCount(country: FoodCultureCountry, flagged: TrackedAllergen[]): number {
+export function allergenFlagCount(country: CountryFoodCulture, flagged: TrackedAllergen[]): number {
   return flagged.reduce((n, a) => (country.allergenPrevalence[a] === 'common' ? n + 1 : n), 0)
 }
 
 /** Count of the user's selected archetypes that a country matches. */
-export function archetypeMatchCount(country: FoodCultureCountry, selected: FoodArchetype[]): number {
+export function archetypeMatchCount(country: CountryFoodCulture, selected: FoodArchetype[]): number {
   return selected.reduce((n, a) => (country.archetypes.includes(a) ? n + 1 : n), 0)
-}
-
-/** Sort: archetype match count desc, then fewer allergen flags, then alphabetical. */
-export function rankCountries(
-  countries: FoodCultureCountry[],
-  selected: FoodArchetype[],
-  flagged: TrackedAllergen[],
-): FoodCultureCountry[] {
-  return [...countries].sort((a, b) => {
-    const matchDiff = archetypeMatchCount(b, selected) - archetypeMatchCount(a, selected)
-    if (matchDiff !== 0) return matchDiff
-    const flagDiff = allergenFlagCount(a, flagged) - allergenFlagCount(b, flagged)
-    if (flagDiff !== 0) return flagDiff
-    return a.name.localeCompare(b.name)
-  })
 }
