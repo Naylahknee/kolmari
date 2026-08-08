@@ -1,18 +1,251 @@
-import type { FoodCultureCountry } from './types'
+// src/lib/food-culture/data.ts
+//
+// Country-level food culture data, mapped to the archetype taxonomy in
+// types.ts. Covers the countries currently in Kolmari's destination set.
+//
+// IMPORTANT: archetypes, cardioNote, and allergenPrevalence are Kolmari's
+// own editorial assessment (assessmentType: "kolmari-editorial") based on
+// general dietary-pattern knowledge, not a certified medical or regulatory
+// dataset. labelingLaw + sourceUrl should be verified/refreshed on a
+// review cadence like the visa data already is — legal labeling regimes
+// change (see Japan's April 2026 update as a live example).
+//
+// allergenPrevalence describes how commonly the allergen shows up in
+// EVERYDAY/traditional cuisine — not whether allergen-free alternatives
+// exist. "common" is a caution flag, not a disqualifier.
 
-/* Per-country Food & Health Fit data.
- *
- * INTENTIONALLY EMPTY. The curated, source-checked country entries from the
- * research session should be pasted here — each conforming to `FoodCultureCountry`
- * in ./types.ts. Do not fabricate allergen prevalence, labeling law, or heart-
- * health claims: these are regulatory/statistical assertions and must be verified
- * (EU entries and Japan are well-sourced; lower-confidence entries such as Costa
- * Rica, Colombia, Ghana, Mauritius, and the UAE need statute-level checks before
- * anyone relies on them for an allergy-sensitive move).
- *
- * Every entry must set `assessmentType: 'kolmari-editorial'` and a real
- * `lastReviewed` date. Slugs must match src/lib/countries.ts.
- *
- * Until entries are added, the filter renders an honest "being added" state
- * rather than any placeholder or invented data. */
-export const FOOD_CULTURE_COUNTRIES: FoodCultureCountry[] = []
+import { CountryFoodCulture } from "./types";
+
+export const COUNTRY_FOOD_CULTURE: Record<string, CountryFoodCulture> = {
+  portugal: {
+    countrySlug: "portugal",
+    archetypes: ["mediterranean", "seafood-forward", "strict-allergen-labeling", "low-processed-food"],
+    allergenPrevalence: {
+      shellfish: "common",
+      treeNuts: "occasional",
+      peanuts: "rare",
+      dairy: "occasional",
+      gluten: "common",
+      eggs: "occasional",
+    },
+    labelingLaw: "EU Regulation 1169/2011 — mandatory disclosure of 14 major allergens on packaged food and, in practice, common on restaurant menus.",
+    cardioNote: "Olive oil and fish-based Atlantic diet aligns closely with Mediterranean/DASH-style eating patterns.",
+    assessmentType: "kolmari-editorial",
+    sourceUrl: "https://food.ec.europa.eu/food-safety/labelling-and-nutrition_en",
+    lastReviewed: "2026-08-07",
+  },
+  spain: {
+    countrySlug: "spain",
+    archetypes: ["mediterranean", "seafood-forward", "strict-allergen-labeling", "low-processed-food"],
+    allergenPrevalence: {
+      shellfish: "common",
+      treeNuts: "occasional",
+      peanuts: "rare",
+      dairy: "occasional",
+      gluten: "common",
+      eggs: "occasional",
+    },
+    labelingLaw: "EU Regulation 1169/2011 — mandatory 14-allergen disclosure, same regime as Portugal.",
+    cardioNote: "One of the most studied Mediterranean-diet populations; strong olive oil, legume, and produce staples.",
+    assessmentType: "kolmari-editorial",
+    sourceUrl: "https://food.ec.europa.eu/food-safety/labelling-and-nutrition_en",
+    lastReviewed: "2026-08-07",
+  },
+  greece: {
+    countrySlug: "greece",
+    archetypes: ["mediterranean", "farm-to-table", "seafood-forward", "strict-allergen-labeling", "low-processed-food"],
+    allergenPrevalence: {
+      shellfish: "occasional",
+      treeNuts: "occasional",
+      peanuts: "rare",
+      dairy: "common",
+      gluten: "common",
+      eggs: "occasional",
+    },
+    labelingLaw: "EU Regulation 1169/2011 — mandatory 14-allergen disclosure.",
+    cardioNote: "Birthplace of the reference Mediterranean diet model; olive oil, legumes, vegetables, and fish are dietary defaults, not specialty choices.",
+    assessmentType: "kolmari-editorial",
+    sourceUrl: "https://food.ec.europa.eu/food-safety/labelling-and-nutrition_en",
+    lastReviewed: "2026-08-07",
+  },
+  estonia: {
+    countrySlug: "estonia",
+    archetypes: ["farm-to-table", "strict-allergen-labeling"],
+    allergenPrevalence: {
+      shellfish: "rare",
+      treeNuts: "rare",
+      peanuts: "rare",
+      dairy: "common",
+      gluten: "common",
+      eggs: "occasional",
+    },
+    labelingLaw: "EU Regulation 1169/2011 — mandatory 14-allergen disclosure.",
+    cardioNote: "Rye, dairy, and root-vegetable heavy Northern European diet; less Mediterranean-aligned than Southern Europe, but low reliance on ultra-processed imports.",
+    assessmentType: "kolmari-editorial",
+    sourceUrl: "https://food.ec.europa.eu/food-safety/labelling-and-nutrition_en",
+    lastReviewed: "2026-08-07",
+  },
+  mexico: {
+    countrySlug: "mexico",
+    archetypes: ["farm-to-table"],
+    allergenPrevalence: {
+      shellfish: "occasional",
+      treeNuts: "occasional",
+      peanuts: "occasional",
+      dairy: "common",
+      gluten: "occasional",
+      eggs: "occasional",
+    },
+    labelingLaw: "NOM-051 requires front-of-package warning labels for excess sugar/sodium/saturated fat, but does NOT mandate a fixed allergen-declaration list the way the EU does — verify per-product.",
+    cardioNote: "Traditional corn/bean/vegetable staples are heart-healthy, but urban diet increasingly includes high-sodium processed and fried food — varies a lot by region and household.",
+    assessmentType: "kolmari-editorial",
+    sourceUrl: "https://www.gob.mx/cofepris",
+    lastReviewed: "2026-08-07",
+  },
+  croatia: {
+    countrySlug: "croatia",
+    archetypes: ["mediterranean", "seafood-forward", "strict-allergen-labeling", "farm-to-table"],
+    allergenPrevalence: {
+      shellfish: "common",
+      treeNuts: "occasional",
+      peanuts: "rare",
+      dairy: "occasional",
+      gluten: "common",
+      eggs: "occasional",
+    },
+    labelingLaw: "EU Regulation 1169/2011 — mandatory 14-allergen disclosure.",
+    cardioNote: "Adriatic coastal diet mirrors Mediterranean patterns; smaller cities retain strong local-market/whole-food habits.",
+    assessmentType: "kolmari-editorial",
+    sourceUrl: "https://food.ec.europa.eu/food-safety/labelling-and-nutrition_en",
+    lastReviewed: "2026-08-07",
+  },
+  "costa-rica": {
+    countrySlug: "costa-rica",
+    archetypes: ["farm-to-table", "plant-forward"],
+    allergenPrevalence: {
+      shellfish: "occasional",
+      treeNuts: "rare",
+      peanuts: "occasional",
+      dairy: "occasional",
+      gluten: "occasional",
+      eggs: "occasional",
+    },
+    labelingLaw: "RTCA regional Central American technical regulation covers basic allergen disclosure on packaging; less comprehensive/enforced than EU regime — verify per-product, especially imports.",
+    cardioNote: "Rice-and-beans staple diet with strong fresh produce culture (\"pura vida\" food culture); tropical fruit availability is a genuine plus for a produce-forward diet.",
+    assessmentType: "kolmari-editorial",
+    lastReviewed: "2026-08-07",
+  },
+  colombia: {
+    countrySlug: "colombia",
+    archetypes: ["farm-to-table"],
+    allergenPrevalence: {
+      shellfish: "occasional",
+      treeNuts: "occasional",
+      peanuts: "occasional",
+      dairy: "occasional",
+      gluten: "occasional",
+      eggs: "occasional",
+    },
+    labelingLaw: "Resolution 810 of 2021 (INVIMA) introduced front-of-package warning labels for excess sugar/sodium/fat, similar in spirit to Mexico's NOM-051; allergen-specific declaration rules are less standardized than EU.",
+    cardioNote: "High-altitude regions (e.g. Medellín/Bogotá) have strong fresh produce markets; fried/starchy staples common too — varies by region.",
+    assessmentType: "kolmari-editorial",
+    lastReviewed: "2026-08-07",
+  },
+  malaysia: {
+    countrySlug: "malaysia",
+    archetypes: ["seafood-forward", "nut-heavy"],
+    allergenPrevalence: {
+      shellfish: "common",
+      treeNuts: "common",
+      peanuts: "common",
+      dairy: "occasional",
+      gluten: "occasional",
+      eggs: "occasional",
+    },
+    labelingLaw: "Malaysian Food Regulations 1985 require allergen declaration for a defined list including peanuts, tree nuts, shellfish, and gluten-containing cereals on packaged food.",
+    cardioNote: "Diverse Malay/Chinese/Indian culinary traditions include produce- and fish-forward dishes, but peanut/nut sauces and shellfish are dietary staples — meaningful caution flag for those allergies specifically.",
+    assessmentType: "kolmari-editorial",
+    lastReviewed: "2026-08-07",
+  },
+  thailand: {
+    countrySlug: "thailand",
+    archetypes: ["seafood-forward", "nut-heavy"],
+    allergenPrevalence: {
+      shellfish: "common",
+      treeNuts: "common",
+      peanuts: "common",
+      dairy: "rare",
+      gluten: "occasional",
+      eggs: "occasional",
+    },
+    labelingLaw: "Thai FDA requires allergen labeling for packaged food (shellfish, peanuts, tree nuts, egg, milk, wheat, soy); restaurant-level allergen disclosure is inconsistent — real caution needed for peanut/tree nut/shellfish allergy specifically since they're everyday ingredients, not occasional ones.",
+    cardioNote: "Herb- and vegetable-forward cooking style is a genuine plus, but peanut sauces, shrimp paste, and fish sauce are foundational — high everyday exposure risk for those specific allergens.",
+    assessmentType: "kolmari-editorial",
+    lastReviewed: "2026-08-07",
+  },
+  japan: {
+    countrySlug: "japan",
+    archetypes: ["seafood-forward", "low-processed-food", "strict-allergen-labeling"],
+    allergenPrevalence: {
+      shellfish: "common",
+      treeNuts: "occasional",
+      peanuts: "occasional",
+      dairy: "rare",
+      gluten: "common",
+      eggs: "occasional",
+    },
+    labelingLaw: "Japan's Consumer Affairs Agency mandates labeling for a specified list — updated April 2026 to 9 mandatory items (shrimp, cashew, crab, walnut, wheat, buckwheat, egg, milk, peanut). Notably, soy and sesame are only 'recommended,' not mandatory — real gap for soy allergy given soy sauce/miso/tofu are dietary staples.",
+    cardioNote: "Traditional diet (fish, rice, vegetables, minimal dairy/red meat) is strongly associated with cardiovascular health in population studies; low reliance on processed convenience food outside konbini snacks.",
+    assessmentType: "kolmari-editorial",
+    sourceUrl: "https://www.caa.go.jp/policies/policy/food_labeling/food_sanitation/allergy/",
+    lastReviewed: "2026-08-07",
+  },
+  ghana: {
+    countrySlug: "ghana",
+    archetypes: ["farm-to-table", "nut-heavy"],
+    allergenPrevalence: {
+      shellfish: "occasional",
+      treeNuts: "common",
+      peanuts: "common",
+      dairy: "rare",
+      gluten: "occasional",
+      eggs: "occasional",
+    },
+    labelingLaw: "Ghana FDA requires ingredient labeling on packaged food; allergen-specific declaration standards are less formalized than EU/Japan-style regimes — verify per-product, and peanut is a foundational everyday ingredient (groundnut soup, peanut butter stews) so exposure risk is high regardless of packaging.",
+    cardioNote: "Fresh-market vegetable and legume staples are a genuine plus; palm oil use is high in traditional cooking, which is a mixed signal for cardiovascular fat profile.",
+    assessmentType: "kolmari-editorial",
+    lastReviewed: "2026-08-07",
+  },
+  mauritius: {
+    countrySlug: "mauritius",
+    archetypes: ["seafood-forward", "farm-to-table"],
+    allergenPrevalence: {
+      shellfish: "common",
+      treeNuts: "occasional",
+      peanuts: "occasional",
+      dairy: "occasional",
+      gluten: "occasional",
+      eggs: "occasional",
+    },
+    labelingLaw: "Mauritius follows Codex Alimentarius-aligned food safety standards with allergen declaration requirements on packaged food; less independently verified than EU regime for this dataset.",
+    cardioNote: "Indian Ocean island diet blends fresh seafood with Indian/Creole/Chinese influences — generally produce- and fish-forward, though fried street food is common in daily life.",
+    assessmentType: "kolmari-editorial",
+    lastReviewed: "2026-08-07",
+  },
+  "united-arab-emirates": {
+    countrySlug: "united-arab-emirates",
+    archetypes: ["high-processed-food"],
+    allergenPrevalence: {
+      shellfish: "occasional",
+      treeNuts: "common",
+      peanuts: "occasional",
+      dairy: "common",
+      gluten: "common",
+      eggs: "occasional",
+    },
+    labelingLaw: "UAE follows GSO (Gulf Standardization Organization) allergen labeling standards, broadly aligned with a defined allergen list; import-heavy food supply means labeling quality varies by product origin.",
+    cardioNote: "Dubai/Abu Dhabi's international food scene means diet quality varies enormously by household choice rather than national default — genuinely easy to eat very well or very poorly; less a fixed 'food culture' than other entries in this list.",
+    assessmentType: "kolmari-editorial",
+    lastReviewed: "2026-08-07",
+  },
+};

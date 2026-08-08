@@ -20,6 +20,7 @@ import {
   type DestinationRow,
 } from '@/components/kolmari/dashboard-side-cards'
 import { DashboardWelcome } from '@/components/kolmari/dashboard-onboarding'
+import { DashboardFoodHealthCard } from '@/components/kolmari/dashboard-food-health'
 import { JourneyDrawer } from '@/components/kolmari/journey-drawer'
 import { DecisionWorkspaceStarter } from '@/components/kolmari/decision-workspace-starter'
 
@@ -123,6 +124,11 @@ export default async function DashboardPage() {
           </section>
 
           <DashboardPlanningAreasCard plan={plan} profileComplete={complete} dependents={profile.dependents} />
+
+          <DashboardFoodHealthCard
+            countrySlug={savedCountry?.slug ?? null}
+            countryName={savedCountry?.name ?? null}
+          />
 
           <div className="grid items-start gap-4 [grid-template-columns:repeat(auto-fit,minmax(252px,1fr))]">
             <DashboardDeadlinesCard plan={plan} today={today} />
