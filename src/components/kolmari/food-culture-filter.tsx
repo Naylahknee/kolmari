@@ -8,7 +8,6 @@ import {
   ARCHETYPE_LABELS,
   ARCHETYPE_DESCRIPTIONS,
   ALLERGEN_LABELS,
-  PREVALENCE_LABELS,
   archetypeMatchCount,
   allergenFlagCount,
   type FoodArchetype,
@@ -16,6 +15,7 @@ import {
   type CountryFoodCulture,
 } from '@/lib/food-culture/types'
 import { COUNTRY_FOOD_CULTURE } from '@/lib/food-culture/data'
+import { CountryFoodFitCard } from './country-food-fit-card'
 
 /* Food & Health Fit filter (the reusable explorer).
  *
@@ -131,120 +131,11 @@ export function FoodCultureFilter({
         <ul className="grid gap-4 sm:grid-cols-2">
           {ranked.map((c) => (
             <li key={c.countrySlug}>
-              <FoodCultureCard country={c} name={c.name} selected={selected} flagged={flagged} />
+              <CountryFoodFitCard country={c} name={c.name} selected={selected} flagged={flagged} />
             </li>
           ))}
         </ul>
       )}
-    </div>
-  )
-}
-
-export function FoodCultureCard({
-  country,
-  name,
-  selected = [],
-  flagged = [],
-}: {
-  country: CountryFoodCulture
-  name: string
-  selected?: FoodArchetype[]
-  flagged?: TrackedAllergen[]
-}) {
-  const matches = archetypeMatchCount(country, selected)
-  const flags = allergenFlagCount(country, flagged)
-
-  return (
-    <div className="flex h-full flex-col rounded-card border border-neutral-200 bg-white p-5 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
-        <h3 className="text-base font-bold text-navy-deep">{name}</h3>
-        <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
-          {selected.length > 0 && (
-            <span className="rounded-field bg-gold-soft px-2 py-0.5 text-[11px] font-bold text-gold-deep">
-              {matches}/{selected.length} match
-            </span>
-          )}
-          {flags > 0 && (
-            <span className="rounded-field bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-800">
-              ⚑ {flags} flagged
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Archetypes */}
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        {country.archetypes.map((a) => {
-          const on = selected.includes(a)
-          return (
-            <span
-              key={a}
-              className={`rounded-field px-2 py-0.5 text-[11px] font-semibold ${
-                on ? 'bg-navy-deep text-white' : 'bg-neutral-100 text-neutral-600'
-              }`}
-            >
-              {ARCHETYPE_LABELS[a]}
-            </span>
-          )
-        })}
-      </div>
-
-      {/* Allergen prevalence */}
-      <div className="mt-3">
-        <p className="text-[11px] font-bold uppercase tracking-wide text-neutral-400">Allergens in everyday food</p>
-        <div className="mt-1.5 flex flex-wrap gap-1.5">
-          {TRACKED_ALLERGENS.map((a) => {
-            const prev = country.allergenPrevalence[a]
-            const isFlagged = flagged.includes(a) && prev === 'common'
-            return (
-              <span
-                key={a}
-                className={`rounded-field border px-2 py-0.5 text-[11px] ${
-                  isFlagged
-                    ? 'border-amber-400 bg-amber-50 font-bold text-amber-800'
-                    : 'border-neutral-200 bg-white text-neutral-600'
-                }`}
-                title={`${ALLERGEN_LABELS[a]}: ${PREVALENCE_LABELS[prev]}`}
-              >
-                {ALLERGEN_LABELS[a]}: {PREVALENCE_LABELS[prev]}
-              </span>
-            )
-          })}
-        </div>
-      </div>
-
-      {country.cardioNote && (
-        <p className="mt-3 text-xs leading-5 text-neutral-600">
-          <span className="font-semibold text-navy-deep">Heart-health note. </span>
-          {country.cardioNote}
-        </p>
-      )}
-
-      <div className="mt-3 rounded-field bg-neutral-50 p-3">
-        <p className="text-[11px] font-bold uppercase tracking-wide text-neutral-400">Allergen labeling</p>
-        <p className="mt-1 text-xs leading-5 text-neutral-600">
-          {country.labelingLaw}
-          {country.sourceUrl && (
-            <>
-              {' '}
-              <a
-                href={country.sourceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold text-gold-deep underline"
-              >
-                Source
-              </a>
-            </>
-          )}
-        </p>
-      </div>
-
-      {/* Editorial disclosure — kept on every card. */}
-      <p className="mt-3 border-t border-neutral-100 pt-2 text-[10px] text-neutral-400">
-        Kolmari editorial assessment · last reviewed {country.lastReviewed}. Verify allergen and labeling details with
-        official sources before relying on them for a move.
-      </p>
     </div>
   )
 }

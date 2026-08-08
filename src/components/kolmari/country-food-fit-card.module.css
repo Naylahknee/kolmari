@@ -1,0 +1,80 @@
+/* CountryFoodFitCard — scoped micro-animations.
+ *
+ * Everything is fully visible by default (SSR and prefers-reduced-motion), so the
+ * card is never hidden without JS. Animations only apply when the `animate` class
+ * is present (added on the client after mount) AND the user hasn't asked to reduce
+ * motion. Stagger delays are passed per element via the `--d` custom property. */
+
+.root {
+  will-change: auto;
+}
+
+/* Reveal: fade + rise once, staggered. Default = final state. */
+.reveal {
+  opacity: 1;
+  transform: none;
+}
+
+/* Segmented match indicator. Default = filled (no animation). */
+.seg {
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+/* Smooth disclosure via grid-rows (0fr -> 1fr). */
+.disclosure {
+  display: grid;
+  grid-template-rows: 0fr;
+}
+.disclosure[data-open='true'] {
+  grid-template-rows: 1fr;
+}
+.disclosureInner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .animate .reveal {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  .animate[data-visible='true'] .reveal {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.45s ease,
+      transform 0.45s ease;
+    transition-delay: var(--d, 0ms);
+  }
+
+  .animate .seg {
+    transform: scaleX(0);
+  }
+  .animate[data-visible='true'] .seg {
+    transform: scaleX(1);
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--d, 0ms);
+  }
+
+  .disclosure {
+    transition: grid-template-rows 0.28s ease;
+  }
+
+  .chip {
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.15s ease,
+      border-color 0.15s ease;
+  }
+  .chip:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px -14px rgba(16, 34, 68, 0.55);
+  }
+
+  .tap {
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease;
+  }
+}
