@@ -157,6 +157,14 @@ export function Sidebar() {
           <Icon><circle cx="12" cy="12" r="9" /><path d="M15.5 8.5l-2 5-5 2 2-5z" /></Icon>
           <span className="lbl">Astrocartography</span>
         </Link>
+        <Link className={`sb-item${active('/food-fit') ? ' active' : ''}`} href="/food-fit">
+          <Icon><path d="M3 11h18a9 9 0 01-18 0z" /><path d="M12 3c1.4 1 1.4 3 0 4" /></Icon>
+          <span className="lbl">{PRODUCT_COPY.foodFit}</span>
+        </Link>
+        <Link className={`sb-item${active('/energy') ? ' active' : ''}`} href="/energy">
+          <Icon><path d="M13 2L3 14h7l-1 8 10-12h-7z" /></Icon>
+          <span className="lbl">{PRODUCT_COPY.energyPortal}</span>
+        </Link>
 
         {/* Profile pinned below the content nav, visually separate. */}
         <div className="mt-3 border-t border-line pt-3">

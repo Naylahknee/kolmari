@@ -10,6 +10,8 @@ export const PRODUCT_COPY = {
   kolmariKlub: 'Kolmari Club',
   costCalculator: 'Cost Calculator',
   greenbook: 'Greenbook',
+  foodFit: 'Food & Health',
+  energyPortal: '8/8 Energy Portal',
   settings: 'Settings',
   matchScore: 'Match Score',
   communityFit: 'Community Fit',

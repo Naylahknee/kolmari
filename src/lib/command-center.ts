@@ -2,6 +2,8 @@ import 'server-only'
 
 import { getSql } from './db'
 import { CC_CATEGORIES, type CCCategory, type CCBoard } from './command-center-model'
+import { rankNextinations } from './userProfile'
+import type { RelocationProfile } from './profile'
 
 export { CC_CATEGORIES, isCategory, categoryProgress, destinationProgress, householdProgress } from './command-center-model'
 export type { CCCategory, CCBoard, CCDestination, CCItem, CCNote, CCMember, CCMemberNote } from './command-center-model'
@@ -233,4 +235,38 @@ export async function upsertMemberNote(userId: number, memberId: string, destina
     INSERT INTO cc_member_note (id, member_id, destination_id, body, updated_at)
     VALUES (${newId()}, ${memberId}, ${destinationId}, ${body}, NOW())
     ON CONFLICT (member_id, destination_id) DO UPDATE SET body = EXCLUDED.body, updated_at = NOW()`
+}
+
+// Generic household member names derived from the profile's household shape.
+// Names only — no invented ages or needs (keeps with "prompts, not facts").
+function householdMemberNames(profile: RelocationProfile): string[] {
+  const names = ['You']
+  if (profile.spouse === true) names.push('Partner')
+  const dependents = Math.max(0, Math.min(8, profile.dependents ?? 0))
+  for (let i = 1; i <= dependents; i += 1) names.push(`Child ${i}`)
+  const cap = profile.family_size && profile.family_size > 0 ? Math.min(12, profile.family_size) : names.length
+  return names.slice(0, Math.max(1, cap))
+}
+
+/**
+ * Seed a brand-new user's Command Center once, at profile-wizard completion.
+ * Seeds the user's top real matched destinations (each auto-gets the generic
+ * default checklist) and generic household-member rows. Idempotent: does
+ * nothing if the board already has any destination, so a wizard retake never
+ * duplicates. Best-effort — callers must not let a seed failure block the save.
+ */
+export async function seedCommandCenterFromProfile(userId: number, profile: RelocationProfile): Promise<void> {
+  const board = await getBoard(userId)
+  if (board.destinations.length > 0) return
+
+  const ranked = rankNextinations(profile).slice(0, 3)
+  for (const { country } of ranked) {
+    await addDestination(userId, country.name)
+  }
+
+  if (ranked.length > 0) {
+    for (const name of householdMemberNames(profile)) {
+      await addMember(userId, name, null, '')
+    }
+  }
 }
