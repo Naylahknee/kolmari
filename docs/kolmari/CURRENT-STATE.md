@@ -236,3 +236,25 @@ auto-generated — page content and figures are never fabricated.
 - **Removed stray `/app.html`.** A 2.4 MB root-level copy of the demo's built SPA
   bundle (byte-identical to `kolmari-demo/public/app.html`), unrelated to
   `src/app/` and referenced by nothing in the repo. Deleted.
+
+## Command Center (multi-destination household board)
+
+A persistent, editable comparison board — distinct from the single-destination
+Kolmari Plan + 8-stage Tracker (orthogonal axes: lifecycle vs topic×destination).
+Translated from the demo's D1 prototype to Neon + real per-user auth.
+
+- **Data** — `src/lib/command-center.ts` (server-only; `ensureTables()` + CRUD,
+  all scoped to `user_id`) with the client-safe model (types, 5 categories,
+  progress helpers) split into `src/lib/command-center-model.ts` to avoid the RSC
+  server-only footgun. Tables `cc_destination`, `cc_checklist_item`, `cc_note`,
+  `cc_member`, `cc_member_note` (mirror in `db/migrations/006_command_center.sql`).
+- **API** — `GET /api/command-center` (full board) and a single same-origin-guarded
+  `POST /api/command-center/mutate` dispatcher that returns the fresh board.
+- **UI** — `/command-center` page + `CommandCenterBoard` client component:
+  destination switcher, 5 category cards (work/visa/schools/safety/community) each
+  with a checklist (toggle/add/delete) + notes, a household member panel with
+  per-member per-destination fit notes, and per-category/destination/household
+  progress bars. Honest empty state ("Add your first destination").
+- **Nav** — added under the sidebar "Plan" group.
+- New destinations seed a generic default checklist (planning prompts, not country
+  facts); nothing here fabricates Match Scores, eligibility, or country data.

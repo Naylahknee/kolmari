@@ -113,6 +113,10 @@ export function Sidebar() {
         )}
 
         <p className="sb-label" data-onboarding="plan-nav">Plan</p>
+        <Link className={`sb-item${active('/command-center') ? ' active' : ''}`} href="/command-center">
+          <Icon><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></Icon>
+          <span className="lbl">Command Center</span>
+        </Link>
         <Link className={`sb-item${active('/pathways') ? ' active' : ''}`} href="/pathways">
           <Icon><circle cx="6" cy="6" r="2.5" /><circle cx="18" cy="18" r="2.5" /><path d="M8.5 6H15a3 3 0 010 6H9a3 3 0 000 6h6.5" /></Icon>
           <span className="lbl">{PRODUCT_COPY.pathways}</span>
