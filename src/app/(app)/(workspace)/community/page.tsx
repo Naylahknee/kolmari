@@ -4,7 +4,7 @@ import { KlubHeader } from '@/components/community/klub-header'
 import { KolmariClub } from '@/components/kolmari/kolmari-club'
 import { requireCurrentUser } from '@/lib/auth'
 import { COUNTRIES } from '@/lib/countries'
-import { getNexitPlan } from '@/lib/kolmari-plan'
+import { getKolmariPlan } from '@/lib/kolmari-plan'
 import { getProfile, hasCompletedProfile } from '@/lib/profile'
 import { rankNextinations } from '@/lib/userProfile'
 
@@ -15,7 +15,7 @@ const relatedActions = [
 
 export default async function CommunityPage() {
   const user = await requireCurrentUser()
-  const [plan, profile] = await Promise.all([getNexitPlan(user.id), getProfile(user.id)])
+  const [plan, profile] = await Promise.all([getKolmariPlan(user.id), getProfile(user.id)])
 
   // Every member is in the Welcome group; a country group opens for each
   // destination the user matches (no manual joining, no dropdown).

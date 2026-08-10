@@ -124,7 +124,7 @@
 
 | Term | Location | Reason |
 | --- | --- | --- |
-| `nexit_plans` | DB table | Database field — requires separate DB migration |
+| `kolmari_plans` | DB table | Database field — requires separate DB migration |
 | `nexit_session` | Cookie | Auth system — must not be renamed without full auth migration |
 | `TOKEN_ISSUER = 'nexit'` | auth-constants.ts | JWT issuer — must not be renamed without full auth migration |
 | `NexitPlan` type | kolmari-plan.ts | Internal type used by API + plan pages |

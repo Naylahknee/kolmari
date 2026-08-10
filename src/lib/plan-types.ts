@@ -102,7 +102,7 @@ export function defaultBudget(): BudgetLine[] {
   }))
 }
 
-export type NexitPlan = {
+export type KolmariPlan = {
   user_id: number
   saved_nextination: string | null
   destination_city: string | null
@@ -120,7 +120,7 @@ export type NexitPlan = {
   updated_at: string | null
 }
 
-export function emptyNexitPlan(userId: number): NexitPlan {
+export function emptyKolmariPlan(userId: number): KolmariPlan {
   return {
     user_id: userId, saved_nextination: null, destination_city: null, selected_pathway: null,
     target_move_date: null, household_members: null, journey_stage: 1, timeline_stage: 'Explore',
@@ -239,8 +239,8 @@ export function normalizeBudget(value: unknown): BudgetLine[] {
   return defaultBudget()
 }
 
-export function normalizePlan(row: NexitPlan): NexitPlan {
-  const base = emptyNexitPlan(row.user_id)
+export function normalizePlan(row: KolmariPlan): KolmariPlan {
+  const base = emptyKolmariPlan(row.user_id)
   const journeyStage = normalizeJourneyStage(row.journey_stage, row.timeline_stage)
   return {
     ...base,
@@ -258,7 +258,7 @@ export function normalizePlan(row: NexitPlan): NexitPlan {
 
 export const READINESS_LABELS = ['Destination chosen', 'Pathway selected', 'Target date set', 'Checklist started', 'Budget entered', 'Documents listed'] as const
 
-export function readinessChecks(plan: NexitPlan): boolean[] {
+export function readinessChecks(plan: KolmariPlan): boolean[] {
   return [
     Boolean(plan.saved_nextination),
     Boolean(plan.selected_pathway),
@@ -273,42 +273,42 @@ export function readinessChecks(plan: NexitPlan): boolean[] {
 export function budgetEffective(line: BudgetLine): number | null {
   return line.userOverride ?? line.systemBaseline
 }
-export function budgetStageTotal(plan: NexitPlan, stage: BudgetStage): number | null {
+export function budgetStageTotal(plan: KolmariPlan, stage: BudgetStage): number | null {
   const vals = plan.budget.filter((l) => l.chronologicalStage === stage).map(budgetEffective).filter((v): v is number => v !== null)
   return vals.length ? vals.reduce((a, b) => a + b, 0) : null
 }
-export function budgetTotal(plan: NexitPlan): number | null {
+export function budgetTotal(plan: KolmariPlan): number | null {
   const vals = plan.budget.map(budgetEffective).filter((v): v is number => v !== null)
   return vals.length ? vals.reduce((a, b) => a + b, 0) : null
 }
-export function upfrontTotal(plan: NexitPlan): number | null { return budgetStageTotal(plan, 'ONE_TIME') }
-export function monthlyTotal(plan: NexitPlan): number | null { return budgetStageTotal(plan, 'MONTHLY_RECURRING') }
-export function budgetEnteredCount(plan: NexitPlan): number {
+export function upfrontTotal(plan: KolmariPlan): number | null { return budgetStageTotal(plan, 'ONE_TIME') }
+export function monthlyTotal(plan: KolmariPlan): number | null { return budgetStageTotal(plan, 'MONTHLY_RECURRING') }
+export function budgetEnteredCount(plan: KolmariPlan): number {
   return plan.budget.filter((l) => budgetEffective(l) !== null).length
 }
-export function budgetCustomizedCount(plan: NexitPlan): number {
+export function budgetCustomizedCount(plan: KolmariPlan): number {
   return plan.budget.filter((l) => l.isCustom).length
 }
 
 // --- Document derivations ---
 export type DocCounts = { MISSING: number; UPLOADED: number; TRANSLATED: number; APOSTILLED: number; APPROVED: number; total: number }
-export function docCounts(plan: NexitPlan): DocCounts {
+export function docCounts(plan: KolmariPlan): DocCounts {
   const counts: DocCounts = { MISSING: 0, UPLOADED: 0, TRANSLATED: 0, APOSTILLED: 0, APPROVED: 0, total: plan.documents.length }
   for (const doc of plan.documents) counts[doc.status] += 1
   return counts
 }
 /** Percent of documents that are past MISSING (any progress made). */
-export function docProgress(plan: NexitPlan): number | null {
+export function docProgress(plan: KolmariPlan): number | null {
   if (!plan.documents.length) return null
   const c = docCounts(plan)
   return Math.round(((c.total - c.MISSING) / c.total) * 100)
 }
-export function docReadyCount(plan: NexitPlan): number {
+export function docReadyCount(plan: KolmariPlan): number {
   return plan.documents.filter((d) => d.status === 'APPROVED').length
 }
 
 /** Current step in the Collect → Apostille → Translate → Compile → Submit workflow (least-advanced document). */
-export function documentStep(plan: NexitPlan): { index: number; name: DocStep } | null {
+export function documentStep(plan: KolmariPlan): { index: number; name: DocStep } | null {
   const docs = plan.documents
   if (!docs.length) return null
   const index = Math.min(...docs.map((d) => DOC_STATUS_STEP[d.status]))
@@ -316,7 +316,7 @@ export function documentStep(plan: NexitPlan): { index: number; name: DocStep } 
 }
 
 export type Deadline = { label: string; date: string; kind: 'document' | 'task' }
-export function upcomingDeadlines(plan: NexitPlan): Deadline[] {
+export function upcomingDeadlines(plan: KolmariPlan): Deadline[] {
   const items: Deadline[] = []
   for (const d of plan.documents) if (d.expirationDate && d.status !== 'APPROVED') items.push({ label: d.name, date: d.expirationDate, kind: 'document' })
   for (const c of plan.checklist) if (c.due && !c.done) items.push({ label: c.text, date: c.due, kind: 'task' })
@@ -324,7 +324,7 @@ export function upcomingDeadlines(plan: NexitPlan): Deadline[] {
 }
 
 export type ProcessingBuckets = { apostille: number; translation: number }
-export function processingBuckets(plan: NexitPlan): ProcessingBuckets {
+export function processingBuckets(plan: KolmariPlan): ProcessingBuckets {
   return {
     apostille: plan.documents.filter((d) => d.status === 'UPLOADED').length,
     translation: plan.documents.filter((d) => d.status === 'TRANSLATED').length,
@@ -355,7 +355,7 @@ export type JourneyStageRow = {
 
 /**
  * Display labels for the journey tracker. The stored stage values in
- * nexit_plans.timeline_stage are unchanged — this maps them to the shorter
+ * kolmari_plans.timeline_stage are unchanged — this maps them to the shorter
  * names the tracker shows, so no database migration is involved.
  */
 export const JOURNEY_STAGE_LABELS: Record<PlanStage, string> = {
@@ -386,7 +386,7 @@ function stageMeta(state: JourneyStageState, total: number, done: number, blocke
  * already passed. `today` is supplied by the caller so the server renders the
  * same result the client hydrates.
  */
-export function journeyStages(plan: NexitPlan | null, today: Date): JourneyStageRow[] {
+export function journeyStages(plan: KolmariPlan | null, today: Date): JourneyStageRow[] {
   const current = plan?.journey_stage ?? 1
   return PLAN_STAGES.map((stage, i) => {
     const index = i + 1
@@ -435,7 +435,7 @@ export type NextAction = {
   tab: 'overview' | 'checklist' | 'documents' | 'budget'
   caughtUp: boolean
 }
-export function nextBestAction(plan: NexitPlan): NextAction {
+export function nextBestAction(plan: KolmariPlan): NextAction {
   const deadlines = upcomingDeadlines(plan)
   if (deadlines.length) {
     const top = deadlines[0]

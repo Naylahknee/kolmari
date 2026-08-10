@@ -1,7 +1,7 @@
 -- Command Center — multi-destination household planning board.
 -- Mirrors the runtime ensureTables() in src/lib/command-center.ts for
 -- `npm run db:migrate` parity. Scoped to the signed-in user (user_id); distinct
--- from the single-destination nexit_plans + 8-stage Tracker.
+-- from the single-destination kolmari_plans + 8-stage Tracker.
 
 CREATE TABLE IF NOT EXISTS cc_destination (
   id         TEXT PRIMARY KEY,

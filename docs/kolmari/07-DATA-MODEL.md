@@ -6,7 +6,7 @@
 |---|---|---|
 | `users` | `id`, `email`, `password_hash` | Do not rename |
 | `profiles` | `user_id`, `wizard_status`, 28+ fields | Do not rename fields |
-| `nexit_plans` | `user_id`, `timeline_stage`, `checklist`, `budget`, `documents` | Do not rename table |
+| `kolmari_plans` | `user_id`, `timeline_stage`, `checklist`, `budget`, `documents` | Do not rename table |
 
 ## Persistent keys (must not be casually renamed)
 
@@ -44,7 +44,7 @@ When real data does not exist, display a clear empty state.
 
 ## Budget compatibility
 
-`nexit_plans.budget` remains JSONB and uses the existing line-item array. Each line may include:
+`kolmari_plans.budget` remains JSONB and uses the existing line-item array. Each line may include:
 
 - `systemBaseline` and `systemBaselineKey` for an explicitly identified planning reference;
 - `userOverride` and `isCustom` for the user's aggregate category value;

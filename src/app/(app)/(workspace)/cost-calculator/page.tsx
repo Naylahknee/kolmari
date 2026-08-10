@@ -1,7 +1,7 @@
 import { CostCalculator } from '@/components/kolmari/cost-calculator'
 import { PlusGate } from '@/components/kolmari/plus-gate'
 import { requireCurrentUser } from '@/lib/auth'
-import { emptyNexitPlan, getNexitPlan } from '@/lib/kolmari-plan'
+import { emptyKolmariPlan, getKolmariPlan } from '@/lib/kolmari-plan'
 import { getProfile, isPaid } from '@/lib/profile'
 
 export default async function CostCalculatorPage() {
@@ -24,11 +24,11 @@ export default async function CostCalculatorPage() {
     )
   }
 
-  const existingPlan = await getNexitPlan(user.id)
+  const existingPlan = await getKolmariPlan(user.id)
 
   return (
     <CostCalculator
-      initialPlan={existingPlan ?? emptyNexitPlan(user.id)}
+      initialPlan={existingPlan ?? emptyKolmariPlan(user.id)}
       income={profile.wizard_status === 'completed' ? profile.monthly_income : null}
       profileComplete={profile.wizard_status === 'completed'}
       profileHousehold={profile.wizard_status === 'completed' ? profile.family_size : null}

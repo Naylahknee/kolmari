@@ -26,7 +26,7 @@ export type CountryBaseline = {
 const MONTHLY_KEYS: readonly string[] = ['housing', 'food', 'transport', 'healthcare', 'other']
 const ONE_TIME_KEYS: readonly string[] = ['visa', 'deposits', 'flights', 'logistics']
 
-// Keyed by destination country name (matches NexitPlan.saved_nextination). Each
+// Keyed by destination country name (matches KolmariPlan.saved_nextination). Each
 // scored country has one benchmark city; the city and its source are named in
 // every `sources` string. Figures are Standard-tier, per single adult.
 //

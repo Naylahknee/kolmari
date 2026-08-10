@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 import { Wordmark } from '@/components/kolmari/wordmark'
 import { countryFlag } from '@/lib/countries'
-import { NEXIT_LEXICON } from '@/lib/lexicon'
+import { KOLMARI_LEXICON } from '@/lib/lexicon'
 import { authHref } from '@/lib/navigation'
 import { getSeoPage, SEO_PAGES } from '@/lib/seoContent'
 import { absoluteUrl } from '@/lib/site'
@@ -148,9 +148,9 @@ export default async function SeoPageRoute({ params }: Props) {
                   <h3 className="mt-4 text-2xl font-extrabold">{item.country}</h3>
                 </div>
                 <dl className="space-y-4 p-6 text-sm">
-                  <div><dt className="font-bold text-muted">{NEXIT_LEXICON.matchScore}</dt><dd className="mt-1 font-extrabold">{item.matchScore}% planning signal</dd></div>
-                  <div><dt className="font-bold text-muted">{NEXIT_LEXICON.pathways}</dt><dd className="mt-1 font-extrabold">{item.pathways}</dd></div>
-                  <div><dt className="font-bold text-muted">{NEXIT_LEXICON.communityFit}</dt><dd className="mt-1 font-extrabold">{item.communityFit}</dd></div>
+                  <div><dt className="font-bold text-muted">{KOLMARI_LEXICON.matchScore}</dt><dd className="mt-1 font-extrabold">{item.matchScore}% planning signal</dd></div>
+                  <div><dt className="font-bold text-muted">{KOLMARI_LEXICON.pathways}</dt><dd className="mt-1 font-extrabold">{item.pathways}</dd></div>
+                  <div><dt className="font-bold text-muted">{KOLMARI_LEXICON.communityFit}</dt><dd className="mt-1 font-extrabold">{item.communityFit}</dd></div>
                 </dl>
                 <Link href={item.href} className="mx-6 mb-6 inline-flex items-center gap-2 text-sm font-extrabold text-gold-deep">Explore This Destination<ArrowRight size={15} /></Link>
               </article>
@@ -166,7 +166,7 @@ export default async function SeoPageRoute({ params }: Props) {
         </section>
 
         <section aria-labelledby="pathways-heading">
-          <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.18em] text-gold-deep"><Route size={17} />{NEXIT_LEXICON.pathways}</p>
+          <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.18em] text-gold-deep"><Route size={17} />{KOLMARI_LEXICON.pathways}</p>
           <h2 id="pathways-heading" className="mt-3 font-display text-3xl font-bold sm:text-4xl">Review your Pathways</h2>
           <div className="mt-7 grid gap-4 md:grid-cols-2">
             {page.pathways.map((item) => (
@@ -179,11 +179,11 @@ export default async function SeoPageRoute({ params }: Props) {
         </section>
 
         <section aria-labelledby="greenbook-heading" className="overflow-hidden rounded-[24px] bg-teal-deep p-6 text-white sm:p-9">
-          <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.18em] text-teal-soft"><BookOpenText size={17} />{NEXIT_LEXICON.greenbookInsights}</p>
+          <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.18em] text-teal-soft"><BookOpenText size={17} />{KOLMARI_LEXICON.greenbookInsights}</p>
           <h2 id="greenbook-heading" className="mt-3 font-display text-3xl font-bold sm:text-4xl">Community context before commitment</h2>
           <div className="mt-7 grid gap-5 lg:grid-cols-[.7fr_1.3fr]">
             <dl className="rounded-[18px] bg-white p-6 text-navy">
-              <div><dt className="text-xs font-bold text-muted">{NEXIT_LEXICON.communityFit}</dt><dd className="mt-1 text-xl font-extrabold">{page.greenbook.communityFit}</dd></div>
+              <div><dt className="text-xs font-bold text-muted">{KOLMARI_LEXICON.communityFit}</dt><dd className="mt-1 text-xl font-extrabold">{page.greenbook.communityFit}</dd></div>
               <div className="mt-5"><dt className="text-xs font-bold text-muted">Best areas to research</dt><dd className="mt-1 font-bold">{page.greenbook.bestAreas.join(', ')}</dd></div>
               <div className="mt-5"><dt className="text-xs font-bold text-muted">Watch areas</dt><dd className="mt-1 font-bold">{page.greenbook.watchAreas.join(', ')}</dd></div>
             </dl>

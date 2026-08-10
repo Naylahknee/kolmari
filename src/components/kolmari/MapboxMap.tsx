@@ -4,10 +4,10 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import mapboxgl from 'mapbox-gl'
 import { ArrowRight, KeyRound, MapPinned } from 'lucide-react'
-import type { NexitRegion, RegionSlug } from '@/lib/regionData'
+import type { KolmariRegion, RegionSlug } from '@/lib/regionData'
 
 type MapboxMapProps = {
-  regions: NexitRegion[]
+  regions: KolmariRegion[]
   activeSlug: RegionSlug
 }
 
@@ -49,22 +49,22 @@ export function MapboxMap({ regions, activeSlug }: MapboxMapProps) {
     const markers = regions.map((region) => {
       const markerButton = document.createElement('button')
       markerButton.type = 'button'
-      markerButton.className = 'nexit-map-marker'
+      markerButton.className = 'kolmari-map-marker'
       markerButton.dataset.active = String(region.slug === activeSlug)
       markerButton.setAttribute('aria-label', `Explore ${region.name}`)
 
       const dot = document.createElement('span')
-      dot.className = 'nexit-map-marker__dot'
+      dot.className = 'kolmari-map-marker__dot'
       dot.setAttribute('aria-hidden', 'true')
 
       const label = document.createElement('span')
-      label.className = 'nexit-map-marker__label'
+      label.className = 'kolmari-map-marker__label'
       label.textContent = region.shortName
 
       markerButton.append(dot, label)
       markerButton.addEventListener('click', () => router.push(`/destinations/regions/${region.slug}`))
 
-      const popup = new mapboxgl.Popup({ closeButton: false, offset: 22, className: 'nexit-map-popup' })
+      const popup = new mapboxgl.Popup({ closeButton: false, offset: 22, className: 'kolmari-map-popup' })
         .setText(`${region.name}: ${region.eyebrow}`)
 
       return new mapboxgl.Marker({ element: markerButton, anchor: 'bottom' })
@@ -110,7 +110,7 @@ export function MapboxMap({ regions, activeSlug }: MapboxMapProps) {
 
   return (
     <div className="relative min-h-[520px] overflow-hidden rounded-[22px] bg-[#dce8f4]">
-      <div ref={containerRef} className="absolute inset-0" aria-label="Interactive map of Nexitnation regions" />
+      <div ref={containerRef} className="absolute inset-0" aria-label="Interactive map of Kolmari regions" />
       <div className="pointer-events-none absolute left-4 top-4 max-w-56 rounded-xl bg-navy-deep/90 p-3 text-xs leading-5 text-white shadow-xl backdrop-blur">
         Select a gold marker to open its regional plan.
       </div>

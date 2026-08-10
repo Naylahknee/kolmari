@@ -14,17 +14,17 @@ export type CountryCityOverview = {
 }
 
 const summaries: Record<string, string> = {
-  'lisbon-portugal': 'Portugal’s primary city in the current Nexit country overview and cost research.',
-  'porto-portugal': 'Included in Nexit’s verified Portugal relocation-place dataset for city comparison.',
-  'madeira-portugal': 'Included in Nexit’s Portugal relocation-place dataset for island-city research.',
-  'barcelona-spain': 'Spain’s primary city in the current Nexit country overview and cost research.',
-  'valencia-spain': 'Included in Nexit’s verified Spain relocation-place dataset for city comparison.',
-  'madrid-spain': 'Included in Nexit’s verified Spain relocation-place dataset for city comparison.',
-  'athens-greece': 'Greece’s current city record in the Nexit relocation-place dataset.',
-  'tallinn-estonia': 'Estonia’s current city record in the Nexit relocation-place dataset.',
-  'playa-del-carmen-mexico': 'Mexico’s primary city in the current Nexit country overview.',
-  'mexico-city-mexico': 'Included in Nexit’s verified Mexico relocation-place dataset for city comparison.',
-  'merida-mexico': 'Included in Nexit’s verified Mexico relocation-place dataset for city comparison.',
+  'lisbon-portugal': 'Portugal’s primary city in the current Kolmari country overview and cost research.',
+  'porto-portugal': 'Included in Kolmari’s verified Portugal relocation-place dataset for city comparison.',
+  'madeira-portugal': 'Included in Kolmari’s Portugal relocation-place dataset for island-city research.',
+  'barcelona-spain': 'Spain’s primary city in the current Kolmari country overview and cost research.',
+  'valencia-spain': 'Included in Kolmari’s verified Spain relocation-place dataset for city comparison.',
+  'madrid-spain': 'Included in Kolmari’s verified Spain relocation-place dataset for city comparison.',
+  'athens-greece': 'Greece’s current city record in the Kolmari relocation-place dataset.',
+  'tallinn-estonia': 'Estonia’s current city record in the Kolmari relocation-place dataset.',
+  'playa-del-carmen-mexico': 'Mexico’s primary city in the current Kolmari country overview.',
+  'mexico-city-mexico': 'Included in Kolmari’s verified Mexico relocation-place dataset for city comparison.',
+  'merida-mexico': 'Included in Kolmari’s verified Mexico relocation-place dataset for city comparison.',
 }
 
 const countrySlugByName: Record<string, string> = {

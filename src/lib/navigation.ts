@@ -4,8 +4,8 @@ export function safeNextPath(value: string | string[] | undefined, fallback = '/
   if (/[\\\u0000-\u001f\u007f]/.test(candidate)) return fallback
 
   try {
-    const url = new URL(candidate, 'https://nexit.local')
-    if (url.origin !== 'https://nexit.local') return fallback
+    const url = new URL(candidate, 'https://kolmari.local')
+    if (url.origin !== 'https://kolmari.local') return fallback
     return `${url.pathname}${url.search}${url.hash}`
   } catch {
     return fallback

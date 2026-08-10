@@ -5,16 +5,16 @@
 export const BRAND_ASSETS = {
   // Wordmark
   wordmark: '/brand/KolmariWordMark.svg',
-  wordmarkFallback: '/brand/NexitWordMark.svg', // compat until new wordmark is delivered
+  wordmarkFallback: '/brand/KolmariWordMark.svg', // compat until new wordmark is delivered
 
   // Butterfly — primary visual symbol
   butterfly: '/brand/kolmari-butterfly.png',
 
   // App icons
-  appIcon: '/brand/nexit-app-icon.png', // replaced when Kolmari icon delivered
+  appIcon: '/brand/kolmari-app-icon.png', // replaced when Kolmari icon delivered
 
   // Favicons
-  faviconSvg: '/brand/faviconNexit.svg',
+  faviconSvg: '/brand/faviconKolmari.svg',
   favicon32: '/brand/favicon-32.png',
   favicon16: '/brand/favicon-16.png',
   faviconIco: '/brand/favicon.ico',

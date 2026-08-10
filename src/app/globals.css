@@ -488,7 +488,7 @@ textarea:focus-visible {
   .k-journey-collapse { display: none; }
 }
 
-.nexit-map-marker {
+.kolmari-map-marker {
   display: flex;
   min-width: 36px;
   flex-direction: column;
@@ -499,7 +499,7 @@ textarea:focus-visible {
   cursor: pointer;
 }
 
-.nexit-map-marker__dot {
+.kolmari-map-marker__dot {
   display: block;
   width: 22px;
   height: 22px;
@@ -510,7 +510,7 @@ textarea:focus-visible {
   transition: transform 160ms ease, background-color 160ms ease;
 }
 
-.nexit-map-marker__label {
+.kolmari-map-marker__label {
   margin-top: 4px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.94);
@@ -521,19 +521,19 @@ textarea:focus-visible {
   box-shadow: 0 8px 24px rgba(13, 27, 57, 0.16);
 }
 
-.nexit-map-marker:hover .nexit-map-marker__dot,
-.nexit-map-marker:focus-visible .nexit-map-marker__dot,
-.nexit-map-marker[data-active="true"] .nexit-map-marker__dot {
+.kolmari-map-marker:hover .kolmari-map-marker__dot,
+.kolmari-map-marker:focus-visible .kolmari-map-marker__dot,
+.kolmari-map-marker[data-active="true"] .kolmari-map-marker__dot {
   transform: scale(1.25);
   background: #17305b;
 }
 
-.nexit-map-marker[data-active="true"] .nexit-map-marker__label {
+.kolmari-map-marker[data-active="true"] .kolmari-map-marker__label {
   background: #17305b;
   color: #ffffff;
 }
 
-.nexit-map-popup .mapboxgl-popup-content {
+.kolmari-map-popup .mapboxgl-popup-content {
   max-width: 220px;
   border-radius: 12px;
   padding: 12px 14px;
@@ -548,12 +548,12 @@ textarea:focus-visible {
   border-radius: 12px !important;
 }
 
-.nexit-region { cursor: pointer; }
-.nexit-region-image { transform-box: fill-box; transform-origin: center; animation: nexit-region-drift 18s ease-in-out infinite alternate; }
-.nexit-region-outline { transition: filter 180ms ease, fill-opacity 180ms ease, stroke-width 180ms ease; }
-.nexit-region:hover .nexit-region-outline,
-.nexit-region:focus .nexit-region-outline { filter: drop-shadow(0 0 10px rgba(243, 197, 22, .9)); fill-opacity: .28; stroke-width: 5; }
-@keyframes nexit-region-drift { from { transform: scale(1.01) translateX(-.5%); } to { transform: scale(1.08) translateX(.5%); } }
+.kolmari-region { cursor: pointer; }
+.kolmari-region-image { transform-box: fill-box; transform-origin: center; animation: kolmari-region-drift 18s ease-in-out infinite alternate; }
+.kolmari-region-outline { transition: filter 180ms ease, fill-opacity 180ms ease, stroke-width 180ms ease; }
+.kolmari-region:hover .kolmari-region-outline,
+.kolmari-region:focus .kolmari-region-outline { filter: drop-shadow(0 0 10px rgba(243, 197, 22, .9)); fill-opacity: .28; stroke-width: 5; }
+@keyframes kolmari-region-drift { from { transform: scale(1.01) translateX(-.5%); } to { transform: scale(1.08) translateX(.5%); } }
 
 /* Keep workspace navigation scrollable without showing browser scrollbar chrome. */
 aside[aria-label="Workspace navigation"],

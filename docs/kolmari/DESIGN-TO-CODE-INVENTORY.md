@@ -332,7 +332,7 @@ TOOLS
 **File:** `src/app/(app)/(workspace)/nexit-plan/page.tsx`
 **Component:** `NexitPlanWorkspace` (`src/components/nexit/nexit-plan-workspace.tsx`)
 **Data sources:** `getProfile()`, `getNexitPlan()`, `COUNTRIES[]`, `PATHWAYS[]`
-**DB table:** `nexit_plans` — do not rename
+**DB table:** `kolmari_plans` — do not rename
 **Kolmari copy status:** ✅ Metadata uses "My Plan | Kolmari"
 
 ---
@@ -527,7 +527,7 @@ Alternative template layout (v2) with fewer tabs (8 sections), hero, sidebar, ta
 |---|---|---|
 | `users` | `id`, `email`, `password_hash` | Auth everywhere |
 | `profiles` | `user_id`, `wizard_status`, 28+ fields | Profile wizard, dashboard, pathways, regions |
-| `nexit_plans` | `user_id`, `timeline_stage`, `checklist`, `budget`, `documents`, etc. | My Plan, Flutter Mode, dashboard |
+| `kolmari_plans` | `user_id`, `timeline_stage`, `checklist`, `budget`, `documents`, etc. | My Plan, Flutter Mode, dashboard |
 
 ### Authentication
 
@@ -630,7 +630,7 @@ The following legacy terms were observed during inspection. They are classified 
 
 ### Database and API (must not rename)
 
-- `nexit_plans` table
+- `kolmari_plans` table
 - `nexit_session` cookie
 - `TOKEN_ISSUER = 'nexit'`
 

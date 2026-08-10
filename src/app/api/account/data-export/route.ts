@@ -1,6 +1,6 @@
 import { getRequestUser } from '@/lib/auth'
 import { getProfile } from '@/lib/profile'
-import { getNexitPlan } from '@/lib/kolmari-plan'
+import { getKolmariPlan } from '@/lib/kolmari-plan'
 import { getSql } from '@/lib/db'
 
 export async function POST(request: Request) {
@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     // This is a v1 best-effort export. Future versions may add more data categories.
     const [profile, plan] = await Promise.all([
       getProfile(user.id),
-      getNexitPlan(user.id),
+      getKolmariPlan(user.id),
     ])
 
     // Redact security-sensitive fields — never export password hashes or tokens.
@@ -25,19 +25,19 @@ export async function POST(request: Request) {
 
     const exportPayload = {
       exportedAt: new Date().toISOString(),
-      format: 'nexit-data-export-v1',
+      format: 'kolmari-data-export-v1',
       account: accountRow
         ? { email: accountRow.email }
         : null,
       profile: safeProfile,
-      nexitPlan: plan ?? null,
+      kolmariPlan: plan ?? null,
     }
 
     return new Response(JSON.stringify(exportPayload, null, 2), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Content-Disposition': 'attachment; filename="nexit-data-export.json"',
+        'Content-Disposition': 'attachment; filename="kolmari-data-export.json"',
       },
     })
   } catch (error) {

@@ -94,7 +94,7 @@ const budgetLineSchema = z.object({
   detailOverrides: z.record(z.string().max(64), z.number().min(0).max(100_000_000)).nullable().optional(),
 }).strict()
 
-export const nexitPlanUpdateSchema = z.object({
+export const kolmariPlanUpdateSchema = z.object({
   saved_nextination: z.string().trim().max(100).nullable().optional(),
   destination_city: z.string().trim().max(120).nullable().optional(),
   selected_pathway: z.string().trim().max(180).nullable().optional(),

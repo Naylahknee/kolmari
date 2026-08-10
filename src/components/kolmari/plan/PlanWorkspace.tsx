@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Download, Pencil, Printer, X } from 'lucide-react'
-import { LIFESTYLE_TIERS, budgetEffective, documentStep, formatMonthYear, journeyStageLabel, type LifestyleTier, type NexitPlan } from '@/lib/plan-types'
+import { LIFESTYLE_TIERS, budgetEffective, documentStep, formatMonthYear, journeyStageLabel, type LifestyleTier, type KolmariPlan } from '@/lib/plan-types'
 import { applyBaselines, baselinesDiffer } from '@/lib/budget-baselines'
 import { useLocalStorageState, useLocalStorageWorkspace } from '@/hooks/useLocalStorageWorkspace'
 import { PLAN_TABS, SaveChip, type PlanCtx, type SaveStatus, type TabId } from './shared'
@@ -29,7 +29,7 @@ function formatTime(date: Date): string {
   return `${h}:${m} ${ampm}`
 }
 
-function usePlanState(initial: NexitPlan) {
+function usePlanState(initial: KolmariPlan) {
   const [plan, setPlan] = useState(initial)
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
   const [savedAt, setSavedAt] = useState<Date | null>(null)
@@ -63,7 +63,7 @@ function usePlanState(initial: NexitPlan) {
     return () => { if (timer.current) clearTimeout(timer.current) }
   }, [plan, flush])
 
-  const update = useCallback(<K extends keyof NexitPlan>(key: K, value: NexitPlan[K]) => {
+  const update = useCallback(<K extends keyof KolmariPlan>(key: K, value: KolmariPlan[K]) => {
     dirty.current = true
     setPlan((current) => ({ ...current, [key]: value }))
   }, [])
@@ -95,7 +95,7 @@ function csvCell(value: string): string {
 }
 // Export the live plan to a CSV the browser downloads (module scope so
 // `document` is the global, not the shadowing documentStep() variable below).
-function exportPlanCsv(plan: NexitPlan) {
+function exportPlanCsv(plan: KolmariPlan) {
   const rows: string[][] = [['Section', 'Item', 'Detail']]
   rows.push(['Plan', 'Destination', plan.saved_nextination ?? ''])
   rows.push(['Plan', 'City', plan.destination_city ?? ''])
@@ -177,7 +177,7 @@ function PlanDetailsDialog({ ctx, tier, setTier, onClose }: { ctx: PlanCtx; tier
 }
 
 export function PlanWorkspace({ initial, nextinations, pathways, profileHousehold, profileMonthlyIncome, initialTab }: {
-  initial: NexitPlan
+  initial: KolmariPlan
   nextinations: string[]
   pathways: string[]
   profileHousehold: number | null
@@ -185,7 +185,7 @@ export function PlanWorkspace({ initial, nextinations, pathways, profileHousehol
   initialTab: TabId
 }) {
   const seededHousehold = initial.household_members ?? profileHousehold
-  const seeded: NexitPlan = {
+  const seeded: KolmariPlan = {
     ...initial,
     household_members: seededHousehold,
     budget: applyBudgetBenchmark(initial.budget, getBudgetBenchmark(initial.saved_nextination, seededHousehold)),

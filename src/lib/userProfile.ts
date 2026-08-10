@@ -4,9 +4,9 @@ import { getProfile, hasCompletedProfile, type PathwayGoal, type RelocationProfi
 import { REGION_SLUGS, type RegionSlug } from './destinations-data'
 import { evaluatePathways } from './pathways'
 import { COUNTRIES, type CountryDetail } from './countries'
-import { calculateNexitReadiness } from './readiness'
+import { calculateKolmariReadiness } from './readiness'
 
-export type NexitnationUserProfile = {
+export type KolmariUserProfile = {
   name: string
   regionMatches: Record<RegionSlug, number>
 }
@@ -38,20 +38,20 @@ export function calculateRegionMatches(profile: RelocationProfile): Record<Regio
   })) as Record<RegionSlug, number>
 }
 
-export function buildNexitnationProfile(profile: RelocationProfile, fallbackName: string): NexitnationUserProfile | null {
+export function buildKolmariProfile(profile: RelocationProfile, fallbackName: string): KolmariUserProfile | null {
   const regionMatches = calculateRegionMatches(profile)
   if (!regionMatches) return null
   return { name: profile.display_name || fallbackName, regionMatches }
 }
 
-export async function loadNexitnationProfile(userId: number, email: string) {
-  return buildNexitnationProfile(await getProfile(userId), email.split('@')[0])
+export async function loadKolmariProfile(userId: number, email: string) {
+  return buildKolmariProfile(await getProfile(userId), email.split('@')[0])
 }
 
 // Compatibility helper. Overall readiness remains unavailable until real
 // document and research completion inputs are implemented.
 export function calculateReadiness(profile: RelocationProfile): number | null {
-  return calculateNexitReadiness(profile).overall
+  return calculateKolmariReadiness(profile).overall
 }
 
 export type CountryMatch = { score: number; reasons: string[]; tradeoff: string }

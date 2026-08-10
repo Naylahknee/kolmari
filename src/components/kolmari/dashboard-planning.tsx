@@ -5,7 +5,7 @@ import {
   docCounts,
   formatShortDate,
   upcomingDeadlines,
-  type NexitPlan,
+  type KolmariPlan,
 } from '@/lib/plan-types'
 
 // ─── Progress by planning area ──────────────────────────────────────────
@@ -43,7 +43,7 @@ function ratio(done: number, total: number): Pick<Area, 'num' | 'pct' | 'tone'> 
   }
 }
 
-function budgetLineSet(plan: NexitPlan | null, category: string): boolean {
+function budgetLineSet(plan: KolmariPlan | null, category: string): boolean {
   const line = plan?.budget.find((l) => l.category === category)
   return line ? budgetEffective(line) !== null : false
 }
@@ -54,7 +54,7 @@ function flag(set: boolean, setNote: string, emptyNote: string): Pick<Area, 'num
     : { num: 'Not started', pct: 0, tone: 'empty', note: emptyNote }
 }
 
-function planningAreas(plan: NexitPlan | null, profileComplete: boolean, dependents: number | null): Area[] {
+function planningAreas(plan: KolmariPlan | null, profileComplete: boolean, dependents: number | null): Area[] {
   // Eligibility: the four setup facts that decide whether a route can be assessed.
   const eligibilityChecks = [
     profileComplete,
@@ -115,7 +115,7 @@ function planningAreas(plan: NexitPlan | null, profileComplete: boolean, depende
 }
 
 export function DashboardPlanningAreasCard({ plan, profileComplete, dependents }: {
-  plan: NexitPlan | null
+  plan: KolmariPlan | null
   profileComplete: boolean
   dependents: number | null
 }) {
@@ -173,7 +173,7 @@ function dayTone(days: number): Tag {
   return 'Watch'
 }
 
-function planningItems(plan: NexitPlan | null, today: Date): PlanningItem[] {
+function planningItems(plan: KolmariPlan | null, today: Date): PlanningItem[] {
   if (!plan) return []
   const midnight = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
   return upcomingDeadlines(plan).slice(0, 3).map((deadline) => {
@@ -189,7 +189,7 @@ function planningItems(plan: NexitPlan | null, today: Date): PlanningItem[] {
   })
 }
 
-export function DashboardDeadlinesCard({ plan, today }: { plan: NexitPlan | null; today: Date }) {
+export function DashboardDeadlinesCard({ plan, today }: { plan: KolmariPlan | null; today: Date }) {
   const items = planningItems(plan, today)
 
   return (

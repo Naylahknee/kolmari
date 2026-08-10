@@ -7,7 +7,7 @@ import { isSameOrigin } from '@/lib/security'
 
 const schema = z.object({
   // The user must type the exact phrase to confirm the destructive action.
-  confirmationPhrase: z.literal('DELETE MY NEXIT ACCOUNT'),
+  confirmationPhrase: z.literal('DELETE MY KOLMARI ACCOUNT'),
   currentPassword: z.string().min(1),
 }).strict()
 
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     const parsed = schema.safeParse(await request.json())
     if (!parsed.success) {
       return Response.json(
-        { error: 'Type DELETE MY NEXIT ACCOUNT exactly to confirm, and provide your current password.' },
+        { error: 'Type DELETE MY KOLMARI ACCOUNT exactly to confirm, and provide your current password.' },
         { status: 400 },
       )
     }

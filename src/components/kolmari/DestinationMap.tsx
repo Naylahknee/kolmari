@@ -24,9 +24,9 @@ export default function DestinationMap({ profile }: { profile: MapProfile }) {
         const image = imagePosition[region.slug]
         const [x, y] = REGION_MAP_LABELS[region.slug]
         const match = profile.matches?.[region.slug]
-        return <Link href={`/destinations/regions/${region.slug}`} key={region.slug} aria-label={`${region.name}, ${region.countryCount} countries`} className="nexit-region">
-          <image href={region.image} {...image} preserveAspectRatio="xMidYMid slice" clipPath={`url(#clip-${region.slug})`} className="nexit-region-image" />
-          <path d={REGION_MAP_SHAPES[region.slug]} fill="#0D1B39" fillOpacity=".48" stroke="#F3C516" strokeWidth="3" className="nexit-region-outline" />
+        return <Link href={`/destinations/regions/${region.slug}`} key={region.slug} aria-label={`${region.name}, ${region.countryCount} countries`} className="kolmari-region">
+          <image href={region.image} {...image} preserveAspectRatio="xMidYMid slice" clipPath={`url(#clip-${region.slug})`} className="kolmari-region-image" />
+          <path d={REGION_MAP_SHAPES[region.slug]} fill="#0D1B39" fillOpacity=".48" stroke="#F3C516" strokeWidth="3" className="kolmari-region-outline" />
           <text x={x} y={y} textAnchor="middle" fill="white" fontSize="18" fontWeight="800" className="pointer-events-none">{region.name}</text>
           <text x={x} y={y + 22} textAnchor="middle" fill="#D6DCE7" fontSize="11" className="pointer-events-none">{region.countryCount} countries</text>
           <text x={x} y={y + 40} textAnchor="middle" fill="#F3C516" fontSize="10" fontWeight="700" className="pointer-events-none">{profile.complete && match !== undefined ? `Match Score ${match}%` : 'Complete profile to see match'}</text>

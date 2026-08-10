@@ -91,19 +91,19 @@ shrink to the rail.
 
 Stage rows use the short display labels in `JOURNEY_STAGE_LABELS`
 (Discover, Fit check, Compare, Decide, Plan, Apply, Move, Settle). These are display-only —
-the values stored in `nexit_plans.timeline_stage` are unchanged, so no migration is involved.
+the values stored in `kolmari_plans.timeline_stage` are unchanged, so no migration is involved.
 My Plan still shows the stored names, which is a known inconsistency to resolve separately.
 
 **Data.** Every value in the tracker is derived from persisted plan data by
 `journeyStages()` and `journeyPercent()` in `src/lib/plan-types.ts`:
 
-- Stage position comes from `nexit_plans.journey_stage`.
+- Stage position comes from `kolmari_plans.journey_stage`.
 - Stage task lists come from the user's saved checklist items, grouped by `stage`.
 - A task is *blocked* only when it carries a real due date that has already passed.
 - Completion percent is fully-passed stages plus the share of the current stage's saved tasks
   that are done. A stage with no saved tasks reports that it has none — no filler tasks,
   no assumed partial credit.
-- The footer timestamp is `nexit_plans.updated_at`, formatted in UTC on the server, and reads
+- The footer timestamp is `kolmari_plans.updated_at`, formatted in UTC on the server, and reads
   "Not saved yet" when the plan has never been saved.
 
 **Validation.** `tsc --noEmit`, `eslint` (changed files), and `next build` all pass. Verified in
@@ -302,3 +302,28 @@ data-integrity rules forbid inventing planetary line positions — so the result
 panel shows an honest "being built" state and a "what your map will show"
 explainer, never a fabricated reading. Birth details live in component state only
 (not sent or persisted). Wiring a real ephemeris source is the follow-up.
+
+## Full Nexit → Kolmari rename
+
+Eliminated the legacy "Nexit" brand from the app — everything is Kolmari now.
+- **Identifiers** renamed across ~46 files: `NexitPlan`→`KolmariPlan`,
+  `getNexitPlan`/`saveNexitPlan`/`emptyNexitPlan`→`get/save/emptyKolmariPlan`,
+  `nexitPlanUpdateSchema`→`kolmariPlanUpdateSchema`, `NEXIT_LEXICON`→`KOLMARI_LEXICON`,
+  `NexitReadiness`→`KolmariReadiness`, `Nexitnation*` types → `Kolmari*`, CSS classes
+  `nexit-*`→`kolmari-*`, localStorage keys `nexit:*`→`kolmari:*`, and legacy URLs
+  (`nexit.local`, `nexit.madincrease.workers.dev` → `kolmari.*`).
+- **Legacy routes removed**: `/nexit-plan` and `/nexitnation` (redirect stubs) and
+  `/nexitnation/[region]` — superseded by `/my-plan`, `/destinations`, and
+  `/destinations/regions/[region]`. SEO/nav/robots references repointed.
+- **DB table** `kolmari_plans` → `kolmari_plans`, with a guarded one-time rename in
+  `ensurePlanTable()` (`ALTER TABLE ... RENAME` only when the legacy table exists
+  and the new one doesn't) so existing user plans are preserved. This is the only
+  remaining reference to the old name, kept for data safety.
+- **Auth**: the session cookie (`nexit_session`→`kolmari_session`) and JWT
+  issuer/audience were renamed. **Consequence:** existing sessions become invalid,
+  so everyone (including the owner) must sign in again once after this deploys.
+- Removed the unrecognized root `KOLMARI_CHATGPT_SHELL_MASTER_SPEC.md`.
+- Note: the "Nextination" spelling (e.g. the `saved_nextination` column, the
+  `/nextinations/` routes) is a separate portmanteau and was left untouched — its
+  cleanup would touch a live DB column and every country URL, so it's a separate
+  decision.

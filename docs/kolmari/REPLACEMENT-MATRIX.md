@@ -40,7 +40,7 @@ These must NOT be renamed without a dedicated migration phase.
 
 | Term | Location | Category | Migration note |
 | --- | --- | --- | --- |
-| `nexit_plans` | DB table `nexit_plans` | Database field | Requires DB migration assignment |
+| `kolmari_plans` | DB table `kolmari_plans` | Database field | Requires DB migration assignment |
 | `nexit_session` | Auth cookie | Persistent auth cookie | Requires full auth migration |
 | `TOKEN_ISSUER = 'nexit'` | `auth-constants.ts` | JWT claim | Requires auth migration |
 | `NexitPlan` | `kolmari-plan.ts` | TypeScript type | Internal — safe to rename later |

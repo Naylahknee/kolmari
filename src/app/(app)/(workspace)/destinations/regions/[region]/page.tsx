@@ -9,8 +9,8 @@ import { PassportIndexLink } from '@/components/kolmari/PassportIndexLink'
 import { requireCurrentUser } from '@/lib/auth'
 import { getProfile } from '@/lib/profile'
 import { calculateRegionMatches } from '@/lib/userProfile'
-import { NEXIT_LEXICON } from '@/lib/lexicon'
-import { isNexitnationRegion, regionList, regions } from '@/lib/destinations-data'
+import { KOLMARI_LEXICON } from '@/lib/lexicon'
+import { isKolmariRegion, regionList, regions } from '@/lib/destinations-data'
 
 type RegionPageProps = {
   params: Promise<{ region: string }>
@@ -24,7 +24,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: RegionPageProps): Promise<Metadata> {
   const { region: slug } = await params
-  const region = isNexitnationRegion(slug) ? regions[slug] : null
+  const region = isKolmariRegion(slug) ? regions[slug] : null
 
   if (!region) return { title: 'Destination Not Found | Kolmari' }
 
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: RegionPageProps): Promise<Met
 
 export default async function NextinationRegionPage({ params }: RegionPageProps) {
   const { region: slug } = await params
-  if (!isNexitnationRegion(slug)) notFound()
+  if (!isKolmariRegion(slug)) notFound()
 
   const user = await requireCurrentUser()
   const profile = await getProfile(user.id)
@@ -63,7 +63,7 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
         />
         <div className="absolute inset-0 bg-gradient-to-r from-navy-deep via-navy-deep/72 to-navy-deep/10" />
         <div className="relative z-10 flex min-h-[360px] max-w-2xl flex-col justify-end p-7 text-white sm:p-10">
-          <p className="text-sm font-extrabold uppercase tracking-[0.18em] text-gold">{NEXIT_LEXICON.regionTitle}</p>
+          <p className="text-sm font-extrabold uppercase tracking-[0.18em] text-gold">{KOLMARI_LEXICON.regionTitle}</p>
           <h1 className="mt-2 text-5xl font-bold">{region.name}</h1>
           <p className="mt-4 max-w-xl leading-7 text-white/80">{region.description}</p>
           <div className="mt-6 flex flex-wrap gap-2">
@@ -99,8 +99,8 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
                   </p>
                   {profileComplete && (country.pathway || country.communityFit || country.monthlyCost) ? (
                     <dl className="mt-4 space-y-2 text-sm">
-                      {country.pathway && <div><dt className="text-muted">{NEXIT_LEXICON.pathways}</dt><dd className="font-semibold text-navy">{country.pathway}</dd></div>}
-                      {country.communityFit && <div className="flex justify-between gap-3"><dt className="text-muted">{NEXIT_LEXICON.communityFit}</dt><dd className="font-semibold text-navy">{country.communityFit}</dd></div>}
+                      {country.pathway && <div><dt className="text-muted">{KOLMARI_LEXICON.pathways}</dt><dd className="font-semibold text-navy">{country.pathway}</dd></div>}
+                      {country.communityFit && <div className="flex justify-between gap-3"><dt className="text-muted">{KOLMARI_LEXICON.communityFit}</dt><dd className="font-semibold text-navy">{country.communityFit}</dd></div>}
                       {country.monthlyCost !== undefined && <div className="flex justify-between gap-3"><dt className="text-muted">Estimated cost</dt><dd className="font-semibold text-navy">${country.monthlyCost.toLocaleString()}/mo</dd></div>}
                     </dl>
                   ) : (
@@ -127,14 +127,14 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
 
       <section className="grid gap-6 pb-10 lg:grid-cols-2">
         <article className="rounded-card border border-line bg-white p-6 shadow-card">
-          <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">{NEXIT_LEXICON.pathways}</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">{KOLMARI_LEXICON.pathways}</p>
           <h2 className="mt-1 text-2xl font-bold text-navy">{matches ? 'Residency options matched to you' : 'Research residency options'}</h2>
           <p className="mt-3 text-muted">Review visa, residency, work, retirement, and study Pathways based on your Profile.</p>
           <Link href={matches ? '/pathways' : '/profile-wizard'} className="mt-5 inline-flex rounded-field bg-navy px-5 py-3 text-sm font-semibold text-white transition hover:bg-navy-deep">{matches ? 'View My Pathways' : 'Build My Kolmari Plan'}</Link>
         </article>
 
         <article className="rounded-card border border-line bg-white p-6 shadow-card">
-          <p className="text-xs font-bold uppercase tracking-widest text-teal-deep">{NEXIT_LEXICON.greenbookInsights}</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-teal-deep">{KOLMARI_LEXICON.greenbookInsights}</p>
           <h2 className="mt-1 text-2xl font-bold text-navy">Community context to research</h2>
           <p className="mt-3 text-muted">Review belonging signals, neighborhood questions, and practical context without treating editorial guidance as a safety guarantee.</p>
           <Link href="/countries" className="mt-5 inline-flex rounded-field border border-navy px-5 py-3 text-sm font-semibold text-navy transition hover:bg-canvas">Compare Community Fit</Link>
@@ -148,7 +148,7 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
       <section className="pb-6">
         <div className="rounded-card bg-navy-deep p-7 text-white sm:flex sm:items-center sm:justify-between sm:gap-8">
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-gold">Your {NEXIT_LEXICON.plan}</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-gold">Your {KOLMARI_LEXICON.plan}</p>
             <h2 className="mt-1 text-3xl font-bold">Save, compare, and build your relocation plan.</h2>
           </div>
           <Link href="/my-plan" className="gold-button mt-5 sm:mt-0">Enter Flutter Mode <ArrowRight size={16} /></Link>

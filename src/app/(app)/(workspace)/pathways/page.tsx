@@ -3,7 +3,7 @@ import { PathwaysResults } from '@/components/kolmari/pathways-results'
 import { PlusGate } from '@/components/kolmari/plus-gate'
 import { requireCurrentUser } from '@/lib/auth'
 import { getProfile, isPaid } from '@/lib/profile'
-import { docCounts, getNexitPlan } from '@/lib/kolmari-plan'
+import { docCounts, getKolmariPlan } from '@/lib/kolmari-plan'
 import { PATHWAYS } from '@/lib/pathways'
 
 export const metadata: Metadata = { title: 'Pathways | Kolmari', description: 'Compare official residency and visa Pathways using your Profile.' }
@@ -35,7 +35,7 @@ function PathwaysPreview() {
 
 export default async function PathwaysPage() {
   const user = await requireCurrentUser()
-  const [profile, plan] = await Promise.all([getProfile(user.id), getNexitPlan(user.id)])
+  const [profile, plan] = await Promise.all([getProfile(user.id), getKolmariPlan(user.id)])
 
   if (!isPaid(profile)) {
     return (

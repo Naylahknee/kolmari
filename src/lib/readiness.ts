@@ -6,7 +6,7 @@ export type ReadinessCategory = {
   detail: string
 }
 
-export type NexitReadiness = {
+export type KolmariReadiness = {
   overall: number | null
   profile: ReadinessCategory
   documents: ReadinessCategory
@@ -38,10 +38,10 @@ export function calculateProfileCompletion(profile: RelocationProfile) {
   return Math.round((complete / fields.length) * 100)
 }
 
-export function calculateNexitReadiness(
+export function calculateKolmariReadiness(
   profile: RelocationProfile,
   inputs: ReadinessInputs = {},
-): NexitReadiness {
+): KolmariReadiness {
   const profileScore = calculateProfileCompletion(profile)
   const documentScore = clampPercentage(inputs.documentCompletion)
   const researchScore = clampPercentage(inputs.researchCompletion)

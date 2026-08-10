@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { requireCurrentUser } from '@/lib/auth'
 import { getProfile, isPaid } from '@/lib/profile'
-import { daysUntil, formatShortDate, getNexitPlan, nextBestAction, type NexitPlan } from '@/lib/kolmari-plan'
+import { daysUntil, formatShortDate, getKolmariPlan, nextBestAction, type KolmariPlan } from '@/lib/kolmari-plan'
 import { COUNTRIES } from '@/lib/countries'
 import { rankNextinations } from '@/lib/userProfile'
 import { FlutterMode, type ProtocolItem } from '@/components/kolmari/flutter-mode'
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   description: 'The execution phase — work your requirements, track your application, and prepare to land.',
 }
 
-function protocolItems(plan: NexitPlan | null, today: Date): ProtocolItem[] {
+function protocolItems(plan: KolmariPlan | null, today: Date): ProtocolItem[] {
   if (!plan) return []
   return plan.checklist.slice(0, 6).map((item) => {
     const overdue = !item.done && item.due !== null && (daysUntil(item.due, today) ?? 0) < 0
@@ -27,7 +27,7 @@ function protocolItems(plan: NexitPlan | null, today: Date): ProtocolItem[] {
 
 export default async function FlutterModePage() {
   const user = await requireCurrentUser()
-  const [profile, plan] = await Promise.all([getProfile(user.id), getNexitPlan(user.id)])
+  const [profile, plan] = await Promise.all([getProfile(user.id), getKolmariPlan(user.id)])
   const ranked = profile.wizard_status === 'completed' ? rankNextinations(profile) : []
 
   if (!isPaid(profile)) {
