@@ -54,3 +54,6 @@ docs/Kolmari/COUNTRY-PAGE-TEMPLATE.md
 
 # Ephemeral Claude Code agent worktrees
 .claude/worktrees/
+
+# SLD runtime audit log (regenerated locally / in CI; never committed)
+.sld/audit.jsonl

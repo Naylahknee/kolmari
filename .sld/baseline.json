@@ -1,0 +1,3618 @@
+{
+  "version": 1,
+  "generatedAt": "2026-08-10T22:09:10.243Z",
+  "manifestVersion": 1,
+  "application": {
+    "name": "Kolmari",
+    "root": "."
+  },
+  "files": {
+    ".env.example": {
+      "hash": "7eda665f4f01186c",
+      "size": 199,
+      "tags": []
+    },
+    ".gitignore": {
+      "hash": "7a76c66440764a85",
+      "size": 724,
+      "tags": []
+    },
+    "AGENTS.md": {
+      "hash": "72bd6e932836e4d0",
+      "size": 3207,
+      "tags": []
+    },
+    "CLAUDE.md": {
+      "hash": "336cc4fbf19beaad",
+      "size": 11,
+      "tags": []
+    },
+    "DESIGN.md": {
+      "hash": "d143b923589b3475",
+      "size": 22835,
+      "tags": []
+    },
+    "MAPS.md": {
+      "hash": "f1aa78ab6bb29cdf",
+      "size": 1452,
+      "tags": []
+    },
+    "README.md": {
+      "hash": "2f3b6b68d088e7aa",
+      "size": 1765,
+      "tags": []
+    },
+    "db/migrations/000_init.sql": {
+      "hash": "de553bcba1c2a2d1",
+      "size": 744,
+      "tags": [
+        "data"
+      ]
+    },
+    "db/migrations/001_profiles.sql": {
+      "hash": "95a800bbdaf7d2dc",
+      "size": 798,
+      "tags": [
+        "data"
+      ]
+    },
+    "db/migrations/002_nullable_kolmari_profiles.sql": {
+      "hash": "662d09621f3a721b",
+      "size": 2383,
+      "tags": [
+        "data"
+      ]
+    },
+    "db/migrations/003_kolmari_plans.sql": {
+      "hash": "8f268b963f7ca949",
+      "size": 664,
+      "tags": [
+        "data"
+      ]
+    },
+    "db/migrations/004_profile_plan.sql": {
+      "hash": "23f5eda8d1d8c59b",
+      "size": 271,
+      "tags": [
+        "data"
+      ]
+    },
+    "db/migrations/005_plan_overhaul.sql": {
+      "hash": "6e51c108596beaba",
+      "size": 1334,
+      "tags": [
+        "data"
+      ]
+    },
+    "db/migrations/006_command_center.sql": {
+      "hash": "22c9ed49b4760888",
+      "size": 2195,
+      "tags": [
+        "data"
+      ]
+    },
+    "db/schema.sql": {
+      "hash": "fd2e3c4ccf62e95d",
+      "size": 1334,
+      "tags": [
+        "data"
+      ]
+    },
+    "design-reference/claude-design/Kolmari-App-Reference.html.html": {
+      "hash": "e73f894a67083b54",
+      "size": 2750086,
+      "tags": []
+    },
+    "docs/DEPLOY.md": {
+      "hash": "498c4814d0d5f917",
+      "size": 2343,
+      "tags": []
+    },
+    "docs/DESIGN-SYSTEM.md": {
+      "hash": "243997cb04bd9274",
+      "size": 6967,
+      "tags": []
+    },
+    "docs/Kolmari/COUNTRY-PAGE-TEMPLATE.md": {
+      "hash": "df36b60c22cf6cd7",
+      "size": 8611,
+      "tags": []
+    },
+    "docs/country-design-system.md": {
+      "hash": "5d5e94b84b979d79",
+      "size": 6177,
+      "tags": []
+    },
+    "docs/country-hero-generator.md": {
+      "hash": "6026263146f1b540",
+      "size": 6277,
+      "tags": []
+    },
+    "docs/kolmari/00-README.md": {
+      "hash": "4a6cf433595e4ab2",
+      "size": 2838,
+      "tags": []
+    },
+    "docs/kolmari/01-DESIGN.md": {
+      "hash": "36112998d0fda4b6",
+      "size": 2992,
+      "tags": []
+    },
+    "docs/kolmari/02-DESIGN-TOKENS.md": {
+      "hash": "35f68344012396b2",
+      "size": 1548,
+      "tags": []
+    },
+    "docs/kolmari/03-COMPONENTS.md": {
+      "hash": "415fb180e0839120",
+      "size": 1772,
+      "tags": []
+    },
+    "docs/kolmari/04-LAYOUTS.md": {
+      "hash": "e1b74c0a6dd48f67",
+      "size": 1482,
+      "tags": []
+    },
+    "docs/kolmari/05-PAGE-TEMPLATES.md": {
+      "hash": "e6c76246991889be",
+      "size": 4907,
+      "tags": []
+    },
+    "docs/kolmari/06-ADAPTIVE-WORKSPACE.md": {
+      "hash": "d36fabd8ca434ba5",
+      "size": 1160,
+      "tags": []
+    },
+    "docs/kolmari/07-DATA-MODEL.md": {
+      "hash": "065aaebfd927d1d5",
+      "size": 1918,
+      "tags": []
+    },
+    "docs/kolmari/08-CONTENT-STANDARDS.md": {
+      "hash": "b89700debedb87bf",
+      "size": 1383,
+      "tags": []
+    },
+    "docs/kolmari/09-IMPLEMENTATION-RULES.md": {
+      "hash": "e7ce5bbba20449d7",
+      "size": 1667,
+      "tags": []
+    },
+    "docs/kolmari/10-LLM-RULES.md": {
+      "hash": "a1dbbc4d9978ee78",
+      "size": 1473,
+      "tags": []
+    },
+    "docs/kolmari/11-KOLMARI-MAP.md": {
+      "hash": "eb7d6e2525509961",
+      "size": 8468,
+      "tags": []
+    },
+    "docs/kolmari/12-INTERACTION-DESIGN.md": {
+      "hash": "5fb5a429adbdc607",
+      "size": 23733,
+      "tags": []
+    },
+    "docs/kolmari/13-ACCOUNT-ADMINISTRATION.md": {
+      "hash": "f6147275e06d4ffe",
+      "size": 24229,
+      "tags": []
+    },
+    "docs/kolmari/CURRENT-STATE.md": {
+      "hash": "8d60382f86f27b38",
+      "size": 19874,
+      "tags": []
+    },
+    "docs/kolmari/DESIGN-TO-CODE-INVENTORY.md": {
+      "hash": "87c215db042d77b3",
+      "size": 39683,
+      "tags": []
+    },
+    "docs/kolmari/HTML-INTEGRATION.md": {
+      "hash": "7b749af02c9ad37d",
+      "size": 1372,
+      "tags": []
+    },
+    "docs/kolmari/hero-image-standard.md": {
+      "hash": "3f271690162b4736",
+      "size": 2504,
+      "tags": []
+    },
+    "eslint.config.mjs": {
+      "hash": "583a674d0a156eb1",
+      "size": 486,
+      "tags": []
+    },
+    "middleware.ts": {
+      "hash": "891e367e6e771557",
+      "size": 330,
+      "tags": []
+    },
+    "next-env.d.ts": {
+      "hash": "1862ac4bbbc5192d",
+      "size": 288,
+      "tags": []
+    },
+    "next.config.ts": {
+      "hash": "106306293e7e20c9",
+      "size": 1642,
+      "tags": []
+    },
+    "open-next.config.ts": {
+      "hash": "2a1a0ff92acb2550",
+      "size": 448,
+      "tags": []
+    },
+    "package-lock.json": {
+      "hash": "68a28a3ed5196868",
+      "size": 433084,
+      "tags": []
+    },
+    "package.json": {
+      "hash": "20e2c66b6b91751e",
+      "size": 1889,
+      "tags": []
+    },
+    "postcss.config.mjs": {
+      "hash": "dfac7ac2d86d326a",
+      "size": 94,
+      "tags": []
+    },
+    "public/_headers": {
+      "hash": "368a9495d7983900",
+      "size": 200,
+      "tags": []
+    },
+    "public/brand/README.md": {
+      "hash": "611a0562f83ab63b",
+      "size": 870,
+      "tags": []
+    },
+    "public/brand/favicon-16.png": {
+      "hash": "abbe2c4722de819b",
+      "size": 762,
+      "tags": []
+    },
+    "public/brand/favicon-32.png": {
+      "hash": "9fd7888802fddbe9",
+      "size": 1822,
+      "tags": []
+    },
+    "public/brand/favicon-48.png": {
+      "hash": "893725438c00d901",
+      "size": 3286,
+      "tags": []
+    },
+    "public/brand/favicon-512.png": {
+      "hash": "34dbedb1ca07507a",
+      "size": 209826,
+      "tags": []
+    },
+    "public/brand/favicon.ico": {
+      "hash": "32df05cc314430cf",
+      "size": 6150,
+      "tags": []
+    },
+    "public/data/README.md": {
+      "hash": "3d6bc4367d2e7f58",
+      "size": 632,
+      "tags": []
+    },
+    "public/data/continents.geojson": {
+      "hash": "bd487c349401ecc1",
+      "size": 219539,
+      "tags": []
+    },
+    "public/data/countries-110m.geojson": {
+      "hash": "6866c877d39cba9c",
+      "size": 838726,
+      "tags": []
+    },
+    "public/file.svg": {
+      "hash": "2b67812c325c199a",
+      "size": 391,
+      "tags": []
+    },
+    "public/flags-png/al.png": {
+      "hash": "bd791debe23d523a",
+      "size": 32524,
+      "tags": []
+    },
+    "public/flags-png/au.png": {
+      "hash": "38cde8cff3847428",
+      "size": 32584,
+      "tags": []
+    },
+    "public/flags-png/bg.png": {
+      "hash": "febe6db86946deab",
+      "size": 4798,
+      "tags": []
+    },
+    "public/flags-png/bz.png": {
+      "hash": "7cfafd5a3735dc6a",
+      "size": 193821,
+      "tags": []
+    },
+    "public/flags-png/ca.png": {
+      "hash": "328398be1ff3bd66",
+      "size": 17621,
+      "tags": []
+    },
+    "public/flags-png/cr.png": {
+      "hash": "873df85c7c9b41bc",
+      "size": 4916,
+      "tags": []
+    },
+    "public/flags-png/de.png": {
+      "hash": "a4de382b64f953cf",
+      "size": 4891,
+      "tags": []
+    },
+    "public/flags-png/ec.png": {
+      "hash": "624c654da493adf3",
+      "size": 138089,
+      "tags": []
+    },
+    "public/flags-png/ee.png": {
+      "hash": "9d6587d77df41040",
+      "size": 4892,
+      "tags": []
+    },
+    "public/flags-png/es.png": {
+      "hash": "b9d6731444c37c08",
+      "size": 77531,
+      "tags": []
+    },
+    "public/flags-png/fr.png": {
+      "hash": "8bd243c22490df4c",
+      "size": 8459,
+      "tags": []
+    },
+    "public/flags-png/gb.png": {
+      "hash": "95dc196fa91ce8aa",
+      "size": 32083,
+      "tags": []
+    },
+    "public/flags-png/ge.png": {
+      "hash": "af5b2d3db3473ac6",
+      "size": 16032,
+      "tags": []
+    },
+    "public/flags-png/gr.png": {
+      "hash": "e18600c8d2864cb1",
+      "size": 7572,
+      "tags": []
+    },
+    "public/flags-png/ie.png": {
+      "hash": "b6f99af996cde7d6",
+      "size": 8459,
+      "tags": []
+    },
+    "public/flags-png/il.png": {
+      "hash": "12fc8f5b59879c95",
+      "size": 16582,
+      "tags": []
+    },
+    "public/flags-png/it.png": {
+      "hash": "a8e71f92a1e411a4",
+      "size": 8467,
+      "tags": []
+    },
+    "public/flags-png/jp.png": {
+      "hash": "a5229927a3e655a9",
+      "size": 12806,
+      "tags": []
+    },
+    "public/flags-png/kh.png": {
+      "hash": "6d6d2d1bd3964dbc",
+      "size": 50610,
+      "tags": []
+    },
+    "public/flags-png/kr.png": {
+      "hash": "d368c268f8805dd5",
+      "size": 30667,
+      "tags": []
+    },
+    "public/flags-png/mt.png": {
+      "hash": "22c79c3c69e119d1",
+      "size": 41376,
+      "tags": []
+    },
+    "public/flags-png/mx.png": {
+      "hash": "eae8ec1657dc4e33",
+      "size": 85080,
+      "tags": []
+    },
+    "public/flags-png/nl.png": {
+      "hash": "ae1801fd107f9e3a",
+      "size": 4897,
+      "tags": []
+    },
+    "public/flags-png/nz.png": {
+      "hash": "016db2f93846d270",
+      "size": 29609,
+      "tags": []
+    },
+    "public/flags-png/pa.png": {
+      "hash": "1a641f43e7d8d0d9",
+      "size": 13617,
+      "tags": []
+    },
+    "public/flags-png/ph.png": {
+      "hash": "d7d4c2ee1b125378",
+      "size": 32992,
+      "tags": []
+    },
+    "public/flags-png/pt.png": {
+      "hash": "40586e2571b7ec40",
+      "size": 77117,
+      "tags": []
+    },
+    "public/flags-png/py.png": {
+      "hash": "bcb17c29975b9b4e",
+      "size": 39636,
+      "tags": []
+    },
+    "public/flags-png/ro.png": {
+      "hash": "d6c055fec5b3480a",
+      "size": 8465,
+      "tags": []
+    },
+    "public/flags-png/si.png": {
+      "hash": "fb2d55ffc6b16f6f",
+      "size": 17996,
+      "tags": []
+    },
+    "public/flags-png/th.png": {
+      "hash": "b703df18fa00fae1",
+      "size": 4811,
+      "tags": []
+    },
+    "public/flags-png/us.png": {
+      "hash": "79495a7a6e0fb954",
+      "size": 6034,
+      "tags": []
+    },
+    "public/flags-png/uy.png": {
+      "hash": "a59cb7cf44526057",
+      "size": 42115,
+      "tags": []
+    },
+    "public/flags/al.svg": {
+      "hash": "4ae4d2950f6a0852",
+      "size": 3126,
+      "tags": []
+    },
+    "public/flags/au.svg": {
+      "hash": "cbb2206c5e59a25d",
+      "size": 1296,
+      "tags": []
+    },
+    "public/flags/bg.svg": {
+      "hash": "b6d979fc96dc6b46",
+      "size": 225,
+      "tags": []
+    },
+    "public/flags/bz.svg": {
+      "hash": "9aef8f4ef9d86bf9",
+      "size": 42505,
+      "tags": []
+    },
+    "public/flags/ca.svg": {
+      "hash": "345ec9dac057e203",
+      "size": 625,
+      "tags": []
+    },
+    "public/flags/cr.svg": {
+      "hash": "4775ef01d28b8a88",
+      "size": 290,
+      "tags": []
+    },
+    "public/flags/de.svg": {
+      "hash": "efd480af5a154a76",
+      "size": 221,
+      "tags": []
+    },
+    "public/flags/ec.svg": {
+      "hash": "4472b0618e2f5e31",
+      "size": 28777,
+      "tags": []
+    },
+    "public/flags/ee.svg": {
+      "hash": "25642310e287fbdc",
+      "size": 225,
+      "tags": []
+    },
+    "public/flags/es.svg": {
+      "hash": "f9cfaff858e95f83",
+      "size": 80958,
+      "tags": []
+    },
+    "public/flags/fr.svg": {
+      "hash": "8cdacc8d79bcf210",
+      "size": 231,
+      "tags": []
+    },
+    "public/flags/gb.svg": {
+      "hash": "c8be1e7208798a4a",
+      "size": 504,
+      "tags": []
+    },
+    "public/flags/ge.svg": {
+      "hash": "0280a1279c3d1d77",
+      "size": 1313,
+      "tags": []
+    },
+    "public/flags/gr.svg": {
+      "hash": "a184070f7678b067",
+      "size": 868,
+      "tags": []
+    },
+    "public/flags/ie.svg": {
+      "hash": "f82568d70bd1624f",
+      "size": 289,
+      "tags": []
+    },
+    "public/flags/il.svg": {
+      "hash": "04a099ac4370b5e8",
+      "size": 834,
+      "tags": []
+    },
+    "public/flags/it.svg": {
+      "hash": "9fa88118818d9b64",
+      "size": 289,
+      "tags": []
+    },
+    "public/flags/jp.svg": {
+      "hash": "bfea80baf9989383",
+      "size": 470,
+      "tags": []
+    },
+    "public/flags/kh.svg": {
+      "hash": "21a9681682a2158c",
+      "size": 7122,
+      "tags": []
+    },
+    "public/flags/kr.svg": {
+      "hash": "7a6cd5b51d0e2841",
+      "size": 1061,
+      "tags": []
+    },
+    "public/flags/mt.svg": {
+      "hash": "a2ad157eeb5f1bb9",
+      "size": 13925,
+      "tags": []
+    },
+    "public/flags/mx.svg": {
+      "hash": "9dbc8ad8b35e52ce",
+      "size": 84753,
+      "tags": []
+    },
+    "public/flags/nl.svg": {
+      "hash": "8f691f17fe708945",
+      "size": 225,
+      "tags": []
+    },
+    "public/flags/nz.svg": {
+      "hash": "794a2c8c09796090",
+      "size": 2172,
+      "tags": []
+    },
+    "public/flags/pa.svg": {
+      "hash": "6181586e499d3baf",
+      "size": 744,
+      "tags": []
+    },
+    "public/flags/ph.svg": {
+      "hash": "c3bd5e08ddc5f6db",
+      "size": 1382,
+      "tags": []
+    },
+    "public/flags/pt.svg": {
+      "hash": "a7a2cf0b44aaaaf4",
+      "size": 8001,
+      "tags": []
+    },
+    "public/flags/py.svg": {
+      "hash": "fe0968470b791054",
+      "size": 16184,
+      "tags": []
+    },
+    "public/flags/ro.svg": {
+      "hash": "17a3a747fc5e6330",
+      "size": 302,
+      "tags": []
+    },
+    "public/flags/si.svg": {
+      "hash": "3a5e0cac44baaea6",
+      "size": 1993,
+      "tags": []
+    },
+    "public/flags/th.svg": {
+      "hash": "329cc0d520536d6e",
+      "size": 284,
+      "tags": []
+    },
+    "public/flags/us.svg": {
+      "hash": "e7be4240cf579879",
+      "size": 648,
+      "tags": []
+    },
+    "public/flags/uy.svg": {
+      "hash": "47656c0bf4961a1f",
+      "size": 1724,
+      "tags": []
+    },
+    "public/globe.svg": {
+      "hash": "b614b9bf18392595",
+      "size": 1035,
+      "tags": []
+    },
+    "public/icons/questions/action-plan.png": {
+      "hash": "f24c2231c909c81f",
+      "size": 945498,
+      "tags": []
+    },
+    "public/icons/questions/family-affordability.png": {
+      "hash": "a1e73c05254f2713",
+      "size": 939524,
+      "tags": []
+    },
+    "public/icons/questions/healthcare-schools.png": {
+      "hash": "64f055619e1edd07",
+      "size": 923688,
+      "tags": []
+    },
+    "public/icons/questions/moving-budget.png": {
+      "hash": "cde41c416210de8f",
+      "size": 955979,
+      "tags": []
+    },
+    "public/icons/questions/safety-welcome.png": {
+      "hash": "3ef9894cf2ce2a77",
+      "size": 1033570,
+      "tags": []
+    },
+    "public/icons/questions/visa-pathways.png": {
+      "hash": "297af0e491ff885f",
+      "size": 950103,
+      "tags": []
+    },
+    "public/images/airplane.png": {
+      "hash": "3cca6229b396be1b",
+      "size": 28848,
+      "tags": []
+    },
+    "public/images/countries/cantonments.jpg": {
+      "hash": "e52ad0537467fca5",
+      "size": 51998,
+      "tags": []
+    },
+    "public/images/countries/colombia/.gitkeep": {
+      "hash": "e3b0c44298fc1c14",
+      "size": 0,
+      "tags": []
+    },
+    "public/images/countries/columbia/medellin-hero.png": {
+      "hash": "7eb70257593da06f",
+      "size": 2,
+      "tags": []
+    },
+    "public/images/countries/estonia.webp": {
+      "hash": "dd144d6785655281",
+      "size": 24888,
+      "tags": []
+    },
+    "public/images/countries/ghana/accra-hero.png": {
+      "hash": "e656c0233db2c088",
+      "size": 3176259,
+      "tags": []
+    },
+    "public/images/countries/ghana/test": {
+      "hash": "01ba4719c80b6fe9",
+      "size": 1,
+      "tags": []
+    },
+    "public/images/countries/greece.webp": {
+      "hash": "bbfcec7dff23b0da",
+      "size": 25680,
+      "tags": []
+    },
+    "public/images/countries/mexico/.gitkeep": {
+      "hash": "e3b0c44298fc1c14",
+      "size": 0,
+      "tags": []
+    },
+    "public/images/countries/mexico/tulum-hero.png": {
+      "hash": "7eb70257593da06f",
+      "size": 2,
+      "tags": []
+    },
+    "public/images/countries/portugal.webp": {
+      "hash": "4d43c6eacacf81e8",
+      "size": 26288,
+      "tags": []
+    },
+    "public/images/countries/portugal/lisbon-hero.png": {
+      "hash": "262b717665c65ecc",
+      "size": 3073372,
+      "tags": []
+    },
+    "public/images/countries/portugal/portugal-flag-map.png": {
+      "hash": "07cd2cdecaa0d7e2",
+      "size": 3301982,
+      "tags": []
+    },
+    "public/images/countries/portugal/test": {
+      "hash": "01ba4719c80b6fe9",
+      "size": 1,
+      "tags": []
+    },
+    "public/images/countries/rwanda/.gitkeep": {
+      "hash": "e3b0c44298fc1c14",
+      "size": 0,
+      "tags": []
+    },
+    "public/images/countries/rwanda/kigali-hero.png": {
+      "hash": "7eb70257593da06f",
+      "size": 2,
+      "tags": []
+    },
+    "public/images/countries/spain.webp": {
+      "hash": "ad8dfb09c3a90ccd",
+      "size": 25658,
+      "tags": []
+    },
+    "public/images/dashboard-beach-banner.png": {
+      "hash": "62654998c1633a10",
+      "size": 2042583,
+      "tags": []
+    },
+    "public/images/footer-beach-ocean.png": {
+      "hash": "62654998c1633a10",
+      "size": 2042583,
+      "tags": []
+    },
+    "public/images/hero-airplane-window.png": {
+      "hash": "3d5be3397a5d1075",
+      "size": 1687006,
+      "tags": []
+    },
+    "public/images/journey-globe-pins.png": {
+      "hash": "e4dbddcdb9330dd2",
+      "size": 2062202,
+      "tags": []
+    },
+    "public/images/luggage-tropical-coast.png": {
+      "hash": "a0cfe0d1544d92c3",
+      "size": 2170502,
+      "tags": []
+    },
+    "public/images/passport-visa-documents.png": {
+      "hash": "10a889722e4a14bd",
+      "size": 2230639,
+      "tags": []
+    },
+    "public/images/regions/africa.webp": {
+      "hash": "8cea5e0db78b650d",
+      "size": 52960,
+      "tags": []
+    },
+    "public/images/regions/asia.webp": {
+      "hash": "d41b8e8bae420826",
+      "size": 82676,
+      "tags": []
+    },
+    "public/images/regions/europe.webp": {
+      "hash": "0228cd1c3305850d",
+      "size": 47998,
+      "tags": []
+    },
+    "public/images/regions/latin-america.webp": {
+      "hash": "90ee3150086d1bae",
+      "size": 39460,
+      "tags": []
+    },
+    "public/images/regions/north-america.webp": {
+      "hash": "b5df3d35d1260072",
+      "size": 60224,
+      "tags": []
+    },
+    "public/images/regions/oceania.webp": {
+      "hash": "7715c1a3c4a01e86",
+      "size": 39678,
+      "tags": []
+    },
+    "public/images/travel-route-pin.png": {
+      "hash": "c1a48de2fba55d82",
+      "size": 176298,
+      "tags": []
+    },
+    "public/mvp.html": {
+      "hash": "952aeb788ac5967a",
+      "size": 3010966,
+      "tags": []
+    },
+    "public/next.svg": {
+      "hash": "55995dfad6ecb494",
+      "size": 1375,
+      "tags": []
+    },
+    "public/og.png": {
+      "hash": "28d2606c3ec39c4e",
+      "size": 1763432,
+      "tags": []
+    },
+    "public/references/national-flag-shadow-hero.webp": {
+      "hash": "6590479eb5001cec",
+      "size": 220114,
+      "tags": []
+    },
+    "public/vercel.svg": {
+      "hash": "f081337b2fee635b",
+      "size": 128,
+      "tags": []
+    },
+    "public/window.svg": {
+      "hash": "644768c4aaeb4767",
+      "size": 385,
+      "tags": []
+    },
+    "scripts/generate-country-shapes.mjs": {
+      "hash": "ddac66c5a9c781eb",
+      "size": 2750,
+      "tags": []
+    },
+    "scripts/migrate.mjs": {
+      "hash": "fd3904f54a644258",
+      "size": 982,
+      "tags": []
+    },
+    "scripts/sld.mjs": {
+      "hash": "d5343cca9b6f5131",
+      "size": 9250,
+      "tags": []
+    },
+    "src/app/(app)/(workspace)/admin/page.tsx": {
+      "hash": "69fe1384a55f417e",
+      "size": 734,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/astrocartography/page.tsx": {
+      "hash": "125b7d6e1d5cef9b",
+      "size": 925,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/checklist/page.tsx": {
+      "hash": "ad3ae6c23f46be1f",
+      "size": 124,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/command-center/page.tsx": {
+      "hash": "ebb3dea3f48aa4d6",
+      "size": 587,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/community/page.tsx": {
+      "hash": "2ed7dca0c8b1ba9d",
+      "size": 2659,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/cost-calculator/page.tsx": {
+      "hash": "f77cddb69dfbac67",
+      "size": 1396,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/countries/[slug]/not-found.tsx": {
+      "hash": "3e6913f398f1a583",
+      "size": 397,
+      "tags": []
+    },
+    "src/app/(app)/(workspace)/countries/[slug]/page.tsx": {
+      "hash": "c7cee2ae18406838",
+      "size": 605,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/countries/page.tsx": {
+      "hash": "0d3d16bdb1bf0117",
+      "size": 381,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/dashboard/page.tsx": {
+      "hash": "b78476ee6df87a3e",
+      "size": 7408,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/destinations/page.tsx": {
+      "hash": "0eee1c3c4f9b3afb",
+      "size": 345,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/destinations/regions/[region]/page.tsx": {
+      "hash": "d3899095f65359a5",
+      "size": 9416,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/documents/page.tsx": {
+      "hash": "8e8b3ca1c9bc21d0",
+      "size": 147,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/energy/page.tsx": {
+      "hash": "e7eccbbf7b2c4793",
+      "size": 430,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/flutter/page.tsx": {
+      "hash": "95cccb4154581f21",
+      "size": 2230,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/food-fit/page.tsx": {
+      "hash": "93cb4437457990a5",
+      "size": 568,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/greenbook/page.tsx": {
+      "hash": "a275f1d53e260783",
+      "size": 2482,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/layout.tsx": {
+      "hash": "f58f0094cfb5c6d6",
+      "size": 703,
+      "tags": []
+    },
+    "src/app/(app)/(workspace)/my-plan/page.tsx": {
+      "hash": "4528179b50352f5e",
+      "size": 1654,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/nextinations/[countrySlug]/[section]/page.tsx": {
+      "hash": "b978adfc6fc09341",
+      "size": 1177,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/nextinations/[countrySlug]/page.tsx": {
+      "hash": "a5042d3404e5a38b",
+      "size": 617,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/nextinations/[countrySlug]/v2/[section]/page.tsx": {
+      "hash": "24c3c73d07f399e9",
+      "size": 9427,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/nextinations/[countrySlug]/v2/layout.tsx": {
+      "hash": "0bb50d6861ae92fe",
+      "size": 147,
+      "tags": []
+    },
+    "src/app/(app)/(workspace)/nextinations/[countrySlug]/v2/page.tsx": {
+      "hash": "4ed37ec8962d9436",
+      "size": 551,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/nextinations/page.tsx": {
+      "hash": "a30a2a0bba50a9f0",
+      "size": 701,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/passportindex/page.tsx": {
+      "hash": "413cceb80e16687c",
+      "size": 3227,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/pathways/page.tsx": {
+      "hash": "463645277048a556",
+      "size": 3024,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/saved/page.tsx": {
+      "hash": "6e90de0f2531642d",
+      "size": 546,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/settings/country-hero/page.tsx": {
+      "hash": "0db5a5588d39ca58",
+      "size": 46502,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/settings/page.tsx": {
+      "hash": "8915fd81aea27be1",
+      "size": 646,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/settings/privacy/page.tsx": {
+      "hash": "5d416c2c74286180",
+      "size": 266,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/visa-wizard/page.tsx": {
+      "hash": "794b440eb4be919c",
+      "size": 132,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/(workspace)/your-world/page.tsx": {
+      "hash": "e464db7b153394c5",
+      "size": 3390,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/layout.tsx": {
+      "hash": "b26038477b346949",
+      "size": 191,
+      "tags": []
+    },
+    "src/app/(app)/onboarding/page.tsx": {
+      "hash": "4fd7de51726cc0fc",
+      "size": 125,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/profile-wizard/page.tsx": {
+      "hash": "0b41133d7af80b7e",
+      "size": 319,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(app)/welcome/page.tsx": {
+      "hash": "e65ac6bcba2cf128",
+      "size": 2020,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(auth)/login/page.tsx": {
+      "hash": "5e0d67deb966280f",
+      "size": 605,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(auth)/signup/page.tsx": {
+      "hash": "97519474c9f9f7e2",
+      "size": 603,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(marketing)/[seoSlug]/page.tsx": {
+      "hash": "1a5c17ec64dfe963",
+      "size": 14053,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(marketing)/coming-soon/page.tsx": {
+      "hash": "bccb5345e82b8b6d",
+      "size": 2468,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(marketing)/page.tsx": {
+      "hash": "69c810d13a7c2193",
+      "size": 17550,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/(marketing)/quiz/page.tsx": {
+      "hash": "58fd14847a096f89",
+      "size": 10309,
+      "tags": [
+        "page"
+      ]
+    },
+    "src/app/api/account/change-password/route.ts": {
+      "hash": "eeca33cd98eccba8",
+      "size": 2003,
+      "tags": [
+        "api"
+      ]
+    },
+    "src/app/api/account/data-export/route.ts": {
+      "hash": "54b6e21d4d41ff9a",
+      "size": 1670,
+      "tags": [
+        "api"
+      ]
+    },
+    "src/app/api/account/deletion-request/route.ts": {
+      "hash": "cd1d08a00dc620f5",
+      "size": 2431,
+      "tags": [
+        "api"
+      ]
+    },
+    "src/app/api/account/sign-out-all/route.ts": {
+      "hash": "4bc76314c5c5e7ac",
+      "size": 874,
+      "tags": [
+        "api"
+      ]
+    },
+    "src/app/api/admin/announcement/route.ts": {
+      "hash": "85b9c76041e64669",
+      "size": 1445,
+      "tags": [
+        "api"
+      ]
+    },
+    "src/app/api/admin/country-asset/route.ts": {
+      "hash": "fd0e1b9d40079a27",
+      "size": 2698,
+      "tags": [
+        "api"
+      ]
+    },
+    "src/app/api/admin/country-hero/backfill/route.ts": {
+      "hash": "0c8a4aae64b37a44",
+      "size": 2783,
+      "tags": [
+        "api"
+      ]
+    },
+    "src/app/api/admin/country-hero/route.ts": {
+      "hash": "ccf3b5451c0a3e2b",
+      "size": 8134,
+      "tags": [
+        "api"
+      ]
+    },
+    "src/app/api/admin/users/plan/route.ts": {
+      "hash": "372ff3faf5843221",
+      "size": 1296,
+      "tags": [
+        "api"
+      ]
+    },
+    "src/app/api/announcement/route.ts": {
+      "hash": "32effa7b30dac31c",
+      "size": 371,
+      "tags": [
+        "api"
+      ]
+    },
+    "src/app/api/ask-kolmari/route.ts": {
+      "hash": "ae82286d29aa49c9",
+      "size": 7110,
+      "tags": [
+        "api"
+      ]
+    },
+    "src/app/api/club/route.ts": {
+      "hash": "1624273018db7ee9",
+      "size": 2162,
+      "tags": [
+        "api"
+      ]
+    },
+    "src/app/api/command-center/mutate/route.ts": {
+      "hash": "18ba47b0d57be261",
+      "size": 3534,
+      "tags": [
+        "api"
+      ]
+    },
+    "src/app/api/command-center/route.ts": {
+      "hash": "cdc45f6efa19a36b",
+      "size": 603,
+      "tags": [
+        "api"
+      ]
+    },
+    "src/app/api/countries/route.ts": {
+      "hash": "6faee5b19c9700c4",
+      "size": 804,
+      "tags": [
+        "api"
+      ]
+    },
+    "src/app/api/country-asset/route.ts": {
+      "hash": "22f8160591eeaea0",
+      "size": 1402,
+      "tags": [
+        "api"
+      ]
+    },
+    "src/app/api/internal/country-hero/ensure/route.ts": {
+      "hash": "4985c3f7b08947b9",
+      "size": 3295,
+      "tags": [
+        "api"
+      ]
+    },
+    "src/app/api/login/route.ts": {
+      "hash": "c11e9cb7a2f3d015",
+      "size": 4361,
+      "tags": [
+        "api"
+      ]
+    },
+    "src/app/api/logout/route.ts": {
+      "hash": "9080ccd7d21bf289",
+      "size": 524,
+      "tags": [
+        "api"
+      ]
+    },
+    "src/app/api/matches/route.ts": {
+      "hash": "4e4012e59cf8dadc",
+      "size": 811,
+      "tags": [
+        "api"
+      ]
+    },
+    "src/app/api/plan/route.ts": {
+      "hash": "3965eaca94579ba0",
+      "size": 1551,
+      "tags": [
+        "api"
+      ]
+    },
+    "src/app/api/profile/route.ts": {
+      "hash": "fea57b5d05741846",
+      "size": 1998,
+      "tags": [
+        "api"
+      ]
+    },
+    "src/app/api/sld/evaluate/route.ts": {
+      "hash": "03ee5983b590838f",
+      "size": 3695,
+      "tags": [
+        "api"
+      ]
+    },
+    "src/app/api/support/route.ts": {
+      "hash": "93ead057eb353f43",
+      "size": 1171,
+      "tags": [
+        "api"
+      ]
+    },
+    "src/app/apple-icon.png": {
+      "hash": "0fb9b066a961c5dd",
+      "size": 4618,
+      "tags": []
+    },
+    "src/app/globals.css": {
+      "hash": "06560edb6d3576e6",
+      "size": 18636,
+      "tags": []
+    },
+    "src/app/icon.png": {
+      "hash": "e3cf50c839d9524e",
+      "size": 20397,
+      "tags": []
+    },
+    "src/app/layout.tsx": {
+      "hash": "780bef0e710ed6da",
+      "size": 1657,
+      "tags": []
+    },
+    "src/app/manifest.ts": {
+      "hash": "b18d364ddcc48667",
+      "size": 616,
+      "tags": []
+    },
+    "src/app/robots.ts": {
+      "hash": "a40ac40b71f56391",
+      "size": 579,
+      "tags": []
+    },
+    "src/app/sidebar-scroll.css": {
+      "hash": "dd5e8339257fe0e3",
+      "size": 407,
+      "tags": []
+    },
+    "src/app/sitemap.ts": {
+      "hash": "7cbccd6e1ac6e77b",
+      "size": 524,
+      "tags": []
+    },
+    "src/components/community/klub-header.tsx": {
+      "hash": "43e4217899edb309",
+      "size": 1730,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/community/klub-tabs.tsx": {
+      "hash": "07a9a703bf894910",
+      "size": 2632,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-template/CityCardImage.tsx": {
+      "hash": "ebfa14838d1ef7cd",
+      "size": 1822,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-template/CountryHero.tsx": {
+      "hash": "2029a6a7e66ce5b4",
+      "size": 13190,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-template/CountryOutline.tsx": {
+      "hash": "2eb46be8875c9e89",
+      "size": 1344,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-template/CountryResearchShell.tsx": {
+      "hash": "0be0ded67b675ae5",
+      "size": 1077,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-template/CountryTemplate.tsx": {
+      "hash": "9f67c148ff0d2dd8",
+      "size": 2632,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-template/HeroAutoGenerate.tsx": {
+      "hash": "716cb66f4051167f",
+      "size": 1322,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-template/PersonalizedCountrySummary.tsx": {
+      "hash": "8b684a6877d59ef6",
+      "size": 4926,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-template/RightRail.tsx": {
+      "hash": "9ee66a5896a19f56",
+      "size": 9916,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-template/Sidebar.tsx": {
+      "hash": "80889e2243a0ed82",
+      "size": 11304,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-template/SimpleCountryView.tsx": {
+      "hash": "4f22dcdd227adffb",
+      "size": 9921,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-template/TabBar.tsx": {
+      "hash": "6619d6316e2b0df2",
+      "size": 2300,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-template/TopBar.tsx": {
+      "hash": "ef6289c6a8bd4c59",
+      "size": 7932,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-template/client/TaxEstimator.tsx": {
+      "hash": "a2a996fd1c0c1db0",
+      "size": 3145,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-template/client/UnitsControl.tsx": {
+      "hash": "b3f07e5442fee9f3",
+      "size": 2076,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-template/client/behaviours.ts": {
+      "hash": "6d3f5747e7f520d8",
+      "size": 1791,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-template/tabs/CostHousingTab.tsx": {
+      "hash": "c42b18603bbf1377",
+      "size": 60047,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-template/tabs/DataOverviewTab.tsx": {
+      "hash": "6bacdb48d7cf3b44",
+      "size": 8868,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-template/tabs/FamilySchoolsTab.tsx": {
+      "hash": "dc23d74a44f8e30e",
+      "size": 50229,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-template/tabs/HealthcareTab.tsx": {
+      "hash": "6578ec866e512239",
+      "size": 34096,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-template/tabs/LifestyleTab.tsx": {
+      "hash": "a8f2d25fc01a2874",
+      "size": 53027,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-template/tabs/MoveThereTab.tsx": {
+      "hash": "536edf4f390400de",
+      "size": 41794,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-template/tabs/OverviewTab.tsx": {
+      "hash": "caaad83693f86e67",
+      "size": 32532,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-template/tabs/TaxMoneyTab.tsx": {
+      "hash": "b08f8b58a03809ba",
+      "size": 35854,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-template/tabs/WorkStudyTab.tsx": {
+      "hash": "74d116c6878f655e",
+      "size": 57494,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-workspace/CityMapImage.tsx": {
+      "hash": "246f31723dc9b026",
+      "size": 1550,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-workspace/CountryOverviewEnhancements.tsx": {
+      "hash": "6fb9612135b3ae5d",
+      "size": 3164,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-workspace/CountrySnapshotMap.tsx": {
+      "hash": "433d64ebfd57375a",
+      "size": 5065,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-workspace/CountryWorkspace.tsx": {
+      "hash": "de0ea57340bf44a2",
+      "size": 27046,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-workspace/tabs/CompareTab.tsx": {
+      "hash": "521de034b3ea10a7",
+      "size": 6151,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-workspace/tabs/CostOfLivingTab.tsx": {
+      "hash": "053698a9b8e6f7a7",
+      "size": 5060,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-workspace/tabs/DailyLifeTab.tsx": {
+      "hash": "bcaaae6a49bb1c2e",
+      "size": 1935,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-workspace/tabs/EconomicProfileTab.tsx": {
+      "hash": "591c89abb783af7e",
+      "size": 4139,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-workspace/tabs/EducationTab.tsx": {
+      "hash": "61038ac37ffda7be",
+      "size": 3373,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-workspace/tabs/EmploymentTab.tsx": {
+      "hash": "2edb2a7411a24ddf",
+      "size": 3246,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-workspace/tabs/FamilyPetsTab.tsx": {
+      "hash": "4826506909616cc4",
+      "size": 2684,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-workspace/tabs/GreenbookTab.tsx": {
+      "hash": "339f9a4d0b889a83",
+      "size": 3716,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-workspace/tabs/HealthcareTab.tsx": {
+      "hash": "9c13b331288ef5a3",
+      "size": 3051,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-workspace/tabs/HousingTab.tsx": {
+      "hash": "fd5d9f1041aa2b09",
+      "size": 4071,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-workspace/tabs/LegalTaxesTab.tsx": {
+      "hash": "07a51c43740580cd",
+      "size": 2562,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-workspace/tabs/ResourcesTab.tsx": {
+      "hash": "4b93839a77959269",
+      "size": 3255,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-workspace/tabs/SourceFooter.tsx": {
+      "hash": "b6337d8f7d9c7679",
+      "size": 1430,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/country-workspace/tabs/TransportationTab.tsx": {
+      "hash": "20a6bb6216cc1975",
+      "size": 1976,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/CountryResearchPage.tsx": {
+      "hash": "ce5f8377fddf87ac",
+      "size": 3776,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/CountryShapePanel.tsx": {
+      "hash": "a5c41885de35c723",
+      "size": 1043,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/DestinationMap.tsx": {
+      "hash": "fd3084fd31aa8826",
+      "size": 3295,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/MapboxMap.tsx": {
+      "hash": "cb2a8e3849cd1289",
+      "size": 5083,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/PassportIndexLink.tsx": {
+      "hash": "733615a0e52b866c",
+      "size": 3065,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/account-tabs.tsx": {
+      "hash": "6f04dd2937116e21",
+      "size": 10707,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/admin/admin-client.tsx": {
+      "hash": "e6000a47fc601eb7",
+      "size": 9951,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/announcement-bar.tsx": {
+      "hash": "e52bb30de19643d5",
+      "size": 1243,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/astrocartography/astro-shell.tsx": {
+      "hash": "7f218069aa060f2a",
+      "size": 7399,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/auth-form.tsx": {
+      "hash": "b7c2c43fd0429cdf",
+      "size": 2909,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/auth-shell.tsx": {
+      "hash": "a9d6aedf188658c9",
+      "size": 2519,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/budget-benchmark-dialog.tsx": {
+      "hash": "74f591a40c1bbbe9",
+      "size": 10112,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/butterfly-mark.tsx": {
+      "hash": "c6e03ff21aa02a4d",
+      "size": 1816,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/command-center/board.tsx": {
+      "hash": "1d11f2e16b806869",
+      "size": 23050,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/cost-calculator.tsx": {
+      "hash": "d4213f15f14bf1fb",
+      "size": 19313,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/countries-browser.tsx": {
+      "hash": "a73dd7a34e386314",
+      "size": 7183,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/country-food-fit-card.module.css": {
+      "hash": "80d4269e1c76fb8e",
+      "size": 1822,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/country-food-fit-card.tsx": {
+      "hash": "2527708bc0a32bc6",
+      "size": 12033,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/dashboard-command-center.tsx": {
+      "hash": "3885e58ea0da28d4",
+      "size": 3370,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/dashboard-food-health.tsx": {
+      "hash": "35e8ce3c6202bd11",
+      "size": 4788,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/dashboard-onboarding.tsx": {
+      "hash": "26bcb1e651c3f474",
+      "size": 6373,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/dashboard-planning.tsx": {
+      "hash": "67a20e35f2f23639",
+      "size": 8389,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/dashboard-side-cards.tsx": {
+      "hash": "eed2c8d1895e89b4",
+      "size": 4748,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/decision-workspace-starter.tsx": {
+      "hash": "8fbb41d0da12a01d",
+      "size": 11386,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/destination-visa-planner.tsx": {
+      "hash": "80a0d85d66205042",
+      "size": 8095,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/destinations-browser.tsx": {
+      "hash": "3d8a3da004cfcb57",
+      "size": 16656,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/documents-manager.tsx": {
+      "hash": "c679fe1261a27d6f",
+      "size": 4958,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/energy/energy-portal.module.css": {
+      "hash": "a72db89cdec22b2a",
+      "size": 13310,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/energy/energy-portal.tsx": {
+      "hash": "ab190507de7deaf8",
+      "size": 38843,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/flutter-gate.tsx": {
+      "hash": "ab6a8688941e530f",
+      "size": 7154,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/flutter-mode.tsx": {
+      "hash": "9c35324c681c7d35",
+      "size": 13473,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/food-culture-filter.tsx": {
+      "hash": "f066af9831bedf99",
+      "size": 5764,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/greenbook-board.tsx": {
+      "hash": "953db81d5fadb8cb",
+      "size": 9454,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/journey-drawer.tsx": {
+      "hash": "87631d5b9dd938c8",
+      "size": 6157,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/kolmari-club.tsx": {
+      "hash": "eed1b375908fac66",
+      "size": 5632,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/landing-mini-experiences.tsx": {
+      "hash": "c5dd15e80243ac06",
+      "size": 23382,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/marketing-logo.tsx": {
+      "hash": "4471626da6eaad93",
+      "size": 1097,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/marketing-mobile-nav.tsx": {
+      "hash": "a6254413636bbbb0",
+      "size": 1861,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/pathways-results.tsx": {
+      "hash": "369273b5d8682365",
+      "size": 24280,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/plan/BudgetTab.tsx": {
+      "hash": "8b318cd6092ee09d",
+      "size": 16048,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/plan/ChecklistTab.tsx": {
+      "hash": "5310037fa02033ce",
+      "size": 12121,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/plan/DocumentsTab.tsx": {
+      "hash": "6f59147eaea4f22c",
+      "size": 17893,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/plan/NotesTab.tsx": {
+      "hash": "20b7c93b67c4a2a1",
+      "size": 6160,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/plan/OverviewTab.tsx": {
+      "hash": "28bf0d48dde6066c",
+      "size": 12066,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/plan/PlanHeaderLocator.tsx": {
+      "hash": "a8356c2bafae9c84",
+      "size": 877,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/plan/PlanWorkspace.tsx": {
+      "hash": "ffc8991e4b6477f5",
+      "size": 15942,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/plan/shared.tsx": {
+      "hash": "760ba4c1202611ea",
+      "size": 4687,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/plus-gate.tsx": {
+      "hash": "aec499a0899b7282",
+      "size": 2311,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/privacy-account-page.tsx": {
+      "hash": "ec4d34d4eb471a4a",
+      "size": 19097,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/profile-wizard.tsx": {
+      "hash": "418f3ccc7ed029c2",
+      "size": 14754,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/questions-section.tsx": {
+      "hash": "df07903159c0a54d",
+      "size": 4679,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/rings.tsx": {
+      "hash": "ba85d8e1ae012e41",
+      "size": 3338,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/saved-nextinations.tsx": {
+      "hash": "9aa61879ed05b024",
+      "size": 3976,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/use-saved-nextinations.ts": {
+      "hash": "98525795e0fc5504",
+      "size": 1189,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/welcome-actions.tsx": {
+      "hash": "c084e2ab58ea1ab7",
+      "size": 1651,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/wordmark.tsx": {
+      "hash": "43d502e16be6a273",
+      "size": 978,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/workspace-shell.tsx": {
+      "hash": "f0d187407648c4a4",
+      "size": 1941,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/world-match-map.tsx": {
+      "hash": "e7681343c5339c0d",
+      "size": 5725,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/world-stories.tsx": {
+      "hash": "7d82b2cb6aa4cd1a",
+      "size": 7322,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/your-world-gated.tsx": {
+      "hash": "10cd4da231303577",
+      "size": 7373,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/your-world-map.css": {
+      "hash": "05fd2f279b408e81",
+      "size": 3163,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/your-world-map.tsx": {
+      "hash": "c382ef0ee96820c5",
+      "size": 4062,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/your-world.tsx": {
+      "hash": "573864b4e0cfa985",
+      "size": 10664,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/layout/kolmari-app-shell.tsx": {
+      "hash": "64694867a29661bf",
+      "size": 638,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/config/brand-assets.ts": {
+      "hash": "ea61e09eef7c9d79",
+      "size": 1260,
+      "tags": []
+    },
+    "src/config/brand.ts": {
+      "hash": "11c2e6589d9e26d3",
+      "size": 269,
+      "tags": []
+    },
+    "src/config/product-copy.ts": {
+      "hash": "51f31a8d26fc0e44",
+      "size": 778,
+      "tags": []
+    },
+    "src/hooks/useLocalStorageWorkspace.ts": {
+      "hash": "9d445ebd7c4a3413",
+      "size": 3311,
+      "tags": []
+    },
+    "src/lib/admin-data.ts": {
+      "hash": "53e2eb6ba8e4fcb5",
+      "size": 4778,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/admin.ts": {
+      "hash": "9d4b0a75d3a55c61",
+      "size": 1387,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/auth-constants.ts": {
+      "hash": "5cfed6557d9559d2",
+      "size": 130,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/auth.ts": {
+      "hash": "f7941a05299c6f69",
+      "size": 2162,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/budget-baselines.ts": {
+      "hash": "953b59c4b235fe31",
+      "size": 8143,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/budget-benchmarks.ts": {
+      "hash": "aaf78ae23d934019",
+      "size": 6920,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/club.ts": {
+      "hash": "7df4fc1391862ef9",
+      "size": 1678,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/command-center-model.ts": {
+      "hash": "b11359137168f02f",
+      "size": 2103,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/command-center.ts": {
+      "hash": "1fdb5dd0b6bbb423",
+      "size": 13505,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/countries.ts": {
+      "hash": "17864bbf95e631b6",
+      "size": 5250,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/country-assets.ts": {
+      "hash": "52afa0afb0bfc62f",
+      "size": 5539,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/country-data.ts": {
+      "hash": "496b6e0cdc210a15",
+      "size": 7358,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/country-facts.ts": {
+      "hash": "bcd683ede13f2aa7",
+      "size": 2644,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/country-geo.ts": {
+      "hash": "4bdab6da3ca88b80",
+      "size": 1486,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/country-page/default-layout.ts": {
+      "hash": "4235468b369ff359",
+      "size": 2649,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/country-page/schema.ts": {
+      "hash": "2d5c6d1f8c718f14",
+      "size": 1729,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/country-shapes.ts": {
+      "hash": "19672a46c7e3b367",
+      "size": 35589,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/country-template/format.ts": {
+      "hash": "f99a5a737234955b",
+      "size": 779,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/country-template/tax.ts": {
+      "hash": "914e39c8d9cf8990",
+      "size": 1094,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/country-visuals/data.ts": {
+      "hash": "4857eef352571d6e",
+      "size": 5401,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/country-visuals/generate.ts": {
+      "hash": "622fc31ef2d46e54",
+      "size": 5655,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/country-visuals/prompt.ts": {
+      "hash": "30c96f7b1d5f6ee9",
+      "size": 7222,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/country-visuals/schema.ts": {
+      "hash": "ceda9b2bdbdc1296",
+      "size": 6880,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/country-workspace/country-cities.ts": {
+      "hash": "87c3c72ad1fae016",
+      "size": 2968,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/country-workspace/country-content.ts": {
+      "hash": "555283f8c2f49222",
+      "size": 127398,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/country-workspace/country-facts.ts": {
+      "hash": "d7a6d86c25be747d",
+      "size": 14367,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/country-workspace/country-tourism-media.ts": {
+      "hash": "13a861c4696c43df",
+      "size": 3135,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/country-workspace/tabs.ts": {
+      "hash": "dafdfb9b342a995d",
+      "size": 7429,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/db.ts": {
+      "hash": "9d98ff6bfc095c04",
+      "size": 313,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/decision-routing.ts": {
+      "hash": "1c5b25d3e6040b48",
+      "size": 2943,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/destinations-data.ts": {
+      "hash": "5cbdba54c301f2f3",
+      "size": 8171,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/energy/astro.ts": {
+      "hash": "23b6628aade085fe",
+      "size": 13366,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/energy/portal-state.ts": {
+      "hash": "aae10da96f298904",
+      "size": 5362,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/energy/scoring.ts": {
+      "hash": "ab8c65e8566730c3",
+      "size": 10614,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/flags.ts": {
+      "hash": "c900ed41008513e9",
+      "size": 291,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/flutter-plan.ts": {
+      "hash": "32279fb838f9d11c",
+      "size": 1871,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/food-culture/data.ts": {
+      "hash": "bd89ab177c5f7d1e",
+      "size": 12122,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/food-culture/types.ts": {
+      "hash": "dfce59063b430e23",
+      "size": 4845,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/greenbook.ts": {
+      "hash": "52efc8b686d5dac7",
+      "size": 8000,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/kolmari-copilot.ts": {
+      "hash": "eb394713bb6effbc",
+      "size": 630,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/kolmari-plan.ts": {
+      "hash": "10853177ec53ebbb",
+      "size": 5370,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/lexicon.ts": {
+      "hash": "2194c97c96bbde34",
+      "size": 1080,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/maps/country-locations.ts": {
+      "hash": "35dfd4a70efd5118",
+      "size": 1271,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/navigation.ts": {
+      "hash": "e07b5566889d56da",
+      "size": 682,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/nextination-board.ts": {
+      "hash": "5bac6ce778edbeb5",
+      "size": 4002,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/pathway-extras.ts": {
+      "hash": "66c274d6176da412",
+      "size": 4258,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/pathways.ts": {
+      "hash": "63c294e9db0b99de",
+      "size": 14274,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/plan-tiers.ts": {
+      "hash": "9fe3158054539a5f",
+      "size": 255,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/plan-types.ts": {
+      "hash": "ab8ceba7c38baad6",
+      "size": 23620,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/profile.ts": {
+      "hash": "52596ea4a414fc4f",
+      "size": 12903,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/readiness.ts": {
+      "hash": "e6fc0a1996cdd836",
+      "size": 2270,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/regionData.ts": {
+      "hash": "9cfb6278d1274ec8",
+      "size": 10340,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/schemas.ts": {
+      "hash": "582d745e9a0b7437",
+      "size": 6152,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/security.ts": {
+      "hash": "6e6f934257209638",
+      "size": 4658,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/seoContent.ts": {
+      "hash": "59e09762a13b80d9",
+      "size": 32758,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/site.ts": {
+      "hash": "499d9efcb423cd27",
+      "size": 382,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/support.ts": {
+      "hash": "19061d2735569383",
+      "size": 1183,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/userProfile.ts": {
+      "hash": "9456645037cc7fee",
+      "size": 7150,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/visa.ts": {
+      "hash": "24525c984d040191",
+      "size": 264,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/workspace-activity.ts": {
+      "hash": "d215b9f0d6fe65c1",
+      "size": 1961,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/world-continents.ts": {
+      "hash": "43fc27f9f95fa6e9",
+      "size": 123680,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/world-map.ts": {
+      "hash": "1a6c99c536ab6eda",
+      "size": 379,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/world-places.ts": {
+      "hash": "838f6aa1c33c5af5",
+      "size": 9869,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/sld/__tests__/engine.test.mjs": {
+      "hash": "debf192096e42c60",
+      "size": 5151,
+      "tags": []
+    },
+    "src/sld/__tests__/impact-audit.test.mjs": {
+      "hash": "09d4325a2a259c17",
+      "size": 3106,
+      "tags": []
+    },
+    "src/sld/audit/audit.js": {
+      "hash": "04bddba2d0780dbb",
+      "size": 1624,
+      "tags": []
+    },
+    "src/sld/engine/decision-engine.js": {
+      "hash": "e481670d3dc9d550",
+      "size": 4718,
+      "tags": []
+    },
+    "src/sld/engine/match.js": {
+      "hash": "f9ad0fa61fbb20c2",
+      "size": 3434,
+      "tags": []
+    },
+    "src/sld/graph/impact.js": {
+      "hash": "6329154310cfe368",
+      "size": 2676,
+      "tags": []
+    },
+    "src/sld/index.d.ts": {
+      "hash": "4f9457b25c82b61f",
+      "size": 5210,
+      "tags": []
+    },
+    "src/sld/index.js": {
+      "hash": "c077d5c40a95f9f1",
+      "size": 1116,
+      "tags": []
+    },
+    "src/sld/layers/layer-1-identity.js": {
+      "hash": "0d2b820d7e5c4907",
+      "size": 1322,
+      "tags": []
+    },
+    "src/sld/layers/layer-2-architecture.js": {
+      "hash": "cd4e8b51a6ea1c5c",
+      "size": 2648,
+      "tags": []
+    },
+    "src/sld/layers/layer-3-dependencies.js": {
+      "hash": "0b5f532ca8d4bc66",
+      "size": 2357,
+      "tags": []
+    },
+    "src/sld/layers/layer-4-behavior.js": {
+      "hash": "4f12f946c09f93cd",
+      "size": 1615,
+      "tags": []
+    },
+    "src/sld/layers/layer-5-data.js": {
+      "hash": "5859fdb562165ab3",
+      "size": 1567,
+      "tags": []
+    },
+    "src/sld/layers/layer-6-interface.js": {
+      "hash": "3b591a7f04df05c3",
+      "size": 2000,
+      "tags": []
+    },
+    "src/sld/layers/layer-7-intent.js": {
+      "hash": "b01f78cac5f3fd14",
+      "size": 2351,
+      "tags": []
+    },
+    "src/sld/manifest/kolmari.manifest.js": {
+      "hash": "afd7377fa5f7cc42",
+      "size": 4642,
+      "tags": []
+    },
+    "src/sld/node/scan.mjs": {
+      "hash": "a7bef00fb121db46",
+      "size": 9379,
+      "tags": []
+    },
+    "src/sld/package.json": {
+      "hash": "fb1e8dadeb9553cc",
+      "size": 233,
+      "tags": []
+    },
+    "src/styles/country-template.css": {
+      "hash": "d422879842a21c8b",
+      "size": 75466,
+      "tags": []
+    },
+    "src/styles/workspace-chrome.css": {
+      "hash": "23bf7ff2be34272e",
+      "size": 19945,
+      "tags": []
+    },
+    "tsconfig.json": {
+      "hash": "5c51df4c59f4510d",
+      "size": 670,
+      "tags": []
+    },
+    "tsconfig.tsbuildinfo": {
+      "hash": "e0135b2aae3314ee",
+      "size": 547184,
+      "tags": []
+    },
+    "wrangler.jsonc": {
+      "hash": "b96a6c079cf307b2",
+      "size": 477,
+      "tags": []
+    }
+  },
+  "appRoots": [
+    "."
+  ],
+  "edges": {
+    "docs/kolmari/DESIGN-TO-CODE-INVENTORY.md": [
+      "@/components/kolmari/KolmariWorldBoard",
+      "@/components/Kolmari/DestinationMapLoader",
+      "@/lib/Destinationination-board",
+      "@/lib/Destination-data"
+    ],
+    "next-env.d.ts": [
+      "./.next/types/routes.d.ts",
+      "./.next/types/root-params.d.ts"
+    ],
+    "scripts/sld.mjs": [
+      "../src/sld/index.js",
+      "../src/sld/node/scan.mjs"
+    ],
+    "src/app/(app)/(workspace)/admin/page.tsx": [
+      "@/lib/auth",
+      "@/lib/admin",
+      "@/lib/admin-data",
+      "@/components/kolmari/admin/admin-client"
+    ],
+    "src/app/(app)/(workspace)/astrocartography/page.tsx": [
+      "@/lib/auth",
+      "@/components/kolmari/astrocartography/astro-shell"
+    ],
+    "src/app/(app)/(workspace)/command-center/page.tsx": [
+      "@/lib/auth",
+      "@/lib/command-center",
+      "@/components/kolmari/command-center/board"
+    ],
+    "src/app/(app)/(workspace)/community/page.tsx": [
+      "@/components/community/klub-header",
+      "@/components/kolmari/kolmari-club",
+      "@/lib/auth",
+      "@/lib/countries",
+      "@/lib/kolmari-plan",
+      "@/lib/profile",
+      "@/lib/userProfile"
+    ],
+    "src/app/(app)/(workspace)/cost-calculator/page.tsx": [
+      "@/components/kolmari/cost-calculator",
+      "@/components/kolmari/plus-gate",
+      "@/lib/auth",
+      "@/lib/kolmari-plan",
+      "@/lib/profile"
+    ],
+    "src/app/(app)/(workspace)/countries/[slug]/page.tsx": [
+      "@/lib/countries"
+    ],
+    "src/app/(app)/(workspace)/dashboard/page.tsx": [
+      "@/lib/auth",
+      "@/lib/countries",
+      "@/lib/kolmari-plan",
+      "@/lib/profile",
+      "@/lib/userProfile",
+      "@/lib/command-center",
+      "@/components/kolmari/dashboard-command-center",
+      "@/components/kolmari/dashboard-planning",
+      "@/components/kolmari/dashboard-side-cards",
+      "@/components/kolmari/dashboard-onboarding",
+      "@/components/kolmari/dashboard-food-health",
+      "@/components/kolmari/journey-drawer",
+      "@/components/kolmari/decision-workspace-starter"
+    ],
+    "src/app/(app)/(workspace)/destinations/regions/[region]/page.tsx": [
+      "@/lib/flags",
+      "@/components/kolmari/CountryShapePanel",
+      "@/components/kolmari/PassportIndexLink",
+      "@/lib/auth",
+      "@/lib/profile",
+      "@/lib/userProfile",
+      "@/lib/lexicon",
+      "@/lib/destinations-data"
+    ],
+    "src/app/(app)/(workspace)/documents/page.tsx": [
+      "@/components/kolmari/documents-manager"
+    ],
+    "src/app/(app)/(workspace)/energy/page.tsx": [
+      "@/components/kolmari/energy/energy-portal",
+      "@/lib/auth"
+    ],
+    "src/app/(app)/(workspace)/flutter/page.tsx": [
+      "@/lib/auth",
+      "@/lib/profile",
+      "@/lib/kolmari-plan",
+      "@/lib/countries",
+      "@/lib/userProfile",
+      "@/components/kolmari/flutter-mode",
+      "@/components/kolmari/flutter-gate"
+    ],
+    "src/app/(app)/(workspace)/food-fit/page.tsx": [
+      "@/lib/auth",
+      "@/components/kolmari/food-culture-filter"
+    ],
+    "src/app/(app)/(workspace)/greenbook/page.tsx": [
+      "@/lib/greenbook",
+      "@/components/kolmari/greenbook-board",
+      "@/components/kolmari/plus-gate",
+      "@/lib/auth",
+      "@/lib/profile"
+    ],
+    "src/app/(app)/(workspace)/layout.tsx": [
+      "@/lib/auth",
+      "@/components/layout/kolmari-app-shell",
+      "@/lib/profile",
+      "@/styles/workspace-chrome.css"
+    ],
+    "src/app/(app)/(workspace)/my-plan/page.tsx": [
+      "@/components/kolmari/plan/PlanWorkspace",
+      "@/components/kolmari/plan/PlanHeaderLocator",
+      "@/lib/auth",
+      "@/lib/countries",
+      "@/lib/kolmari-plan",
+      "@/lib/plan-types",
+      "@/lib/pathways",
+      "@/lib/profile"
+    ],
+    "src/app/(app)/(workspace)/nextinations/[countrySlug]/v2/[section]/page.tsx": [
+      "@/lib/countries",
+      "@/lib/auth",
+      "@/lib/profile",
+      "@/lib/userProfile",
+      "@/lib/country-geo",
+      "@/lib/country-data",
+      "@/lib/country-visuals/data",
+      "@/lib/country-assets",
+      "@/components/country-template/PersonalizedCountrySummary",
+      "@/components/country-template/SimpleCountryView",
+      "@/components/country-template/CountryTemplate",
+      "@/components/country-template/TabBar",
+      "@/components/country-template/tabs/OverviewTab",
+      "@/components/country-template/tabs/DataOverviewTab",
+      "@/components/country-template/tabs/MoveThereTab",
+      "@/components/country-template/tabs/CostHousingTab",
+      "@/components/country-template/tabs/WorkStudyTab",
+      "@/components/country-template/tabs/HealthcareTab",
+      "@/components/country-template/tabs/FamilySchoolsTab",
+      "@/components/country-template/tabs/LifestyleTab",
+      "@/components/country-template/tabs/TaxMoneyTab"
+    ],
+    "src/app/(app)/(workspace)/nextinations/[countrySlug]/v2/layout.tsx": [
+      "@/styles/country-template.css"
+    ],
+    "src/app/(app)/(workspace)/nextinations/page.tsx": [
+      "@/lib/auth",
+      "@/lib/profile",
+      "@/lib/userProfile"
+    ],
+    "src/app/(app)/(workspace)/passportindex/page.tsx": [
+      "@/lib/auth"
+    ],
+    "src/app/(app)/(workspace)/pathways/page.tsx": [
+      "@/components/kolmari/pathways-results",
+      "@/components/kolmari/plus-gate",
+      "@/lib/auth",
+      "@/lib/profile",
+      "@/lib/kolmari-plan",
+      "@/lib/pathways"
+    ],
+    "src/app/(app)/(workspace)/saved/page.tsx": [
+      "@/components/kolmari/saved-nextinations"
+    ],
+    "src/app/(app)/(workspace)/settings/country-hero/page.tsx": [
+      "@/components/country-workspace/CountrySnapshotMap",
+      "@/lib/country-visuals/schema",
+      "@/lib/country-page/default-layout"
+    ],
+    "src/app/(app)/(workspace)/settings/page.tsx": [
+      "@/components/kolmari/account-tabs",
+      "@/lib/auth",
+      "@/lib/profile"
+    ],
+    "src/app/(app)/(workspace)/your-world/page.tsx": [
+      "@/components/kolmari/your-world",
+      "@/components/kolmari/your-world-gated",
+      "@/components/kolmari/your-world-map",
+      "@/lib/auth",
+      "@/lib/countries",
+      "@/lib/country-geo",
+      "@/lib/profile",
+      "@/lib/userProfile"
+    ],
+    "src/app/(app)/layout.tsx": [
+      "@/lib/auth"
+    ],
+    "src/app/(app)/profile-wizard/page.tsx": [
+      "@/components/kolmari/profile-wizard",
+      "@/lib/auth",
+      "@/lib/profile"
+    ],
+    "src/app/(app)/welcome/page.tsx": [
+      "@/components/kolmari/welcome-actions",
+      "@/lib/auth",
+      "@/lib/profile"
+    ],
+    "src/app/(auth)/login/page.tsx": [
+      "@/components/kolmari/auth-form",
+      "@/components/kolmari/auth-shell",
+      "@/lib/navigation"
+    ],
+    "src/app/(auth)/signup/page.tsx": [
+      "@/components/kolmari/auth-form",
+      "@/components/kolmari/auth-shell",
+      "@/lib/navigation"
+    ],
+    "src/app/(marketing)/[seoSlug]/page.tsx": [
+      "@/components/kolmari/wordmark",
+      "@/lib/countries",
+      "@/lib/lexicon",
+      "@/lib/navigation",
+      "@/lib/seoContent",
+      "@/lib/site"
+    ],
+    "src/app/(marketing)/page.tsx": [
+      "@/components/kolmari/marketing-mobile-nav",
+      "@/components/kolmari/marketing-logo",
+      "@/components/kolmari/questions-section"
+    ],
+    "src/app/(marketing)/quiz/page.tsx": [
+      "@/components/kolmari/marketing-logo"
+    ],
+    "src/app/api/account/change-password/route.ts": [
+      "@/lib/auth",
+      "@/lib/db",
+      "@/lib/schemas",
+      "@/lib/security"
+    ],
+    "src/app/api/account/data-export/route.ts": [
+      "@/lib/auth",
+      "@/lib/profile",
+      "@/lib/kolmari-plan",
+      "@/lib/db"
+    ],
+    "src/app/api/account/deletion-request/route.ts": [
+      "@/lib/auth",
+      "@/lib/db",
+      "@/lib/security"
+    ],
+    "src/app/api/account/sign-out-all/route.ts": [
+      "@/lib/auth",
+      "@/lib/security"
+    ],
+    "src/app/api/admin/announcement/route.ts": [
+      "@/lib/auth",
+      "@/lib/admin",
+      "@/lib/admin-data",
+      "@/lib/security"
+    ],
+    "src/app/api/admin/country-asset/route.ts": [
+      "@/lib/auth",
+      "@/lib/country-assets"
+    ],
+    "src/app/api/admin/country-hero/backfill/route.ts": [
+      "@/lib/auth",
+      "@/lib/countries",
+      "@/lib/country-visuals/generate",
+      "@/lib/country-assets"
+    ],
+    "src/app/api/admin/country-hero/route.ts": [
+      "@/lib/auth",
+      "@/lib/country-visuals/schema",
+      "@/lib/country-visuals/prompt"
+    ],
+    "src/app/api/admin/users/plan/route.ts": [
+      "@/lib/auth",
+      "@/lib/admin",
+      "@/lib/admin-data",
+      "@/lib/profile",
+      "@/lib/security"
+    ],
+    "src/app/api/announcement/route.ts": [
+      "@/lib/admin-data"
+    ],
+    "src/app/api/ask-kolmari/route.ts": [
+      "@/lib/auth",
+      "@/lib/decision-routing",
+      "@/lib/kolmari-copilot"
+    ],
+    "src/app/api/club/route.ts": [
+      "@/lib/auth",
+      "@/lib/countries",
+      "@/lib/club",
+      "@/lib/profile",
+      "@/lib/security"
+    ],
+    "src/app/api/command-center/mutate/route.ts": [
+      "@/lib/auth",
+      "@/lib/security",
+      "@/lib/command-center"
+    ],
+    "src/app/api/command-center/route.ts": [
+      "@/lib/auth",
+      "@/lib/command-center"
+    ],
+    "src/app/api/countries/route.ts": [
+      "@/lib/auth",
+      "@/lib/countries",
+      "@/lib/db"
+    ],
+    "src/app/api/country-asset/route.ts": [
+      "@/lib/country-assets"
+    ],
+    "src/app/api/internal/country-hero/ensure/route.ts": [
+      "@/lib/auth",
+      "@/lib/countries",
+      "@/lib/country-visuals/generate",
+      "@/lib/country-assets"
+    ],
+    "src/app/api/login/route.ts": [
+      "@/lib/auth",
+      "@/lib/db",
+      "@/lib/schemas",
+      "@/lib/security"
+    ],
+    "src/app/api/logout/route.ts": [
+      "@/lib/auth",
+      "@/lib/security"
+    ],
+    "src/app/api/matches/route.ts": [
+      "@/lib/auth",
+      "@/lib/profile",
+      "@/lib/userProfile"
+    ],
+    "src/app/api/plan/route.ts": [
+      "@/lib/auth",
+      "@/lib/kolmari-plan",
+      "@/lib/schemas",
+      "@/lib/security"
+    ],
+    "src/app/api/profile/route.ts": [
+      "@/lib/auth",
+      "@/lib/admin",
+      "@/lib/profile",
+      "@/lib/command-center",
+      "@/lib/schemas",
+      "@/lib/security"
+    ],
+    "src/app/api/sld/evaluate/route.ts": [
+      "@/lib/auth",
+      "@/lib/admin",
+      "@/lib/security",
+      "@/sld"
+    ],
+    "src/app/api/support/route.ts": [
+      "@/lib/auth",
+      "@/lib/security",
+      "@/lib/support"
+    ],
+    "src/app/layout.tsx": [
+      "./globals.css",
+      "./sidebar-scroll.css",
+      "@/lib/site"
+    ],
+    "src/app/robots.ts": [
+      "@/lib/site"
+    ],
+    "src/app/sitemap.ts": [
+      "@/lib/seoContent",
+      "@/lib/site"
+    ],
+    "src/components/country-template/CityCardImage.tsx": [
+      "@/lib/flags",
+      "@/lib/country-visuals/schema"
+    ],
+    "src/components/country-template/CountryHero.tsx": [
+      "@/lib/flags",
+      "@/lib/country-facts",
+      "./CountryOutline",
+      "./HeroAutoGenerate",
+      "@/lib/country-visuals/schema"
+    ],
+    "src/components/country-template/CountryOutline.tsx": [
+      "@/lib/country-shapes"
+    ],
+    "src/components/country-template/CountryResearchShell.tsx": [
+      "./client/UnitsControl",
+      "./TopBar",
+      "./Sidebar"
+    ],
+    "src/components/country-template/CountryTemplate.tsx": [
+      "./client/UnitsControl",
+      "@/components/kolmari/announcement-bar",
+      "./TopBar",
+      "./Sidebar",
+      "./CountryHero",
+      "./TabBar",
+      "./RightRail"
+    ],
+    "src/components/country-template/RightRail.tsx": [
+      "./client/behaviours"
+    ],
+    "src/components/country-template/Sidebar.tsx": [
+      "@/config/product-copy",
+      "@/components/kolmari/butterfly-mark",
+      "@/lib/flutter-plan"
+    ],
+    "src/components/country-template/SimpleCountryView.tsx": [
+      "@/lib/flags",
+      "./client/UnitsControl",
+      "./CountryOutline",
+      "@/lib/country-visuals/data",
+      "@/lib/country-visuals/schema",
+      "./TopBar",
+      "./Sidebar"
+    ],
+    "src/components/country-template/TopBar.tsx": [
+      "@/config/brand",
+      "@/config/product-copy",
+      "./client/UnitsControl",
+      "@/lib/decision-routing"
+    ],
+    "src/components/country-template/client/TaxEstimator.tsx": [
+      "@/lib/country-template/tax",
+      "./UnitsControl",
+      "@/lib/country-template/format"
+    ],
+    "src/components/country-template/client/UnitsControl.tsx": [
+      "@/lib/country-template/format"
+    ],
+    "src/components/country-template/tabs/CostHousingTab.tsx": [
+      "@/lib/country-workspace/country-content"
+    ],
+    "src/components/country-template/tabs/DataOverviewTab.tsx": [
+      "@/lib/flags",
+      "@/components/country-workspace/CountrySnapshotMap",
+      "@/components/country-template/CityCardImage",
+      "@/lib/country-geo",
+      "@/lib/country-workspace/country-facts",
+      "@/lib/country-workspace/country-cities"
+    ],
+    "src/components/country-template/tabs/FamilySchoolsTab.tsx": [
+      "@/lib/country-workspace/country-content"
+    ],
+    "src/components/country-template/tabs/HealthcareTab.tsx": [
+      "@/lib/country-workspace/country-content"
+    ],
+    "src/components/country-template/tabs/LifestyleTab.tsx": [
+      "@/lib/country-workspace/country-content"
+    ],
+    "src/components/country-template/tabs/MoveThereTab.tsx": [
+      "@/lib/country-workspace/country-content"
+    ],
+    "src/components/country-template/tabs/OverviewTab.tsx": [
+      "@/components/country-workspace/CountrySnapshotMap",
+      "@/components/country-template/CityCardImage",
+      "@/lib/country-visuals/data"
+    ],
+    "src/components/country-template/tabs/TaxMoneyTab.tsx": [
+      "@/lib/country-workspace/country-content"
+    ],
+    "src/components/country-template/tabs/WorkStudyTab.tsx": [
+      "@/lib/country-workspace/country-content"
+    ],
+    "src/components/country-workspace/CountryOverviewEnhancements.tsx": [
+      "@/lib/profile",
+      "@/lib/readiness"
+    ],
+    "src/components/country-workspace/CountryWorkspace.tsx": [
+      "@/lib/countries",
+      "@/lib/country-workspace/country-cities",
+      "@/lib/country-workspace/country-tourism-media",
+      "@/lib/country-workspace/country-facts",
+      "@/lib/country-workspace/tabs",
+      "@/lib/country-workspace/country-content",
+      "./CityMapImage",
+      "./CountrySnapshotMap",
+      "./tabs/CompareTab",
+      "./tabs/CostOfLivingTab",
+      "./tabs/HousingTab",
+      "./tabs/EmploymentTab",
+      "./tabs/HealthcareTab",
+      "./tabs/EducationTab",
+      "./tabs/TransportationTab",
+      "./tabs/DailyLifeTab",
+      "./tabs/LegalTaxesTab",
+      "./tabs/FamilyPetsTab",
+      "./tabs/GreenbookTab",
+      "./tabs/ResourcesTab",
+      "./tabs/EconomicProfileTab"
+    ],
+    "src/components/country-workspace/tabs/CompareTab.tsx": [
+      "@/lib/countries"
+    ],
+    "src/components/country-workspace/tabs/CostOfLivingTab.tsx": [
+      "@/lib/country-workspace/country-content",
+      "./SourceFooter"
+    ],
+    "src/components/country-workspace/tabs/DailyLifeTab.tsx": [
+      "@/lib/country-workspace/country-content",
+      "./SourceFooter"
+    ],
+    "src/components/country-workspace/tabs/EconomicProfileTab.tsx": [
+      "@/lib/country-workspace/country-content",
+      "./SourceFooter"
+    ],
+    "src/components/country-workspace/tabs/EducationTab.tsx": [
+      "@/lib/country-workspace/country-content",
+      "./SourceFooter"
+    ],
+    "src/components/country-workspace/tabs/EmploymentTab.tsx": [
+      "@/lib/country-workspace/country-content",
+      "./SourceFooter"
+    ],
+    "src/components/country-workspace/tabs/FamilyPetsTab.tsx": [
+      "@/lib/country-workspace/country-content",
+      "./SourceFooter"
+    ],
+    "src/components/country-workspace/tabs/GreenbookTab.tsx": [
+      "@/lib/country-workspace/country-content"
+    ],
+    "src/components/country-workspace/tabs/HealthcareTab.tsx": [
+      "@/lib/country-workspace/country-content",
+      "./SourceFooter"
+    ],
+    "src/components/country-workspace/tabs/HousingTab.tsx": [
+      "@/lib/country-workspace/country-content",
+      "./SourceFooter"
+    ],
+    "src/components/country-workspace/tabs/LegalTaxesTab.tsx": [
+      "@/lib/country-workspace/country-content",
+      "./SourceFooter"
+    ],
+    "src/components/country-workspace/tabs/ResourcesTab.tsx": [
+      "@/lib/country-workspace/country-content"
+    ],
+    "src/components/country-workspace/tabs/SourceFooter.tsx": [
+      "@/lib/country-workspace/country-content"
+    ],
+    "src/components/country-workspace/tabs/TransportationTab.tsx": [
+      "@/lib/country-workspace/country-content",
+      "./SourceFooter"
+    ],
+    "src/components/kolmari/CountryResearchPage.tsx": [
+      "@/lib/flags",
+      "@/lib/countries"
+    ],
+    "src/components/kolmari/CountryShapePanel.tsx": [
+      "@/lib/country-shapes"
+    ],
+    "src/components/kolmari/DestinationMap.tsx": [
+      "@/lib/destinations-data"
+    ],
+    "src/components/kolmari/MapboxMap.tsx": [
+      "@/lib/regionData"
+    ],
+    "src/components/kolmari/account-tabs.tsx": [
+      "@/lib/profile",
+      "./privacy-account-page"
+    ],
+    "src/components/kolmari/admin/admin-client.tsx": [
+      "@/lib/plan-tiers",
+      "@/lib/admin-data"
+    ],
+    "src/components/kolmari/auth-form.tsx": [
+      "@/lib/navigation"
+    ],
+    "src/components/kolmari/auth-shell.tsx": [
+      "./wordmark"
+    ],
+    "src/components/kolmari/budget-benchmark-dialog.tsx": [
+      "@/lib/budget-benchmarks",
+      "@/lib/plan-types"
+    ],
+    "src/components/kolmari/command-center/board.tsx": [
+      "@/lib/countries",
+      "@/lib/command-center-model",
+      "@/lib/food-culture/data",
+      "@/lib/food-culture/types"
+    ],
+    "src/components/kolmari/cost-calculator.tsx": [
+      "@/lib/budget-benchmarks",
+      "@/lib/plan-types",
+      "./budget-benchmark-dialog",
+      "./rings"
+    ],
+    "src/components/kolmari/countries-browser.tsx": [
+      "@/lib/countries",
+      "./saved-nextinations"
+    ],
+    "src/components/kolmari/country-food-fit-card.tsx": [
+      "@/lib/countries",
+      "@/lib/food-culture/types",
+      "./country-food-fit-card.module.css"
+    ],
+    "src/components/kolmari/dashboard-command-center.tsx": [
+      "./rings",
+      "@/lib/command-center",
+      "@/lib/command-center-model"
+    ],
+    "src/components/kolmari/dashboard-food-health.tsx": [
+      "@/lib/food-culture/data",
+      "@/lib/food-culture/types"
+    ],
+    "src/components/kolmari/dashboard-planning.tsx": [
+      "@/lib/plan-types"
+    ],
+    "src/components/kolmari/dashboard-side-cards.tsx": [
+      "@/lib/countries",
+      "@/lib/destinations-data"
+    ],
+    "src/components/kolmari/decision-workspace-starter.tsx": [
+      "@/lib/kolmari-copilot",
+      "@/lib/workspace-activity"
+    ],
+    "src/components/kolmari/destination-visa-planner.tsx": [
+      "@/lib/flags",
+      "@/lib/pathways"
+    ],
+    "src/components/kolmari/destinations-browser.tsx": [
+      "@/lib/flags"
+    ],
+    "src/components/kolmari/energy/energy-portal.tsx": [
+      "@/lib/energy/astro",
+      "@/lib/energy/scoring",
+      "@/lib/energy/portal-state",
+      "./energy-portal.module.css"
+    ],
+    "src/components/kolmari/flutter-mode.tsx": [
+      "@/lib/profile",
+      "@/lib/plan-types",
+      "@/lib/flutter-plan"
+    ],
+    "src/components/kolmari/food-culture-filter.tsx": [
+      "@/lib/countries",
+      "@/lib/food-culture/types",
+      "@/lib/food-culture/data",
+      "./country-food-fit-card"
+    ],
+    "src/components/kolmari/greenbook-board.tsx": [
+      "@/lib/greenbook"
+    ],
+    "src/components/kolmari/journey-drawer.tsx": [
+      "@/lib/plan-types"
+    ],
+    "src/components/kolmari/marketing-mobile-nav.tsx": [
+      "./marketing-logo"
+    ],
+    "src/components/kolmari/pathways-results.tsx": [
+      "@/lib/profile",
+      "@/lib/pathways",
+      "@/lib/pathway-extras"
+    ],
+    "src/components/kolmari/plan/BudgetTab.tsx": [
+      "@/lib/plan-types",
+      "@/lib/budget-baselines",
+      "@/lib/budget-benchmarks",
+      "./shared"
+    ],
+    "src/components/kolmari/plan/ChecklistTab.tsx": [
+      "@/lib/plan-types",
+      "./shared"
+    ],
+    "src/components/kolmari/plan/DocumentsTab.tsx": [
+      "@/lib/plan-types",
+      "./shared"
+    ],
+    "src/components/kolmari/plan/NotesTab.tsx": [
+      "@/lib/plan-types",
+      "./shared"
+    ],
+    "src/components/kolmari/plan/OverviewTab.tsx": [
+      "@/lib/plan-types",
+      "./shared"
+    ],
+    "src/components/kolmari/plan/PlanHeaderLocator.tsx": [
+      "@/components/country-workspace/CountrySnapshotMap",
+      "@/lib/maps/country-locations"
+    ],
+    "src/components/kolmari/plan/PlanWorkspace.tsx": [
+      "@/lib/plan-types",
+      "@/lib/budget-baselines",
+      "@/hooks/useLocalStorageWorkspace",
+      "./shared",
+      "./OverviewTab",
+      "./ChecklistTab",
+      "./DocumentsTab",
+      "./BudgetTab",
+      "./NotesTab",
+      "@/lib/budget-benchmarks"
+    ],
+    "src/components/kolmari/plan/shared.tsx": [
+      "@/lib/plan-types"
+    ],
+    "src/components/kolmari/profile-wizard.tsx": [
+      "@/lib/profile"
+    ],
+    "src/components/kolmari/saved-nextinations.tsx": [
+      "@/lib/countries"
+    ],
+    "src/components/kolmari/use-saved-nextinations.ts": [
+      "@/lib/countries"
+    ],
+    "src/components/kolmari/wordmark.tsx": [
+      "./marketing-logo"
+    ],
+    "src/components/kolmari/workspace-shell.tsx": [
+      "@/lib/profile",
+      "@/components/country-template/client/UnitsControl",
+      "@/components/country-template/TopBar",
+      "@/components/country-template/Sidebar",
+      "@/components/kolmari/announcement-bar",
+      "@/lib/workspace-activity"
+    ],
+    "src/components/kolmari/world-match-map.tsx": [
+      "./your-world-map"
+    ],
+    "src/components/kolmari/your-world-gated.tsx": [
+      "./your-world-map"
+    ],
+    "src/components/kolmari/your-world-map.tsx": [
+      "@/lib/destinations-data",
+      "@/lib/world-map",
+      "./your-world-map.css"
+    ],
+    "src/components/kolmari/your-world.tsx": [
+      "./your-world-map",
+      "./world-match-map",
+      "./world-stories"
+    ],
+    "src/components/layout/kolmari-app-shell.tsx": [
+      "@/components/kolmari/workspace-shell",
+      "@/lib/profile"
+    ],
+    "src/lib/admin-data.ts": [
+      "./db",
+      "./profile",
+      "./admin"
+    ],
+    "src/lib/admin.ts": [
+      "./db",
+      "./auth"
+    ],
+    "src/lib/auth.ts": [
+      "./auth-constants"
+    ],
+    "src/lib/budget-baselines.ts": [
+      "./plan-types"
+    ],
+    "src/lib/budget-benchmarks.ts": [
+      "./plan-types"
+    ],
+    "src/lib/club.ts": [
+      "@/lib/db"
+    ],
+    "src/lib/command-center.ts": [
+      "./db",
+      "./command-center-model",
+      "./userProfile",
+      "./profile"
+    ],
+    "src/lib/country-assets.ts": [
+      "./db"
+    ],
+    "src/lib/country-data.ts": [
+      "./db"
+    ],
+    "src/lib/country-geo.ts": [
+      "./world-places"
+    ],
+    "src/lib/country-page/default-layout.ts": [
+      "./schema"
+    ],
+    "src/lib/country-visuals/data.ts": [
+      "@/lib/country-geo",
+      "./schema"
+    ],
+    "src/lib/country-visuals/generate.ts": [
+      "./prompt",
+      "./schema"
+    ],
+    "src/lib/country-visuals/prompt.ts": [
+      "./schema"
+    ],
+    "src/lib/country-workspace/country-cities.ts": [
+      "@/lib/world-places"
+    ],
+    "src/lib/country-workspace/tabs.ts": [
+      "../profile"
+    ],
+    "src/lib/destinations-data.ts": [
+      "@/lib/countries"
+    ],
+    "src/lib/energy/scoring.ts": [
+      "./astro",
+      "./portal-state"
+    ],
+    "src/lib/food-culture/data.ts": [
+      "./types"
+    ],
+    "src/lib/greenbook.ts": [
+      "./regionData"
+    ],
+    "src/lib/kolmari-plan.ts": [
+      "./db",
+      "./plan-types"
+    ],
+    "src/lib/lexicon.ts": [
+      "@/config/brand",
+      "@/config/product-copy"
+    ],
+    "src/lib/nextination-board.ts": [
+      "./world-places",
+      "./countries"
+    ],
+    "src/lib/pathways.ts": [
+      "./profile"
+    ],
+    "src/lib/profile.ts": [
+      "./admin",
+      "./db",
+      "./plan-tiers"
+    ],
+    "src/lib/readiness.ts": [
+      "./profile"
+    ],
+    "src/lib/seoContent.ts": [
+      "./greenbook",
+      "./regionData"
+    ],
+    "src/lib/support.ts": [
+      "@/lib/db"
+    ],
+    "src/lib/userProfile.ts": [
+      "./profile",
+      "./destinations-data",
+      "./pathways",
+      "./countries",
+      "./readiness"
+    ],
+    "src/sld/__tests__/engine.test.mjs": [
+      "../index.js",
+      "@/lib/db",
+      "@/lib/command-center"
+    ],
+    "src/sld/__tests__/impact-audit.test.mjs": [
+      "../index.js"
+    ],
+    "src/sld/audit/audit.js": [
+      "../index.js"
+    ],
+    "src/sld/engine/decision-engine.js": [
+      "../layers/layer-1-identity.js",
+      "../layers/layer-2-architecture.js",
+      "../layers/layer-3-dependencies.js",
+      "../layers/layer-4-behavior.js",
+      "../layers/layer-5-data.js",
+      "../layers/layer-6-interface.js",
+      "../layers/layer-7-intent.js",
+      "../index.js"
+    ],
+    "src/sld/graph/impact.js": [
+      "../engine/match.js",
+      "../index.js"
+    ],
+    "src/sld/index.js": [
+      "./manifest/kolmari.manifest.js",
+      "./engine/decision-engine.js",
+      "./graph/impact.js",
+      "./audit/audit.js"
+    ],
+    "src/sld/layers/layer-1-identity.js": [
+      "../engine/match.js",
+      "../index.js"
+    ],
+    "src/sld/layers/layer-2-architecture.js": [
+      "../index.js"
+    ],
+    "src/sld/layers/layer-3-dependencies.js": [
+      "../engine/match.js",
+      "../index.js"
+    ],
+    "src/sld/layers/layer-4-behavior.js": [
+      "../engine/match.js",
+      "../index.js"
+    ],
+    "src/sld/layers/layer-5-data.js": [
+      "../engine/match.js",
+      "../index.js"
+    ],
+    "src/sld/layers/layer-6-interface.js": [
+      "../index.js"
+    ],
+    "src/sld/layers/layer-7-intent.js": [
+      "../engine/match.js",
+      "../index.js"
+    ],
+    "src/sld/manifest/kolmari.manifest.js": [
+      "../index.js"
+    ],
+    "src/sld/node/scan.mjs": [
+      "../index.js"
+    ]
+  },
+  "envNames": [
+    "ADMIN_EMAILS",
+    "DATABASE_URL",
+    "JWT_SECRET",
+    "KOLMARI_ADMIN_EMAILS",
+    "KOLMARI_AI_MODEL",
+    "NEXT_PUBLIC_MAPBOX_TOKEN",
+    "NODE_ENV",
+    "OPENAI_API_KEY",
+    "SITE_URL",
+    "X"
+  ]
+}

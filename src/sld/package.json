@@ -1,0 +1,6 @@
+{
+  "name": "@kolmari/sld",
+  "private": true,
+  "type": "module",
+  "description": "Seven Layer Dip governance engine. Dependency-free ESM so the pure core runs identically under Node (CLI/CI) and Cloudflare Workers (API route)."
+}
