@@ -4,9 +4,9 @@ The app runs on a Cloudflare Worker named **`kolmari`** (set in `wrangler.jsonc`
 Your live site — `kolmari.<account>.workers.dev` (and any custom domain routed to
 it) — is served by that worker.
 
-> Note: an older worker named **`nexit`** also exists from before the rebrand.
-> Deploys used to point at `nexit` by mistake, so fixes never reached the live
-> `kolmari` worker. That is fixed. The old `nexit` worker can be deleted once the
+> Note: an older worker named **`kolmari`** also exists from before the rebrand.
+> Deploys used to point at `kolmari` by mistake, so fixes never reached the live
+> `kolmari` worker. That is fixed. The old `kolmari` worker can be deleted once the
 > `kolmari` worker is confirmed working (see "Clean up" below).
 
 ## Automatic deploys (recommended — no terminal needed)
@@ -51,6 +51,6 @@ Cloudflare dashboard → Workers & Pages → **kolmari** → Settings → Variab
 ## Clean up the old worker
 
 Once `kolmari` is confirmed working:
-Cloudflare dashboard → Workers & Pages → **nexit** → Settings → Delete
-(or `npx wrangler delete --name nexit`). This removes any confusion between the
+Cloudflare dashboard → Workers & Pages → **kolmari** → Settings → Delete
+(or `npx wrangler delete --name kolmari`). This removes any confusion between the
 two workers.

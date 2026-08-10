@@ -16,12 +16,12 @@ The protected workspace uses a shared app shell (`AppShell`) with:
 Dashboard
 
 EXPLORE
-  Your World          → /nexitnation
+  Your World          → /destinations
   Destinations        → /saved
 
 PLAN
   Pathways            → /pathways
-  My Plan             → /nexit-plan
+  My Plan             → /my-plan
   Flutter Mode        → /flutter
   Documents           → /documents
 

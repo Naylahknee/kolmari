@@ -4,10 +4,10 @@
 
 | Component | File | Server/Client | Purpose |
 |---|---|---|---|
-| `AppShell` | `src/components/nexit/app-shell.tsx` | Client | Sidebar, top bar, mobile nav — migrated to Kolmari labels |
-| `Wordmark` | `src/components/nexit/wordmark.tsx` | Server | Renders brand SVG |
-| `ScoreRing` | `src/components/nexit/rings.tsx` | Server | Move Readiness / Match Score ring |
-| `BudgetDonut` | `src/components/nexit/rings.tsx` | Server | Budget breakdown chart |
+| `AppShell` | `src/components/kolmari/app-shell.tsx` | Client | Sidebar, top bar, mobile nav — migrated to Kolmari labels |
+| `Wordmark` | `src/components/kolmari/wordmark.tsx` | Server | Renders brand SVG |
+| `ScoreRing` | `src/components/kolmari/rings.tsx` | Server | Move Readiness / Match Score ring |
+| `BudgetDonut` | `src/components/kolmari/rings.tsx` | Server | Budget breakdown chart |
 | `KlubHeader` | `src/components/community/klub-header.tsx` | Server | Kolmari Klub page header |
 | `KlubTabs` | `src/components/community/klub-tabs.tsx` | Client | Tab navigation for Klub sections |
 | `DiscoverKlubs` | `src/components/community/discover-klubs.tsx` | Server | Discover klubs section |

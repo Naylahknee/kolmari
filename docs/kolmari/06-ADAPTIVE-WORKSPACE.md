@@ -18,7 +18,7 @@ The adaptive country workspace at `/nextinations/[slug]/[section]` provides:
 ## Saved destinations
 
 - Stored in localStorage under key `kolmari-saves` (new)
-- Compatibility read from `nexit-saves` (old) with migration shim
+- Compatibility read from `kolmari-saves` (old) with migration shim
 - Displayed in sidebar country tree when saved
 - Maximum display: no hard limit, but sidebar truncates at practical length
 

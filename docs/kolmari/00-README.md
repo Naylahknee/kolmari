@@ -6,7 +6,7 @@ Kolmari is a relocation decision system — not a travel app. It helps people di
 
 ## Migration context
 
-Kolmari is a controlled migration of the existing Nexit application. The existing application remains the functional source of truth. The Kolmari design and product language is the visual and terminology source of truth.
+Kolmari's existing production behavior remains the functional source of truth. The Kolmari design and product language is the visual and terminology source of truth.
 
 ## Source-of-truth order
 
@@ -15,7 +15,7 @@ Kolmari is a controlled migration of the existing Nexit application. The existin
 3. The relevant focused document in this directory.
 4. Production components, schemas, and tokens.
 5. Owner-supplied mockups and external references.
-6. Existing Nexit application behavior.
+6. Existing Kolmari application behavior.
 
 ## Documentation map
 

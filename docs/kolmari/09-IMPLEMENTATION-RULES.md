@@ -26,7 +26,7 @@
 src/
   app/           ← Next.js App Router
   components/
-    nexit/       ← existing components (migrate in place)
+    kolmari/       ← existing components (migrate in place)
     community/   ← new Kolmari Klub components
     dashboard/   ← new dashboard sub-components
     destinations/ ← new destination sub-components
@@ -50,7 +50,7 @@ src/
 - Converted to TSX with named components
 - Real data connected (no hardcoded values)
 - Honest empty states
-- No public "Nexit" copy on migrated page
+- No public "Kolmari" copy on migrated page
 - typecheck passes
 - lint passes
 - build passes
