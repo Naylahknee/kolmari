@@ -10,7 +10,7 @@ future country render from the same template, components, schemas, and assets.
   **Mexico**. Mexico is the approved *visual reference only* (fabric treatment,
   silhouette opacity, shadow depth, emblem preservation, composition). It is not
   a Mexico template — every country uses its own flag, emblem, colors, and
-  geographic silhouette. Full spec: `docs/hero-image-standard.md`.
+  geographic silhouette. Full spec: `docs/kolmari/hero-image-standard.md`.
 - **Page layout style: Kolmari Country Page Standard.** Reference
   implementation: **Portugal**. Portugal defines width, hero proportions,
   spacing, tabs, main/sidebar, snapshot, Match Score placement, Top Cities, and
