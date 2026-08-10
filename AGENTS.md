@@ -21,7 +21,7 @@ Before changing application code, read:
 5. `/docs/kolmari/10-LLM-RULES.md`
 
 Do not rely only on chat history or an older implementation prompt.
-For Kolmarination Map work, also read `/docs/kolmari/11-KolmariNATION-MAP.md`.
+For Kolmari world map work, also read `/docs/kolmari/11-KOLMARI-MAP.md`.
 
 For interaction, navigation, transition, or motion work, also read `/docs/kolmari/12-INTERACTION-DESIGN.md`.
 

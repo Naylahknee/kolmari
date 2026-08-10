@@ -258,3 +258,20 @@ Translated from the demo's D1 prototype to Neon + real per-user auth.
 - **Nav** — added under the sidebar "Plan" group.
 - New destinations seed a generic default checklist (planning prompts, not country
   facts); nothing here fabricates Match Scores, eligibility, or country data.
+
+## Sync cleanup: dead map chain + doc port
+
+- **Removed the dead Nexit map chain** (P2 rebrand cleanup). `KolmariWorldBoard`
+  and its map components (`NexitnationMapLoader`, `NexitnationMapbox`,
+  `nexit-world`, `nexitnation-map.css`) were self-referencing and imported by no
+  route or live component — the live world map is `your-world.tsx` /
+  `your-world-map.tsx` at `/your-world`. Deleted all five.
+- **Ported the missing 11/12/13 docs** into `docs/kolmari/` with a Nexit→Kolmari
+  terminology pass:
+  `11-KOLMARI-MAP.md` (Kolmari World Map), `12-INTERACTION-DESIGN.md`,
+  `13-ACCOUNT-ADMINISTRATION.md`. Per the owner, Nexit is retired and
+  "Kolmarination" is avoided — the map doc is named `11-KOLMARI-MAP.md` (not
+  "KolmariNATION"), and AGENTS.md's reference was updated to match. Judgment calls
+  in the port: feature routes `/nexitnation` → `/your-world`, doc self-references
+  `/docs/nexit/` → `/docs/kolmari/`. The `docs/nexit/` originals were left in
+  place and can be retired separately.
