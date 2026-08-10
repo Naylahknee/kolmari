@@ -8,8 +8,6 @@ import {
 } from '@/sld'
 import type { ChangeSet, FileChange, ChangeType } from '@/sld'
 
-export const runtime = 'edge'
-
 /**
  * POST /api/sld/evaluate
  *
