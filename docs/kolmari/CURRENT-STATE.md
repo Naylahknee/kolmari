@@ -273,8 +273,23 @@ Translated from the demo's D1 prototype to Neon + real per-user auth.
   "Kolmarination" is avoided — the map doc is named `11-KOLMARI-MAP.md` (not
   "KolmariNATION"), and AGENTS.md's reference was updated to match. Judgment calls
   in the port: feature routes `/nexitnation` → `/your-world`, doc self-references
-  `/docs/nexit/` → `/docs/kolmari/`. The `docs/nexit/` originals were left in
-  place and can be retired separately.
+  `/docs/nexit/` → `/docs/kolmari/`.
+
+## Dead-file cleanup
+
+Removed files that could not be migrated further and served no purpose for the app:
+- **`docs/nexit/`** (entire legacy doc tree, 16 files) — fully superseded by
+  `docs/kolmari/` after the 11/12/13 port; Nexit is retired.
+- **One-off template tooling** at the repo root: `install-kolmari-template.py`,
+  `kolmari-template-SWITCH.diff`, `kolmari-template-README.md` — a leftover
+  patch/installer set, referenced by nothing and unrelated to the app build.
+
+Migrated (not deleted): `docs/Kolmari/hero-image-standard.md` (capital-K
+case-collision orphan) → `docs/kolmari/hero-image-standard.md`, resolving the last
+case-sensitivity artifact; references in `prompt.ts` and `country-design-system.md`
+updated. Kept: the `/nexit-plan` and `/nexitnation` redirect stubs and the
+`/nexitnation/[region]` page (referenced by `seoContent.ts`), which still serve
+backward-compatible routing.
 
 ## Astrocartography (scaffold only)
 
