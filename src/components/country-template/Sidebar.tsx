@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { PRODUCT_COPY } from '@/config/product-copy'
 import { ButterflyMark } from '@/components/kolmari/butterfly-mark'
 import { flutterReadiness } from '@/lib/flutter-plan'
@@ -12,12 +12,12 @@ function Icon({ children }: { children: React.ReactNode }) {
 
 type Match = { slug: string; name: string; code: string }
 
-// Section lead icons (shown alone when the rail is collapsed → four primary icons).
 const ICONS = {
   dashboard: <><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></>,
-  explore: <><path d="M12 21s-7-6.3-7-11a7 7 0 0114 0c0 4.7-7 11-7 11z" /><circle cx="12" cy="10" r="2.6" /></>,
+  world: <><path d="M12 21s-7-6.3-7-11a7 7 0 0114 0c0 4.7-7 11-7 11z" /><circle cx="12" cy="10" r="2.6" /></>,
   plan: <><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M8 3v18M11 8h6M11 12h4" /></>,
   connect: <><circle cx="8" cy="8" r="3" /><circle cx="16" cy="8" r="3" /><path d="M2 21a6 6 0 0112 0M10 21a6 6 0 0112 0" /></>,
+  tools: <><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6" /></>,
 }
 
 export function Sidebar() {
@@ -35,7 +35,6 @@ export function Sidebar() {
     return () => { cancelled = true }
   }, [])
 
-  // Relocation-plan progress drives the Flutter Mode butterfly.
   const [planReady, setPlanReady] = useState(0)
   useEffect(() => {
     let cancelled = false
@@ -47,19 +46,48 @@ export function Sidebar() {
   }, [])
 
   const onCountry = pathname.startsWith('/nextinations/')
-  const exploreActive = active('/your-world') || active('/destinations') || active('/greenbook') || active('/passportindex') || onCountry
-  const planActive = active('/command-center') || active('/pathways') || active('/my-plan') || active('/flutter') || active('/checklist') || active('/documents') || active('/cost-calculator') || active('/astrocartography')
-  const connectActive = active('/community')
+  const worldActive = active('/your-world') || active('/destinations') || onCountry
+  const planActive = active('/command-center') || active('/pathways') || active('/my-plan') || active('/flutter') || active('/checklist') || active('/documents')
+  const toolsActive = active('/cost-calculator') || active('/greenbook') || active('/passportindex') || active('/astrocartography')
 
-  // Which sections are expanded. Default: the section matching the current page.
+  // Collapsible sections (Plan, Tools). Default open = the active section.
   const [openSecs, setOpenSecs] = useState<Record<string, boolean>>({})
   const openState = useMemo(() => ({
-    explore: openSecs.explore ?? exploreActive,
     plan: openSecs.plan ?? planActive,
-    connect: openSecs.connect ?? connectActive,
-  }), [openSecs, exploreActive, planActive, connectActive])
+    tools: openSecs.tools ?? toolsActive,
+  }), [openSecs, planActive, toolsActive])
   const toggle = (key: string, fallback: boolean) =>
     setOpenSecs((prev) => ({ ...prev, [key]: !(prev[key] ?? fallback) }))
+
+  // Your World countries → floating menu (fixed-positioned so the rail's overflow
+  // doesn't clip it).
+  const [worldOpen, setWorldOpen] = useState(false)
+  const [worldPos, setWorldPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 })
+  const worldRowRef = useRef<HTMLDivElement>(null)
+  const worldFlyRef = useRef<HTMLDivElement>(null)
+  const openWorld = () => {
+    const r = worldRowRef.current?.getBoundingClientRect()
+    if (r) setWorldPos({ top: r.top, left: r.right + 10 })
+    setWorldOpen(true)
+  }
+  useEffect(() => {
+    if (!worldOpen) return
+    const onDown = (e: MouseEvent) => {
+      const t = e.target as Node
+      if (worldFlyRef.current?.contains(t) || worldRowRef.current?.contains(t)) return
+      setWorldOpen(false)
+    }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setWorldOpen(false) }
+    const onScroll = () => setWorldOpen(false)
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    window.addEventListener('scroll', onScroll, true)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('keydown', onKey)
+      window.removeEventListener('scroll', onScroll, true)
+    }
+  }, [worldOpen])
 
   return (
     <aside className="rail">
@@ -73,37 +101,29 @@ export function Sidebar() {
         }}
       >
         <div className="rail-scroll">
-          {/* Dashboard — standalone primary icon */}
+          {/* Dashboard */}
           <Link className={`sb-item sb-sec${active('/dashboard') ? ' active' : ''}`} href="/dashboard" title="Dashboard">
             <Icon>{ICONS.dashboard}</Icon>
             <span className="lbl">{PRODUCT_COPY.dashboard}</span>
           </Link>
 
-          {/* Explore */}
-          <button
-            type="button"
-            className={`sb-item sb-sec${exploreActive ? ' active' : ''}`}
-            aria-expanded={openState.explore}
-            title="Explore"
-            onClick={() => {
-              if (document.body.classList.contains('rail-collapsed')) { router.push('/your-world'); return }
-              toggle('explore', exploreActive)
-            }}
-          >
-            <Icon>{ICONS.explore}</Icon>
-            <span className="lbl">Explore</span>
-            <svg className="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 9l6 6 6-6" /></svg>
-          </button>
-          <div className="sb-group" hidden={!openState.explore}>
-            <Link className={`sb-sub${active('/your-world') || onCountry ? ' active' : ''}`} href="/your-world">Your World</Link>
-            {matches.map((m) => (
-              <Link key={m.slug} className={`sb-country${pathname.startsWith(`/nextinations/${m.slug}`) ? ' active' : ''}`} href={`/nextinations/${m.slug}/v2/overview`}>
-                <span className="sb-cc">{m.code}</span>
-                <span className="nm">{m.name}</span>
-              </Link>
-            ))}
-            <Link className={`sb-sub${active('/greenbook') ? ' active' : ''}`} href="/greenbook">{PRODUCT_COPY.greenbook}</Link>
-            <Link className={`sb-sub${active('/passportindex') ? ' active' : ''}`} href="/passportindex">PassportIndex</Link>
+          {/* Your World — floating country menu */}
+          <div className="sb-flyout-anchor" ref={worldRowRef}>
+            <Link className={`sb-item sb-sec${worldActive ? ' active' : ''}`} href="/your-world" title="Your World">
+              <Icon>{ICONS.world}</Icon>
+              <span className="lbl">Your World</span>
+            </Link>
+            {matches.length > 0 && (
+              <button
+                type="button"
+                className="sb-flyout-toggle"
+                aria-label="Your destinations"
+                aria-expanded={worldOpen}
+                onClick={() => (worldOpen ? setWorldOpen(false) : openWorld())}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6" /></svg>
+              </button>
+            )}
           </div>
 
           {/* Plan */}
@@ -130,27 +150,34 @@ export function Sidebar() {
               {PRODUCT_COPY.flutterMode}
             </Link>
             <Link className={`sb-sub${active('/documents') ? ' active' : ''}`} href="/documents">{PRODUCT_COPY.documents}</Link>
-            <Link className={`sb-sub${active('/cost-calculator') ? ' active' : ''}`} href="/cost-calculator">{PRODUCT_COPY.costCalculator}</Link>
-            <Link className={`sb-sub${active('/astrocartography') ? ' active' : ''}`} href="/astrocartography">Astrocartography</Link>
           </div>
 
           {/* Connect */}
+          <Link className={`sb-item sb-sec${active('/community') ? ' active' : ''}`} href="/community" title="Connect">
+            <Icon>{ICONS.connect}</Icon>
+            <span className="lbl">{PRODUCT_COPY.kolmariKlub}</span>
+          </Link>
+
+          {/* Tools */}
           <button
             type="button"
-            className={`sb-item sb-sec${connectActive ? ' active' : ''}`}
-            aria-expanded={openState.connect}
-            title="Connect"
+            className={`sb-item sb-sec${toolsActive ? ' active' : ''}`}
+            aria-expanded={openState.tools}
+            title="Tools"
             onClick={() => {
-              if (document.body.classList.contains('rail-collapsed')) { router.push('/community'); return }
-              toggle('connect', connectActive)
+              if (document.body.classList.contains('rail-collapsed')) { router.push('/cost-calculator'); return }
+              toggle('tools', toolsActive)
             }}
           >
-            <Icon>{ICONS.connect}</Icon>
-            <span className="lbl">Connect</span>
+            <Icon>{ICONS.tools}</Icon>
+            <span className="lbl">Tools</span>
             <svg className="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 9l6 6 6-6" /></svg>
           </button>
-          <div className="sb-group" hidden={!openState.connect}>
-            <Link className={`sb-sub${active('/community') ? ' active' : ''}`} href="/community">{PRODUCT_COPY.kolmariKlub}</Link>
+          <div className="sb-group" hidden={!openState.tools}>
+            <Link className={`sb-sub${active('/cost-calculator') ? ' active' : ''}`} href="/cost-calculator">{PRODUCT_COPY.costCalculator}</Link>
+            <Link className={`sb-sub${active('/greenbook') ? ' active' : ''}`} href="/greenbook">{PRODUCT_COPY.greenbook}</Link>
+            <Link className={`sb-sub${active('/passportindex') ? ' active' : ''}`} href="/passportindex">PassportIndex</Link>
+            <Link className={`sb-sub${active('/astrocartography') ? ' active' : ''}`} href="/astrocartography">Astrocartography</Link>
           </div>
         </div>
 
@@ -162,6 +189,29 @@ export function Sidebar() {
           <span className="lbl">Account</span>
         </Link>
       </nav>
+
+      {/* Floating Your World country menu */}
+      {worldOpen && (
+        <div ref={worldFlyRef} className="sb-flyout" style={{ position: 'fixed', top: worldPos.top, left: worldPos.left }} role="menu">
+          <p className="sb-flyout-title">Your destinations</p>
+          {matches.map((m) => (
+            <Link
+              key={m.slug}
+              role="menuitem"
+              className={`sb-fly-item${pathname.startsWith(`/nextinations/${m.slug}`) ? ' active' : ''}`}
+              href={`/nextinations/${m.slug}/v2/overview`}
+              onClick={() => setWorldOpen(false)}
+            >
+              <span className="sb-cc">{m.code}</span>
+              <span className="nm">{m.name}</span>
+            </Link>
+          ))}
+          <Link role="menuitem" className="sb-fly-item sb-fly-all" href="/your-world" onClick={() => setWorldOpen(false)}>
+            <span className="sb-cc" aria-hidden="true">＋</span>
+            <span className="nm">Browse all destinations</span>
+          </Link>
+        </div>
+      )}
     </aside>
   )
 }
