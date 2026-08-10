@@ -303,3 +303,16 @@ URLs are all Kolmari — the pre-rebrand brand has been removed everywhere.
 - The "Nextination" spelling (the `saved_nextination` column, the `/nextinations/`
   country routes) is a separate portmanteau, still present; cleaning it would
   touch a live DB column and every country URL, so it remains a separate decision.
+
+## Command Center — matched to the demo design
+
+Rebuilt the `/command-center` page UI to match the demo (`command-center.html`):
+"Relocation Command Center" title + subtitle, a dark navy **Overall progress**
+banner (gold eyebrow, "N of M checklist items done across K destinations", big
+percentage, gold bar), a full-width add-destination row, destination tabs, five
+category cards (checklist + notes) in a 2-up grid, a **Food & health fit** card
+that resolves the selected destination to its editorial food profile (archetypes,
+allergen prevalence, heart note, disclosure), and a **Who's moving** household
+panel (per-person needs + per-destination fit notes). Same data + mutate API as
+before; only the presentation changed. Renders inside the app's own workspace
+shell (the demo's standalone header/sidebar chrome was not adopted).
