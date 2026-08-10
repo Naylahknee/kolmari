@@ -101,8 +101,13 @@ export function YourWorld({ pins, cards, complete, initialQuery = '' }: { pins: 
         <p className="mt-1 text-sm text-muted">Browse the map or the directory. Selecting a country opens its details; your matches are pinned and ranked from your Kolmari Profile.</p>
       </div>
 
-      {/* Sticky search + filter toolbar */}
-      <div className="sticky top-[56px] z-40 -mx-1 mt-4 px-1 py-1">
+      {/* Matched destinations map (ported from the demo World page) */}
+      <div className="mt-4">
+        <WorldMatchMap pins={pins} />
+      </div>
+
+      {/* Sticky search + filter toolbar — sits between the map and the shortlist */}
+      <div className="sticky top-[56px] z-40 -mx-1 mt-6 px-1 py-1">
         <div className="rounded-[12px] border-[0.8px] border-[#E7EBF1] bg-white px-3.5 py-3 shadow-tile">
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
@@ -137,13 +142,8 @@ export function YourWorld({ pins, cards, complete, initialQuery = '' }: { pins: 
         </div>
       </div>
 
-      {/* Matched destinations map (ported from the demo World page) */}
-      <div className="mt-4">
-        <WorldMatchMap pins={pins} />
-      </div>
-
       {/* Recommended for you — matched + discoverable destinations in one grid */}
-      <div className="mt-8">
+      <div className="mt-6">
         <div className="flex items-end justify-between gap-3">
           <div>
             <h2 className="text-lg font-bold text-navy">Recommended for you</h2>
