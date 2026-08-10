@@ -22,6 +22,8 @@ const pageNames: Record<string, string> = {
   '/community': PRODUCT_COPY.kolmariKlub,
   '/cost-calculator': PRODUCT_COPY.costCalculator,
   '/greenbook': PRODUCT_COPY.greenbook,
+  '/food-fit': PRODUCT_COPY.foodFit,
+  '/energy': PRODUCT_COPY.energyPortal,
   '/passportindex': 'PassportIndex',
   '/documents': PRODUCT_COPY.documents,
   '/settings': PRODUCT_COPY.settings,

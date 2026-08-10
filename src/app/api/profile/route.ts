@@ -1,6 +1,7 @@
 import { getRequestUser } from '@/lib/auth'
 import { isAdminUser } from '@/lib/admin'
 import { getProfile, saveProfile } from '@/lib/profile'
+import { seedCommandCenterFromProfile } from '@/lib/command-center'
 import { profileUpdateSchema } from '@/lib/schemas'
 import { isSameOrigin } from '@/lib/security'
 
@@ -27,7 +28,19 @@ export async function PUT(request: Request) {
     const parsed = profileUpdateSchema.safeParse(await request.json())
     if (!parsed.success) return Response.json({ error: 'Some profile details are invalid.' }, { status: 400 })
     const current = await getProfile(user.id)
-    return Response.json(await saveProfile({ ...current, ...parsed.data, user_id: user.id }))
+    const saved = await saveProfile({ ...current, ...parsed.data, user_id: user.id })
+
+    // First time the wizard reaches "completed", seed the Command Center from the
+    // user's real matches. Best-effort: a seed failure must not fail the save.
+    if (current.wizard_status !== 'completed' && saved.wizard_status === 'completed') {
+      try {
+        await seedCommandCenterFromProfile(user.id, saved)
+      } catch (error) {
+        console.error('Command Center seeding failed', error)
+      }
+    }
+
+    return Response.json(saved)
   } catch (error) {
     console.error('Profile update failed', error)
     return Response.json({ error: 'Unable to save your progress.' }, { status: 500 })

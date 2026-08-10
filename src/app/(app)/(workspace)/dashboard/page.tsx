@@ -13,6 +13,8 @@ import {
 } from '@/lib/kolmari-plan'
 import { getProfile, hasCompletedProfile } from '@/lib/profile'
 import { rankNextinations } from '@/lib/userProfile'
+import { getBoard } from '@/lib/command-center'
+import { DashboardCommandCenterCard } from '@/components/kolmari/dashboard-command-center'
 import { DashboardDeadlinesCard, DashboardPlanningAreasCard } from '@/components/kolmari/dashboard-planning'
 import {
   DashboardActivePathwayCard,
@@ -34,7 +36,7 @@ function savedAtLabel(updatedAt: string | null): string | null {
 
 export default async function DashboardPage() {
   const user = await requireCurrentUser()
-  const [profile, plan] = await Promise.all([getProfile(user.id), getKolmariPlan(user.id)])
+  const [profile, plan, board] = await Promise.all([getProfile(user.id), getKolmariPlan(user.id), getBoard(user.id)])
   const today = new Date()
 
   const complete = hasCompletedProfile(profile)
@@ -131,6 +133,7 @@ export default async function DashboardPage() {
           />
 
           <div className="grid items-start gap-4 [grid-template-columns:repeat(auto-fit,minmax(252px,1fr))]">
+            <DashboardCommandCenterCard board={board} />
             <DashboardDeadlinesCard plan={plan} today={today} />
             <DashboardDestinationsCard rows={destinationRows} ranked={rankedList.length > 0} />
             <DashboardActivePathwayCard
