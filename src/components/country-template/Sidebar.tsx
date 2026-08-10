@@ -153,6 +153,10 @@ export function Sidebar() {
           <Icon><rect x="4" y="3" width="16" height="18" rx="2" /><circle cx="12" cy="10" r="2.5" /><path d="M9 16h6" /></Icon>
           <span className="lbl">PassportIndex</span>
         </Link>
+        <Link className={`sb-item${active('/astrocartography') ? ' active' : ''}`} href="/astrocartography">
+          <Icon><circle cx="12" cy="12" r="9" /><path d="M15.5 8.5l-2 5-5 2 2-5z" /></Icon>
+          <span className="lbl">Astrocartography</span>
+        </Link>
 
         {/* Profile pinned below the content nav, visually separate. */}
         <div className="mt-3 border-t border-line pt-3">

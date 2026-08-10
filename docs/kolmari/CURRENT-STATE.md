@@ -275,3 +275,15 @@ Translated from the demo's D1 prototype to Neon + real per-user auth.
   in the port: feature routes `/nexitnation` → `/your-world`, doc self-references
   `/docs/nexit/` → `/docs/kolmari/`. The `docs/nexit/` originals were left in
   place and can be retired separately.
+
+## Astrocartography (scaffold only)
+
+Owner-approved UX scaffold for a relocation-astrocartography tool at
+`/astrocartography` (sidebar Tools group). Portal/energy framing, a birth-details
+form (date / time / place, "unknown time" option), and a "Map my lines" action.
+Deliberately **no line calculation**: real astrocartography lines need an
+ephemeris (planetary positions) from a data source not yet chosen, and the
+data-integrity rules forbid inventing planetary line positions — so the results
+panel shows an honest "being built" state and a "what your map will show"
+explainer, never a fabricated reading. Birth details live in component state only
+(not sent or persisted). Wiring a real ephemeris source is the follow-up.
