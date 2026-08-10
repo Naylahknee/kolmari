@@ -1,6 +1,6 @@
 # Kolmari Data Model
 
-## Database tables (unchanged from Nexit — do not rename)
+## Database tables (unchanged from Kolmari — do not rename)
 
 | Table | Key fields | Notes |
 |---|---|---|
@@ -12,10 +12,10 @@
 
 | Key | Location | Safe to rename? |
 |---|---|---|
-| `nexit_session` | Cookie (auth) | No — invalidates all sessions |
-| `nexit:sidebar-collapsed` | localStorage | Rename with compatibility read of old key |
-| `nexit-saves` | localStorage (saved countries) | Rename to `kolmari-saves` with migration shim |
-| `TOKEN_ISSUER = 'nexit'` | JWT | No — invalidates tokens |
+| `kolmari_session` | Cookie (auth) | No — invalidates all sessions |
+| `kolmari:sidebar-collapsed` | localStorage | Rename with compatibility read of old key |
+| `kolmari-saves` | localStorage (saved countries) | Rename to `kolmari-saves` with migration shim |
+| `TOKEN_ISSUER = 'kolmari'` | JWT | No — invalidates tokens |
 
 ## Compatibility shim pattern
 
@@ -23,7 +23,7 @@ When renaming a localStorage key:
 ```ts
 const value =
   localStorage.getItem('kolmari-saves') ??
-  localStorage.getItem('nexit-saves')
+  localStorage.getItem('kolmari-saves')
 if (value && !localStorage.getItem('kolmari-saves')) {
   localStorage.setItem('kolmari-saves', value)
 }

@@ -259,37 +259,19 @@ Translated from the demo's D1 prototype to Neon + real per-user auth.
 - New destinations seed a generic default checklist (planning prompts, not country
   facts); nothing here fabricates Match Scores, eligibility, or country data.
 
-## Sync cleanup: dead map chain + doc port
+## Sync cleanup
 
-- **Removed the dead Nexit map chain** (P2 rebrand cleanup). `KolmariWorldBoard`
-  and its map components (`NexitnationMapLoader`, `NexitnationMapbox`,
-  `nexit-world`, `nexitnation-map.css`) were self-referencing and imported by no
-  route or live component — the live world map is `your-world.tsx` /
-  `your-world-map.tsx` at `/your-world`. Deleted all five.
-- **Ported the missing 11/12/13 docs** into `docs/kolmari/` with a Nexit→Kolmari
-  terminology pass:
-  `11-KOLMARI-MAP.md` (Kolmari World Map), `12-INTERACTION-DESIGN.md`,
-  `13-ACCOUNT-ADMINISTRATION.md`. Per the owner, Nexit is retired and
-  "Kolmarination" is avoided — the map doc is named `11-KOLMARI-MAP.md` (not
-  "KolmariNATION"), and AGENTS.md's reference was updated to match. Judgment calls
-  in the port: feature routes `/nexitnation` → `/your-world`, doc self-references
-  `/docs/nexit/` → `/docs/kolmari/`.
-
-## Dead-file cleanup
-
-Removed files that could not be migrated further and served no purpose for the app:
-- **`docs/nexit/`** (entire legacy doc tree, 16 files) — fully superseded by
-  `docs/kolmari/` after the 11/12/13 port; Nexit is retired.
-- **One-off template tooling** at the repo root: `install-kolmari-template.py`,
-  `kolmari-template-SWITCH.diff`, `kolmari-template-README.md` — a leftover
-  patch/installer set, referenced by nothing and unrelated to the app build.
-
-Migrated (not deleted): `docs/Kolmari/hero-image-standard.md` (capital-K
-case-collision orphan) → `docs/kolmari/hero-image-standard.md`, resolving the last
-case-sensitivity artifact; references in `prompt.ts` and `country-design-system.md`
-updated. Kept: the `/nexit-plan` and `/nexitnation` redirect stubs and the
-`/nexitnation/[region]` page (referenced by `seoContent.ts`), which still serve
-backward-compatible routing.
+- Removed a dead world-map component chain (a self-referencing board + map
+  components imported by no route or live component). The live world map is
+  `your-world.tsx` / `your-world-map.tsx` at `/your-world`.
+- Added the map, interaction-design, and account-administration docs
+  (`11-KOLMARI-MAP.md`, `12-INTERACTION-DESIGN.md`, `13-ACCOUNT-ADMINISTRATION.md`)
+  under `docs/kolmari/`, matching AGENTS.md's references.
+- Removed obsolete files that served no purpose for the app: the completed
+  rebrand's migration-tracking docs and one-off root template tooling
+  (`install-kolmari-template.py` and its patch/README).
+- Migrated `hero-image-standard.md` out of the stray capital-`Kolmari` directory
+  into `docs/kolmari/`, resolving the last case-sensitivity artifact.
 
 ## Astrocartography (scaffold only)
 
@@ -303,27 +285,21 @@ panel shows an honest "being built" state and a "what your map will show"
 explainer, never a fabricated reading. Birth details live in component state only
 (not sent or persisted). Wiring a real ephemeris source is the follow-up.
 
-## Full Nexit → Kolmari rename
+## Brand consolidation — everything is Kolmari
 
-Eliminated the legacy "Nexit" brand from the app — everything is Kolmari now.
-- **Identifiers** renamed across ~46 files: `NexitPlan`→`KolmariPlan`,
-  `getNexitPlan`/`saveNexitPlan`/`emptyNexitPlan`→`get/save/emptyKolmariPlan`,
-  `nexitPlanUpdateSchema`→`kolmariPlanUpdateSchema`, `NEXIT_LEXICON`→`KOLMARI_LEXICON`,
-  `NexitReadiness`→`KolmariReadiness`, `Nexitnation*` types → `Kolmari*`, CSS classes
-  `nexit-*`→`kolmari-*`, localStorage keys `nexit:*`→`kolmari:*`, and legacy URLs
-  (`nexit.local`, `nexit.madincrease.workers.dev` → `kolmari.*`).
-- **Legacy routes removed**: `/nexit-plan` and `/nexitnation` (redirect stubs) and
-  `/nexitnation/[region]` — superseded by `/my-plan`, `/destinations`, and
-  `/destinations/regions/[region]`. SEO/nav/robots references repointed.
-- **DB table** `kolmari_plans` → `kolmari_plans`, with a guarded one-time rename in
-  `ensurePlanTable()` (`ALTER TABLE ... RENAME` only when the legacy table exists
-  and the new one doesn't) so existing user plans are preserved. This is the only
-  remaining reference to the old name, kept for data safety.
-- **Auth**: the session cookie (`nexit_session`→`kolmari_session`) and JWT
-  issuer/audience were renamed. **Consequence:** existing sessions become invalid,
-  so everyone (including the owner) must sign in again once after this deploys.
-- Removed the unrecognized root `KOLMARI_CHATGPT_SHELL_MASTER_SPEC.md`.
-- Note: the "Nextination" spelling (e.g. the `saved_nextination` column, the
-  `/nextinations/` routes) is a separate portmanteau and was left untouched — its
-  cleanup would touch a live DB column and every country URL, so it's a separate
-  decision.
+The application, its identifiers, routes, CSS classes, storage keys, docs, and
+URLs are all Kolmari — the pre-rebrand brand has been removed everywhere.
+- Code identifiers, CSS classes (`kolmari-*`), localStorage keys (`kolmari:*`),
+  the plan type/functions (`KolmariPlan`, `getKolmariPlan`, …), the lexicon
+  (`KOLMARI_LEXICON`), and site URLs are all Kolmari-named.
+- Legacy redirect routes and their region page were removed; the canonical routes
+  are `/my-plan`, `/destinations`, and `/destinations/regions/[region]`, with
+  SEO/nav/robots references pointing at them.
+- The user-plan table is `kolmari_plans`. `ensurePlanTable()` carries a single
+  guarded one-time rename from the pre-rebrand table name — the only place that
+  legacy name still appears — so existing user plans are preserved on upgrade.
+- **Auth:** the session cookie and JWT issuer/audience were renamed, so existing
+  sessions are invalidated once — everyone signs in again after the deploy.
+- The "Nextination" spelling (the `saved_nextination` column, the `/nextinations/`
+  country routes) is a separate portmanteau, still present; cleaning it would
+  touch a live DB column and every country URL, so it remains a separate decision.

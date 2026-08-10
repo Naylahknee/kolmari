@@ -66,6 +66,6 @@ See My Next Steps
 
 ## Do not use
 
-- "Nexit", "Nexitnation", "Nextination", "Nexicution", "Nexiter" in public UI
+- "Kolmari", "Kolmari", "Nextination", "Nexicution", "Kolmarier" in public UI
 - Generic travel-product language ("journey", "destination" for a vacation concept)
 - Fabricated scores, Match Scores, or readiness values
