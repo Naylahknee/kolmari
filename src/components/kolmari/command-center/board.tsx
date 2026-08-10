@@ -1,24 +1,40 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
+import { COUNTRIES } from '@/lib/countries'
 import {
   CC_CATEGORIES,
-  categoryProgress,
   destinationProgress,
   householdProgress,
   type CCBoard,
   type CCCategory,
   type CCItem,
 } from '@/lib/command-center-model'
+import { COUNTRY_FOOD_CULTURE } from '@/lib/food-culture/data'
+import {
+  TRACKED_ALLERGENS,
+  ARCHETYPE_LABELS,
+  ALLERGEN_LABELS,
+  PREVALENCE_LABELS,
+  type CountryFoodCulture,
+} from '@/lib/food-culture/types'
 
-/* Relocation Command Center board (client). Multi-destination × 5-category
- * checklist grid + a household-member panel. Every edit posts to
- * /api/command-center/mutate, which returns the fresh board — so the server
- * stays the single source of truth and the UI just replaces state. */
+/* Relocation Command Center board (client) — matches the demo design:
+ * a dark overall-progress banner, a full-width add-destination row, destination
+ * tabs, five category cards with checklists + notes, a Food & Health fit card
+ * that surfaces the selected destination's food profile, and a "Who's moving"
+ * household panel. Every edit posts to /api/command-center/mutate, which returns
+ * the fresh board so the server stays the source of truth. */
+
+// Demo palette (Kolmari brand + supporting slates), kept exact for fidelity.
+const C = {
+  navy: '#17305b', navyDeep: '#0d1b39', gold: '#f3c516', goldHover: '#ffd633',
+  slate: '#5a6a83', slate2: '#42536e', muted: '#9aa6b8', line: '#e7ebf1',
+  goldSoft: '#fdf1c2', goldBorder: '#f3d97a', danger: '#b3261e',
+}
 
 type MutateAction =
   | { type: 'add-destination'; name: string }
-  | { type: 'rename-destination'; id: string; name: string }
   | { type: 'delete-destination'; id: string }
   | { type: 'add-item'; destinationId: string; category: CCCategory; text: string }
   | { type: 'toggle-item'; id: string; checked: boolean }
@@ -29,16 +45,24 @@ type MutateAction =
   | { type: 'delete-member'; id: string }
   | { type: 'upsert-member-note'; memberId: string; destinationId: string; body: string }
 
-function Bar({ done, total }: { done: number; total: number }) {
-  const pct = total > 0 ? Math.round((done / total) * 100) : 0
-  return (
-    <div className="flex items-center gap-2">
-      <span className="h-1.5 flex-1 overflow-hidden rounded-pill bg-[#eef1f6]">
-        <span className="block h-full rounded-pill bg-gold" style={{ width: `${pct}%` }} />
-      </span>
-      <span className="w-10 shrink-0 text-right text-[11px] font-bold text-navy">{done}/{total}</span>
-    </div>
-  )
+function slugify(s: string) {
+  return s.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+}
+function resolveFood(name: string): { entry: CountryFoodCulture; countryName: string; exact: boolean } | null {
+  const lower = name.trim().toLowerCase()
+  const bySlug = COUNTRY_FOOD_CULTURE[slugify(name)]
+  if (bySlug) return { entry: bySlug, countryName: displayName(bySlug.countrySlug), exact: displayName(bySlug.countrySlug).toLowerCase() === lower }
+  for (const key of Object.keys(COUNTRY_FOOD_CULTURE)) {
+    if (displayName(key).toLowerCase() === lower) {
+      return { entry: COUNTRY_FOOD_CULTURE[key], countryName: displayName(key), exact: true }
+    }
+  }
+  return null
+}
+function displayName(slug: string) {
+  const known = COUNTRIES.find((c) => c.slug === slug)
+  if (known) return known.name
+  return slug.split('-').map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w)).join(' ')
 }
 
 export function CommandCenterBoard({ initial }: { initial: CCBoard }) {
@@ -46,6 +70,7 @@ export function CommandCenterBoard({ initial }: { initial: CCBoard }) {
   const [activeId, setActiveId] = useState<string | null>(initial.destinations[0]?.id ?? null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [newDest, setNewDest] = useState('')
 
   const mutate = useCallback(async (action: MutateAction, opts?: { selectNewest?: boolean }) => {
     setBusy(true)
@@ -78,66 +103,105 @@ export function CommandCenterBoard({ initial }: { initial: CCBoard }) {
   }, [])
 
   const activeDest = board.destinations.find((d) => d.id === activeId) ?? null
-  const household = householdProgress(board.items)
+  const overall = householdProgress(board.items)
+  const overallPct = overall.total ? Math.round((overall.done / overall.total) * 100) : 0
+
+  const addDestination = () => {
+    const v = newDest.trim()
+    if (!v) return
+    setNewDest('')
+    mutate({ type: 'add-destination', name: v }, { selectNewest: true })
+  }
 
   return (
-    <div className="space-y-5">
+    <div style={{ fontFamily: 'inherit', color: C.navy }}>
       {error && (
-        <p className="rounded-[var(--radius-field)] border border-danger/30 bg-[#fde9ec] px-3 py-2 text-xs font-semibold text-[#b3243c]">{error}</p>
+        <div style={{ marginBottom: 18, padding: '12px 15px', background: '#fdecea', border: '1px solid #f5c6c3', borderRadius: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 13.5, color: C.danger }}>{error}</span>
+          <button type="button" onClick={() => setError('')} style={{ fontSize: 12, fontWeight: 600, color: C.danger, background: 'none', border: 'none', cursor: 'pointer' }}>Dismiss</button>
+        </div>
       )}
 
-      {/* Destination switcher + household roll-up */}
-      <section className="rounded-[var(--radius-card)] border border-line bg-white p-4 shadow-tile">
-        <div className="flex flex-wrap items-center gap-2">
-          {board.destinations.map((d) => {
-            const p = destinationProgress(board.items, d.id)
-            const on = d.id === activeId
-            return (
-              <button
-                key={d.id}
-                type="button"
-                onClick={() => setActiveId(d.id)}
-                aria-pressed={on}
-                className={`rounded-pill border px-3 py-1.5 text-xs font-semibold transition ${
-                  on ? 'border-navy bg-navy text-white' : 'border-line bg-white text-navy hover:border-navy/40'
-                }`}
-              >
-                {d.name}
-                <span className={`ml-1.5 ${on ? 'text-white/70' : 'text-muted'}`}>{p.done}/{p.total}</span>
-              </button>
-            )
-          })}
-          <AddDestination busy={busy} onAdd={(name) => mutate({ type: 'add-destination', name }, { selectNewest: true })} />
-        </div>
-        {board.destinations.length > 0 && (
-          <div className="mt-3 border-t border-line pt-3">
-            <p className="mb-1 text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted-soft">Household progress across all destinations</p>
-            <Bar done={household.done} total={household.total} />
+      {/* Title */}
+      <div style={{ marginBottom: 20 }}>
+        <h1 style={{ margin: 0, fontFamily: 'var(--font-display, Poppins), sans-serif', fontWeight: 700, fontSize: 27, letterSpacing: '-.02em' }}>Relocation Command Center</h1>
+        <p style={{ margin: '8px 0 0', fontSize: 14, color: C.slate, maxWidth: 560 }}>
+          Compare the places you&rsquo;re considering against work, visa, schools, safety, community — and what each person in your household needs.
+        </p>
+      </div>
+
+      {/* Overall progress banner */}
+      <div style={{ background: C.navyDeep, borderRadius: 16, padding: '20px 22px', color: '#fff', marginBottom: 22 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+          <div>
+            <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: C.gold }}>Overall progress</p>
+            <p style={{ margin: '6px 0 0', fontSize: 14, color: '#c8d3e6' }}>
+              {overall.done} of {overall.total} checklist items done across {board.destinations.length} destination{board.destinations.length === 1 ? '' : 's'}
+            </p>
           </div>
-        )}
-      </section>
+          <span style={{ fontFamily: 'var(--font-display, Poppins), sans-serif', fontWeight: 700, fontSize: 34, lineHeight: 1 }}>{overallPct}%</span>
+        </div>
+        <div style={{ marginTop: 14, height: 8, background: 'rgba(255,255,255,.14)', borderRadius: 5, overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${overallPct}%`, background: C.gold, borderRadius: 'inherit', transition: 'width .2s' }} />
+        </div>
+      </div>
+
+      {/* Add destination */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center', marginBottom: 24 }}>
+        <input
+          value={newDest}
+          onChange={(e) => setNewDest(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && addDestination()}
+          placeholder="Add a destination — e.g. Lisbon, Mexico City"
+          style={{ flex: 1, minWidth: 220, fontSize: 14.5, color: C.navy, background: '#fff', border: `1.5px solid #dde3ec`, borderRadius: 12, padding: '12px 15px', outline: 'none' }}
+        />
+        <button
+          type="button"
+          onClick={addDestination}
+          disabled={busy || !newDest.trim()}
+          style={{ fontSize: 14, fontWeight: 700, color: C.navy, background: C.gold, border: 'none', borderRadius: 999, padding: '12px 22px', cursor: 'pointer', opacity: busy || !newDest.trim() ? 0.6 : 1 }}
+        >
+          Add destination
+        </button>
+      </div>
 
       {board.destinations.length === 0 ? (
-        <div className="rounded-[var(--radius-card)] border border-dashed border-line bg-[#fafbfd] p-10 text-center">
-          <p className="text-sm font-semibold text-navy">Add your first destination</p>
-          <p className="mx-auto mt-1 max-w-md text-xs text-muted">
-            Each destination gets its own checklist across work, visa, schools, safety, and community — so you can
-            compare what a move to each one really takes.
+        <div style={{ textAlign: 'center', padding: '48px 24px', background: '#fff', border: `1px dashed #cfd7e3`, borderRadius: 16 }}>
+          <h2 style={{ margin: 0, fontFamily: 'var(--font-display, Poppins), sans-serif', fontWeight: 700, fontSize: 20 }}>No destinations yet</h2>
+          <p style={{ margin: '10px auto 0', maxWidth: 400, fontSize: 14, color: C.slate, lineHeight: 1.6 }}>
+            Add the first place you&rsquo;re considering above. We&rsquo;ll set up a research checklist across all five categories so you can start comparing right away.
           </p>
         </div>
       ) : activeDest ? (
         <>
-          {/* Rename / delete the active destination */}
-          <DestinationHeader
-            key={activeDest.id}
+          {/* Destination tabs */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 18 }}>
+            {board.destinations.map((d) => {
+              const on = d.id === activeId
+              return (
+                <button
+                  key={d.id}
+                  type="button"
+                  onClick={() => setActiveId(d.id)}
+                  style={{ fontSize: 13.5, fontWeight: 600, color: on ? C.navy : C.slate2, background: on ? C.goldSoft : '#fff', border: `1.5px solid ${on ? C.gold : '#dde3ec'}`, borderRadius: 999, padding: '8px 16px', cursor: 'pointer' }}
+                >
+                  {d.name}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Selected destination header */}
+          <SelectedHeader
+            board={board}
+            destId={activeDest.id}
             name={activeDest.name}
             busy={busy}
-            onRename={(name) => mutate({ type: 'rename-destination', id: activeDest.id, name })}
-            onDelete={() => mutate({ type: 'delete-destination', id: activeDest.id })}
+            onDelete={() => { if (window.confirm('Remove this destination and everything under it?')) mutate({ type: 'delete-destination', id: activeDest.id }) }}
           />
 
-          {/* 5 category cards */}
-          <div className="grid gap-4 md:grid-cols-2">
+          {/* Category cards */}
+          <div className="cc-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 26 }}>
             {CC_CATEGORIES.map((c) => (
               <CategoryCard
                 key={c.key}
@@ -152,85 +216,31 @@ export function CommandCenterBoard({ initial }: { initial: CCBoard }) {
             ))}
           </div>
 
-          {/* Household member panel */}
-          <MemberPanel board={board} destinationId={activeDest.id} busy={busy} mutate={mutate} />
+          {/* Food & health fit */}
+          <FoodFitCard destName={activeDest.name} />
+
+          {/* Who's moving */}
+          <MemberPanel board={board} destinationId={activeDest.id} destName={activeDest.name} busy={busy} mutate={mutate} />
         </>
       ) : null}
+
+      <style>{`@media (max-width: 760px){ .cc-grid{ grid-template-columns: 1fr !important; } }`}</style>
     </div>
   )
 }
 
-function AddDestination({ busy, onAdd }: { busy: boolean; onAdd: (name: string) => void }) {
-  const [value, setValue] = useState('')
-  const submit = () => {
-    const v = value.trim()
-    if (!v) return
-    onAdd(v)
-    setValue('')
-  }
+function SelectedHeader({
+  board, destId, name, busy, onDelete,
+}: { board: CCBoard; destId: string; name: string; busy: boolean; onDelete: () => void }) {
+  const p = destinationProgress(board.items, destId)
+  const pct = p.total ? Math.round((p.done / p.total) * 100) : 0
   return (
-    <div className="inline-flex items-center gap-1.5">
-      <input
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && submit()}
-        placeholder="Add destination"
-        className="w-36 rounded-pill border border-line px-3 py-1.5 text-xs text-navy outline-none focus:border-navy/40"
-      />
-      <button
-        type="button"
-        onClick={submit}
-        disabled={busy || !value.trim()}
-        className="rounded-pill bg-gold px-3 py-1.5 text-xs font-bold text-navy-deep transition hover:bg-[#e0b40c] disabled:opacity-50"
-      >
-        Add
-      </button>
-    </div>
-  )
-}
-
-function DestinationHeader({
-  name, busy, onRename, onDelete,
-}: { name: string; busy: boolean; onRename: (name: string) => void; onDelete: () => void }) {
-  const [editing, setEditing] = useState(false)
-  const [draft, setDraft] = useState(name)
-  const [confirm, setConfirm] = useState(false)
-
-  return (
-    <div className="flex items-center justify-between gap-3">
-      {editing ? (
-        <div className="flex items-center gap-2">
-          <input
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            className="rounded-[var(--radius-field)] border border-line px-3 py-1.5 text-lg font-bold text-navy outline-none focus:border-navy/40"
-            autoFocus
-          />
-          <button
-            type="button"
-            disabled={busy || !draft.trim()}
-            onClick={() => { onRename(draft.trim()); setEditing(false) }}
-            className="rounded-[var(--radius-field)] bg-navy px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50"
-          >
-            Save
-          </button>
-          <button type="button" onClick={() => { setDraft(name); setEditing(false) }} className="text-xs font-semibold text-muted">Cancel</button>
-        </div>
-      ) : (
-        <h2 className="text-xl font-bold text-navy">
-          {name}
-          <button type="button" onClick={() => setEditing(true)} className="ml-2 text-xs font-semibold text-info hover:text-navy">Rename</button>
-        </h2>
-      )}
-      {confirm ? (
-        <span className="flex items-center gap-2 text-xs">
-          <span className="text-muted">Remove this destination?</span>
-          <button type="button" disabled={busy} onClick={onDelete} className="font-bold text-[#b3243c]">Remove</button>
-          <button type="button" onClick={() => setConfirm(false)} className="font-semibold text-muted">Keep</button>
-        </span>
-      ) : (
-        <button type="button" onClick={() => setConfirm(true)} className="text-xs font-semibold text-muted hover:text-[#b3243c]">Remove</button>
-      )}
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
+      <div>
+        <h2 style={{ margin: 0, fontFamily: 'var(--font-display, Poppins), sans-serif', fontWeight: 700, fontSize: 22 }}>{name}</h2>
+        <p style={{ margin: '5px 0 0', fontSize: 13, color: C.slate }}>{p.total ? `${p.done} of ${p.total} done · ${pct}%` : 'No checklist items yet'}</p>
+      </div>
+      <button type="button" disabled={busy} onClick={onDelete} style={{ fontSize: 12.5, fontWeight: 600, color: C.danger, background: '#fff', border: '1px solid #f2cfcb', borderRadius: 999, padding: '8px 14px', cursor: 'pointer' }}>Remove destination</button>
     </div>
   )
 }
@@ -246,154 +256,193 @@ function CategoryCard({
   busy: boolean
   mutate: (a: MutateAction) => void
 }) {
-  const scoped = items
-    .filter((i) => i.destinationId === destinationId && i.category === category)
-    .sort((a, b) => a.position - b.position)
-  const p = categoryProgress(items, destinationId, category)
-  const [newItem, setNewItem] = useState('')
+  const scoped = items.filter((i) => i.destinationId === destinationId && i.category === category).sort((a, b) => a.position - b.position)
+  const done = scoped.filter((i) => i.checked).length
+  const pct = scoped.length ? Math.round((done / scoped.length) * 100) : 0
+  const [newText, setNewText] = useState('')
+  const [noteDraft, setNoteDraft] = useState(note)
 
   const addItem = () => {
-    const v = newItem.trim()
+    const v = newText.trim()
     if (!v) return
+    setNewText('')
     mutate({ type: 'add-item', destinationId, category, text: v })
-    setNewItem('')
   }
 
   return (
-    <section className="flex flex-col rounded-[var(--radius-card)] border border-line bg-white p-4 shadow-tile">
-      <div className="mb-2">
-        <div className="flex items-center justify-between gap-2">
-          <h3 className="text-sm font-bold text-navy">{label}</h3>
-        </div>
-        <div className="mt-1.5"><Bar done={p.done} total={p.total} /></div>
+    <div style={{ background: '#fff', border: `1px solid ${C.line}`, borderRadius: 14, padding: '16px 17px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+        <h3 style={{ margin: 0, fontFamily: 'var(--font-display, Poppins), sans-serif', fontWeight: 700, fontSize: 15.5 }}>{label}</h3>
+        <span style={{ fontSize: 12, fontWeight: 600, color: C.slate }}>{done}/{scoped.length}</span>
+      </div>
+      <div style={{ margin: '11px 0 13px', height: 6, background: '#eef1f6', borderRadius: 4, overflow: 'hidden' }}>
+        <div style={{ height: '100%', width: `${pct}%`, background: C.gold, borderRadius: 'inherit', transition: 'width .2s' }} />
       </div>
 
-      <ul className="space-y-1.5">
-        {scoped.map((item) => (
-          <li key={item.id} className="group flex items-start gap-2">
-            <input
-              type="checkbox"
-              checked={item.checked}
-              disabled={busy}
-              onChange={(e) => mutate({ type: 'toggle-item', id: item.id, checked: e.target.checked })}
-              className="mt-0.5 h-4 w-4 shrink-0 accent-[color:var(--color-gold-deep)]"
-            />
-            <span className={`flex-1 text-[13px] leading-5 ${item.checked ? 'text-muted line-through' : 'text-navy'}`}>{item.text}</span>
-            <button
-              type="button"
-              onClick={() => mutate({ type: 'delete-item', id: item.id })}
-              className="shrink-0 text-[11px] font-semibold text-muted opacity-0 transition group-hover:opacity-100 hover:text-[#b3243c]"
-              aria-label="Remove task"
-            >
-              ✕
-            </button>
-          </li>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+        {scoped.map((i) => (
+          <div key={i.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 9 }}>
+            <input type="checkbox" checked={i.checked} disabled={busy} onChange={(e) => mutate({ type: 'toggle-item', id: i.id, checked: e.target.checked })} style={{ width: 17, height: 17, marginTop: 1, accentColor: C.gold, cursor: 'pointer', flex: '0 0 auto' }} />
+            <span style={{ fontSize: 13, lineHeight: 1.45, color: i.checked ? C.muted : C.navy, textDecoration: i.checked ? 'line-through' : 'none' }}>{i.text}</span>
+            <button type="button" onClick={() => mutate({ type: 'delete-item', id: i.id })} aria-label="Remove item" style={{ marginLeft: 'auto', fontSize: 15, lineHeight: 1, color: '#c2ccda', background: 'none', border: 'none', cursor: 'pointer', flex: '0 0 auto' }}>×</button>
+          </div>
         ))}
-        {scoped.length === 0 && <li className="text-[12px] text-muted-soft">No tasks yet.</li>}
-      </ul>
-
-      <div className="mt-2 flex items-center gap-1.5">
-        <input
-          value={newItem}
-          onChange={(e) => setNewItem(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && addItem()}
-          placeholder="Add a task"
-          className="flex-1 rounded-[var(--radius-field)] border border-line px-2.5 py-1.5 text-xs text-navy outline-none focus:border-navy/40"
-        />
-        <button type="button" onClick={addItem} disabled={busy || !newItem.trim()} className="rounded-[var(--radius-field)] border border-line px-2.5 py-1.5 text-xs font-bold text-navy disabled:opacity-50">Add</button>
       </div>
 
-      <NoteField
-        key={`${destinationId}:${category}`}
-        label="Notes"
-        initial={note}
-        busy={busy}
-        onSave={(body) => mutate({ type: 'upsert-note', destinationId, category, body })}
-      />
-    </section>
-  )
-}
+      <div style={{ display: 'flex', gap: 7, marginTop: 11 }}>
+        <input value={newText} onChange={(e) => setNewText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addItem()} placeholder="Add an item…" style={{ flex: 1, minWidth: 0, fontSize: 13, color: C.navy, background: '#f7f8fb', border: '1px solid #e4e8f0', borderRadius: 9, padding: '8px 10px', outline: 'none' }} />
+        <button type="button" onClick={addItem} disabled={busy || !newText.trim()} style={{ fontSize: 13, fontWeight: 600, color: C.navy, background: '#eef1f6', border: 'none', borderRadius: 9, padding: '8px 12px', cursor: 'pointer' }}>Add</button>
+      </div>
 
-function NoteField({
-  label, initial, busy, onSave,
-}: { label: string; initial: string; busy: boolean; onSave: (body: string) => void }) {
-  const [value, setValue] = useState(initial)
-  return (
-    <div className="mt-3">
-      <label className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted-soft">{label}</label>
       <textarea
-        value={value}
+        value={noteDraft}
         disabled={busy}
-        onChange={(e) => setValue(e.target.value)}
-        onBlur={() => { if (value !== initial) onSave(value) }}
+        onChange={(e) => setNoteDraft(e.target.value)}
+        onBlur={() => { if (noteDraft !== note) mutate({ type: 'upsert-note', destinationId, category, body: noteDraft }) }}
+        placeholder="Notes for this category…"
         rows={2}
-        placeholder="Add a note…"
-        className="mt-1 w-full resize-y rounded-[var(--radius-field)] border border-line bg-[#fafbfd] px-2.5 py-1.5 text-[12px] leading-5 text-navy outline-none focus:border-navy/40"
+        style={{ marginTop: 10, width: '100%', fontSize: 13, color: C.slate2, background: '#fbfcfe', border: '1px solid #e4e8f0', borderRadius: 9, padding: '9px 11px', outline: 'none', lineHeight: 1.5, resize: 'vertical' }}
       />
     </div>
   )
 }
 
+function FoodFitCard({ destName }: { destName: string }) {
+  const match = useMemo(() => resolveFood(destName), [destName])
+  if (!match) {
+    return (
+      <div style={{ background: '#fbfcfe', border: '1px dashed #d7dee8', borderRadius: 14, padding: '14px 16px', marginBottom: 26 }}>
+        <p style={{ margin: 0, fontSize: 13, color: C.slate }}>No food &amp; health profile matched &ldquo;{destName}&rdquo; yet — try a country name.</p>
+      </div>
+    )
+  }
+  const { entry, countryName, exact } = match
+  return (
+    <div style={{ background: '#fff', border: `1px solid ${C.line}`, borderRadius: 16, padding: '18px 19px', marginBottom: 26 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10, flexWrap: 'wrap' }}>
+        <div>
+          <h2 style={{ margin: 0, fontFamily: 'var(--font-display, Poppins), sans-serif', fontWeight: 700, fontSize: 18 }}>Food &amp; health fit</h2>
+          <p style={{ margin: '5px 0 0', fontSize: 12.5, color: C.muted }}>{exact ? `Everyday cuisine in ${countryName}` : `Based on ${countryName}`}</p>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 12 }}>
+        {entry.archetypes.map((a) => (
+          <span key={a} style={{ fontSize: 11.5, fontWeight: 600, borderRadius: 8, padding: '4px 9px', background: '#f4f6fa', color: C.slate, border: `1px solid ${C.line}` }}>{ARCHETYPE_LABELS[a]}</span>
+        ))}
+      </div>
+
+      <p style={{ margin: '13px 0 6px', fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: C.muted }}>Allergen prevalence in everyday food</p>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+        {TRACKED_ALLERGENS.map((a) => {
+          const prev = entry.allergenPrevalence[a]
+          const common = prev === 'common'
+          return (
+            <span key={a} style={{ fontSize: 11.5, fontWeight: 600, borderRadius: 8, padding: '4px 9px', border: `1px solid ${common ? '#f0b1a8' : '#eef1f6'}`, background: common ? '#fdecea' : '#fbfcfe', color: common ? '#a23b2e' : '#8a97ab' }}>
+              {ALLERGEN_LABELS[a]} · {PREVALENCE_LABELS[prev].toLowerCase()}
+            </span>
+          )
+        })}
+      </div>
+
+      <p style={{ margin: '12px 0 0', fontSize: 12.5, lineHeight: 1.55, color: C.slate2 }}><strong style={{ color: C.navy }}>Heart note.</strong> {entry.cardioNote}</p>
+      <p style={{ margin: '13px 0 0', paddingTop: 11, borderTop: '1px solid #f0f2f6', fontSize: 11, lineHeight: 1.5, color: C.muted }}>
+        Kolmari editorial assessment · reviewed {entry.lastReviewed}
+      </p>
+    </div>
+  )
+}
+
 function MemberPanel({
-  board, destinationId, busy, mutate,
+  board, destinationId, destName, busy, mutate,
 }: {
   board: CCBoard
   destinationId: string
+  destName: string
   busy: boolean
   mutate: (a: MutateAction) => void
 }) {
   const members = [...board.members].sort((a, b) => a.position - b.position)
   const [name, setName] = useState('')
   const [age, setAge] = useState('')
-  const [needs, setNeeds] = useState('')
 
   const addMember = () => {
     const n = name.trim()
     if (!n) return
     const parsedAge = age.trim() ? Number(age) : null
-    mutate({ type: 'add-member', name: n, age: Number.isFinite(parsedAge) ? parsedAge : null, needs: needs.trim() })
-    setName(''); setAge(''); setNeeds('')
+    setName(''); setAge('')
+    mutate({ type: 'add-member', name: n, age: Number.isFinite(parsedAge) ? parsedAge : null, needs: '' })
   }
 
   return (
-    <section className="rounded-[var(--radius-card)] border border-line bg-white p-4 shadow-tile">
-      <h3 className="text-sm font-bold text-navy">Household</h3>
-      <p className="mt-0.5 text-xs text-muted">Who&rsquo;s moving, and how each destination addresses their needs.</p>
-
-      <ul className="mt-3 space-y-3">
-        {members.map((m) => {
-          const mn = board.memberNotes.find((x) => x.memberId === m.id && x.destinationId === destinationId)?.body ?? ''
-          return (
-            <li key={m.id} className="rounded-[var(--radius-field)] border border-line p-3">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <p className="text-[13px] font-bold text-navy">
-                    {m.name}
-                    {m.age != null && <span className="ml-1.5 text-xs font-normal text-muted">age {m.age}</span>}
-                  </p>
-                  {m.needs && <p className="mt-0.5 text-xs text-muted">{m.needs}</p>}
-                </div>
-                <button type="button" onClick={() => mutate({ type: 'delete-member', id: m.id })} className="text-[11px] font-semibold text-muted hover:text-[#b3243c]">Remove</button>
-              </div>
-              <NoteField
-                key={`${m.id}:${destinationId}`}
-                label="How this destination fits"
-                initial={mn}
-                busy={busy}
-                onSave={(body) => mutate({ type: 'upsert-member-note', memberId: m.id, destinationId, body })}
-              />
-            </li>
-          )
-        })}
-        {members.length === 0 && <li className="text-[12px] text-muted-soft">No household members added yet.</li>}
-      </ul>
-
-      <div className="mt-3 grid gap-2 border-t border-line pt-3 sm:grid-cols-[1fr_80px_1.4fr_auto]">
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" className="rounded-[var(--radius-field)] border border-line px-2.5 py-1.5 text-xs text-navy outline-none focus:border-navy/40" />
-        <input value={age} onChange={(e) => setAge(e.target.value.replace(/[^0-9]/g, ''))} placeholder="Age" inputMode="numeric" className="rounded-[var(--radius-field)] border border-line px-2.5 py-1.5 text-xs text-navy outline-none focus:border-navy/40" />
-        <input value={needs} onChange={(e) => setNeeds(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addMember()} placeholder="Needs (e.g. allergy-safe school)" className="rounded-[var(--radius-field)] border border-line px-2.5 py-1.5 text-xs text-navy outline-none focus:border-navy/40" />
-        <button type="button" onClick={addMember} disabled={busy || !name.trim()} className="rounded-[var(--radius-field)] bg-navy px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50">Add</button>
+    <div style={{ background: '#fff', border: `1px solid ${C.line}`, borderRadius: 16, padding: '18px 19px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
+        <h2 style={{ margin: 0, fontFamily: 'var(--font-display, Poppins), sans-serif', fontWeight: 700, fontSize: 18 }}>Who&rsquo;s moving</h2>
+        <span style={{ fontSize: 12.5, color: C.muted }}>How {destName} works for each person</span>
       </div>
-    </section>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 14 }}>
+        {members.map((m) => (
+          <MemberCard
+            key={m.id}
+            member={m}
+            destinationId={destinationId}
+            destName={destName}
+            memberNote={board.memberNotes.find((x) => x.memberId === m.id && x.destinationId === destinationId)?.body ?? ''}
+            busy={busy}
+            mutate={mutate}
+          />
+        ))}
+        {members.length === 0 && <p style={{ margin: 0, fontSize: 13, color: C.muted }}>No one added yet.</p>}
+      </div>
+
+      <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #eef1f6', display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+        <input value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addMember()} placeholder="Name" style={{ flex: 2, minWidth: 120, fontSize: 13.5, color: C.navy, background: '#fff', border: '1px solid #dde3ec', borderRadius: 9, padding: '9px 11px', outline: 'none' }} />
+        <input value={age} onChange={(e) => setAge(e.target.value.replace(/[^0-9]/g, ''))} inputMode="numeric" placeholder="Age" style={{ flex: '0 0 82px', width: 82, fontSize: 13.5, color: C.navy, background: '#fff', border: '1px solid #dde3ec', borderRadius: 9, padding: '9px 11px', outline: 'none' }} />
+        <button type="button" onClick={addMember} disabled={busy || !name.trim()} style={{ fontSize: 13.5, fontWeight: 700, color: C.navy, background: C.gold, border: 'none', borderRadius: 999, padding: '9px 18px', cursor: 'pointer', opacity: busy || !name.trim() ? 0.6 : 1 }}>Add person</button>
+      </div>
+    </div>
+  )
+}
+
+function MemberCard({
+  member, destinationId, destName, memberNote, busy, mutate,
+}: {
+  member: CCBoard['members'][number]
+  destinationId: string
+  destName: string
+  memberNote: string
+  busy: boolean
+  mutate: (a: MutateAction) => void
+}) {
+  const [needs, setNeeds] = useState(member.needs)
+  const [note, setNote] = useState(memberNote)
+  const ageTxt = member.age != null ? `, ${member.age}` : ''
+
+  return (
+    <div style={{ border: '1px solid #eef1f6', borderRadius: 12, padding: '13px 14px', background: '#fbfcfe' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+        <p style={{ margin: 0, fontSize: 14.5, fontWeight: 700, color: C.navy }}>{member.name}{ageTxt}</p>
+        <button type="button" onClick={() => { if (window.confirm('Remove this person?')) mutate({ type: 'delete-member', id: member.id }) }} style={{ fontSize: 12, fontWeight: 600, color: C.danger, background: 'none', border: 'none', cursor: 'pointer' }}>Remove</button>
+      </div>
+      <textarea
+        value={needs}
+        disabled={busy}
+        onChange={(e) => setNeeds(e.target.value)}
+        onBlur={() => { if (needs !== member.needs) mutate({ type: 'edit-member', id: member.id, name: member.name, age: member.age, needs }) }}
+        placeholder="What this person needs (e.g. school continuity, an established friend group)…"
+        rows={2}
+        style={{ marginTop: 9, width: '100%', fontSize: 13, color: C.slate2, background: '#fff', border: '1px solid #e4e8f0', borderRadius: 9, padding: '9px 11px', outline: 'none', lineHeight: 1.5, resize: 'vertical' }}
+      />
+      <textarea
+        value={note}
+        disabled={busy}
+        onChange={(e) => setNote(e.target.value)}
+        onBlur={() => { if (note !== memberNote) mutate({ type: 'upsert-member-note', memberId: member.id, destinationId, body: note }) }}
+        placeholder={`How does ${destName} address this for ${member.name}?`}
+        rows={2}
+        style={{ marginTop: 8, width: '100%', fontSize: 13, color: C.slate2, background: '#fff', border: '1px solid #e4e8f0', borderRadius: 9, padding: '9px 11px', outline: 'none', lineHeight: 1.5, resize: 'vertical' }}
+      />
+    </div>
   )
 }
