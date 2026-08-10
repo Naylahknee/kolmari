@@ -352,6 +352,8 @@ body.rail-collapsed .sb-label,
 body.rail-collapsed .sb-item .lbl,
 body.rail-collapsed .sb-item .chev,
 body.rail-collapsed .sb-tree,
+body.rail-collapsed .sb-group,
+body.rail-collapsed .sb-user .lbl,
 body.rail-collapsed .sb-div,
 body.rail-collapsed .readiness { display: none; }
 body.rail-collapsed .sb-item { justify-content: center; padding: 10px 0; gap: 0; }
@@ -404,6 +406,8 @@ body.rail-collapsed .sb-item .ic {
   body.rail-collapsed .sb-item .lbl,
   body.rail-collapsed .sb-item .chev,
   body.rail-collapsed .sb-tree,
+  body.rail-collapsed .sb-group,
+  body.rail-collapsed .sb-user .lbl,
   body.rail-collapsed .sb-div,
   body.rail-collapsed .readiness { display: revert; }
   body.rail-collapsed .sb-item {
@@ -437,3 +441,24 @@ body.rail-collapsed .sb-item .ic {
   body.rail-collapsed .main.workspace-main { padding: 12px; }
   .main.workspace-main > * { min-width: 0; max-width: 100%; }
 }
+
+/* ── Collapsible sidebar sections + bottom account avatar ─────────────── */
+.rail-nav { display: flex; flex-direction: column; min-height: 100%; }
+.rail-scroll { flex: 1 1 auto; }
+
+.sb-sec .chev { margin-left: auto; }
+.sb-group { margin: 1px 0 6px; }
+.sb-group[hidden] { display: none; }
+.sb-sub { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 7px 10px 7px 40px; border-radius: var(--radius-sidebar-row); color: #cfd9ea; font-size: 13px; font-weight: 500; transition: .14s; margin-bottom: 1px; }
+.sb-sub:hover { background: rgba(255,255,255,.05); color: #fff; }
+.sb-sub.active { background: rgba(255,255,255,.09); color: #fff; font-weight: 600; }
+.sb-sub-bf { width: 16px; height: 16px; flex: 0 0 auto; margin-left: -2px; }
+.sb-group .sb-country { padding-left: 34px; }
+
+.sb-user { display: flex; align-items: center; gap: 11px; margin-top: auto; padding: 10px 8px; border-radius: var(--radius-sidebar-row); color: #cfd9ea; font-size: 13.5px; font-weight: 600; transition: .14s; }
+.sb-user:hover { background: rgba(255,255,255,.05); color: #fff; }
+.sb-user.active { background: rgba(255,255,255,.09); color: #fff; }
+.sb-user-av { width: 34px; height: 34px; flex: 0 0 auto; border-radius: 50%; background: var(--color-gold); color: var(--color-navy-deep); display: grid; place-items: center; }
+
+/* Collapsed rail → only the four section icons + the account avatar. */
+body.rail-collapsed .sb-user { justify-content: center; margin-left: auto; margin-right: auto; padding: 8px 0; width: 40px; }
