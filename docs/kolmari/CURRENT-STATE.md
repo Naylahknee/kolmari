@@ -225,3 +225,14 @@ depend on someone sitting in the admin panel:
 Both paths reuse `generateCountryHero`/`defaultHeroInput` in
 `src/lib/country-visuals/generate.ts`. Only the decorative hero image is ever
 auto-generated — page content and figures are never fabricated.
+
+## Sync housekeeping (demo → app)
+
+- **AGENTS.md case fix.** AGENTS.md referenced `/docs/Kolmari/` (capital K); the
+  real folder is `/docs/kolmari/` (lowercase). On case-sensitive build/CI
+  environments those doc lookups silently missed. All references corrected to
+  lowercase. (Note: a near-empty `docs/Kolmari/` dir still holds one orphan file,
+  `hero-image-standard.md`; left in place — not referenced by the fixed paths.)
+- **Removed stray `/app.html`.** A 2.4 MB root-level copy of the demo's built SPA
+  bundle (byte-identical to `kolmari-demo/public/app.html`), unrelated to
+  `src/app/` and referenced by nothing in the repo. Deleted.
