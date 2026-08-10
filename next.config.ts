@@ -10,7 +10,7 @@ const csp = [
   "object-src 'none'",
   "frame-ancestors 'none'",
   "form-action 'self'",
-  "img-src 'self' data: blob: https://*.mapbox.com",
+  "img-src 'self' data: blob: https://*.mapbox.com https://i.ytimg.com",
   "font-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
   "script-src 'self' 'unsafe-inline' blob:",

@@ -1,13 +1,11 @@
 'use client'
 
-import { flagSrc } from '@/lib/flags'
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Coins, Heart, Search, ShieldCheck, SlidersHorizontal, Stamp } from 'lucide-react'
-import { YourWorldMap, type WorldPin } from './your-world-map'
-import { CountryOutline } from '@/components/country-template/CountryOutline'
-import { getApprovedHero } from '@/lib/country-visuals/data'
-import { focalToObjectPosition } from '@/lib/country-visuals/schema'
+import { ArrowRight, Search, SlidersHorizontal } from 'lucide-react'
+import type { WorldPin } from './your-world-map'
+import { WorldMatchMap } from './world-match-map'
+import { WorldStories } from './world-stories'
 
 export type RecCard = {
   slug: string
@@ -100,7 +98,7 @@ export function YourWorld({ pins, cards, complete, initialQuery = '' }: { pins: 
       <div>
         <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Explore</p>
         <h1 className="mt-1 font-display text-3xl font-bold text-navy sm:text-4xl">Your World</h1>
-        <p className="mt-1 text-sm text-muted">Your matched destinations on the map, and a ranked shortlist built from your Kolmari Profile.</p>
+        <p className="mt-1 text-sm text-muted">Browse the map or the directory. Selecting a country opens its details; your matches are pinned and ranked from your Kolmari Profile.</p>
       </div>
 
       {/* Sticky search + filter toolbar */}
@@ -112,7 +110,7 @@ export function YourWorld({ pins, cards, complete, initialQuery = '' }: { pins: 
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search your destinations"
+                placeholder="Search countries, cities, or visa routes"
                 aria-label="Search destinations"
                 className="h-[38px] w-full rounded-[8px] border-[0.8px] border-[#E7EBF1] bg-[#FBFCFE] pl-9 pr-3 text-sm text-navy placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-gold/30"
               />
@@ -139,16 +137,19 @@ export function YourWorld({ pins, cards, complete, initialQuery = '' }: { pins: 
         </div>
       </div>
 
-      {/* Map */}
+      {/* Matched destinations map (ported from the demo World page) */}
       <div className="mt-4">
-        <YourWorldMap pins={pins} />
+        <WorldMatchMap pins={pins} />
       </div>
 
-      {/* Explore More — matched + discoverable destinations in one visual grid */}
+      {/* Recommended for you — matched + discoverable destinations in one grid */}
       <div className="mt-8">
         <div className="flex items-end justify-between gap-3">
-          <h2 className="text-lg font-bold text-navy">Explore More</h2>
-          <Link href="/destinations" className="inline-flex items-center gap-1 text-xs font-bold text-gold-deep">Browse all <ArrowRight size={13} aria-hidden="true" /></Link>
+          <div>
+            <h2 className="text-lg font-bold text-navy">Recommended for you</h2>
+            <p className="mt-0.5 text-xs text-muted">Ranked against your household, income, and move date.</p>
+          </div>
+          <Link href="/destinations" className="inline-flex shrink-0 items-center gap-1 text-xs font-bold text-gold-deep">Browse all <ArrowRight size={13} aria-hidden="true" /></Link>
         </div>
 
         {!complete && (
@@ -159,76 +160,69 @@ export function YourWorld({ pins, cards, complete, initialQuery = '' }: { pins: 
         )}
 
         {filtered.length > 0 ? (
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filtered.map((c) => <DestinationCard key={c.slug} card={c} />)}
+          <div className="mt-4 grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(258px, 1fr))' }}>
+            {filtered.map((c) => <RecommendedCard key={c.slug} card={c} />)}
           </div>
         ) : (
           <p className="mt-6 p-8 text-center text-sm text-muted">No destinations match your filters.</p>
         )}
       </div>
+
+      {/* Stories & expert guidance (ported from the demo World page) */}
+      <WorldStories />
     </div>
   )
 }
 
-/** Fit label for the card badge, derived from the real Match Score. */
-function fitBadge(score: number | null): string {
-  if (score === null) return 'Explore'
-  if (score >= 70) return 'Strong Fit'
-  if (score >= 50) return 'Good Fit'
-  return 'Possible Fit'
+/** Match-percentage color, mirroring the demo's thresholds. */
+function matchColor(score: number): string {
+  if (score >= 80) return '#1f7a4d'
+  if (score >= 70) return '#b8890a'
+  return '#8090a8'
 }
 
-/** Card artwork: approved flag-map artwork when committed, else the country's
- *  real flag with its silhouette as a shadow — matching the country-page hero. */
-function CardArt({ card }: { card: RecCard }) {
-  const hero = getApprovedHero(card.slug)
+function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="relative aspect-[16/10] overflow-hidden" style={{ background: '#0f2247' }}>
-      {hero ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={hero.src} alt="" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: focalToObjectPosition(hero.focalPoint) }} loading="lazy" />
-      ) : (
-        <>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={flagSrc(card.code)} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
-          <span className="absolute right-[5%] top-1/2 h-[74%] w-[38%] -translate-y-1/2" style={{ filter: 'drop-shadow(0 6px 16px rgba(0,0,0,.3))' }}>
-            <CountryOutline code={card.code} fill="rgba(0,0,0,0.3)" style={{ width: '100%', height: '100%' }} />
-          </span>
-        </>
-      )}
-      {/* Legibility scrim for the overlaid badge + name */}
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(to top,rgba(8,18,40,.82) 0%,rgba(8,18,40,.12) 46%,rgba(8,18,40,.28) 100%)' }} />
-      <span className="absolute left-2.5 top-2.5 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-bold text-navy shadow-sm">{fitBadge(card.score)}</span>
-      <span className="absolute right-2.5 top-2.5 grid size-8 place-items-center rounded-full bg-black/25 text-white backdrop-blur-sm"><Heart size={16} aria-hidden="true" /></span>
-      <div className="absolute inset-x-0 bottom-0 p-3">
-        <p className="text-lg font-extrabold leading-tight text-white drop-shadow">{card.name}</p>
-        <p className="text-[11px] font-semibold text-white/85">{card.city} · {card.region}</p>
-      </div>
+    <div className="min-w-0">
+      <p className="truncate text-[9.5px] font-bold uppercase tracking-wider text-muted">{label}</p>
+      <p className="mt-0.5 truncate text-[12.5px] font-bold text-navy">{value}</p>
     </div>
   )
 }
 
-function FooterChip({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <div className="flex flex-col items-center gap-1 px-1 py-2.5 text-center">
-      <span className="text-gold-deep">{icon}</span>
-      <span className="w-full truncate text-[10.5px] font-semibold text-navy">{label}</span>
-    </div>
-  )
-}
-
-function DestinationCard({ card }: { card: RecCard }) {
+function RecommendedCard({ card }: { card: RecCard }) {
+  const cost = card.cost ? costLabel[card.cost] ?? card.cost : '—'
   return (
     <Link
       href={`/nextinations/${card.slug}/v2/overview`}
-      className="group flex flex-col overflow-hidden rounded-card border border-line bg-white shadow-tile transition hover:-translate-y-0.5 hover:border-gold/40 hover:shadow-card"
+      className="group flex flex-col rounded-card border border-line bg-white p-4 shadow-tile transition hover:-translate-y-0.5 hover:border-gold/40 hover:shadow-card"
     >
-      <CardArt card={card} />
-      <div className="grid grid-cols-3 divide-x divide-line border-t border-line">
-        <FooterChip icon={<Stamp size={15} aria-hidden="true" />} label={card.route ?? (card.scored ? 'Route TBD' : 'Not scored')} />
-        <FooterChip icon={<Coins size={15} aria-hidden="true" />} label={card.cost ? costLabel[card.cost] ?? card.cost : '—'} />
-        <FooterChip icon={<ShieldCheck size={15} aria-hidden="true" />} label={card.safety ?? '—'} />
+      <div className="flex items-start justify-between gap-2">
+        <span className="grid size-9 place-items-center rounded-[10px] bg-navy text-[11px] font-extrabold tracking-wide text-gold">{card.code}</span>
+        {card.score !== null ? (
+          <span className="text-sm font-bold" style={{ color: matchColor(card.score) }}>{card.score}%</span>
+        ) : (
+          <span className="rounded-full bg-[#f1f4f8] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted">Explore</span>
+        )}
       </div>
+
+      <p className="mt-2.5 text-[15px] font-bold text-navy">{card.name}</p>
+      <p className="text-[11.5px] font-semibold text-muted">{card.city} · {card.region}</p>
+
+      {card.blurb && <p className="mt-2 line-clamp-3 text-[12px] leading-relaxed text-[#5a6a83]">{card.blurb}</p>}
+
+      <div className="mt-3 grid grid-cols-3 gap-2 border-t border-line pt-3">
+        <Stat label="Cost" value={cost} />
+        <Stat label="Route" value={card.route ?? '—'} />
+        <Stat label="Safety" value={card.safety ?? '—'} />
+      </div>
+
+      <p
+        className="mt-3 text-[10.5px] font-bold uppercase tracking-wider"
+        style={{ color: card.scored ? '#147a74' : '#8090a8' }}
+      >
+        {card.scored ? 'Ranked for your profile' : 'Preview · not yet scored'}
+      </p>
     </Link>
   )
 }
