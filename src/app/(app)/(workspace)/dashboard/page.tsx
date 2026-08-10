@@ -3,7 +3,7 @@ import { requireCurrentUser } from '@/lib/auth'
 import { COUNTRIES } from '@/lib/countries'
 import {
   formatShortDate,
-  getNexitPlan,
+  getKolmariPlan,
   journeyPercent,
   journeyStages,
   JOURNEY_STAGE_LABELS,
@@ -34,7 +34,7 @@ function savedAtLabel(updatedAt: string | null): string | null {
 
 export default async function DashboardPage() {
   const user = await requireCurrentUser()
-  const [profile, plan] = await Promise.all([getProfile(user.id), getNexitPlan(user.id)])
+  const [profile, plan] = await Promise.all([getProfile(user.id), getKolmariPlan(user.id)])
   const today = new Date()
 
   const complete = hasCompletedProfile(profile)

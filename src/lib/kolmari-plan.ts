@@ -1,7 +1,7 @@
 import 'server-only'
 
 import { getSql } from './db'
-import { journeyStageLabel, normalizePlan, type NexitPlan } from './plan-types'
+import { journeyStageLabel, normalizePlan, type KolmariPlan } from './plan-types'
 
 // Re-export the shared model so existing server imports of '@/lib/kolmari-plan'
 // keep working. Client components import from '@/lib/plan-types' directly.
@@ -12,8 +12,21 @@ let planTableReady: Promise<void> | null = null
 async function ensurePlanTable() {
   if (!planTableReady) {
     planTableReady = (async () => {
+      // One-time rename of the legacy table so existing user plans are preserved.
+      // Renames only when the old table exists and the new one does not, so fresh
+      // installs and already-migrated databases are both no-ops. This is the only
+      // remaining reference to the pre-rename table name, kept for data safety.
       await getSql()`
-        CREATE TABLE IF NOT EXISTS nexit_plans (
+        DO $$
+        BEGIN
+          IF to_regclass('public.nexit_plans') IS NOT NULL AND to_regclass('public.kolmari_plans') IS NULL THEN
+            ALTER TABLE nexit_plans RENAME TO kolmari_plans;
+          END IF;
+        END
+        $$;
+      `
+      await getSql()`
+        CREATE TABLE IF NOT EXISTS kolmari_plans (
           user_id INT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
           saved_nextination TEXT,
           destination_city TEXT,
@@ -30,12 +43,12 @@ async function ensurePlanTable() {
         )
       `
       // Phase 1 (My Plan overhaul): destination city + budget is now a line-item array.
-      await getSql()`ALTER TABLE nexit_plans ADD COLUMN IF NOT EXISTS destination_city TEXT`
-      await getSql()`ALTER TABLE nexit_plans ALTER COLUMN budget SET DEFAULT '[]'::jsonb`
-      await getSql()`ALTER TABLE nexit_plans ADD COLUMN IF NOT EXISTS journey_stage SMALLINT`
-      await getSql()`ALTER TABLE nexit_plans DROP CONSTRAINT IF EXISTS nexit_plans_timeline_stage_check`
+      await getSql()`ALTER TABLE kolmari_plans ADD COLUMN IF NOT EXISTS destination_city TEXT`
+      await getSql()`ALTER TABLE kolmari_plans ALTER COLUMN budget SET DEFAULT '[]'::jsonb`
+      await getSql()`ALTER TABLE kolmari_plans ADD COLUMN IF NOT EXISTS journey_stage SMALLINT`
+      await getSql()`ALTER TABLE kolmari_plans DROP CONSTRAINT IF EXISTS kolmari_plans_timeline_stage_check`
       await getSql()`
-        UPDATE nexit_plans
+        UPDATE kolmari_plans
         SET journey_stage = CASE timeline_stage
           WHEN 'Assess' THEN 2 WHEN 'Shortlist' THEN 3 WHEN 'Decide' THEN 4
           WHEN 'Prepare' THEN 5 WHEN 'Apply' THEN 6 WHEN 'Move' THEN 7
@@ -43,22 +56,22 @@ async function ensurePlanTable() {
         WHERE journey_stage IS NULL
       `
       await getSql()`
-        UPDATE nexit_plans SET timeline_stage = CASE journey_stage
+        UPDATE kolmari_plans SET timeline_stage = CASE journey_stage
           WHEN 2 THEN 'Assess' WHEN 3 THEN 'Shortlist' WHEN 4 THEN 'Decide'
           WHEN 5 THEN 'Prepare' WHEN 6 THEN 'Apply' WHEN 7 THEN 'Move'
           WHEN 8 THEN 'Settle In' ELSE 'Explore' END
       `
-      await getSql()`ALTER TABLE nexit_plans ALTER COLUMN journey_stage SET DEFAULT 1`
-      await getSql()`ALTER TABLE nexit_plans ALTER COLUMN journey_stage SET NOT NULL`
+      await getSql()`ALTER TABLE kolmari_plans ALTER COLUMN journey_stage SET DEFAULT 1`
+      await getSql()`ALTER TABLE kolmari_plans ALTER COLUMN journey_stage SET NOT NULL`
       await getSql()`
         DO $$
         BEGIN
           BEGIN
-            ALTER TABLE nexit_plans ADD CONSTRAINT nexit_plans_journey_stage_v2_check CHECK (journey_stage BETWEEN 1 AND 8);
+            ALTER TABLE kolmari_plans ADD CONSTRAINT kolmari_plans_journey_stage_v2_check CHECK (journey_stage BETWEEN 1 AND 8);
           EXCEPTION WHEN duplicate_object THEN NULL;
           END;
           BEGIN
-            ALTER TABLE nexit_plans ADD CONSTRAINT nexit_plans_timeline_stage_v2_check CHECK (timeline_stage IN ('Explore','Assess','Shortlist','Decide','Prepare','Apply','Move','Settle In'));
+            ALTER TABLE kolmari_plans ADD CONSTRAINT kolmari_plans_timeline_stage_v2_check CHECK (timeline_stage IN ('Explore','Assess','Shortlist','Decide','Prepare','Apply','Move','Settle In'));
           EXCEPTION WHEN duplicate_object THEN NULL;
           END;
         END
@@ -69,17 +82,17 @@ async function ensurePlanTable() {
   await planTableReady
 }
 
-export async function getNexitPlan(userId: number) {
+export async function getKolmariPlan(userId: number) {
   await ensurePlanTable()
-  const rows = await getSql()`SELECT * FROM nexit_plans WHERE user_id = ${userId} LIMIT 1` as NexitPlan[]
+  const rows = await getSql()`SELECT * FROM kolmari_plans WHERE user_id = ${userId} LIMIT 1` as KolmariPlan[]
   return rows[0] ? normalizePlan(rows[0]) : null
 }
 
-export async function saveNexitPlan(plan: NexitPlan) {
+export async function saveKolmariPlan(plan: KolmariPlan) {
   await ensurePlanTable()
   const stageLabel = journeyStageLabel(plan.journey_stage)
   const rows = await getSql()`
-    INSERT INTO nexit_plans (user_id, saved_nextination, destination_city, selected_pathway, target_move_date, household_members, journey_stage, timeline_stage, checklist, budget, documents, notes, updated_at)
+    INSERT INTO kolmari_plans (user_id, saved_nextination, destination_city, selected_pathway, target_move_date, household_members, journey_stage, timeline_stage, checklist, budget, documents, notes, updated_at)
     VALUES (${plan.user_id}, ${plan.saved_nextination}, ${plan.destination_city}, ${plan.selected_pathway}, ${plan.target_move_date}, ${plan.household_members}, ${plan.journey_stage}, ${stageLabel}, ${JSON.stringify(plan.checklist)}::jsonb, ${JSON.stringify(plan.budget)}::jsonb, ${JSON.stringify(plan.documents)}::jsonb, ${plan.notes}, NOW())
     ON CONFLICT (user_id) DO UPDATE SET
       saved_nextination = EXCLUDED.saved_nextination,
@@ -95,6 +108,6 @@ export async function saveNexitPlan(plan: NexitPlan) {
       notes = EXCLUDED.notes,
       updated_at = NOW()
     RETURNING *
-  ` as NexitPlan[]
+  ` as KolmariPlan[]
   return normalizePlan(rows[0])
 }

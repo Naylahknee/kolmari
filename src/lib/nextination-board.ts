@@ -1,6 +1,6 @@
 'use client'
 
-// Nexit World planning board store.
+// Kolmari World planning board store.
 // A saved destination is a pin that carries planning status + a note. Persisted
 // in localStorage (same pattern as the existing saved-nextinations store) so the
 // MVP needs no DB migration; a Neon-backed store can replace read/write later
@@ -43,8 +43,8 @@ export type SavedNextination = {
   createdAt: number
 }
 
-const STORAGE_KEY = 'nexit:board'
-const CHANGED_EVENT = 'nexit:board-changed'
+const STORAGE_KEY = 'kolmari:board'
+const CHANGED_EVENT = 'kolmari:board-changed'
 
 function read(): SavedNextination[] {
   if (typeof window === 'undefined') return []

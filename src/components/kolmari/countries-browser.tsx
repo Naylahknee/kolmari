@@ -9,7 +9,7 @@ import { SaveNextinationButton } from './saved-nextinations'
 type ApiCountry = { id: number; name: string; visa_type: string; income_required: number; country_code: string | null }
 
 /**
- * CountriesView — the country-directory panel used inside the unified Nexit World page.
+ * CountriesView — the country-directory panel used inside the unified Kolmari World page.
  * Does NOT render its own page header; the parent page supplies that.
  */
 export function CountriesView({ initialQuery = '', profileComplete }: { initialQuery?: string; profileComplete: boolean }) {

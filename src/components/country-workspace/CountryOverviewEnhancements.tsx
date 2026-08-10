@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import type { RelocationProfile } from '@/lib/profile'
-import { calculateNexitReadiness } from '@/lib/readiness'
+import { calculateKolmariReadiness } from '@/lib/readiness'
 
 export function CountryOverviewEnhancements({
   profile,
@@ -10,7 +10,7 @@ export function CountryOverviewEnhancements({
   countryName: string
   profile: RelocationProfile
 }) {
-  const readiness = calculateNexitReadiness(profile)
+  const readiness = calculateKolmariReadiness(profile)
 
   return (
     <div className="mt-5">

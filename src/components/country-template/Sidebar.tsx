@@ -49,7 +49,7 @@ export function Sidebar() {
   }, [])
 
   const onCountry = pathname.startsWith('/nextinations/')
-  const yourWorldActive = active('/your-world') || active('/destinations') || active('/nexitnation') || onCountry
+  const yourWorldActive = active('/your-world') || active('/destinations') || onCountry
   const [open, setOpen] = useState(false)
   // Auto-open the tree whenever the user is on a country page.
   useEffect(() => {
@@ -121,7 +121,7 @@ export function Sidebar() {
           <Icon><circle cx="6" cy="6" r="2.5" /><circle cx="18" cy="18" r="2.5" /><path d="M8.5 6H15a3 3 0 010 6H9a3 3 0 000 6h6.5" /></Icon>
           <span className="lbl">{PRODUCT_COPY.pathways}</span>
         </Link>
-        <Link className={`sb-item${active('/my-plan') || active('/nexit-plan') ? ' active' : ''}`} href="/my-plan">
+        <Link className={`sb-item${active('/my-plan') ? ' active' : ''}`} href="/my-plan">
           <Icon><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M8 3v18M11 8h6M11 12h4" /></Icon>
           <span className="lbl">{PRODUCT_COPY.plan}</span>
         </Link>

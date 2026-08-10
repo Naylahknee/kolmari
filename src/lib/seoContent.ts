@@ -101,7 +101,7 @@ function card(place: RegionDestination, regionSlug: RegionSlug): SeoCountryCard 
     pathways: place.pathways.join(' or '),
     communityFit: place.communityFit,
     monthlyBudget: place.monthlyBudget,
-    href: `/nexitnation/${regionSlug}`,
+    href: `/destinations/regions/${regionSlug}`,
   }
 }
 
@@ -129,7 +129,7 @@ function countryPage(config: {
 }): SeoPage {
   const { place, regionSlug, visaSource, safetySource } = config
   const greenbook = insight(place.slug)
-  const planHref = `/nexitnation/${regionSlug}`
+  const planHref = `/destinations/regions/${regionSlug}`
 
   return {
     slug: config.slug,
@@ -201,7 +201,7 @@ const editorialPages: SeoPage[] = [
     keywords: ['best countries for Black expats', 'Black Americans moving abroad', 'Black expat countries'],
     eyebrow: 'Profile guide', h1: 'Best countries for Black expats',
     intro: 'There is no universal â€œbestâ€ country for Black expats. Kolmari starts with Pathways, budget, and general safety, then treats Community Fit as a separate research question shaped by city, neighborhood, identity, and local relationships.',
-    lastReviewed: REVIEWED, mapHref: '/nexitnation',
+    lastReviewed: REVIEWED, mapHref: '/destinations',
     countryCards: [card(portugal.place, portugal.regionSlug), card(ghana.place, ghana.regionSlug), card(mexico.place, mexico.regionSlug)],
     costHeading: 'Compare the planning baselines',
     costIntro: 'Use these figures to narrow a shortlist, then replace them with neighborhood-level housing, healthcare, tax, and schooling research.',
@@ -235,7 +235,7 @@ const editorialPages: SeoPage[] = [
     keywords: ['best countries for single women', 'women moving abroad alone', 'safe countries for solo women expats'],
     eyebrow: 'Profile guide', h1: 'Best countries for single women moving abroad',
     intro: 'A strong shortlist balances legal status, a sustainable budget, healthcare, transport, social connection, and city-specific safety research. Kolmari treats official advisories as a starting point rather than a personal guarantee.',
-    lastReviewed: REVIEWED, mapHref: '/nexitnation',
+    lastReviewed: REVIEWED, mapHref: '/destinations',
     countryCards: [card(portugal.place, portugal.regionSlug), card(spain.place, spain.regionSlug), card(costaRica.place, costaRica.regionSlug)],
     costHeading: 'Plan for independence, not only rent',
     costIntro: 'Include secure housing, late-night transport, private healthcare, emergency savings, and the cost of returning home when building a personal baseline.',
@@ -264,7 +264,7 @@ const editorialPages: SeoPage[] = [
     keywords: ['best countries for families moving abroad', 'move abroad with children', 'family expat countries'],
     eyebrow: 'Family Profile guide', h1: 'Best countries for families moving abroad',
     intro: 'Families need a Destination that works for every member. The right shortlist accounts for legal status, dependent eligibility, schooling, healthcare, housing, transport, language, and a larger arrival buffer.',
-    lastReviewed: REVIEWED, mapHref: '/nexitnation',
+    lastReviewed: REVIEWED, mapHref: '/destinations',
     countryCards: [card(spain.place, spain.regionSlug), card(portugal.place, portugal.regionSlug), card(mexico.place, mexico.regionSlug)],
     costHeading: 'Turn the one-adult baseline into a family budget',
     costIntro: 'Add bedrooms, school or childcare, dependent insurance, larger deposits, transport, and document costs for every family member.',
@@ -293,7 +293,7 @@ const editorialPages: SeoPage[] = [
     keywords: ['digital nomad visas for Americans', 'remote work visas 2026', 'best digital nomad visa'],
     eyebrow: 'Pathways guide', h1: 'Digital nomad visas for Americans',
     intro: 'Remote-work Pathways vary in income tests, professional history, insurance, tax exposure, dependents, and permitted work. Use Kolmari to build a shortlist, then treat the official authority as the application source of truth.',
-    lastReviewed: REVIEWED, mapHref: '/nexitnation',
+    lastReviewed: REVIEWED, mapHref: '/destinations',
     countryCards: [card(portugal.place, portugal.regionSlug), card(spain.place, spain.regionSlug), card(thailand.place, thailand.regionSlug)],
     costHeading: 'Compare the whole Move Plan',
     costIntro: 'The cheapest monthly baseline is not automatically the best Pathway. Include tax advice, insurance, document preparation, application fees, and renewal requirements.',
@@ -328,7 +328,7 @@ const editorialPages: SeoPage[] = [
     keywords: ['easiest visas for US citizens', 'easy residence visa Americans', 'move abroad visa options'],
     eyebrow: 'Pathways comparison', h1: 'Easiest residence visas for US citizens to compare',
     intro: 'â€œEasyâ€ should mean compatible with your documented circumstances, not free of requirements. Kolmari compares Pathways by work arrangement, finances, dependents, paperwork, and the Move Timeline.',
-    lastReviewed: REVIEWED, mapHref: '/nexitnation',
+    lastReviewed: REVIEWED, mapHref: '/destinations',
     countryCards: [card(portugal.place, portugal.regionSlug), card(spain.place, spain.regionSlug), card(mexico.place, mexico.regionSlug)],
     costHeading: 'Budget beyond the income threshold',
     costIntro: 'Qualification evidence is not the same as a sustainable living budget. Plan for documents, apostilles, translations, insurance, deposits, professional advice, and renewals.',
@@ -362,7 +362,7 @@ const editorialPages: SeoPage[] = [
     keywords: ['Portugal vs Spain expats', 'move to Portugal or Spain', 'Portugal Spain cost of living'],
     eyebrow: 'Destination comparison', h1: 'Portugal vs Spain for Americans moving abroad',
     intro: 'Portugal and Spain both offer formal routes for qualifying remote professionals, but the better Destination depends on work structure, city, language, housing, taxes, and Community Fit.',
-    lastReviewed: REVIEWED, mapHref: '/nexitnation/europe',
+    lastReviewed: REVIEWED, mapHref: '/destinations/regions/europe',
     countryCards: [card(portugal.place, portugal.regionSlug), card(spain.place, spain.regionSlug)],
     costHeading: 'Portugal vs Spain planning baseline',
     costIntro: 'These Kolmari figures compare Lisbon and Valencia starting points. City and housing selection can outweigh the country-level difference.',
@@ -390,7 +390,7 @@ const editorialPages: SeoPage[] = [
     keywords: ['Thailand vs Mexico cost of living', 'Thailand or Mexico expat', 'move to Thailand vs Mexico'],
     eyebrow: 'Destination comparison', h1: 'Thailand vs Mexico cost of living',
     intro: 'Thailand has the lower Kolmari baseline in this comparison, while Mexico offers closer US time zones and shorter routes home. The right Destination depends on city, work hours, healthcare, legal status, and Community Fit.',
-    lastReviewed: REVIEWED, mapHref: '/nexitnation',
+    lastReviewed: REVIEWED, mapHref: '/destinations',
     countryCards: [card(thailand.place, thailand.regionSlug), card(mexico.place, mexico.regionSlug)],
     costHeading: 'Thailand vs Mexico monthly baseline',
     costIntro: 'This compares Chiang Mai and Merida planning baselines for one adult. Bangkok, Mexico City, resort areas, healthcare, and imported goods can change the result.',

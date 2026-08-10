@@ -14,7 +14,7 @@ import {
   formatAmount,
   type BudgetLine,
   type BudgetStage,
-  type NexitPlan,
+  type KolmariPlan,
 } from '@/lib/plan-types'
 import { BudgetBenchmarkDialog } from './budget-benchmark-dialog'
 import { BudgetDonut, BUDGET_COLORS, type BudgetSlice } from './rings'
@@ -40,7 +40,7 @@ export function CostCalculator({
   profileComplete,
   profileHousehold,
 }: {
-  initialPlan: NexitPlan
+  initialPlan: KolmariPlan
   income: number | null
   profileComplete: boolean
   profileHousehold: number | null

@@ -219,7 +219,7 @@ for (const country of DISCOVERABLE_COUNTRIES) {
 
 export const regionList = REGION_SLUGS.map((slug) => regions[slug])
 
-export function isNexitnationRegion(value: string): value is RegionSlug {
+export function isKolmariRegion(value: string): value is RegionSlug {
   return REGION_SLUGS.some((slug) => slug === value)
 }
 import { DISCOVERABLE_COUNTRIES } from '@/lib/countries'

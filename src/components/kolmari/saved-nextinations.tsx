@@ -5,8 +5,8 @@ import { useEffect, useState } from 'react'
 import { ArrowRight, Heart } from 'lucide-react'
 import { COUNTRIES, countryFlag } from '@/lib/countries'
 
-const storageKey = 'nexit:saved-nextinations'
-const changedEvent = 'nexit:saved-nextinations-changed'
+const storageKey = 'kolmari:saved-nextinations'
+const changedEvent = 'kolmari:saved-nextinations-changed'
 
 function readSaved() {
   try {

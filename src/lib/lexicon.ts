@@ -32,9 +32,3 @@ export const KOLMARI_STORY = [
   KOLMARI_LEXICON.startCta,
   KOLMARI_LEXICON.executionCta,
 ] as const
-
-/**
- * Temporary compatibility exports. Remove after all legacy imports are migrated.
- */
-export const NEXIT_LEXICON = KOLMARI_LEXICON
-export const NEXIT_STORY = KOLMARI_STORY

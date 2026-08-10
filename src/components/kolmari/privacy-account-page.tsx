@@ -257,7 +257,7 @@ function DataExportSection() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = 'nexit-data-export.json'
+      a.download = 'kolmari-data-export.json'
       a.click()
       URL.revokeObjectURL(url)
       setIsError(false)

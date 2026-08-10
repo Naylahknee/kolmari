@@ -6,7 +6,7 @@ import { ArrowLeft, ArrowRight, Check, X } from 'lucide-react'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type ExperienceId = 'starting-places' | 'pathways' | 'nexit-stage'
+export type ExperienceId = 'starting-places' | 'pathways' | 'kolmari-stage'
 
 export type LandingMiniExperienceResult = {
   experience: ExperienceId
@@ -177,8 +177,8 @@ const pathwaysExperience: Experience = {
 
 // ─── Experience 3: Discover Your Move Stage ──────────────────────────────────
 
-const nexitStageExperience: Experience = {
-  id: 'nexit-stage',
+const kolmariStageExperience: Experience = {
+  id: 'kolmari-stage',
   name: 'Discover Your Move Stage',
   steps: [
     {
@@ -258,7 +258,7 @@ const nexitStageExperience: Experience = {
 const EXPERIENCES: Record<ExperienceId, Experience> = {
   'starting-places': startingPlacesExperience,
   'pathways': pathwaysExperience,
-  'nexit-stage': nexitStageExperience,
+  'kolmari-stage': kolmariStageExperience,
 }
 
 // ─── Progress bar ─────────────────────────────────────────────────────────────
@@ -412,7 +412,7 @@ function FinalScreen({ onClose }: { onClose: () => void }) {
 
       <div className="space-y-3">
         <Link
-          href="/signup?next=%2Fnexitnation"
+          href="/signup?next=%2Fdestinations"
           className="gold-button w-full text-center"
         >
           Create My Free Account <ArrowRight size={16} />

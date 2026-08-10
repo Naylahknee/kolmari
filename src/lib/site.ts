@@ -1,4 +1,4 @@
-const FALLBACK_SITE_URL = 'https://nexit.madincrease.workers.dev'
+const FALLBACK_SITE_URL = 'https://kolmari.madincrease.workers.dev'
 
 export function getSiteUrl() {
   const candidate = process.env.SITE_URL?.trim() || FALLBACK_SITE_URL

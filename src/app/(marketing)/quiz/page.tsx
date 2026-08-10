@@ -59,7 +59,7 @@ function buildResult(answers: Answers) {
   }
 }
 
-export default function NexitQuizPage() {
+export default function KolmariQuizPage() {
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState<Answers>({})
   const [complete, setComplete] = useState(false)
@@ -80,7 +80,7 @@ export default function NexitQuizPage() {
     }
 
     try {
-      window.localStorage.setItem('nexit-quiz-result', JSON.stringify({ answers, completedAt: new Date().toISOString() }))
+      window.localStorage.setItem('kolmari-quiz-result', JSON.stringify({ answers, completedAt: new Date().toISOString() }))
     } catch {
       // The result remains visible even when browser storage is unavailable.
     }
@@ -111,12 +111,12 @@ export default function NexitQuizPage() {
               Create a free account to save these results and build your full Move Plan. You may delete your account and stored data at any time.
             </div>
 
-            <Link href="/signup?next=%2Fnexitnation&source=nexit-quiz" className="gold-button w-full justify-center text-center">
+            <Link href="/signup?next=%2Fdestinations&source=kolmari-quiz" className="gold-button w-full justify-center text-center">
               Create My Free Account <ArrowRight size={17} />
             </Link>
 
             <p className="text-center text-xs text-muted">
-              Already have an account? <Link href="/login?next=%2Fnexitnation" className="font-bold text-navy underline underline-offset-2">Sign in</Link>
+              Already have an account? <Link href="/login?next=%2Fdestinations" className="font-bold text-navy underline underline-offset-2">Sign in</Link>
             </p>
           </div>
         </section>

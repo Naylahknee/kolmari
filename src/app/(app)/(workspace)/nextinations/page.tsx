@@ -3,7 +3,7 @@ import { requireCurrentUser } from '@/lib/auth'
 import { getProfile } from '@/lib/profile'
 import { rankNextinations } from '@/lib/userProfile'
 
-// Entry point after the Nexit Match Quiz: pick the top Nextination and open its
+// Entry point after the Kolmari Match Quiz: pick the top Nextination and open its
 // workspace. If the profile isn't scorable yet, send the user to the wizard.
 //
 export default async function NextinationsIndexPage() {

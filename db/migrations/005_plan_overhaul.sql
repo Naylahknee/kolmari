@@ -2,10 +2,10 @@
 -- Runtime `ensurePlanTable()` in src/lib/kolmari-plan.ts is authoritative; this
 -- file mirrors it for `npm run db:migrate` parity. All statements are idempotent
 -- (the migration runner re-applies every file on each run). Targets the live
--- `nexit_plans` table (note: 003 defines an unused `kolmari_plans` — pre-existing
+-- `kolmari_plans` table (note: 003 defines an unused `kolmari_plans` — pre-existing
 -- divergence, intentionally left as-is here).
 
-CREATE TABLE IF NOT EXISTS nexit_plans (
+CREATE TABLE IF NOT EXISTS kolmari_plans (
   user_id INT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
   saved_nextination TEXT,
   destination_city TEXT,
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS nexit_plans (
 );
 
 -- Destination city (Workspace Profile) — new in Phase 1.
-ALTER TABLE nexit_plans ADD COLUMN IF NOT EXISTS destination_city TEXT;
+ALTER TABLE kolmari_plans ADD COLUMN IF NOT EXISTS destination_city TEXT;
 
 -- Budget is now a line-item array (one-time vs monthly, baseline vs override).
-ALTER TABLE nexit_plans ALTER COLUMN budget SET DEFAULT '[]'::jsonb;
+ALTER TABLE kolmari_plans ALTER COLUMN budget SET DEFAULT '[]'::jsonb;

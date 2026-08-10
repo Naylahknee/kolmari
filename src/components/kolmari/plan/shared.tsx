@@ -1,7 +1,7 @@
 'use client'
 
 import { Check } from 'lucide-react'
-import { DOC_STATUS_LABELS, PLAN_TABS, type DocStatus, type NexitPlan, type TabId } from '@/lib/plan-types'
+import { DOC_STATUS_LABELS, PLAN_TABS, type DocStatus, type KolmariPlan, type TabId } from '@/lib/plan-types'
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
@@ -10,8 +10,8 @@ export type { TabId }
 
 // Everything each tab needs from the workspace container.
 export type PlanCtx = {
-  plan: NexitPlan
-  update: <K extends keyof NexitPlan>(key: K, value: NexitPlan[K]) => void
+  plan: KolmariPlan
+  update: <K extends keyof KolmariPlan>(key: K, value: KolmariPlan[K]) => void
   goToTab: (tab: TabId) => void
   openDetails: () => void
   saveStatus: SaveStatus

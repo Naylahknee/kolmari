@@ -18,7 +18,7 @@ export type RegionDestination = {
   highlights: string[]
 }
 
-export type NexitRegion = {
+export type KolmariRegion = {
   slug: RegionSlug
   name: string
   shortName: string
@@ -31,7 +31,7 @@ export type NexitRegion = {
   destinations: RegionDestination[]
 }
 
-export const REGIONS: NexitRegion[] = [
+export const REGIONS: KolmariRegion[] = [
   {
     slug: 'europe',
     name: 'Europe',
