@@ -15,17 +15,17 @@ Kolmari is a relocation decision and planning system. It is not a vacation, trav
 Before changing application code, read:
 
 1. `/DESIGN.md`
-2. `/docs/Kolmari/00-README.md`
+2. `/docs/kolmari/00-README.md`
 3. The documentation files relevant to the assigned task
-4. `/docs/Kolmari/09-IMPLEMENTATION-RULES.md`
-5. `/docs/Kolmari/10-LLM-RULES.md`
+4. `/docs/kolmari/09-IMPLEMENTATION-RULES.md`
+5. `/docs/kolmari/10-LLM-RULES.md`
 
 Do not rely only on chat history or an older implementation prompt.
-For Kolmarination Map work, also read `/docs/Kolmari/11-KolmariNATION-MAP.md`.
+For Kolmarination Map work, also read `/docs/kolmari/11-KolmariNATION-MAP.md`.
 
-For interaction, navigation, transition, or motion work, also read `/docs/Kolmari/12-INTERACTION-DESIGN.md`.
+For interaction, navigation, transition, or motion work, also read `/docs/kolmari/12-INTERACTION-DESIGN.md`.
 
-For account, privacy, deletion, role, permission, or administrative work, also read `/docs/Kolmari/13-ACCOUNT-ADMINISTRATION.md`.
+For account, privacy, deletion, role, permission, or administrative work, also read `/docs/kolmari/13-ACCOUNT-ADMINISTRATION.md`.
 
 
 ## Source-of-truth order
@@ -34,7 +34,7 @@ When instructions conflict, follow this order:
 
 1. The owner's current explicit instruction
 2. `/DESIGN.md`
-3. Files inside `/docs/Kolmari/`
+3. Files inside `/docs/kolmari/`
 4. Existing production behavior, code, and types
 5. Older prompts, mockups, archived documents, and reference material
 
@@ -112,7 +112,7 @@ Before changing code:
 5. Reuse existing components when appropriate.
 6. Implement only the assigned phase.
 7. Run the available validation commands.
-8. Update `/docs/Kolmari/CURRENT-STATE.md`.
+8. Update `/docs/kolmari/CURRENT-STATE.md`.
 9. Report changed files, test results, unresolved issues, and assumptions.
 
 Do not perform a full-product rewrite unless the owner explicitly requests one.
