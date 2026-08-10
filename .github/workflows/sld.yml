@@ -1,0 +1,46 @@
+name: SLD Governance
+
+# Seven Layer Dip runtime governance checks. Runs the deterministic engine's
+# unit tests, then evaluates the PR's diff against the baseline. The change
+# analysis fails the job ONLY on a BLOCK decision (forbidden term, destructive
+# DB op, architecture violation, duplicate app root) — REVIEW/WARN are surfaced
+# as advisory output so legitimate changes are never gated on a human-review
+# nudge.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  sld:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # need history to diff against the base branch
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm ci
+
+      - name: SLD engine tests
+        run: npm run sld:test
+
+      - name: SLD change analysis (BLOCK fails the job)
+        run: |
+          BASE="origin/${{ github.base_ref || 'main' }}"
+          git fetch origin "${{ github.base_ref || 'main' }}" --depth=1 || true
+          set +e
+          node scripts/sld.mjs check "$BASE"
+          code=$?
+          set -e
+          echo "SLD exit code: $code"
+          if [ "$code" = "2" ]; then
+            echo "::error::SLD returned BLOCK — a hard governance violation is present."
+            exit 1
+          fi
+          if [ "$code" = "1" ]; then
+            echo "::warning::SLD returned REVIEW — human review recommended (not blocking)."
+          fi
+          exit 0

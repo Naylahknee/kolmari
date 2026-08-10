@@ -316,3 +316,30 @@ allergen prevalence, heart note, disclosure), and a **Who's moving** household
 panel (per-person needs + per-destination fit notes). Same data + mutate API as
 before; only the presentation changed. Renders inside the app's own workspace
 shell (the demo's standalone header/sidebar chrome was not adopted).
+
+## Sidebar — text section headers + icon menu items
+
+Reworked the workspace rail (`src/components/country-template/Sidebar.tsx`) to
+match the approved reference: section headers (Explore, Plan, Connect, Tools) are
+now **text-only labels with a caret** (no header icons), and every individual
+menu item carries its own icon (Dashboard, Your World, Command Center, Pathways,
+My Plan, Flutter Mode, Documents, Kolmari Club, Cost Calculator, Greenbook,
+PassportIndex, Astrocartography). Collapsed rail is unchanged in spirit: it shows
+Dashboard + one icon per section + the account avatar (the section icon is hidden
+while expanded and revealed only in the collapsed strip). Your World keeps its
+floating destinations menu. CSS in `src/styles/workspace-chrome.css`
+(`.sb-head`, `.sb-link`, `.sb-top`).
+
+## SLD (Seven Layer Dip) governance engine — installed
+
+Added a deterministic, fail-closed change-governance engine (see
+`docs/kolmari/14-SLD-GOVERNANCE.md`). Pure Workers-safe core under `src/sld/`
+(seven layer analyzers, decision engine with BLOCK>REVIEW>WARN>ALLOW priority,
+impact graph, secret-free audit) + Node-only scanner (`src/sld/node/scan.mjs`)
+for baseline/diff/duplicate-root detection. Machine-readable manifest at
+`src/sld/manifest/kolmari.manifest.js`. CLI via `npm run sld:*`; admin-gated
+`POST /api/sld/evaluate`; CI workflow `.github/workflows/sld.yml` (blocks only on
+BLOCK). Baseline committed at `.sld/baseline.json` (443 files, single canonical
+root, env vars by name only — no secret values). 21 engine unit tests pass;
+demonstrated live catching intentional Layer 1/3/5/7 violations (→ BLOCK, CLI
+exit 2). No new dependencies.
