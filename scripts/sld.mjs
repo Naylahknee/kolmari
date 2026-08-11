@@ -29,6 +29,9 @@ import {
   evaluateChangeSet,
   computeImpact,
   buildAuditEntry,
+  createTaskContract,
+  validateTaskContract,
+  verifyAgainstContract,
 } from '../src/sld/index.js'
 import {
   buildBaseline,
@@ -41,6 +44,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const SLD_DIR = join(ROOT, '.sld')
 const BASELINE_PATH = join(SLD_DIR, 'baseline.json')
 const AUDIT_PATH = join(SLD_DIR, 'audit.jsonl')
+const CONTRACT_PATH = join(SLD_DIR, 'task-contract.json')
 
 const C = {
   reset: '\x1b[0m', bold: '\x1b[1m', dim: '\x1b[2m',
@@ -63,6 +67,42 @@ function saveBaseline(baseline) {
   mkdirSync(SLD_DIR, { recursive: true })
   writeFileSync(BASELINE_PATH, `${JSON.stringify(baseline, null, 2)}\n`)
 }
+/**
+ * The active TaskContract. Without one, every proposed change is unauthorized —
+ * that is the point: no contract is not permission.
+ */
+function loadContract() {
+  if (!existsSync(CONTRACT_PATH)) return null
+  try {
+    return createTaskContract(JSON.parse(readFileSync(CONTRACT_PATH, 'utf8')))
+  } catch {
+    return null
+  }
+}
+
+function printLedger(ledger) {
+  if (!ledger) return
+  console.log(`${C.bold}Change ledger${C.reset}${ledger.taskId ? ` — ${ledger.taskId}` : ''}`)
+  if (ledger.authorized.length) {
+    console.log(`${C.green}  AUTHORIZED${C.reset}`)
+    for (const a of ledger.authorized) {
+      console.log(`    ${a.path}`)
+      console.log(`${C.dim}      entity: ${a.entity} · state: ${a.states.join(', ')} · action: ${a.action} · source: ${a.source}${C.reset}`)
+    }
+  }
+  if (ledger.unauthorized.length) {
+    console.log(`${C.red}  UNAUTHORIZED${C.reset}`)
+    for (const u of ledger.unauthorized) {
+      console.log(`    ${u.path}`)
+      console.log(`${C.dim}      reason: ${u.reason}${C.reset}`)
+    }
+  }
+  for (const o of ledger.observations) {
+    console.log(`${C.yellow}  OUT-OF-SCOPE OBSERVATION${C.reset} ${o.observation}`)
+  }
+  console.log('')
+}
+
 function pickRef() {
   // Prefer origin/main if it resolves, else HEAD.
   return process.argv[3] || 'origin/main'
@@ -143,8 +183,10 @@ function cmdAnalyze(exitOnSeverity) {
   const ref = pickRef()
   const cs = diffToChangeSet(ROOT, ref)
   const baseline = loadBaseline()
-  const result = evaluateChangeSet(cs, KOLMARI_MANIFEST, baseline, now())
+  const contract = loadContract()
+  const result = evaluateChangeSet(cs, KOLMARI_MANIFEST, baseline, now(), contract)
   printResult(result)
+  printLedger(result.ledger)
   recordAudit(cs, result)
   if (exitOnSeverity && (result.decision === 'REVIEW' || result.decision === 'BLOCK')) {
     process.exitCode = result.decision === 'BLOCK' ? 2 : 1
@@ -204,6 +246,43 @@ function cmdAudit() {
   }
 }
 
+function cmdContract() {
+  const contract = loadContract()
+  if (!contract) {
+    console.log(`${C.red}No TaskContract at ${CONTRACT_PATH}.${C.reset}`)
+    console.log(`${C.dim}Without one every change is unauthorized. Write the contract the user's request authorizes.${C.reset}`)
+    process.exitCode = 1
+    return
+  }
+  const v = validateTaskContract(contract)
+  console.log(`${C.bold}TaskContract${C.reset} ${contract.taskId}`)
+  console.log(`  instruction : ${contract.instruction}`)
+  console.log(`  entities    : ${contract.allowedEntities.join(', ') || '(none)'}`)
+  console.log(`  files       : ${contract.allowedFiles.join(', ') || '(none)'}`)
+  console.log(`  directories : ${contract.allowedDirectories.join(', ') || '(none)'}`)
+  console.log(`  actions     : ${contract.allowedActions.join(', ') || '(none)'}`)
+  console.log(`  states      : ${contract.allowedStates.join(', ') || '(any within scope)'}`)
+  console.log(`  grants      : ${contract.grants.join(', ') || '(none)'}`)
+  console.log(`  valid       : ${v.ok ? `${C.green}yes${C.reset}` : `${C.red}no — ${v.reason}${C.reset}`}`)
+  if (!v.ok) process.exitCode = 1
+}
+
+/** Post-change verification: compare the real diff to the contract. */
+function cmdVerify() {
+  const ref = pickRef()
+  const contract = loadContract()
+  const cs = diffToChangeSet(ROOT, ref)
+  const v = verifyAgainstContract(cs, KOLMARI_MANIFEST, contract)
+
+  console.log(`${C.bold}Post-change verification${C.reset} vs ${ref}`)
+  printLedger(v.ledger)
+  for (const f of v.findings) printFinding(f)
+  const verdict = v.pass ? `${C.green}PASS${C.reset}` : `${C.red}FAIL${C.reset}`
+  console.log(`  unauthorized changes: ${v.unauthorizedCount}`)
+  console.log(`  verification: ${verdict}`)
+  if (!v.pass) process.exitCode = 2
+}
+
 function cmdExplain() {
   const cls = process.argv[3]
   const policies = KOLMARI_MANIFEST.policies
@@ -232,9 +311,11 @@ function main() {
     case 'drift': return cmdDrift()
     case 'audit': return cmdAudit()
     case 'explain': return cmdExplain()
+    case 'contract': return cmdContract()
+    case 'verify': return cmdVerify()
     default:
       console.log(`${C.bold}SLD — Seven Layer Dip governance${C.reset}`)
-      console.log('Usage: node scripts/sld.mjs <init|baseline|scan|diff|analyze|check|impact|drift|audit|explain>')
+      console.log('Usage: node scripts/sld.mjs <init|baseline|scan|diff|contract|analyze|check|verify|impact|drift|audit|explain>')
       if (cmd) process.exitCode = 1
   }
 }

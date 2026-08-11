@@ -86,8 +86,33 @@ export const KOLMARI_MANIFEST = {
       'Use approved product language; do not reintroduce retired brand terms.',
     ],
   },
+  // Entity registry — entity name → the files that implement it. Powers
+  // entity-level scope: a TaskContract may authorize "Country Hero" without
+  // authorizing the navigation shell beside it.
+  entities: {
+    'Country Hero': ['src/components/country-template/CountryHero.tsx'],
+    'Country Sidebar': ['src/components/country-template/Sidebar.tsx', 'src/styles/workspace-chrome.css'],
+    'Country Page': ['src/app/(app)/(workspace)/nextinations/**', 'src/components/country-template/**'],
+    'Country Tabs': ['src/components/country-template/TabBar.tsx', 'src/components/country-template/tabs/**'],
+    'Navigation Shell': ['src/components/kolmari/workspace-shell.tsx', 'src/components/layout/**', 'src/components/country-template/TopBar.tsx'],
+    'Dashboard': ['src/app/(app)/(workspace)/dashboard/**', 'src/components/kolmari/dashboard/**', 'src/lib/dashboard-model.ts', 'src/lib/dashboard-layout.ts'],
+    'Journey Tracker': ['src/components/kolmari/dashboard/journey-tracker.tsx', 'src/styles/journey-tracker.css'],
+    'Your World Map': ['src/components/kolmari/your-world*.tsx', 'src/components/kolmari/world-match-map.tsx'],
+    'Match Score': ['src/lib/userProfile.ts', 'src/lib/readiness.ts'],
+    'Authentication': ['src/lib/auth.ts', 'src/lib/auth-constants.ts', 'src/middleware.ts'],
+    'Kolmari Plan': ['src/lib/kolmari-plan.ts', 'src/lib/plan-types.ts', 'src/components/kolmari/plan/**'],
+    'Command Center': ['src/lib/command-center.ts', 'src/lib/command-center-model.ts', 'src/components/kolmari/command-center/**'],
+    'Profile Wizard': ['src/components/kolmari/profile-wizard.tsx', 'src/lib/profile.ts'],
+    'Destination Tabs': ['src/components/country-template/tabs/**'],
+    'SLD Engine': ['src/sld/**', 'scripts/sld.mjs', '.sld/**'],
+  },
   // Policy defaults — deterministic mapping from finding class → decision.
+  //
+  // Scope classes are absolute: an unauthorized change BLOCKs regardless of how
+  // harmless it is, because authorization and risk are separate dimensions.
   policies: {
+    unauthorizedChange: 'BLOCK',
+    unknownScope: 'BLOCK',
     unknownChange: 'REVIEW',
     destructiveChange: 'BLOCK',
     architectureViolation: 'BLOCK',
@@ -97,6 +122,8 @@ export const KOLMARI_MANIFEST = {
     designSystemDrift: 'WARN',
     forbiddenTerm: 'BLOCK',
     duplicateAppRoot: 'BLOCK',
+    // Risk-only classification. It is NOT authorization: a harmless change the
+    // user never asked for is still blocked by the Scope Gate.
     harmlessChange: 'ALLOW',
   },
 }

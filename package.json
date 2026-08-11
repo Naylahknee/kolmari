@@ -19,6 +19,8 @@
     "sld:drift": "node scripts/sld.mjs drift",
     "sld:audit": "node scripts/sld.mjs audit",
     "sld:explain": "node scripts/sld.mjs explain",
+    "sld:contract": "node scripts/sld.mjs contract",
+    "sld:verify": "node scripts/sld.mjs verify",
     "sld:test": "node --test src/sld/__tests__/*.test.mjs",
     "preview": "npm run build:worker && opennextjs-cloudflare preview",
     "deploy": "npm run build:worker && opennextjs-cloudflare deploy",

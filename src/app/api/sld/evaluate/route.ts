@@ -3,10 +3,11 @@ import { isAdminUser } from '@/lib/admin'
 import { isSameOrigin } from '@/lib/security'
 import {
   KOLMARI_MANIFEST,
+  createTaskContract,
   evaluateChangeSet,
   buildAuditEntry,
 } from '@/sld'
-import type { ChangeSet, FileChange, ChangeType } from '@/sld'
+import type { ChangeSet, FileChange, ChangeType, TaskContract } from '@/sld'
 
 /**
  * POST /api/sld/evaluate
@@ -51,6 +52,9 @@ function sanitizeChange(raw: unknown): FileChange | null {
     removedText: str(r.removedText),
     imports,
     isClientComponent: typeof r.isClientComponent === 'boolean' ? r.isClientComponent : undefined,
+    states: Array.isArray(r.states)
+      ? r.states.filter((s): s is string => typeof s === 'string').slice(0, 50).map((s) => s.slice(0, 120))
+      : undefined,
   }
 }
 
@@ -87,10 +91,18 @@ export async function POST(request: Request) {
   const label = str((body as { label?: unknown })?.label, 200)
   const changeSet: ChangeSet = { label, changes }
 
+  // The TaskContract carries the authorization. Absent or invalid, the Scope
+  // Gate blocks every change — no contract is not permission.
+  const rawContract = (body as { taskContract?: unknown })?.taskContract
+  const contract: TaskContract | null =
+    rawContract && typeof rawContract === 'object'
+      ? createTaskContract(rawContract as Partial<TaskContract>)
+      : null
+
   // Fail-closed pure evaluation. The API route never loads a baseline (no fs on
   // Workers); duplicate-app-root and drift checks belong to the CLI/CI half.
   const at = new Date().toISOString()
-  const result = evaluateChangeSet(changeSet, KOLMARI_MANIFEST, null, at)
+  const result = evaluateChangeSet(changeSet, KOLMARI_MANIFEST, null, at, contract)
   const audit = buildAuditEntry(changeSet, result, at)
 
   return Response.json({
@@ -98,6 +110,7 @@ export async function POST(request: Request) {
     summary: result.summary,
     failedClosed: result.failedClosed,
     findings: result.findings,
+    ledger: result.ledger ?? null,
     audit,
     evaluatedAt: at,
     manifestVersion: KOLMARI_MANIFEST.version,
