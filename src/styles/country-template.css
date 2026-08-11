@@ -163,6 +163,7 @@
 .country-template-root .m-l{display:flex;align-items:center;gap:6px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:rgba(255,255,255,.6)}
 .country-template-root .m-l svg{width:13px;height:13px;stroke-width:2.1}
 .country-template-root .m-v{display:block;font-size:22px;font-weight:700;letter-spacing:-.02em;margin-top:5px;line-height:1.1}
+.country-template-root .m-v-pending{color:rgba(255,255,255,.72)}
 .country-template-root .m-v small{font-size:12px;font-weight:500;color:rgba(255,255,255,.58);letter-spacing:0}
 .country-template-root .m-n{display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:11px;line-height:1.35;color:rgba(255,255,255,.56);margin-top:3px}
 .country-template-root .m-n b{color:#8fe0d3;font-weight:600}

@@ -69,27 +69,61 @@ function HeroBackdrop({ code, artwork }: { code: string; artwork?: HeroArtwork |
   )
 }
 
+/** The arrow affordance every hero metric panel carries. */
+const MetricArrow = (
+  <svg className="m-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+    <path d="M5 12h14M13 6l6 6-6 6" />
+  </svg>
+)
+
+/**
+ * Split a metric into the large figure and its small unit, matching the approved
+ * hero standard ("$2,365 / mo", "D8 digital nomad", "4 to 7 months", "5 years").
+ * Splits at the slash when there is one, otherwise after the first token.
+ */
+function splitMetric(value: string): [string, string | null] {
+  const slash = value.indexOf('/')
+  if (slash > 0) return [value.slice(0, slash).trim(), value.slice(slash).trim()]
+  const space = value.indexOf(' ')
+  if (space > 0) return [value.slice(0, space), value.slice(space + 1)]
+  return [value, null]
+}
+
 /** Honest metric card for a country without a verified metric dataset. */
 function VerifyingMetric({ label, icon }: { label: string; icon: React.ReactNode }) {
   return (
     <div className="metric" aria-disabled="true">
       <span className="m-l">{icon} {label}</span>
-      <span className="m-v" style={{ fontSize: 16, color: 'rgba(255,255,255,.72)' }}>Being verified</span>
+      {/* Standard .m-v typography — the muted treatment is a class, not an
+          inline font-size, so every hero sizes identically. */}
+      <span className="m-v m-v-pending">Being verified</span>
       <span className="m-n">Pending an official source</span>
     </div>
   )
 }
 
-/** Metric card that shows a verified value + its note/source, or the honest
- *  "being verified" state when the value is null. */
-function DataMetric({ label, icon, value, note }: { label: string; icon: React.ReactNode; value: string | null; note?: string | null }) {
+/**
+ * Metric card that shows a verified value + its note/source, or the honest
+ * "being verified" state when the value is null. Renders the same clickable
+ * panel as the approved standard, so every country page behaves alike.
+ */
+function DataMetric({ label, icon, value, note, onOpen, openLabel }: {
+  label: string
+  icon: React.ReactNode
+  value: string | null
+  note?: string | null
+  onOpen?: () => void
+  openLabel?: string
+}) {
   if (!value) return <VerifyingMetric label={label} icon={icon} />
+  const [figure, unit] = splitMetric(value)
   return (
-    <div className="metric">
+    <button className="metric" onClick={onOpen} aria-label={openLabel ?? label}>
+      {MetricArrow}
       <span className="m-l">{icon} {label}</span>
-      <span className="m-v">{value}</span>
+      <span className="m-v">{figure}{unit ? <> <small>{unit}</small></> : null}</span>
       {note && <span className="m-n">{note}</span>}
-    </div>
+    </button>
   )
 }
 
@@ -206,24 +240,32 @@ export function CountryHero({
       <div className="metrics">
         <DataMetric
           label="Cost vs your budget"
+          onOpen={() => go('cost-housing')}
+          openLabel="Cost against your budget. Opens Cost and Housing."
           icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /></svg>}
           value={data?.monthlyCostUsd != null ? `$${data.monthlyCostUsd.toLocaleString()}/mo` : null}
           note={data?.sources?.monthlyCostUsd ?? null}
         />
         <DataMetric
           label="Your best route"
+          onOpen={() => go('move-there')}
+          openLabel="Your best route. Opens Move There."
           icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="6" cy="6" r="2.5" /><circle cx="18" cy="18" r="2.5" /><path d="M8.5 6H15a3 3 0 010 6H9a3 3 0 000 6h6.5" /></svg>}
           value={data?.primaryVisaRoute ?? visaType ?? null}
           note={data?.sources?.primaryVisaRoute ?? 'Confirm your eligibility with the official authority'}
         />
         <DataMetric
           label="Time to residency"
+          onOpen={() => go('move-there')}
+          openLabel="Time to residency. Opens Move There."
           icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>}
           value={data?.timeToResidency ?? null}
           note={data?.sources?.timeToResidency ?? null}
         />
         <DataMetric
           label="Path to citizenship"
+          onOpen={() => go('move-there')}
+          openLabel="Path to citizenship. Opens Move There."
           icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="3" width="16" height="18" rx="2" /><circle cx="12" cy="10" r="2.6" /><path d="M8.5 17c.9-1.8 2-2.6 3.5-2.6s2.6.8 3.5 2.6" /></svg>}
           value={data?.pathToCitizenship ?? null}
           note={data?.sources?.pathToCitizenship ?? null}
