@@ -448,3 +448,32 @@ directive prologue and sets `isClientComponent`, the API route accepts the same
 flag, and the rule falls back to scanning the diff text when it is undetermined.
 Server components may import server-only modules freely; the UI → DB dependency
 rule still applies to both. Three regression tests cover it (30 total).
+
+## Sidebar — identical on country pages
+
+The sidebar looked different on `/nextinations/*` pages. Root cause was not the
+component — all three country shells render the same `<Sidebar>` — but the CSS:
+
+1. `country-template.css` carried a **duplicate copy** of the whole rail and
+   sidebar-nav block, scoped to `.country-template-root`, which had drifted from
+   the shared version (rail 254px vs 256px, collapsed 70px vs 64px) and was still
+   written against the pre-rename class names (`.sb-item`, `.sb-sub`), so it no
+   longer matched the markup and left the real rules unapplied.
+2. The scoped reset `.country-template-root *{padding:0}` plus
+   `a{color:inherit}` / `button{color:inherit}` loads **after**
+   workspace-chrome.css, so it flattened every sidebar row's padding to 0 and
+   forced all labels to white.
+3. `.country-template-root` sets `line-height:1.55`, which the rail inherited,
+   making each row about 2px taller than everywhere else.
+
+Fixes: the duplicated rail/sidebar block was deleted so workspace-chrome.css is
+the single source of truth; the country reset now excludes the shared rail
+(`*:not(.rail, .rail *)`, and the same for the `a`/`button` colour resets); and
+`.rail` pins `line-height: 1.5` so it renders identically wherever it is mounted.
+The removed mobile rail rules sat in a `max-width:900px` query that the global
+stylesheet already matches, so the drawer behaviour is unchanged.
+
+Verified by rendering the sidebar in both contexts in headless Chromium and
+diffing `getComputedStyle` across width, padding, colour, font, radius, margin,
+gap and rendered height for the rail, section headers, labels, menu items, item
+icons, section wrappers and the account row: **34 differences → 0**.

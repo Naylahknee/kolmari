@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-11T18:51:28.530Z",
+  "generatedAt": "2026-08-11T20:44:25.006Z",
   "manifestVersion": 1,
   "application": {
     "name": "Kolmari",
@@ -23,8 +23,8 @@
       "tags": []
     },
     ".sld/baseline.json": {
-      "hash": "44c3d9faa6940088",
-      "size": 85894,
+      "hash": "5ab7d94d6f4e68ba",
+      "size": 88709,
       "tags": []
     },
     "AGENTS.md": {
@@ -214,8 +214,8 @@
       "tags": []
     },
     "docs/kolmari/CURRENT-STATE.md": {
-      "hash": "9f7d01cb77152a5f",
-      "size": 24990,
+      "hash": "2c02a6c480f1150d",
+      "size": 28036,
       "tags": []
     },
     "docs/kolmari/DESIGN-TO-CODE-INVENTORY.md": {
@@ -2746,8 +2746,8 @@
       "tags": []
     },
     "src/styles/country-template.css": {
-      "hash": "d422879842a21c8b",
-      "size": 75466,
+      "hash": "a05480aac3bf7bb7",
+      "size": 70798,
       "tags": []
     },
     "src/styles/journey-tracker.css": {
@@ -2756,8 +2756,8 @@
       "tags": []
     },
     "src/styles/workspace-chrome.css": {
-      "hash": "23bf7ff2be34272e",
-      "size": 19945,
+      "hash": "c4c167a57fb78942",
+      "size": 20185,
       "tags": []
     },
     "tsconfig.json": {
@@ -2766,8 +2766,8 @@
       "tags": []
     },
     "tsconfig.tsbuildinfo": {
-      "hash": "0932b61675b7332d",
-      "size": 553235,
+      "hash": "b546b25018ef9218",
+      "size": 513668,
       "tags": []
     },
     "wrangler.jsonc": {

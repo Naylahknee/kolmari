@@ -279,6 +279,10 @@
   background: var(--color-navy-deep);
   color: #fff;
   padding: 18px 12px 40px;
+  /* Pinned so the rail renders identically wherever it is mounted. Country
+     pages wrap it in a root that sets line-height:1.55, which silently made
+     every sidebar row ~2px taller than on the rest of the app. */
+  line-height: 1.5;
   transition: flex-basis .2s, width .2s, padding .2s;
 }
 
