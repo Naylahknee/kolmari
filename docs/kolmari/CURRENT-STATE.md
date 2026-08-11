@@ -506,3 +506,24 @@ scope would itself have required `SLD_ENGINE_MAINTENANCE`, handing every feature
 task the power to rewrite the rules. The per-task working files
 (`task-contract.json`, `audit.jsonl`, `baseline.json`) are now exempt; the engine,
 manifest and governance docs stay protected. Two tests cover both directions.
+
+## Country hero — one standard for every destination
+
+The approved hero panel is now the standard on all country pages, not just
+Portugal. Both paths already shared the same classes (`hero`, `hero-eyebrow`,
+`hero-name`, `hero-blurb`, `badges`, `hero-status`, `metrics`), so typography was
+mostly common; three real divergences are fixed:
+
+- **Metric panels are clickable everywhere.** Non-Portugal countries rendered a
+  static `<div className="metric">` with no `m-go` arrow. `DataMetric` now emits
+  the same `<button className="metric">` + arrow as the approved standard and
+  navigates to the same tab (cost → Cost & Housing, the other three → Move There).
+- **Big figure + small unit.** `splitMetric()` splits at the slash, else after the
+  first token, so data-driven values render like the standard: `$1,905 / mo`,
+  `D8 digital nomad`, `4 to 7 months`, `5 years`.
+- **No inline typography override.** The "Being verified" state used
+  `style={{ fontSize: 16 }}`, which sized differently from every other hero. It
+  now uses `.m-v-pending` (colour only), so `.m-v` sizing is uniform.
+
+Portugal keeps its verified literal copy; only the shared presentation was
+unified. Verified structurally — both paths emit identical DOM, class for class.

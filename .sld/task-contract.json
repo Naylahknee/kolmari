@@ -1,41 +1,10 @@
 {
-  "taskId": "country-free-tier-visibility",
-  "instruction": "Free accounts on a matched country: Overview shows section 1 + basic personalization only (sections 2-5 hidden); all other tabs show the locked Kolmari Pro card. Same layout/visibility on every tab. Also make the four country-hero metric panels visible again (too dark) and blur them for free accounts only.",
-  "objective": "Match the kolmari-demo free-tier country page gating, and restore hero metric panel legibility with a free/paid blur split.",
-  "allowedEntities": [
-    "Country Page",
-    "Country Hero",
-    "Country Tabs"
-  ],
-  "allowedFiles": [
-    "src/app/(app)/(workspace)/nextinations/[countrySlug]/v2/[section]/page.tsx",
-    "src/styles/country-template.css",
-    "docs/kolmari/CURRENT-STATE.md",
-    ".sld/task-contract.json",
-    ".sld/baseline.json",
-    "src/sld/scope/task-contract.js",
-    "src/sld/__tests__/scope.test.mjs"
-  ],
-  "allowedActions": [
-    "CREATE",
-    "MODIFY",
-    "RESTYLE",
-    "REWIRE"
-  ],
-  "forbiddenChanges": [
-    "src/lib",
-    "src/components/kolmari",
-    "src/app/(app)/(workspace)/dashboard"
-  ],
-  "createdFrom": "user-request",
-  "grants": [
-    "SLD_ENGINE_MAINTENANCE"
-  ],
-  "propagationRules": [
-    {
-      "from": ".sld/task-contract.json",
-      "to": "src/sld/scope/task-contract.js",
-      "reason": "Governance blocked its own per-task contract file, so no feature task could declare scope. Required to complete any authorized change."
-    }
-  ]
+  "taskId": "country-hero-standard",
+  "instruction": "The attached country hero panel is the standard for any and all country pages, including typography and font sizing.",
+  "objective": "Every country's hero metric panels match the approved standard: clickable panel with arrow affordance, big value + small unit, standard .m-v typography with no inline overrides.",
+  "allowedEntities": ["Country Hero"],
+  "allowedFiles": ["src/styles/country-template.css", "docs/kolmari/CURRENT-STATE.md", ".sld/task-contract.json", ".sld/baseline.json"],
+  "allowedActions": ["MODIFY", "RESTYLE"],
+  "forbiddenChanges": ["src/lib", "src/app", "src/components/kolmari"],
+  "createdFrom": "user-request"
 }
