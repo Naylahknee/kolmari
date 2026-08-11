@@ -146,7 +146,12 @@
 .country-template-root .badge-h{display:inline-flex;align-items:center;gap:7px;padding:6px 12px 6px 9px;border-radius:var(--r-pill);font-size:12px;font-weight:600;background:rgba(13,27,57,.5);border:1px solid rgba(255,255,255,.2);color:#fff;backdrop-filter:blur(6px)}
 .country-template-root .badge-h svg{width:15px;height:15px;flex:0 0 auto;stroke-width:2.1}
 .country-template-root .b-sch svg{color:var(--gold)} .country-template-root .b-eu svg{color:#93b6ff} .country-template-root .b-nato svg{color:#8fe0d3}
-.country-template-root .metrics{margin-top:26px;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(255,255,255,.16);background:rgba(13,27,57,.5);backdrop-filter:blur(14px)}
+.country-template-root .metrics{margin-top:26px;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.10);backdrop-filter:blur(14px)}
+/* Free accounts get the panels frosted: the labels stay readable so the value is
+   visible, but the figures are not legible until Kolmari Pro. Paid accounts see
+   them crisp. Applied on the hero root so it needs no per-panel markup. */
+.country-template-root[data-plan="free"] .metric .m-v,
+.country-template-root[data-plan="free"] .metric .m-n{filter:blur(5px);user-select:none}
 .country-template-root .metric{position:relative;display:flex;flex-direction:column;justify-content:center;width:100%;min-height:88px;text-align:left;padding:14px 30px 14px 18px;
   border-right:1px solid rgba(255,255,255,.12);color:#fff;transition:.15s;cursor:pointer}
 .country-template-root .metric:hover{background:rgba(255,255,255,.07)}

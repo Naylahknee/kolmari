@@ -1,31 +1,41 @@
 {
-  "taskId": "sld-strict-scope-repair",
-  "instruction": "REPAIR SLD: implement strict task-scope enforcement \u2014 TaskContract, Scope Gate before the seven layers, default-deny, ledger, post-change verification, tests.",
-  "objective": "SLD must ask whether the agent had permission, not merely whether a change is risky.",
+  "taskId": "country-free-tier-visibility",
+  "instruction": "Free accounts on a matched country: Overview shows section 1 + basic personalization only (sections 2-5 hidden); all other tabs show the locked Kolmari Pro card. Same layout/visibility on every tab. Also make the four country-hero metric panels visible again (too dark) and blur them for free accounts only.",
+  "objective": "Match the kolmari-demo free-tier country page gating, and restore hero metric panel legibility with a free/paid blur split.",
   "allowedEntities": [
-    "SLD Engine"
+    "Country Page",
+    "Country Hero",
+    "Country Tabs"
   ],
   "allowedFiles": [
-    "package.json",
-    "src/app/api/sld/evaluate/route.ts",
-    "docs/kolmari/14-SLD-GOVERNANCE.md",
-    "AGENTS.md",
+    "src/app/(app)/(workspace)/nextinations/[countrySlug]/v2/[section]/page.tsx",
+    "src/styles/country-template.css",
     "docs/kolmari/CURRENT-STATE.md",
     ".sld/task-contract.json",
     ".sld/baseline.json",
-    ".github/workflows/sld.yml"
+    "src/sld/scope/task-contract.js",
+    "src/sld/__tests__/scope.test.mjs"
   ],
   "allowedActions": [
     "CREATE",
     "MODIFY",
+    "RESTYLE",
     "REWIRE"
   ],
+  "forbiddenChanges": [
+    "src/lib",
+    "src/components/kolmari",
+    "src/app/(app)/(workspace)/dashboard"
+  ],
+  "createdFrom": "user-request",
   "grants": [
     "SLD_ENGINE_MAINTENANCE"
   ],
-  "requiredChanges": [
-    "src/sld/scope/task-contract.js",
-    "src/sld/scope/scope-gate.js"
-  ],
-  "createdFrom": "user-request"
+  "propagationRules": [
+    {
+      "from": ".sld/task-contract.json",
+      "to": "src/sld/scope/task-contract.js",
+      "reason": "Governance blocked its own per-task contract file, so no feature task could declare scope. Required to complete any authorized change."
+    }
+  ]
 }

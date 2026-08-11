@@ -357,3 +357,32 @@ test('a RESTYLE in a real UI file is still detected', () => {
   assert.equal(r.decision, 'BLOCK')
   assert.match(r.findings[0].message, /RESTYLE/)
 })
+
+test('the per-task contract file is an input to governance, not part of the referee', () => {
+  // Protecting .sld/task-contract.json made the system unusable: declaring a
+  // task's scope would itself require SLD_ENGINE_MAINTENANCE, handing every
+  // feature task the power to rewrite the rules.
+  const contract = createTaskContract({
+    taskId: 'a-feature',
+    instruction: 'Do a feature.',
+    allowedFiles: ['src/components/kolmari/hello.tsx', '.sld/task-contract.json'],
+    allowedActions: ['CREATE', 'MODIFY'],
+  })
+  const r = decide([
+    { path: '.sld/task-contract.json', changeType: 'modify', addedText: '{"taskId":"a-feature"}' },
+  ], contract)
+  assert.equal(r.decision, 'ALLOW')
+})
+
+test('the SLD engine itself stays protected from an ordinary feature task', () => {
+  const contract = createTaskContract({
+    taskId: 'a-feature',
+    instruction: 'Do a feature.',
+    allowedDirectories: ['src', '.sld'],
+    allowedActions: ['MODIFY'],
+  })
+  const r = decide([
+    { path: 'src/sld/scope/scope-gate.js', changeType: 'modify', addedText: '// weaken' },
+  ], contract)
+  assert.equal(r.decision, 'BLOCK')
+})
