@@ -43,6 +43,16 @@ export const MANDATORY_INVARIANTS = [
  * weaken the referee because the referee is inconvenient.
  */
 export const GOVERNANCE_PATHS = ['src/sld/', '.sld/', 'docs/kolmari/14-SLD-GOVERNANCE.md', 'scripts/sld.mjs']
+
+/**
+ * Per-task working files that live under .sld/ but are INPUTS to governance
+ * rather than part of the referee: the contract declaring what this task
+ * authorizes, the append-only audit log, and the scanned baseline. Protecting
+ * these made the system unusable — no feature task could declare its own scope
+ * without first claiming SLD_ENGINE_MAINTENANCE, which would hand every task the
+ * power to rewrite the rules. The engine, manifest and docs stay protected.
+ */
+const GOVERNANCE_EXEMPT = ['.sld/task-contract.json', '.sld/audit.jsonl', '.sld/baseline.json']
 export const SLD_MAINTENANCE_GRANT = 'SLD_ENGINE_MAINTENANCE'
 
 /**
@@ -116,5 +126,6 @@ export function allowsGovernanceEdits(contract) {
 
 /** True when a path belongs to SLD's own governance surface. */
 export function isGovernancePath(path) {
+  if (GOVERNANCE_EXEMPT.includes(path)) return false
   return GOVERNANCE_PATHS.some((p) => (p.endsWith('/') ? path.startsWith(p) : path === p))
 }

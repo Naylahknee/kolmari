@@ -9,6 +9,7 @@ import { getApprovedHero } from '@/lib/country-visuals/data'
 import { getGeneratedHeroVersion } from '@/lib/country-assets'
 import { PersonalizedCountrySummary } from '@/components/country-template/PersonalizedCountrySummary'
 import { SimpleCountryView } from '@/components/country-template/SimpleCountryView'
+import { LockedTab } from '@/components/country-template/LockedTab'
 import { CountryTemplate } from '@/components/country-template/CountryTemplate'
 import { TAB_SLUGS, type TabSlug } from '@/components/country-template/TabBar'
 import { OverviewTab } from '@/components/country-template/tabs/OverviewTab'
@@ -43,6 +44,55 @@ export async function generateMetadata({ params }: Props) {
   if (!country) return { title: 'Destination Not Found | Kolmari' }
   const label = section.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
   return { title: `${country.name} — ${label} | Kolmari` }
+}
+
+/**
+ * What each tab actually contains. Shown (titles only) on the locked card so a
+ * free account can see what Kolmari Pro adds without the research itself.
+ */
+const LOCKED_TITLE: Record<TabSlug, string> = {
+  'overview': 'Your personalized overview',
+  'move-there': 'Your route in, and what it will take',
+  'cost-housing': 'What it will actually cost you',
+  'work-study': 'Working and studying on your terms',
+  'healthcare': 'Healthcare for your household',
+  'family-schools': 'Schools and family logistics',
+  'lifestyle-community': 'Daily life and where you would belong',
+  'tax-money': 'Tax and money, against your numbers',
+}
+
+const TAB_SECTIONS: Record<TabSlug, string[]> = {
+  'overview': [],
+  'move-there': [
+    'Ways In', 'Visa Pathways', 'Short-Stay and Long-Stay Options',
+    'Temporary Residency, Permanent Residency, and Citizenship', 'Entry and Immigration Requirements',
+    'Required Documents', 'Processing Times', 'Relocation Steps and Requirements',
+    'Lesser-known routes most people miss',
+  ],
+  'cost-housing': [
+    'Cost of Living', 'Housing Market', 'Renting vs Buying', 'Neighborhood Costs',
+    'Utilities and Internet', 'Upfront Move Costs',
+  ],
+  'work-study': [
+    'Work Rights', 'Remote Work and Employers of Record', 'Local Job Market',
+    'Starting a Business', 'Credential Recognition', 'Study Options',
+  ],
+  'healthcare': [
+    'Public Healthcare Access', 'Private Insurance', 'Costs and Coverage',
+    'Prescriptions and Pharmacies', 'Specialist and Emergency Care',
+  ],
+  'family-schools': [
+    'Schooling Options', 'International Schools', 'Enrolment and Documents',
+    'Childcare', 'Family Reunification',
+  ],
+  'lifestyle-community': [
+    'Daily Life', 'Community and Belonging', 'Language Reality',
+    'Climate and Seasons', 'Safety', 'Getting Around',
+  ],
+  'tax-money': [
+    'Tax Residency', 'Income Tax', 'Banking', 'Moving Money',
+    'Double Taxation', 'Social Security',
+  ],
 }
 
 /** Honest "being verified" panel shown for deeper tabs of countries whose
@@ -82,9 +132,14 @@ export default async function CountryV2Page({ params, searchParams }: Props) {
     region: record.region,
   }
 
-  // FREE plan: the simple, non-expanded view for any country — info, short
-  // summary, basic visa info, and a small real map.
-  if (!isPaid(profile)) {
+  const paid = isPaid(profile)
+
+  // FREE plan, country NOT matched to this user: the simple, non-expanded view.
+  // A matched destination keeps the full frame below so the user can see what
+  // their match actually bought them.
+  const freeRanked = !paid ? rankNextinations(profile) : []
+  const freeMatchIdx = freeRanked.findIndex((r) => r.country.slug === countrySlug)
+  if (!paid && freeMatchIdx < 0) {
     return (
       <SimpleCountryView
         country={templateCountry}
@@ -101,8 +156,8 @@ export default async function CountryV2Page({ params, searchParams }: Props) {
 
   // Real Match Score from the user's profile ranking (null when unscored /
   // profile incomplete) — the right rail renders this instead of a placeholder.
-  const ranked = rankNextinations(profile)
-  const rankIdx = ranked.findIndex((r) => r.country.slug === countrySlug)
+  const ranked = paid ? rankNextinations(profile) : freeRanked
+  const rankIdx = paid ? ranked.findIndex((r) => r.country.slug === countrySlug) : freeMatchIdx
   const rankedMatch = rankIdx >= 0 ? ranked[rankIdx].match : null
   const matchInfo = rankIdx >= 0
     ? { score: rankedMatch!.score, rank: rankIdx + 1, total: ranked.length, reasons: rankedMatch!.reasons }
@@ -163,25 +218,48 @@ export default async function CountryV2Page({ params, searchParams }: Props) {
   // tabs. Every other country renders the same rich frame with honest,
   // data-driven content.
   if (countrySlug === 'portugal') {
-    const tab = {
-      'overview': <>{overviewPrefix}<OverviewTab slug={countrySlug} /></>,
-      'move-there': <MoveThereTab />,
-      'cost-housing': <CostHousingTab slug={countrySlug} />,
-      'work-study': <WorkStudyTab slug={countrySlug} />,
-      'healthcare': <HealthcareTab slug={countrySlug} />,
-      'family-schools': <FamilySchoolsTab slug={countrySlug} />,
-      'lifestyle-community': <LifestyleTab slug={countrySlug} />,
-      'tax-money': <TaxMoneyTab slug={countrySlug} />,
-    }[active]
+    // Free + matched: Overview keeps section 1 and the personalization teaser;
+    // every other tab is locked. Mirrors the demo's richOverview / lockedTab split.
+    const locked = (
+      <LockedTab
+        countryName={record.name}
+        tabLabel={TAB_LABEL[active]}
+        title={LOCKED_TITLE[active]}
+        sections={TAB_SECTIONS[active]}
+      />
+    )
+    const tab = !paid
+      ? (active === 'overview'
+        ? <>{overviewPrefix}<OverviewTab slug={countrySlug} freeTier /></>
+        : locked)
+      : {
+        'overview': <>{overviewPrefix}<OverviewTab slug={countrySlug} /></>,
+        'move-there': <MoveThereTab />,
+        'cost-housing': <CostHousingTab slug={countrySlug} />,
+        'work-study': <WorkStudyTab slug={countrySlug} />,
+        'healthcare': <HealthcareTab slug={countrySlug} />,
+        'family-schools': <FamilySchoolsTab slug={countrySlug} />,
+        'lifestyle-community': <LifestyleTab slug={countrySlug} />,
+        'tax-money': <TaxMoneyTab slug={countrySlug} />,
+      }[active]
 
     return (
-      <CountryTemplate slug={countrySlug} active={active} fromQuiz={fromQuiz} country={templateCountry} center={center} match={matchInfo} data={heroData} heroArtwork={heroArtwork} statusChips={statusChips} rich>
+      <CountryTemplate slug={countrySlug} active={active} fromQuiz={fromQuiz} country={templateCountry} center={center} match={matchInfo} data={heroData} heroArtwork={heroArtwork} statusChips={statusChips} paid={paid} rich>
         {tab}
       </CountryTemplate>
     )
   }
 
-  const body = active === 'overview'
+  const body = !paid && active !== 'overview'
+    ? (
+      <LockedTab
+        countryName={record.name}
+        tabLabel={TAB_LABEL[active]}
+        title={LOCKED_TITLE[active]}
+        sections={TAB_SECTIONS[active]}
+      />
+    )
+    : active === 'overview'
     ? (
       <>
         {overviewPrefix}
@@ -207,6 +285,7 @@ export default async function CountryV2Page({ params, searchParams }: Props) {
       data={heroData}
       heroArtwork={heroArtwork}
       statusChips={statusChips}
+      paid={paid}
     >
       {body}
     </CountryTemplate>

@@ -18,7 +18,7 @@ type LatLng = { lat: number; lng: number }
    `rich` is true only for Portugal (the fully verified dataset), which renders
    the approved hero metrics and rail. Every other country renders the same
    frame with honest, data-driven content and a real map. */
-export function CountryTemplate({ slug, active, fromQuiz = false, country, center = null, visaType, rich = false, match = null, data = null, heroArtwork = null, statusChips = [], children }:
+export function CountryTemplate({ slug, active, fromQuiz = false, country, center = null, visaType, rich = false, match = null, data = null, heroArtwork = null, statusChips = [], paid = true, children }:
   {
     slug: string
     active: TabSlug
@@ -31,6 +31,8 @@ export function CountryTemplate({ slug, active, fromQuiz = false, country, cente
     data?: CountryHeroData | null
     heroArtwork?: HeroArtwork | null
     statusChips?: HeroStatusChip[]
+    /** Drives the free-tier frosting on the hero metric panels. */
+    paid?: boolean
     children: React.ReactNode
   }) {
   const router = useRouter()
@@ -42,7 +44,7 @@ export function CountryTemplate({ slug, active, fromQuiz = false, country, cente
 
   return (
     <UnitsProvider>
-      <div className="country-template-root">
+      <div className="country-template-root" data-plan={paid ? 'pro' : 'free'}>
         <AnnouncementBar />
         <TopBar onToggleRail={toggleRail} />
         <div className="shell">

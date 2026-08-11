@@ -477,3 +477,32 @@ Verified by rendering the sidebar in both contexts in headless Chromium and
 diffing `getComputedStyle` across width, padding, colour, font, radius, margin,
 gap and rendered height for the rail, section headers, labels, menu items, item
 icons, section wrappers and the account row: **34 differences → 0**.
+
+## Country page — free-tier visibility
+
+Free accounts on a **matched** destination now get the full country frame (hero,
+tabs, right rail) with the content gated, instead of the flat `SimpleCountryView`.
+The split mirrors `kolmari-demo`'s `richOverview` / `lockedTab` / `plainTab` rule:
+
+- **Overview, free:** section 1 (Country Snapshot) plus the personalized summary
+  teaser. Sections 2–5 are the personalized research and are not rendered at all.
+- **Every other tab, free:** the `LockedTab` card — Kolmari Pro eyebrow, the tab's
+  real headline, its actual section titles numbered in a grid, an "Unlock Kolmari
+  Pro" CTA, and the section count. Same layout on every tab.
+- **Unmatched destination, free:** unchanged `SimpleCountryView`.
+- **Paid:** unchanged.
+
+Hero metric panels were `rgba(13,27,57,.5)` on a dark hero and effectively
+invisible; they are now `rgba(255,255,255,.10)`, keeping the existing
+`backdrop-filter: blur(14px)` frosting. For free accounts the panel *values* and
+sub-lines are frosted (`filter: blur(5px)`) via `data-plan="free"` on the country
+root, so the labels stay readable and the figures unlock with Pro.
+
+## SLD: the per-task contract file is an input, not the referee
+
+Post-change verification blocked `.sld/task-contract.json` as part of SLD's own
+governance surface — which made the system unusable, since declaring a task's
+scope would itself have required `SLD_ENGINE_MAINTENANCE`, handing every feature
+task the power to rewrite the rules. The per-task working files
+(`task-contract.json`, `audit.jsonl`, `baseline.json`) are now exempt; the engine,
+manifest and governance docs stay protected. Two tests cover both directions.

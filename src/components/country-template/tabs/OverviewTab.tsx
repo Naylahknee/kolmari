@@ -6,7 +6,15 @@ import { getCountryVisualAssets } from '@/lib/country-visuals/data'
 /* Converted from the approved index.html mockup. Markup is verbatim.
    Content is still literal Portugal copy: replace with `content.*` per
    section as the model is extended. See README step 4. */
-export function OverviewTab({ slug }: { slug: string }) {
+/**
+ * Overview tab.
+ *
+ * `freeTier` renders the plain overview a free account sees on a matched
+ * country: section 1 (Country Snapshot) only. Sections 2–5 are the personalized
+ * research and belong to Kolmari Pro, so they are not rendered at all rather
+ * than rendered-and-hidden.
+ */
+export function OverviewTab({ slug, freeTier = false }: { slug: string; freeTier?: boolean }) {
   const assets = getCountryVisualAssets(slug)
   const snap = assets?.snapshotMap
   return (
@@ -62,6 +70,8 @@ export function OverviewTab({ slug }: { slug: string }) {
                 <div className="src"><span>Last verified: January 2026 · World Bank, Eurostat, Instituto Nacional de Estatística</span><span className="sbadge">Official source verified</span></div>
               </section>
 
+              {/* Sections 2–5 are the personalized research: Kolmari Pro only. */}
+              {!freeTier && (<>
               {/* 2. TOP CITIES */}
               <section className="card-surface sec" id="top-cities">
                 <div className="sec-head">
@@ -212,6 +222,7 @@ export function OverviewTab({ slug }: { slug: string }) {
                   <button className="chip"><span className="ic i-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" /><path d="M12 3v18M3 12h18" /></svg></span><span><span className="t">Housing co-ops</span><span className="d">Cooperativa de habitação</span></span></button>
                 </div>
               </section>
+              </>)}
             </div>
   )
 }
