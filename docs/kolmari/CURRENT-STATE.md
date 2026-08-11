@@ -343,3 +343,59 @@ BLOCK). Baseline committed at `.sld/baseline.json` (443 files, single canonical
 root, env vars by name only — no secret values). 21 engine unit tests pass;
 demonstrated live catching intentional Layer 1/3/5/7 violations (→ BLOCK, CLI
 exit 2). No new dependencies.
+
+## Dashboard — redesigned as a decision workspace
+
+Rebuilt `/dashboard` around the five questions it exists to answer: where did I
+leave off, what should I do next, is anything waiting for me, how far along am I,
+and what can I ask Kolmari. Order: orientation header (greeting, one-sentence
+state, compact journey progress, Flutter Mode) → Ask Kolmari → Pick Up Where You
+Left Off + Your Journey → What's Next + Needs Your Attention → Your Shortlist.
+
+A new pure derivation layer, `src/lib/dashboard-model.ts`, computes all of it from
+real saved state (Kolmari Plan, Command Center board, Kolmari Profile) with
+`today` passed in so server and client render identically:
+
+- **Pick up where you left off** uses actual work, not the last visited URL — a
+  part-way Command Center category ("Continue comparing safety — 1 of 3 items
+  checked for Portugal"), then a document mid-pipeline, then an open task.
+- **What's Next** returns at most three actions in dependency order (profile
+  before scoring, destination before pathway, pathway before documents, budget
+  before affordability); overdue dated items jump the queue. Each carries a
+  reason behind a "Why this?" disclosure.
+- **Needs Your Attention** emits only date-derived alerts (document expiring
+  before the target move date, expired documents, overdue and imminent tasks).
+  Kolmari has no live requirements feed, so no "changed" alerts are manufactured.
+  With nothing waiting the section collapses to a single line.
+- **Your Shortlist** shows two destinations with real signals only (tracked
+  Kolmari Pathways count, cost of living, Community Fit, safety) and a Match
+  Score only where one has been calculated.
+
+Relocated rather than deleted: planning-area coverage and the consolidated
+deadline list now render in **My Plan → Overview** (`PlanWorkspace` gained
+`profileComplete` / `dependents` props). Journey stage management was already in
+My Plan's Kolmari Timeline stepper, per-stage tasks in the Checklist tab, food fit
+in Command Center and `/food-fit`, pathway detail in `/pathways`. The four
+dashboard-only presentation components those replaced were removed
+(`dashboard-side-cards`, `dashboard-command-center`, `dashboard-food-health`,
+`journey-drawer`). Ask Kolmari now takes at most three contextual suggestion chips
+built from the user's own destinations and plan state instead of six fixed tiles.
+
+Panels are server components; "Why this?" uses native `<details>`, so the
+redesign ships no new client JavaScript beyond the time-of-day greeting.
+
+## SLD precision fixes (found by running the gate on the dashboard redesign)
+
+Running `sld:analyze` against the redesign surfaced three false positives in the
+engine, now fixed with regression tests (28 total):
+
+- Destructive-SQL matching is **case-sensitive** outside real SQL surfaces, so
+  Tailwind's `truncate` class no longer reads as `TRUNCATE`. Inside `.sql` files
+  and `db/migrations/` any spelling still counts.
+- The fabricated-Match-Score heuristic is scored **per line** and requires an
+  actual assignment (`matchScore: 92`), not merely the words plus a number
+  somewhere in the file.
+- Content-scanning layers (Identity, Data, Intent) skip **specimen surfaces** —
+  the engine's own source and test files — which necessarily contain the strings
+  they exist to detect. Without this, editing the manifest would BLOCK on its own
+  forbidden-terms list. Structural layers still apply everywhere.

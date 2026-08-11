@@ -1,18 +1,15 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useSyncExternalStore } from 'react'
+import { useState } from 'react'
 import {
   AlertTriangle,
   ArrowRight,
   ArrowUp,
   ExternalLink,
-  FileText,
+  GitCompareArrows,
   Globe2,
-  History,
-  ListChecks,
   LoaderCircle,
-  ShieldCheck,
   Sparkles,
   Stamp,
   WalletCards,
@@ -20,41 +17,15 @@ import {
 } from 'lucide-react'
 import type { KolmariCopilotAnswer, KolmariCopilotResponse } from '@/lib/kolmari-copilot'
 import { isKolmariCopilotError } from '@/lib/kolmari-copilot'
-import {
-  parseWorkspaceActivity,
-  WORKSPACE_ACTIVITY_EVENT,
-  WORKSPACE_ACTIVITY_STORAGE_KEY,
-} from '@/lib/workspace-activity'
+import type { Suggestion } from '@/lib/dashboard-model'
 
-type Starter = {
-  question: string
-  href: string
-  icon: LucideIcon
+/** Suggestion chips are chosen from the user's real state by the dashboard model. */
+const SUGGESTION_ICON: Record<Suggestion['icon'], LucideIcon> = {
+  money: WalletCards,
+  globe: Globe2,
+  compare: GitCompareArrows,
+  route: Stamp,
 }
-
-const STARTERS: Starter[] = [
-  { question: 'Where can I realistically move?', href: '/your-world', icon: Globe2 },
-  { question: 'Which Pathways might fit me?', href: '/pathways', icon: Stamp },
-  { question: 'Can my family afford this?', href: '/cost-calculator', icon: WalletCards },
-  { question: 'How do I turn this into a plan?', href: '/my-plan', icon: ListChecks },
-  { question: 'Where might we feel welcomed?', href: '/greenbook', icon: ShieldCheck },
-  { question: 'What documents will I need?', href: '/documents', icon: FileText },
-]
-
-function subscribeToWorkspaceActivity(onStoreChange: () => void) {
-  const onStorage = (event: StorageEvent) => {
-    if (event.key === WORKSPACE_ACTIVITY_STORAGE_KEY) onStoreChange()
-  }
-  window.addEventListener('storage', onStorage)
-  window.addEventListener(WORKSPACE_ACTIVITY_EVENT, onStoreChange)
-  return () => {
-    window.removeEventListener('storage', onStorage)
-    window.removeEventListener(WORKSPACE_ACTIVITY_EVENT, onStoreChange)
-  }
-}
-
-const readWorkspaceActivity = () => window.localStorage.getItem(WORKSPACE_ACTIVITY_STORAGE_KEY)
-const readServerWorkspaceActivity = () => null
 
 function statusLabel(status: KolmariCopilotAnswer['status']) {
   if (status === 'verified_information') return 'Verified information'
@@ -62,17 +33,11 @@ function statusLabel(status: KolmariCopilotAnswer['status']) {
   return 'Decision support'
 }
 
-export function DecisionWorkspaceStarter() {
+export function DecisionWorkspaceStarter({ suggestions = [] }: { suggestions?: Suggestion[] }) {
   const [question, setQuestion] = useState('')
   const [answer, setAnswer] = useState<KolmariCopilotAnswer | null>(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const activityValue = useSyncExternalStore(
-    subscribeToWorkspaceActivity,
-    readWorkspaceActivity,
-    readServerWorkspaceActivity,
-  )
-  const activity = parseWorkspaceActivity(activityValue)
 
   async function submitQuestion(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -112,14 +77,9 @@ export function DecisionWorkspaceStarter() {
           <Sparkles size={13} aria-hidden="true" /> Ask Kolmari
         </p>
         <div className="mt-1 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h2 id="decision-workspace-heading" className="text-2xl font-bold tracking-[-0.02em] text-navy sm:text-[28px]">
-              What do you need to figure out?
-            </h2>
-            <p className="mt-1 text-sm leading-6 text-muted">
-              Ask a relocation question. Kolmari will research it, explain the limits, and connect you to the right workspace.
-            </p>
-          </div>
+          <h2 id="decision-workspace-heading" className="text-2xl font-bold tracking-[-0.02em] text-navy sm:text-[28px]">
+            What do you want to figure out?
+          </h2>
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-soft">
             Questions are not added to your profile
           </span>
@@ -218,33 +178,26 @@ export function DecisionWorkspaceStarter() {
           </article>
         )}
 
-        {!answer && activity && (
-          <Link
-            href={activity.href}
-            className="mt-3 inline-flex min-h-9 items-center gap-2 rounded-full border border-line bg-canvas/60 px-3 text-xs font-semibold text-navy transition hover:border-gold-deep hover:bg-gold-soft/25"
-          >
-            <History size={14} className="text-gold-deep" aria-hidden="true" />
-            Continue where you left off: <span className="font-bold">{activity.label}</span>
-            <ArrowRight size={13} aria-hidden="true" />
-          </Link>
+        {/* Contextual suggestions — drawn from the user's own destinations and
+            plan state, not a fixed list of generic questions. */}
+        {!answer && suggestions.length > 0 && (
+          <div className="mt-3.5 flex flex-wrap gap-2">
+            {suggestions.map(({ question: suggested, icon }) => {
+              const Icon = SUGGESTION_ICON[icon]
+              return (
+                <button
+                  key={suggested}
+                  type="button"
+                  onClick={() => setQuestion(suggested)}
+                  className="group inline-flex min-h-9 items-center gap-2 rounded-full border border-line bg-white px-3.5 text-[12.5px] font-semibold text-navy transition-colors duration-150 hover:border-gold-deep hover:bg-[#fdfbf3]"
+                >
+                  <Icon size={14} className="flex-none text-gold-deep" strokeWidth={1.9} aria-hidden="true" />
+                  {suggested}
+                </button>
+              )
+            })}
+          </div>
         )}
-      </div>
-
-      <div className="grid gap-px bg-line sm:grid-cols-2 xl:grid-cols-3">
-        {STARTERS.map(({ question: starterQuestion, href, icon: Icon }) => (
-          <button
-            key={starterQuestion}
-            type="button"
-            onClick={() => setQuestion(starterQuestion)}
-            className="group flex min-h-[76px] items-center gap-3 bg-white px-5 py-4 text-left transition-colors duration-150 hover:bg-[#fdfbf3]"
-          >
-            <span className="grid size-9 flex-none place-items-center rounded-[10px] bg-gold-soft/55 text-gold-deep transition-colors duration-150 group-hover:bg-gold-soft">
-              <Icon size={17} strokeWidth={1.9} aria-hidden="true" />
-            </span>
-            <span className="min-w-0 flex-1 text-[13px] font-semibold leading-5 text-navy">{starterQuestion}</span>
-            <ArrowRight size={15} className="flex-none text-muted-soft transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-gold-deep" aria-hidden="true" />
-          </button>
-        ))}
       </div>
     </section>
   )
