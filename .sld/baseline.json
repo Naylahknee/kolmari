@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-11T16:16:28.525Z",
+  "generatedAt": "2026-08-11T18:51:28.530Z",
   "manifestVersion": 1,
   "application": {
     "name": "Kolmari",
@@ -18,13 +18,13 @@
       "tags": []
     },
     ".sld/audit.jsonl": {
-      "hash": "c9dc0b1c31acce22",
-      "size": 5044,
+      "hash": "cbf5ed73b8a020c2",
+      "size": 5662,
       "tags": []
     },
     ".sld/baseline.json": {
-      "hash": "033ef978c047e9e8",
-      "size": 86089,
+      "hash": "44c3d9faa6940088",
+      "size": 85894,
       "tags": []
     },
     "AGENTS.md": {
@@ -214,8 +214,8 @@
       "tags": []
     },
     "docs/kolmari/CURRENT-STATE.md": {
-      "hash": "f0b3784d9694c2cc",
-      "size": 21535,
+      "hash": "9f7d01cb77152a5f",
+      "size": 24990,
       "tags": []
     },
     "docs/kolmari/DESIGN-TO-CODE-INVENTORY.md": {
@@ -950,8 +950,8 @@
       ]
     },
     "src/app/(app)/(workspace)/dashboard/page.tsx": {
-      "hash": "88dc3577c7d244ec",
-      "size": 4864,
+      "hash": "06dd986054b2f2bf",
+      "size": 7780,
       "tags": [
         "page"
       ]
@@ -1086,8 +1086,8 @@
       ]
     },
     "src/app/(app)/(workspace)/settings/page.tsx": {
-      "hash": "8915fd81aea27be1",
-      "size": 646,
+      "hash": "d9e10c1ca9cfe832",
+      "size": 830,
       "tags": [
         "page"
       ]
@@ -1293,6 +1293,13 @@
         "api"
       ]
     },
+    "src/app/api/dashboard-layout/route.ts": {
+      "hash": "13c4cc636ba73412",
+      "size": 2249,
+      "tags": [
+        "api"
+      ]
+    },
     "src/app/api/internal/country-hero/ensure/route.ts": {
       "hash": "4985c3f7b08947b9",
       "size": 3295,
@@ -1336,8 +1343,8 @@
       ]
     },
     "src/app/api/sld/evaluate/route.ts": {
-      "hash": "f3289a539f73abad",
-      "size": 3664,
+      "hash": "00073a42786ef3e7",
+      "size": 3763,
       "tags": [
         "api"
       ]
@@ -1733,8 +1740,8 @@
       ]
     },
     "src/components/kolmari/account-tabs.tsx": {
-      "hash": "6f04dd2937116e21",
-      "size": 10707,
+      "hash": "44fc8fa5d54faadb",
+      "size": 11009,
       "tags": [
         "interface"
       ]
@@ -1823,9 +1830,23 @@
         "interface"
       ]
     },
+    "src/components/kolmari/dashboard-command-center.tsx": {
+      "hash": "3885e58ea0da28d4",
+      "size": 3370,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/dashboard-food-health.tsx": {
+      "hash": "35e8ce3c6202bd11",
+      "size": 4788,
+      "tags": [
+        "interface"
+      ]
+    },
     "src/components/kolmari/dashboard-onboarding.tsx": {
-      "hash": "26bcb1e651c3f474",
-      "size": 6373,
+      "hash": "58a830f3f3407c62",
+      "size": 6280,
       "tags": [
         "interface"
       ]
@@ -1837,6 +1858,20 @@
         "interface"
       ]
     },
+    "src/components/kolmari/dashboard-side-cards.tsx": {
+      "hash": "eed2c8d1895e89b4",
+      "size": 4748,
+      "tags": [
+        "interface"
+      ]
+    },
+    "src/components/kolmari/dashboard/customize.tsx": {
+      "hash": "87d4f4aa432e44d3",
+      "size": 7955,
+      "tags": [
+        "interface"
+      ]
+    },
     "src/components/kolmari/dashboard/greeting.tsx": {
       "hash": "1ad76d43df076490",
       "size": 718,
@@ -1844,9 +1879,16 @@
         "interface"
       ]
     },
+    "src/components/kolmari/dashboard/journey-tracker.tsx": {
+      "hash": "5234811499e65cb0",
+      "size": 7517,
+      "tags": [
+        "interface"
+      ]
+    },
     "src/components/kolmari/dashboard/panels.tsx": {
-      "hash": "a84365785a718c85",
-      "size": 17486,
+      "hash": "6229cb201914fe8e",
+      "size": 19626,
       "tags": [
         "interface"
       ]
@@ -2347,6 +2389,20 @@
         "lib"
       ]
     },
+    "src/lib/dashboard-layout-store.ts": {
+      "hash": "0151808f088ece03",
+      "size": 1979,
+      "tags": [
+        "lib"
+      ]
+    },
+    "src/lib/dashboard-layout.ts": {
+      "hash": "87dc402b5de307e6",
+      "size": 5357,
+      "tags": [
+        "lib"
+      ]
+    },
     "src/lib/dashboard-model.ts": {
       "hash": "57d7291dd5f4ec1b",
       "size": 20122,
@@ -2502,8 +2558,8 @@
       ]
     },
     "src/lib/profile.ts": {
-      "hash": "52596ea4a414fc4f",
-      "size": 12903,
+      "hash": "c9bfd78d867b0c22",
+      "size": 12910,
       "tags": [
         "lib"
       ]
@@ -2600,8 +2656,8 @@
       ]
     },
     "src/sld/__tests__/engine.test.mjs": {
-      "hash": "5fca20666685d8c2",
-      "size": 7676,
+      "hash": "e64ec906ef91316f",
+      "size": 8703,
       "tags": []
     },
     "src/sld/__tests__/impact-audit.test.mjs": {
@@ -2630,8 +2686,8 @@
       "tags": []
     },
     "src/sld/index.d.ts": {
-      "hash": "4f9457b25c82b61f",
-      "size": 5210,
+      "hash": "9bee50e58ac5d096",
+      "size": 5473,
       "tags": []
     },
     "src/sld/index.js": {
@@ -2650,8 +2706,8 @@
       "tags": []
     },
     "src/sld/layers/layer-3-dependencies.js": {
-      "hash": "0b5f532ca8d4bc66",
-      "size": 2357,
+      "hash": "d8997ab43f36af80",
+      "size": 2726,
       "tags": []
     },
     "src/sld/layers/layer-4-behavior.js": {
@@ -2680,8 +2736,8 @@
       "tags": []
     },
     "src/sld/node/scan.mjs": {
-      "hash": "a7bef00fb121db46",
-      "size": 9379,
+      "hash": "3511f203988e6231",
+      "size": 10261,
       "tags": []
     },
     "src/sld/package.json": {
@@ -2692,6 +2748,11 @@
     "src/styles/country-template.css": {
       "hash": "d422879842a21c8b",
       "size": 75466,
+      "tags": []
+    },
+    "src/styles/journey-tracker.css": {
+      "hash": "3ea6fe2703993d96",
+      "size": 8627,
       "tags": []
     },
     "src/styles/workspace-chrome.css": {
@@ -2705,8 +2766,8 @@
       "tags": []
     },
     "tsconfig.tsbuildinfo": {
-      "hash": "f680ce40ccb481f5",
-      "size": 548707,
+      "hash": "0932b61675b7332d",
+      "size": 553235,
       "tags": []
     },
     "wrangler.jsonc": {
@@ -2769,15 +2830,23 @@
     ],
     "src/app/(app)/(workspace)/dashboard/page.tsx": [
       "@/lib/auth",
+      "@/lib/countries",
       "@/lib/kolmari-plan",
       "@/lib/profile",
       "@/lib/userProfile",
       "@/lib/command-center",
+      "@/lib/dashboard-layout-store",
+      "@/lib/dashboard-layout",
       "@/lib/dashboard-model",
       "@/components/kolmari/decision-workspace-starter",
       "@/components/kolmari/dashboard-onboarding",
-      "@/components/kolmari/dashboard/greeting",
-      "@/components/kolmari/dashboard/panels"
+      "@/components/kolmari/dashboard-command-center",
+      "@/components/kolmari/dashboard-planning",
+      "@/components/kolmari/dashboard-food-health",
+      "@/components/kolmari/dashboard-side-cards",
+      "@/components/kolmari/dashboard/journey-tracker",
+      "@/components/kolmari/dashboard/panels",
+      "@/styles/journey-tracker.css"
     ],
     "src/app/(app)/(workspace)/destinations/regions/[region]/page.tsx": [
       "@/lib/flags",
@@ -2885,7 +2954,8 @@
     "src/app/(app)/(workspace)/settings/page.tsx": [
       "@/components/kolmari/account-tabs",
       "@/lib/auth",
-      "@/lib/profile"
+      "@/lib/profile",
+      "@/lib/dashboard-layout-store"
     ],
     "src/app/(app)/(workspace)/your-world/page.tsx": [
       "@/components/kolmari/your-world",
@@ -3016,6 +3086,12 @@
     ],
     "src/app/api/country-asset/route.ts": [
       "@/lib/country-assets"
+    ],
+    "src/app/api/dashboard-layout/route.ts": [
+      "@/lib/auth",
+      "@/lib/security",
+      "@/lib/dashboard-layout",
+      "@/lib/dashboard-layout-store"
     ],
     "src/app/api/internal/country-hero/ensure/route.ts": [
       "@/lib/auth",
@@ -3262,7 +3338,9 @@
     ],
     "src/components/kolmari/account-tabs.tsx": [
       "@/lib/profile",
-      "./privacy-account-page"
+      "./privacy-account-page",
+      "./dashboard/customize",
+      "@/lib/dashboard-layout"
     ],
     "src/components/kolmari/admin/admin-client.tsx": [
       "@/lib/plan-tiers",
@@ -3299,8 +3377,31 @@
       "@/lib/food-culture/types",
       "./country-food-fit-card.module.css"
     ],
+    "src/components/kolmari/dashboard-command-center.tsx": [
+      "./rings",
+      "@/lib/command-center",
+      "@/lib/command-center-model"
+    ],
+    "src/components/kolmari/dashboard-food-health.tsx": [
+      "@/lib/food-culture/data",
+      "@/lib/food-culture/types"
+    ],
+    "src/components/kolmari/dashboard-onboarding.tsx": [
+      "./dashboard/greeting"
+    ],
     "src/components/kolmari/dashboard-planning.tsx": [
       "@/lib/plan-types"
+    ],
+    "src/components/kolmari/dashboard-side-cards.tsx": [
+      "@/lib/countries",
+      "@/lib/destinations-data"
+    ],
+    "src/components/kolmari/dashboard/customize.tsx": [
+      "@/lib/dashboard-layout"
+    ],
+    "src/components/kolmari/dashboard/journey-tracker.tsx": [
+      "@/lib/plan-types",
+      "@/components/kolmari/butterfly-mark"
     ],
     "src/components/kolmari/dashboard/panels.tsx": [
       "@/lib/dashboard-model"
@@ -3481,6 +3582,11 @@
     ],
     "src/lib/country-workspace/tabs.ts": [
       "../profile"
+    ],
+    "src/lib/dashboard-layout-store.ts": [
+      "./db",
+      "./profile",
+      "./dashboard-layout"
     ],
     "src/lib/dashboard-model.ts": [
       "./countries",

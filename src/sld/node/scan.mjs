@@ -102,6 +102,26 @@ export function extractImports(text) {
 }
 
 /**
+ * True when a file declares `'use client'` in its directive prologue. Read from
+ * the file on disk, so it is accurate for modifications where the diff does not
+ * include the first line.
+ * @param {string} root
+ * @param {string} path
+ * @returns {boolean | undefined} undefined when the file cannot be read
+ */
+export function detectClientComponent(root, path) {
+  if (!/\.(tsx|jsx|ts|js|mjs)$/.test(path)) return undefined
+  try {
+    const head = readFileSync(join(root, path), 'utf8').slice(0, 800)
+    // Skip leading comments/blank lines, then look for the directive.
+    const stripped = head.replace(/^\s*(\/\*[\s\S]*?\*\/|\/\/[^\n]*\n)\s*/g, '')
+    return /^['"]use client['"]/.test(stripped.trimStart())
+  } catch {
+    return undefined
+  }
+}
+
+/**
  * Extract environment variable NAMES referenced via process.env.X or
  * process.env['X']. Values are never read.
  * @param {string} text
@@ -247,7 +267,8 @@ export function diffToChangeSet(root, baseRef) {
     }
 
     const imports = addedText ? extractImports(addedText).filter((s) => s.startsWith('.') || s.startsWith('@/') || s.startsWith('src/')) : []
-    changes.push({ path, changeType, oldPath, addedText, removedText, imports })
+    const isClientComponent = changeType === 'delete' ? undefined : detectClientComponent(root, path)
+    changes.push({ path, changeType, oldPath, addedText, removedText, imports, isClientComponent })
   }
 
   return { label: `diff ${baseRef}`, changes }

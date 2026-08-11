@@ -399,3 +399,52 @@ engine, now fixed with regression tests (28 total):
   the engine's own source and test files — which necessarily contain the strings
   they exist to detect. Without this, editing the manifest would BLOCK on its own
   forbidden-terms list. Structural layers still apply everywhere.
+
+## Dashboard — restored layout, customizable panels, vertical Journey tracker
+
+**One greeting.** The dashboard was rendering two (`DashboardWelcome`'s "Welcome
+back" plus the redesign's orientation header). `DashboardWelcome` is now the
+single greeting and uses the time-of-day `<Greeting>`; the separate orientation
+header is gone.
+
+**Layout restored** to the approved arrangement: greeting → Recommended next
+action (navy, now with a "Why this matters" disclosure) → Progress by planning
+area → Deadlines and blockers / Destinations / Active pathway → with the Journey
+tracker docked to the right of the content column at every layout.
+
+**Customizable panels.** `src/lib/dashboard-layout.ts` holds the widget registry
+and the stored shape; `profiles.dashboard_layout` (JSONB, its own read/write
+helpers so `saveProfile` can never clobber it) persists per user through
+`GET/PUT/DELETE /api/dashboard-layout`. **Account → Dashboard** offers
+drag-and-drop reordering (native HTML5 DnD — no new dependency) with Move up /
+Move down buttons as the keyboard path, per-panel on/off toggles, a live-region
+status line, and Reset to default. Nine panels are available; the five in the
+approved layout are on by default, and Ask Kolmari, Your shortlist, Food & health
+fit, and Command Center summary can be switched on. The resolver splices in
+panels added after a user saved their layout, so new widgets are never silently
+lost.
+
+**Journey tracker** (`journey-tracker.tsx` + `styles/journey-tracker.css`) is now
+the specified collapsible vertical rail: a 322px ⇄ 56px shell animating on
+`cubic-bezier(.4,0,.2,1)`, a collapsed rail with vertical "JOURNEY", eight status
+dots and a stage counter, and an expanded panel with the PROGRESS TRACKER header,
+stage summary, gold progress bar, an eight-stage accordion (one open at a time,
+current stage open on load) using 26px stage-icon discs on a continuous connector
+line, task rows with done/blocker/todo dots and Blocker pills, and a navy "Open My
+Plan" footer with the real last-saved stamp. Below 860px the rail is dropped and
+the tracker becomes a normal full-width card.
+
+Stage position, per-stage task states, percentage, and the saved stamp all come
+from the saved plan via `journeyStages`. Where a stage has no saved tasks the
+tracker shows Kolmari's suggested steps for that stage under a "Suggested steps"
+label, so suggestions are never counted as progress.
+
+## SLD: client vs server components (found by the gate on this change)
+
+The gate BLOCKed a restored **server** component for importing a server-only
+module. Layer 3 had assumed everything under `src/components/` is a client
+component. It now requires evidence: the Node scanner reads each changed file's
+directive prologue and sets `isClientComponent`, the API route accepts the same
+flag, and the rule falls back to scanning the diff text when it is undetermined.
+Server components may import server-only modules freely; the UI → DB dependency
+rule still applies to both. Three regression tests cover it (30 total).

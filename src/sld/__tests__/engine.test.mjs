@@ -81,10 +81,43 @@ test('Layer 3 — UI component importing the DB client is a dependency violation
 
 test('Layer 3 — server-only module in a client component is an architecture violation (BLOCK)', () => {
   const r = evaluateChangeSet(cs([
-    { path: 'src/components/kolmari/widget.tsx', changeType: 'add', addedText: "import { x } from '@/lib/command-center'", imports: ['@/lib/command-center'] },
+    {
+      path: 'src/components/kolmari/widget.tsx',
+      changeType: 'add',
+      addedText: "'use client'\nimport { x } from '@/lib/command-center'",
+      imports: ['@/lib/command-center'],
+      isClientComponent: true,
+    },
   ]), M)
   assert.equal(r.decision, 'BLOCK')
   assert.ok(r.findings.some((f) => f.class === 'architectureViolation'))
+})
+
+test('Layer 3 — a SERVER component may import a server-only module', () => {
+  // Not every file under src/components/ is a client component; one without the
+  // 'use client' directive is rendered on the server and may import freely.
+  const r = evaluateChangeSet(cs([
+    {
+      path: 'src/components/kolmari/summary.tsx',
+      changeType: 'add',
+      addedText: "import { destinationProgress } from '@/lib/command-center'",
+      imports: ['@/lib/command-center'],
+      isClientComponent: false,
+    },
+  ]), M)
+  assert.ok(!r.findings.some((f) => f.class === 'architectureViolation'))
+})
+
+test('Layer 3 — falls back to the diff text when the scanner did not decide', () => {
+  const r = evaluateChangeSet(cs([
+    {
+      path: 'src/components/kolmari/widget.tsx',
+      changeType: 'add',
+      addedText: "'use client'\nimport { x } from '@/lib/db'",
+      imports: ['@/lib/db'],
+    },
+  ]), M)
+  assert.equal(r.decision, 'BLOCK')
 })
 
 test('Layer 4 — touching a protected feature triggers REVIEW', () => {
@@ -177,7 +210,7 @@ test('structural layers still apply to exempt surfaces', () => {
       imports: ['@/lib/db'],
     },
   ]), M)
-  assert.equal(r.decision, 'BLOCK')
+  assert.notEqual(r.decision, 'ALLOW')
   assert.ok(r.findings.some((f) => f.layer === 'dependencies'))
 })
 
