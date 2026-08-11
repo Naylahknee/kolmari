@@ -20,6 +20,9 @@ export type PlanCtx = {
   nextinations: string[]
   pathways: string[]
   monthlyIncome: number | null
+  /** Profile signals used by the planning-area coverage view on Overview. */
+  profileComplete: boolean
+  dependents: number | null
 }
 
 export function SaveChip({ status, onRetry, className = '' }: { status: SaveStatus; onRetry?: () => void; className?: string }) {

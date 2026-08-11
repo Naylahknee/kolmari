@@ -9,7 +9,7 @@
  * @typedef {import('../index.js').Finding} Finding
  * @typedef {import('../index.js').ChangeSet} ChangeSet
  */
-import { containsTerm } from '../engine/match.js'
+import { containsTerm, isSpecimenSurface } from '../engine/match.js'
 
 /**
  * @param {ChangeSet} changeSet
@@ -23,6 +23,8 @@ export function analyzeIdentity(changeSet, manifest) {
 
   for (const change of changeSet.changes) {
     if (change.changeType === 'delete') continue
+    // The rulebook and the tests spell out the terms they exist to detect.
+    if (isSpecimenSurface(change.path)) continue
     const text = change.addedText || ''
     if (!text) continue
     for (const term of forbidden) {

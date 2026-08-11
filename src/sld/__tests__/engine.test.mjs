@@ -41,6 +41,36 @@ test('Layer 5 — destructive SQL on a protected table BLOCKs', () => {
   assert.match(f.message, /protected table/i)
 })
 
+test('Layer 5 — lowercase SQL words in UI code are NOT destructive (Tailwind "truncate")', () => {
+  const r = evaluateChangeSet(cs([
+    { path: 'src/components/kolmari/card.tsx', changeType: 'add', addedText: '<p className="min-w-0 truncate text-navy">{name}</p>' },
+  ]), M)
+  assert.equal(r.decision, 'ALLOW', 'a CSS class must never read as a destructive DB operation')
+})
+
+test('Layer 5 — lowercase destructive SQL in a migration IS caught', () => {
+  const r = evaluateChangeSet(cs([
+    { path: 'db/migrations/004.sql', changeType: 'add', addedText: 'drop table users;' },
+  ]), M)
+  assert.equal(r.decision, 'BLOCK')
+  assert.ok(r.findings.some((f) => f.layer === 'data'))
+})
+
+test('Layer 7 — rendering the words "Match Score" is not a fabricated score', () => {
+  const r = evaluateChangeSet(cs([
+    { path: 'src/components/kolmari/shortlist.tsx', changeType: 'add', addedText: '<p className="text-[10px]">Match Score</p>\n<Icon size={13} />' },
+  ]), M)
+  assert.equal(r.decision, 'ALLOW')
+})
+
+test('Layer 7 — a hard-coded Match Score value IS flagged', () => {
+  const r = evaluateChangeSet(cs([
+    { path: 'src/lib/country-data.ts', changeType: 'add', addedText: 'export const PT = { matchScore: 92 }' },
+  ]), M)
+  assert.equal(r.decision, 'REVIEW')
+  assert.ok(r.findings.some((f) => f.detail === 'literal-match-score'))
+})
+
 test('Layer 3 — UI component importing the DB client is a dependency violation (REVIEW)', () => {
   const r = evaluateChangeSet(cs([
     { path: 'src/components/kolmari/widget.tsx', changeType: 'add', addedText: "import { getSql } from '@/lib/db'", imports: ['@/lib/db'] },
@@ -127,4 +157,33 @@ test('deletions never crash and are analyzed', () => {
     { path: 'src/lib/auth.ts', changeType: 'delete' },
   ]), M)
   assert.ok(r.findings.some((f) => f.layer === 'behavior'))
+})
+
+test('the engine does not flag its own rulebook (which lists forbidden terms)', () => {
+  const r = evaluateChangeSet(cs([
+    { path: 'src/sld/manifest/kolmari.manifest.js', changeType: 'modify', addedText: "forbiddenTerms: ['Nexit', 'Nexitnation']" },
+  ]), M)
+  assert.equal(r.decision, 'ALLOW', 'editing the manifest must not BLOCK on its own forbidden-terms list')
+})
+
+test('structural layers still apply to exempt surfaces', () => {
+  // The specimen exemption covers CONTENT scanning only — a real boundary
+  // violation inside a test file is still caught.
+  const r = evaluateChangeSet(cs([
+    {
+      path: 'src/components/kolmari/__tests__/widget.test.tsx',
+      changeType: 'add',
+      addedText: "import { getSql } from '@/lib/db'",
+      imports: ['@/lib/db'],
+    },
+  ]), M)
+  assert.equal(r.decision, 'BLOCK')
+  assert.ok(r.findings.some((f) => f.layer === 'dependencies'))
+})
+
+test('test fixtures may quote destructive SQL without blocking', () => {
+  const r = evaluateChangeSet(cs([
+    { path: 'src/sld/__tests__/engine.test.mjs', changeType: 'modify', addedText: "addedText: 'DROP TABLE users;'" },
+  ]), M)
+  assert.equal(r.decision, 'ALLOW')
 })

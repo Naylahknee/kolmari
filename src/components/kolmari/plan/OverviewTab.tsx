@@ -17,6 +17,7 @@ import {
   type JourneyStage,
 } from '@/lib/plan-types'
 import { ProgressBar, type PlanCtx } from './shared'
+import { DashboardDeadlinesCard, DashboardPlanningAreasCard } from '@/components/kolmari/dashboard-planning'
 
 export function OverviewTab({ ctx }: { ctx: PlanCtx }) {
   const { plan, goToTab, openDetails } = ctx
@@ -211,6 +212,14 @@ function MoveJourney({ ctx }: { ctx: PlanCtx }) {
             )
           })}
         </ol>
+      </div>
+
+      {/* Detailed planning-area coverage and the consolidated deadline list.
+          Both moved here from the dashboard, which now shows only the next
+          best actions rather than full coverage tables. */}
+      <div className="grid items-start gap-4 xl:grid-cols-2">
+        <DashboardPlanningAreasCard plan={ctx.plan} profileComplete={ctx.profileComplete} dependents={ctx.dependents} />
+        <DashboardDeadlinesCard plan={ctx.plan} today={new Date()} />
       </div>
     </section>
   )

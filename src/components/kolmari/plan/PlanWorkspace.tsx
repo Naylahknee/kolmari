@@ -176,12 +176,15 @@ function PlanDetailsDialog({ ctx, tier, setTier, onClose }: { ctx: PlanCtx; tier
   )
 }
 
-export function PlanWorkspace({ initial, nextinations, pathways, profileHousehold, profileMonthlyIncome, initialTab }: {
+export function PlanWorkspace({ initial, nextinations, pathways, profileHousehold, profileMonthlyIncome, profileComplete, dependents, initialTab }: {
   initial: KolmariPlan
   nextinations: string[]
   pathways: string[]
   profileHousehold: number | null
   profileMonthlyIncome: number | null
+  /** Drives the planning-area coverage view relocated here from the dashboard. */
+  profileComplete: boolean
+  dependents: number | null
   initialTab: TabId
 }) {
   const seededHousehold = initial.household_members ?? profileHousehold
@@ -255,6 +258,8 @@ export function PlanWorkspace({ initial, nextinations, pathways, profileHousehol
     nextinations,
     pathways,
     monthlyIncome: profileMonthlyIncome,
+    profileComplete,
+    dependents,
   }
 
   const document = documentStep(plan)
