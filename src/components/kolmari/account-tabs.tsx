@@ -4,9 +4,12 @@ import Link from 'next/link'
 import { ArrowRight, CheckCircle2, CreditCard, LifeBuoy, LoaderCircle, Sparkles } from 'lucide-react'
 import type { RelocationProfile } from '@/lib/profile'
 import { PrivacyAccountPage } from './privacy-account-page'
+import { DashboardCustomizer } from './dashboard/customize'
+import type { DashboardLayout } from '@/lib/dashboard-layout'
 
 const TABS = [
   { id: 'profile', label: 'Profile' },
+  { id: 'dashboard', label: 'Dashboard' },
   { id: 'billing', label: 'Billing' },
   { id: 'notifications', label: 'Notifications' },
   { id: 'help', label: 'Help' },
@@ -18,10 +21,12 @@ export function AccountTabs({
   initial,
   email,
   initialTab = 'profile',
+  dashboardLayout,
 }: {
   initial: RelocationProfile
   email: string
   initialTab?: TabId
+  dashboardLayout: DashboardLayout
 }) {
   const [tab, setTab] = useState<TabId>(initialTab)
 
@@ -43,6 +48,7 @@ export function AccountTabs({
 
       <div className="mt-6" role="tabpanel">
         {tab === 'profile' && <ProfilePanel initial={initial} email={email} />}
+        {tab === 'dashboard' && <DashboardCustomizer initial={dashboardLayout} />}
         {tab === 'billing' && <BillingPanel paid={initial.plan !== 'free'} />}
         {tab === 'notifications' && <NotificationsPanel />}
         {tab === 'help' && <HelpPanel email={email} />}

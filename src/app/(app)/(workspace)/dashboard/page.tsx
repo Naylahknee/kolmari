@@ -1,4 +1,5 @@
 import { requireCurrentUser } from '@/lib/auth'
+import { COUNTRIES } from '@/lib/countries'
 import {
   journeyPercent,
   journeyStages,
@@ -10,45 +11,50 @@ import {
 import { getProfile, hasCompletedProfile } from '@/lib/profile'
 import { rankNextinations } from '@/lib/userProfile'
 import { getBoard } from '@/lib/command-center'
+import { getDashboardLayout } from '@/lib/dashboard-layout-store'
+import { visibleWidgets, type WidgetId } from '@/lib/dashboard-layout'
 import {
-  buildAlerts,
   buildNextActions,
-  buildOrientation,
-  buildResume,
   buildShortlist,
   buildSuggestions,
   type DashboardInput,
 } from '@/lib/dashboard-model'
 import { DecisionWorkspaceStarter } from '@/components/kolmari/decision-workspace-starter'
 import { DashboardWelcome } from '@/components/kolmari/dashboard-onboarding'
-import { Greeting } from '@/components/kolmari/dashboard/greeting'
+import { DashboardCommandCenterCard } from '@/components/kolmari/dashboard-command-center'
+import { DashboardDeadlinesCard, DashboardPlanningAreasCard } from '@/components/kolmari/dashboard-planning'
+import { DashboardFoodHealthCard } from '@/components/kolmari/dashboard-food-health'
 import {
-  AttentionPanel,
-  JourneyPanel,
-  LearningNote,
-  NextActionsPanel,
-  OrientationHeader,
-  ResumePanel,
-  ShortlistPanel,
-} from '@/components/kolmari/dashboard/panels'
+  DashboardActivePathwayCard,
+  DashboardDestinationsCard,
+  type DestinationRow,
+} from '@/components/kolmari/dashboard-side-cards'
+import { JourneyTracker } from '@/components/kolmari/dashboard/journey-tracker'
+import { NextActionCard, ShortlistPanel } from '@/components/kolmari/dashboard/panels'
+import '@/styles/journey-tracker.css'
 
 /**
- * The dashboard is a continuation and decision workspace, not an analytics page.
- * It answers five questions and nothing else: where did I leave off, what should
- * I do next, is anything waiting for me, how far along am I, and what can I ask
- * Kolmari right now.
- *
- * Detailed surfaces live one level deeper on their own pages — planning-area
- * coverage and deadlines in My Plan, stage management in the My Plan journey
- * stepper, destination browsing in Your World, comparison in the Command Center,
- * and route detail in Kolmari Pathways.
+ * The dashboard. Panels are chosen and ordered by the user in
+ * Account → Dashboard; `DASHBOARD_WIDGETS` holds the shipped default. The
+ * Journey tracker is not one of those panels — it stays docked to the right of
+ * the content column at every layout.
  */
+
+/** Last-saved stamp for the tracker footer, formatted in UTC so markup hydrates unchanged. */
+function savedAtLabel(updatedAt: string | null): string | null {
+  if (!updatedAt) return null
+  const parsed = new Date(updatedAt)
+  if (Number.isNaN(parsed.getTime())) return null
+  return `${parsed.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'UTC' })} UTC`
+}
+
 export default async function DashboardPage() {
   const user = await requireCurrentUser()
-  const [profile, plan, board] = await Promise.all([
+  const [profile, plan, board, layout] = await Promise.all([
     getProfile(user.id),
     getKolmariPlan(user.id),
     getBoard(user.id),
+    getDashboardLayout(user.id),
   ])
   const today = new Date()
 
@@ -57,12 +63,14 @@ export default async function DashboardPage() {
   const currentStage = plan?.journey_stage ?? 1
   const stageRows = journeyStages(plan, today)
   const percent = journeyPercent(stageRows, currentStage)
+  const stageName = JOURNEY_STAGE_LABELS[journeyStageLabel(currentStage)]
 
   const firstVisitCandidate =
     !profile.dashboard_onboarding_completed &&
     profile.wizard_status === 'not_started' &&
     !plan
 
+  const rankedList = complete ? rankNextinations(profile) : []
   const input: DashboardInput = {
     plan,
     board,
@@ -72,65 +80,109 @@ export default async function DashboardPage() {
       dashboard_onboarding_completed: profile.dashboard_onboarding_completed,
     },
     profileComplete: complete,
-    ranked: complete
-      ? rankNextinations(profile).map((item) => ({ country: item.country, score: item.match.score }))
-      : [],
+    ranked: rankedList.map((item) => ({ country: item.country, score: item.match.score })),
     today,
   }
 
   const shortlist = buildShortlist(input)
-  const resume = buildResume(input)
   const tasks = buildNextActions(input, shortlist)
-  const alerts = buildAlerts(input)
   const suggestions = buildSuggestions(input, shortlist)
-  const orientation = buildOrientation(input, shortlist)
 
-  // The next stage the user has not reached yet, straight from the saved journey.
-  const nextStageRow = stageRows.find((row) => row.index === currentStage + 1)
-  const nextMilestone = nextStageRow ? nextStageRow.label : null
+  const destinationRows: DestinationRow[] = rankedList.length > 0
+    ? rankedList.slice(0, 2).map((item) => ({ country: item.country, match: item.match.score }))
+    : COUNTRIES.slice(0, 2).map((country) => ({ country, match: null }))
+
+  const savedCountry = plan?.saved_nextination
+    ? COUNTRIES.find((c) => c.name === plan.saved_nextination || c.slug === plan.saved_nextination) ?? null
+    : null
+
+  const pathwayDetail = plan?.selected_pathway
+    ? 'Official requirements still control eligibility. Review the route before you file.'
+    : complete
+      ? 'No pathway saved to your plan yet. Compare the routes that fit your profile.'
+      : 'Finish the Profile Wizard before Pathway signals are calculated.'
+
+  // Each widget renders on demand, so a panel the user turned off costs nothing.
+  const PANELS: Record<WidgetId, () => React.ReactNode> = {
+    nextAction: () => (
+      <NextActionCard
+        task={tasks[0]}
+        stageLine={`Stage ${currentStage} of ${PLAN_STAGES.length} · ${stageName}`}
+      />
+    ),
+    planningAreas: () => (
+      <DashboardPlanningAreasCard plan={plan} profileComplete={complete} dependents={profile.dependents} />
+    ),
+    deadlines: () => <DashboardDeadlinesCard plan={plan} today={today} />,
+    destinations: () => <DashboardDestinationsCard rows={destinationRows} ranked={rankedList.length > 0} />,
+    activePathway: () => (
+      <DashboardActivePathwayCard
+        pathway={plan?.selected_pathway ?? null}
+        detail={pathwayDetail}
+        countryName={savedCountry?.name ?? null}
+        countrySlug={savedCountry?.slug ?? null}
+      />
+    ),
+    askKolmari: () => <DecisionWorkspaceStarter suggestions={suggestions} />,
+    shortlist: () => (
+      <ShortlistPanel items={shortlist} ranked={complete && shortlist.some((s) => s.score !== null)} />
+    ),
+    foodHealth: () => (
+      <DashboardFoodHealthCard countrySlug={savedCountry?.slug ?? null} countryName={savedCountry?.name ?? null} />
+    ),
+    commandCenter: () => <DashboardCommandCenterCard board={board} />,
+  }
+
+  // Full-width panels stack; the compact ones share an auto-fit row, matching the
+  // Deadlines / Destinations / Active pathway strip at the bottom of the default.
+  const shown = visibleWidgets(layout)
+  const FULL: WidgetId[] = ['nextAction', 'planningAreas', 'askKolmari', 'shortlist', 'foodHealth', 'commandCenter']
+  const blocks: { kind: 'full' | 'row'; ids: WidgetId[] }[] = []
+  for (const id of shown) {
+    const isFull = FULL.includes(id)
+    const last = blocks[blocks.length - 1]
+    if (isFull) blocks.push({ kind: 'full', ids: [id] })
+    else if (last?.kind === 'row') last.ids.push(id)
+    else blocks.push({ kind: 'row', ids: [id] })
+  }
 
   return (
-    <div className="mx-auto flex w-full max-w-[1180px] flex-col gap-4">
+    <div className="flex flex-col gap-4">
       <DashboardWelcome firstName={firstName} firstVisitCandidate={firstVisitCandidate} profileComplete={complete} />
 
-      <OrientationHeader
-        greeting={<Greeting firstName={firstName} />}
-        orientation={orientation}
-        percent={percent}
-        currentStage={currentStage}
-        totalStages={PLAN_STAGES.length}
-      />
+      {/* Content column + the docked Journey tracker. The tracker animates its
+          own width, so this column reflows wider whenever it is collapsed. */}
+      <div className="flex flex-col gap-4 min-[861px]:flex-row">
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
+          {shown.length === 0 && (
+            <p className="rounded-[var(--radius-card)] border border-dashed border-line-strong bg-white px-4 py-8 text-center text-sm text-muted">
+              Every dashboard panel is hidden. Turn them back on in Account → Dashboard.
+            </p>
+          )}
 
-      <DecisionWorkspaceStarter suggestions={suggestions} />
+          {blocks.map((block, index) =>
+            block.kind === 'full' ? (
+              <div key={`${block.ids[0]}-${index}`}>{PANELS[block.ids[0]]()}</div>
+            ) : (
+              <div
+                key={`row-${index}`}
+                className="grid items-start gap-4 [grid-template-columns:repeat(auto-fit,minmax(252px,1fr))]"
+              >
+                {block.ids.map((id) => <div key={id}>{PANELS[id]()}</div>)}
+              </div>
+            ),
+          )}
+        </div>
 
-      {/* Continuity, then the operational heart. One grid so the order can differ
-          by breakpoint: desktop reads Resume | Journey / What's next | Attention,
-          while mobile stacks Resume → What's next → Attention → Journey, keeping
-          the two action surfaces above the fold on a phone. */}
-      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.55fr)_minmax(290px,1fr)]">
-        <div className="order-1 flex flex-col lg:order-1">
-          <ResumePanel resume={resume} />
-        </div>
-        <div className="order-4 flex flex-col lg:order-2">
-          <JourneyPanel
-            stageName={JOURNEY_STAGE_LABELS[journeyStageLabel(currentStage)]}
-            percent={percent}
-            currentStage={currentStage}
-            totalStages={PLAN_STAGES.length}
-            nextMilestone={nextMilestone}
-          />
-        </div>
-        <div className="order-2 flex flex-col lg:order-3">
-          <NextActionsPanel tasks={tasks} />
-        </div>
-        <div className="order-3 flex flex-col lg:order-4">
-          <AttentionPanel alerts={alerts} />
-        </div>
+        <JourneyTracker
+          rows={stageRows}
+          currentStage={currentStage}
+          currentStageName={stageName}
+          percent={percent}
+          totalStages={PLAN_STAGES.length}
+          savedAt={savedAtLabel(plan?.updated_at ?? null)}
+        />
       </div>
-
-      <ShortlistPanel items={shortlist} ranked={complete && shortlist.some((s) => s.score !== null)} />
-
-      <LearningNote />
     </div>
   )
 }

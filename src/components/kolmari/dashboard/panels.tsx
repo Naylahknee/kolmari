@@ -69,6 +69,53 @@ export function OrientationHeader({
   )
 }
 
+// --- Recommended next action -------------------------------------------------
+
+/**
+ * The single most important thing to do next. Same prioritized list that feeds
+ * What's Next, showing its top entry; "Why this matters" reveals the reason
+ * Kolmari ranked it first.
+ */
+export function NextActionCard({ task, stageLine }: { task: NextTask; stageLine: string }) {
+  return (
+    <section
+      className="rounded-[var(--radius-card)] px-[22px] py-5 text-white"
+      style={{
+        background: 'linear-gradient(135deg,#0d1b39 0%,#17305b 58%,#1b3f68 100%)',
+        boxShadow: '0 10px 30px -18px rgba(13,27,57,.45)',
+      }}
+      aria-labelledby="next-action-heading"
+    >
+      <p className="text-[10.5px] font-bold uppercase tracking-[0.13em] text-gold">Recommended next action</p>
+      <h2 id="next-action-heading" className="mt-[9px] text-[20px] font-bold tracking-[-0.015em]">
+        {task.title}
+      </h2>
+      <p className="mt-2 max-w-[56ch] text-[13.5px] leading-[1.62] text-white/80">{task.why}</p>
+
+      <details className="group mt-4">
+        <summary className="flex list-none flex-wrap items-center gap-[9px] marker:hidden">
+          <Link
+            href={task.href}
+            className="inline-flex items-center gap-[7px] rounded-[var(--radius-btn)] bg-gold px-[17px] py-2.5 text-[13px] font-bold text-navy-deep transition-colors duration-150 hover:bg-[#e0b40c]"
+          >
+            {task.cta === 'Open' ? 'Open in My Plan' : task.cta}
+          </Link>
+          <span className="cursor-pointer rounded-[var(--radius-btn)] border border-white/24 px-[15px] py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-white/10">
+            Why this matters
+          </span>
+          {task.minutes !== null && (
+            <span className="text-[12px] text-white/55">{task.minutes} min</span>
+          )}
+          <span className="text-[12px] text-white/55">{stageLine}</span>
+        </summary>
+        <p className="mt-3 max-w-[62ch] border-l-2 border-gold/60 pl-3 text-[12.5px] leading-[1.6] text-white/75">
+          {task.reason}
+        </p>
+      </details>
+    </section>
+  )
+}
+
 // --- Pick up where you left off ---------------------------------------------
 
 export function ResumePanel({ resume }: { resume: ResumeCard }) {

@@ -54,6 +54,12 @@ export interface FileChange {
   removedText?: string
   /** Module specifiers imported by the new content (e.g. '@/lib/db'). */
   imports?: string[]
+  /**
+   * Whether the file carries a `'use client'` directive. Supplied by the Node
+   * scanner, which can read the whole file; `undefined` means "not determined",
+   * and rules that depend on it must not assume either way.
+   */
+  isClientComponent?: boolean
 }
 
 export interface ChangeSet {

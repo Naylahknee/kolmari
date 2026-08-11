@@ -50,6 +50,7 @@ function sanitizeChange(raw: unknown): FileChange | null {
     addedText: str(r.addedText),
     removedText: str(r.removedText),
     imports,
+    isClientComponent: typeof r.isClientComponent === 'boolean' ? r.isClientComponent : undefined,
   }
 }
 

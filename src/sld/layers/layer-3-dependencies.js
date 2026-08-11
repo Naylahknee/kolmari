@@ -44,9 +44,14 @@ export function analyzeDependencies(changeSet, manifest) {
         }
       }
 
-      // Server-only module pulled into a client component.
-      const isClientComponent = from.startsWith('src/components/')
-      if (isClientComponent) {
+      // Server-only module pulled into a CLIENT component. A server component
+      // under src/components/ may import server-only modules freely, so this
+      // needs the `'use client'` directive as evidence — the scanner supplies it,
+      // and we fall back to the diff text when it has not been determined.
+      const declaresClient =
+        change.isClientComponent === true ||
+        (change.isClientComponent === undefined && /^\s*['"]use client['"]/m.test(change.addedText || ''))
+      if (declaresClient) {
         for (const mod of serverOnly) {
           const modNoExt = mod.replace(/\.(ts|tsx|js|jsx)$/, '')
           if (spec === mod || spec === modNoExt || underPath(spec, modNoExt)) {

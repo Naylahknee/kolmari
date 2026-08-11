@@ -111,7 +111,7 @@ export function isPaid(profile: RelocationProfile) {
   return profile.plan !== 'free'
 }
 
-async function ensureProfilesTable() {
+export async function ensureProfilesTable() {
   if (!profilesTableReady) {
     profilesTableReady = (async () => {
       const sql = getSql()
