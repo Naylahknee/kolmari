@@ -27,6 +27,19 @@ jobs:
       - name: SLD engine tests
         run: npm run sld:test
 
+      # Scope enforcement needs the TaskContract that authorized the branch.
+      # Without .sld/task-contract.json every change is unauthorized, which is
+      # correct for an agent but wrong for a human PR, so the gate only runs the
+      # scope check when a contract is present.
+      - name: SLD post-change scope verification (when a TaskContract is present)
+        run: |
+          if [ -f .sld/task-contract.json ]; then
+            git fetch origin "${{ github.base_ref || 'main' }}" --depth=1 || true
+            node scripts/sld.mjs verify "origin/${{ github.base_ref || 'main' }}"
+          else
+            echo "No TaskContract on this branch — skipping scope verification."
+          fi
+
       - name: SLD change analysis (BLOCK fails the job)
         run: |
           BASE="origin/${{ github.base_ref || 'main' }}"

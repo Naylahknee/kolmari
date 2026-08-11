@@ -15,6 +15,7 @@ export type Decision = 'ALLOW' | 'WARN' | 'REVIEW' | 'BLOCK'
 
 /** The seven layers, in canonical order. */
 export type Layer =
+  | 'scope'
   | 'identity'
   | 'architecture'
   | 'dependencies'
@@ -25,6 +26,8 @@ export type Layer =
 
 /** Deterministic finding classes → policy keys in the manifest. */
 export type FindingClass =
+  | 'unauthorizedChange'
+  | 'unknownScope'
   | 'unknownChange'
   | 'destructiveChange'
   | 'architectureViolation'
@@ -60,6 +63,12 @@ export interface FileChange {
    * and rules that depend on it must not assume either way.
    */
   isClientComponent?: boolean
+  /**
+   * States of the authorized entity this change touches (e.g. 'mobileVisibility',
+   * 'backgroundImage'). Required when the TaskContract is state-scoped: a file
+   * being in scope does not put every property of it in scope.
+   */
+  states?: string[]
 }
 
 export interface ChangeSet {
@@ -76,6 +85,51 @@ export interface Finding {
   message: string
   /** Optional machine detail (matched term, edge, table…). Never a secret. */
   detail?: string
+}
+
+export type ScopeAction =
+  | 'CREATE' | 'MODIFY' | 'DELETE' | 'MOVE' | 'RENAME'
+  | 'REFACTOR' | 'RESTYLE' | 'REWIRE' | 'MIGRATE'
+
+/** Exactly what the user authorized. Absent from it means PRESERVE. */
+export interface TaskContract {
+  taskId: string
+  instruction: string
+  objective: string
+  allowedFiles: string[]
+  allowedDirectories: string[]
+  allowedEntities: string[]
+  allowedActions: ScopeAction[]
+  allowedBehaviors: string[]
+  allowedUIRegions: string[]
+  allowedStates: string[]
+  requiredChanges: string[]
+  forbiddenChanges: string[]
+  invariants: string[]
+  propagationRules: Array<{ from: string; to: string; reason: string }>
+  /** Special grants, e.g. SLD_ENGINE_MAINTENANCE. */
+  grants: string[]
+  ambiguityPolicy: 'BLOCK' | 'ALLOW'
+  createdFrom: string
+}
+
+export interface CompiledScope {
+  taskId: string
+  fileGlobs: string[]
+  entityGlobs: Record<string, string[]>
+  unresolvedEntities: string[]
+  actions: ScopeAction[]
+  states: string[]
+  forbidden: string[]
+  ambiguityPolicy: 'BLOCK' | 'ALLOW'
+}
+
+/** Per-task record of what was authorized, what was not, and what was noticed. */
+export interface ChangeLedger {
+  taskId: string | null
+  authorized: Array<{ path: string; entity: string; states: string[]; action: ScopeAction; source: string }>
+  unauthorized: Array<{ path: string; reason: string }>
+  observations: Array<{ observation: string; action: 'none'; reason: string }>
 }
 
 export interface Manifest {
@@ -118,6 +172,8 @@ export interface Manifest {
   intent: {
     productPrinciples: string[]
   }
+  /** Entity name → file globs implementing it. Powers entity-level scope. */
+  entities?: Record<string, string[]>
   policies: Record<FindingClass, Decision>
 }
 
@@ -147,6 +203,8 @@ export interface EvaluationResult {
     BLOCK: number
   }
   failedClosed: boolean
+  /** Scope ledger for the evaluated change set, when a contract was supplied. */
+  ledger?: ChangeLedger
   evaluatedAt?: string
 }
 
@@ -169,7 +227,34 @@ export function evaluateChangeSet(
   manifest: Manifest,
   baseline?: Baseline | null,
   now?: string,
+  contract?: TaskContract | null,
 ): EvaluationResult
+
+/** Build a TaskContract from an authored description. Never widens scope. */
+export function createTaskContract(input: Partial<TaskContract>): TaskContract
+
+/** A contract must name a concrete target and an action, else it is not permission. */
+export function validateTaskContract(
+  contract: TaskContract | null | undefined,
+): { ok: boolean; reason: string }
+
+/** Authorization check that runs before the seven layers. */
+export function runScopeGate(
+  changeSet: ChangeSet,
+  manifest: Manifest,
+  contract: TaskContract | null | undefined,
+): { findings: Finding[]; ledger: ChangeLedger }
+
+/** Post-change verification: compare the actual diff to the contract. */
+export function verifyAgainstContract(
+  actualDiff: ChangeSet,
+  manifest: Manifest,
+  contract: TaskContract | null | undefined,
+): { pass: boolean; unauthorizedCount: number; ledger: ChangeLedger; findings: Finding[] }
+
+export const SCOPE_ACTIONS: ScopeAction[]
+export const MANDATORY_INVARIANTS: string[]
+export const SLD_MAINTENANCE_GRANT: string
 
 /** Highest-severity decision across findings; empty ⇒ ALLOW. */
 export function aggregateDecision(findings: Finding[]): Decision

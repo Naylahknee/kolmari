@@ -116,3 +116,52 @@ Before changing code:
 9. Report changed files, test results, unresolved issues, and assumptions.
 
 Do not perform a full-product rewrite unless the owner explicitly requests one.
+## SLD task scope (binding)
+
+SLD does not ask whether a change is good. It asks whether there was permission
+to make it. If permission cannot be proven: BLOCK.
+
+**Unspecified change = BLOCK.** A change is not authorized because it is an
+improvement, cleanup, refactor, simplification, consistency fix, accessibility or
+responsive or performance improvement, better UX, modernization, a bug noticed in
+passing, or a "related" improvement. Those need explicit authorization unless
+they are technically necessary to complete the requested change. Low risk is not
+permission — a harmless change nobody asked for is still blocked.
+
+**Preservation is the default.** Anything outside the task contract — wording,
+layout, routes, components, colours, spacing, typography, animation, behaviour,
+APIs, schemas, calculations, navigation, responsive and accessibility behaviour,
+and even unrelated existing bugs — must be left exactly as it is.
+
+Before editing any file:
+
+1. Read the active TaskContract (`.sld/task-contract.json`, `npm run sld:contract`).
+2. Identify the authorized entity.
+3. Identify the authorized state.
+4. Identify the authorized action.
+5. Confirm the file is permitted.
+6. Confirm the exact modification is permitted.
+7. Make the minimum necessary change.
+
+After editing:
+
+8. Run `npm run sld:verify` (post-change verification).
+9. Inspect the complete git diff.
+10. Map every changed hunk to the TaskContract.
+11. Revert every unauthorized hunk.
+12. Only then report completion.
+
+Permission to MODIFY does not imply DELETE. RESTYLE does not imply REFACTOR. FIX
+does not imply REBUILD. ADD does not imply REPLACE. A file being in scope does
+not put every property of that file in scope.
+
+Never expand your own scope. If you notice a worthwhile adjacent change, do not
+implement it — record it as an out-of-scope observation and report it.
+
+`src/sld/**`, `.sld/**`, and the SLD documentation may only be modified under a
+contract granting `SLD_ENGINE_MAINTENANCE`.
+
+Report at task end: requested, authorized entities, files changed, required
+propagation, preserved, out-of-scope observations, post-change verification
+PASS/FAIL, unauthorized changes count, final SLD decision. If unauthorized
+changes > 0, the task has not passed.

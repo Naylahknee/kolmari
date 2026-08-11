@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-11T20:44:25.006Z",
+  "generatedAt": "2026-08-11T21:02:45.689Z",
   "manifestVersion": 1,
   "application": {
     "name": "Kolmari",
@@ -18,18 +18,23 @@
       "tags": []
     },
     ".sld/audit.jsonl": {
-      "hash": "cbf5ed73b8a020c2",
-      "size": 5662,
+      "hash": "0108978ca9fa8c87",
+      "size": 5800,
       "tags": []
     },
     ".sld/baseline.json": {
-      "hash": "5ab7d94d6f4e68ba",
+      "hash": "1d05c6da4ffcf978",
       "size": 88709,
       "tags": []
     },
+    ".sld/task-contract.json": {
+      "hash": "c1005c07806d9e3a",
+      "size": 859,
+      "tags": []
+    },
     "AGENTS.md": {
-      "hash": "72bd6e932836e4d0",
-      "size": 3207,
+      "hash": "b508861ee442f724",
+      "size": 5459,
       "tags": []
     },
     "CLAUDE.md": {
@@ -209,13 +214,13 @@
       "tags": []
     },
     "docs/kolmari/14-SLD-GOVERNANCE.md": {
-      "hash": "b6a1e1cd8f25cb62",
-      "size": 4791,
+      "hash": "ff5076bf580144db",
+      "size": 7216,
       "tags": []
     },
     "docs/kolmari/CURRENT-STATE.md": {
-      "hash": "2c02a6c480f1150d",
-      "size": 28036,
+      "hash": "801c2f9915668c8e",
+      "size": 29773,
       "tags": []
     },
     "docs/kolmari/DESIGN-TO-CODE-INVENTORY.md": {
@@ -264,8 +269,8 @@
       "tags": []
     },
     "package.json": {
-      "hash": "20e2c66b6b91751e",
-      "size": 1889,
+      "hash": "c6f49a10d677e708",
+      "size": 1991,
       "tags": []
     },
     "postcss.config.mjs": {
@@ -884,8 +889,8 @@
       "tags": []
     },
     "scripts/sld.mjs": {
-      "hash": "d5343cca9b6f5131",
-      "size": 9250,
+      "hash": "f4637ec99a74226c",
+      "size": 12512,
       "tags": []
     },
     "src/app/(app)/(workspace)/admin/page.tsx": {
@@ -1343,8 +1348,8 @@
       ]
     },
     "src/app/api/sld/evaluate/route.ts": {
-      "hash": "00073a42786ef3e7",
-      "size": 3763,
+      "hash": "3098ad4093c6b4a8",
+      "size": 4393,
       "tags": [
         "api"
       ]
@@ -2656,13 +2661,18 @@
       ]
     },
     "src/sld/__tests__/engine.test.mjs": {
-      "hash": "e64ec906ef91316f",
-      "size": 8703,
+      "hash": "14ca3d1d101f9435",
+      "size": 9948,
       "tags": []
     },
     "src/sld/__tests__/impact-audit.test.mjs": {
       "hash": "09d4325a2a259c17",
       "size": 3106,
+      "tags": []
+    },
+    "src/sld/__tests__/scope.test.mjs": {
+      "hash": "dac09a2436175dd7",
+      "size": 14782,
       "tags": []
     },
     "src/sld/audit/audit.js": {
@@ -2671,8 +2681,8 @@
       "tags": []
     },
     "src/sld/engine/decision-engine.js": {
-      "hash": "e481670d3dc9d550",
-      "size": 4718,
+      "hash": "cb02ebb8e471d03c",
+      "size": 5686,
       "tags": []
     },
     "src/sld/engine/match.js": {
@@ -2686,13 +2696,13 @@
       "tags": []
     },
     "src/sld/index.d.ts": {
-      "hash": "9bee50e58ac5d096",
-      "size": 5473,
+      "hash": "96ebd1666e31cc6a",
+      "size": 8488,
       "tags": []
     },
     "src/sld/index.js": {
-      "hash": "c077d5c40a95f9f1",
-      "size": 1116,
+      "hash": "21888990547eedeb",
+      "size": 1799,
       "tags": []
     },
     "src/sld/layers/layer-1-identity.js": {
@@ -2731,8 +2741,8 @@
       "tags": []
     },
     "src/sld/manifest/kolmari.manifest.js": {
-      "hash": "afd7377fa5f7cc42",
-      "size": 4642,
+      "hash": "4fcd93678649649c",
+      "size": 6789,
       "tags": []
     },
     "src/sld/node/scan.mjs": {
@@ -2743,6 +2753,21 @@
     "src/sld/package.json": {
       "hash": "fb1e8dadeb9553cc",
       "size": 233,
+      "tags": []
+    },
+    "src/sld/scope/scope-gate.js": {
+      "hash": "d9a1d45049389b44",
+      "size": 9345,
+      "tags": []
+    },
+    "src/sld/scope/task-compiler.js": {
+      "hash": "b3160be5fe7b15f4",
+      "size": 3155,
+      "tags": []
+    },
+    "src/sld/scope/task-contract.js": {
+      "hash": "25412b47d7d11bdb",
+      "size": 5163,
       "tags": []
     },
     "src/styles/country-template.css": {
@@ -2766,7 +2791,7 @@
       "tags": []
     },
     "tsconfig.tsbuildinfo": {
-      "hash": "b546b25018ef9218",
+      "hash": "1c3170caac6e6ffb",
       "size": 513668,
       "tags": []
     },
@@ -3653,6 +3678,9 @@
     "src/sld/__tests__/impact-audit.test.mjs": [
       "../index.js"
     ],
+    "src/sld/__tests__/scope.test.mjs": [
+      "../index.js"
+    ],
     "src/sld/audit/audit.js": [
       "../index.js"
     ],
@@ -3664,6 +3692,7 @@
       "../layers/layer-5-data.js",
       "../layers/layer-6-interface.js",
       "../layers/layer-7-intent.js",
+      "../scope/scope-gate.js",
       "../index.js"
     ],
     "src/sld/graph/impact.js": [
@@ -3674,7 +3703,10 @@
       "./manifest/kolmari.manifest.js",
       "./engine/decision-engine.js",
       "./graph/impact.js",
-      "./audit/audit.js"
+      "./audit/audit.js",
+      "./scope/scope-gate.js",
+      "./scope/task-contract.js",
+      "./scope/task-compiler.js"
     ],
     "src/sld/layers/layer-1-identity.js": [
       "../engine/match.js",
@@ -3706,6 +3738,19 @@
       "../index.js"
     ],
     "src/sld/node/scan.mjs": [
+      "../index.js"
+    ],
+    "src/sld/scope/scope-gate.js": [
+      "./task-compiler.js",
+      "./task-contract.js",
+      "../engine/match.js",
+      "../index.js"
+    ],
+    "src/sld/scope/task-compiler.js": [
+      "../engine/match.js",
+      "../index.js"
+    ],
+    "src/sld/scope/task-contract.js": [
       "../index.js"
     ]
   },

@@ -6,7 +6,9 @@
  * Rules:
  *  - Severity order: BLOCK > REVIEW > WARN > ALLOW. The final decision is the
  *    highest-severity finding present.
- *  - Empty findings ⇒ ALLOW.
+ *  - Scope is evaluated FIRST. An unauthorized change BLOCKs immediately and the
+ *    seven layers are not consulted — permission is prior to risk.
+ *  - Empty findings ⇒ ALLOW, but only for a change already proven in scope.
  *  - FAIL CLOSED: if any analyzer throws, the whole evaluation returns BLOCK.
  *    Governance never fails open.
  *  - Fully deterministic: no clock, no randomness, no network, no LLM.
@@ -25,6 +27,7 @@ import { analyzeBehavior } from '../layers/layer-4-behavior.js'
 import { analyzeData } from '../layers/layer-5-data.js'
 import { analyzeInterface } from '../layers/layer-6-interface.js'
 import { analyzeIntent } from '../layers/layer-7-intent.js'
+import { runScopeGate } from '../scope/scope-gate.js'
 
 /** @type {Record<Decision, number>} */
 const SEVERITY = { ALLOW: 0, WARN: 1, REVIEW: 2, BLOCK: 3 }
@@ -80,7 +83,7 @@ function isValidChangeSet(changeSet) {
  * @param {string} [now]
  * @returns {EvaluationResult}
  */
-export function evaluateChangeSet(changeSet, manifest, baseline = null, now) {
+export function evaluateChangeSet(changeSet, manifest, baseline = null, now, contract = null) {
   try {
     if (!isValidChangeSet(changeSet)) {
       return {
@@ -100,6 +103,21 @@ export function evaluateChangeSet(changeSet, manifest, baseline = null, now) {
     }
     if (!manifest || !manifest.policies) {
       throw new Error('missing manifest policies')
+    }
+
+    // ── Scope Gate ──────────────────────────────────────────────────────────
+    // Permission before risk. If the agent could not prove authorization, the
+    // seven layers are irrelevant: the change should not exist at all.
+    const scope = runScopeGate(changeSet, manifest, contract)
+    if (scope.findings.length > 0) {
+      return {
+        decision: 'BLOCK',
+        findings: scope.findings,
+        summary: summarize(scope.findings),
+        failedClosed: false,
+        ledger: scope.ledger,
+        evaluatedAt: now,
+      }
     }
 
     /** @type {Finding[]} */
@@ -122,6 +140,7 @@ export function evaluateChangeSet(changeSet, manifest, baseline = null, now) {
       findings,
       summary: summarize(findings),
       failedClosed: false,
+      ledger: scope.ledger,
       evaluatedAt: now,
     }
   } catch (err) {

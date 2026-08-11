@@ -88,3 +88,48 @@ decision.
 
 `.github/workflows/sld.yml` runs `sld:test` (blocking) and `sld:check` (fails the
 job only on a `BLOCK` decision; `REVIEW`/`WARN` are advisory annotations).
+
+## Scope enforcement (the governing rule)
+
+SLD's first question is not "is this change risky?" but **"was the agent allowed
+to make it?"**. Authorization and risk are separate dimensions, and the seven
+layers only ever judge the second.
+
+```
+USER REQUEST → TASK CONTRACT → SCOPE GATE → SOURCE/ENTITY/STATE/ACTION
+  → SEVEN LAYERS → IMPLEMENTATION → POST-CHANGE VERIFICATION → AUDIT
+```
+
+**Default deny.** An unspecified change is `BLOCK` — never ALLOW, WARN, REVIEW or
+"harmless". `harmlessChange` remains a risk classification and is explicitly not
+authorization: an unauthorized harmless change still blocks.
+
+- `src/sld/scope/task-contract.js` — the TaskContract: allowed files,
+  directories, entities, actions, states, required/forbidden changes,
+  propagation rules, grants, and the mandatory preservation invariants
+  (`UNCHANGED_UNLESS_AUTHORIZED`, `NO_OPPORTUNISTIC_REFACTORING`, …) that are
+  attached to every contract automatically.
+- `src/sld/scope/task-compiler.js` — compiles a contract into deterministic scope
+  rules. It expands only what the contract literally says; entities resolve
+  through the manifest's `entities` registry, and an entity it cannot resolve is
+  ambiguity, which blocks rather than widening to "everything".
+- `src/sld/scope/scope-gate.js` — runs before all seven layers. Enforces
+  file-, entity-, state- and action-level authorization, protects SLD's own
+  governance surface, and emits the change ledger.
+
+**Levels of authorization.** A file in scope does not put every property of it in
+scope. Permission to MODIFY never implies DELETE; RESTYLE never implies REFACTOR.
+Deterministic classifiers detect what a hunk actually does (dependency rewire,
+restyle, copy change) and block any action the contract did not grant. Content
+classifiers skip specimen surfaces — engine source and tests quote these patterns
+as data.
+
+**Ledger and verification.** Every evaluation returns a ledger mapping each
+change to SOURCE → ENTITY → STATE → ACTION, or recording why it could not be
+mapped. `npm run sld:verify` re-runs the gate over the real git diff after
+implementation; any change that cannot be traced back to the contract is an
+unauthorized change and the task fails.
+
+CLI: `npm run sld:contract` (inspect the active contract) and `npm run sld:verify`
+(post-change verification). The API route accepts an optional `taskContract` and
+returns the ledger.

@@ -1,0 +1,31 @@
+{
+  "taskId": "sld-strict-scope-repair",
+  "instruction": "REPAIR SLD: implement strict task-scope enforcement \u2014 TaskContract, Scope Gate before the seven layers, default-deny, ledger, post-change verification, tests.",
+  "objective": "SLD must ask whether the agent had permission, not merely whether a change is risky.",
+  "allowedEntities": [
+    "SLD Engine"
+  ],
+  "allowedFiles": [
+    "package.json",
+    "src/app/api/sld/evaluate/route.ts",
+    "docs/kolmari/14-SLD-GOVERNANCE.md",
+    "AGENTS.md",
+    "docs/kolmari/CURRENT-STATE.md",
+    ".sld/task-contract.json",
+    ".sld/baseline.json",
+    ".github/workflows/sld.yml"
+  ],
+  "allowedActions": [
+    "CREATE",
+    "MODIFY",
+    "REWIRE"
+  ],
+  "grants": [
+    "SLD_ENGINE_MAINTENANCE"
+  ],
+  "requiredChanges": [
+    "src/sld/scope/task-contract.js",
+    "src/sld/scope/scope-gate.js"
+  ],
+  "createdFrom": "user-request"
+}
