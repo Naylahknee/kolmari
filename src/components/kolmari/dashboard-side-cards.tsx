@@ -30,7 +30,7 @@ export function DashboardDestinationsCard({ rows, profileComplete }: {
     >
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h2 id="destinations-heading" className="text-[18px] font-bold text-navy">Destinations</h2>
-        <Link href="/your-world" className="text-xs font-bold text-info hover:text-navy">Explore more</Link>
+        <Link href="/your-world" className="text-xs font-bold text-info hover:text-navy">Explore more destinations</Link>
       </div>
 
       {rows.length > 0 ? (
@@ -48,23 +48,21 @@ export function DashboardDestinationsCard({ rows, profileComplete }: {
           {lead ? (
             <section className="mt-5 border-t border-line pt-4" aria-labelledby="dashboard-visa-options-heading">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <h3 id="dashboard-visa-options-heading" className="text-[15px] font-bold text-navy">
-                  Visa Options for {lead.name}
-                </h3>
-                <Link href="/pathways" className="text-xs font-bold text-info hover:text-navy">View all pathways</Link>
+                <div>
+                  <h3 id="dashboard-visa-options-heading" className="text-[15px] font-bold text-navy">
+                    Visa Options for {lead.name}
+                  </h3>
+                  <p className="mt-0.5 text-[10.5px] text-muted">Research preview — open Pathways for eligibility details.</p>
+                </div>
+                <Link href="/pathways" className="text-xs font-bold text-info hover:text-navy">Open Pathways</Link>
               </div>
 
               {visaOptions.length > 0 ? (
                 <ul className="mt-3 divide-y divide-line rounded-[10px] border border-line bg-white">
                   {visaOptions.map((pathway) => (
-                    <li key={pathway.id}>
-                      <Link
-                        href="/pathways"
-                        className="block px-3 py-3 transition-colors duration-150 hover:bg-canvas focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold"
-                      >
-                        <span className="block text-[12.5px] font-bold text-navy">{pathway.name}</span>
-                        <span className="mt-0.5 block text-[10.5px] text-muted">{pathway.category}</span>
-                      </Link>
+                    <li key={pathway.id} className="px-3 py-3">
+                      <span className="block text-[12.5px] font-bold text-navy">{pathway.name}</span>
+                      <span className="mt-0.5 block text-[10.5px] text-muted">{pathway.category}</span>
                     </li>
                   ))}
                 </ul>
@@ -107,19 +105,19 @@ export function DashboardActivePathwayCard({ pathway, detail, countryName, count
         {pathway ?? 'No pathway selected'}
       </h2>
       <p className="mt-1.5 text-[12.5px] leading-[1.6] text-muted">{detail}</p>
-      <div className="mt-3 flex gap-2">
+      <div className="mt-3 flex flex-col gap-2 sm:flex-row">
         <Link
           href="/pathways"
           className="flex-1 rounded-[var(--radius-btn)] border border-line px-3 py-[9px] text-center text-[12.5px] font-semibold text-navy transition-[background-color,border-color] duration-150 hover:border-line-strong hover:bg-[#fbfcfe]"
         >
-          {pathway ? 'View pathway' : 'Find a pathway'}
+          {pathway ? 'Review active pathway' : 'Find a pathway'}
         </Link>
         {countryName && countrySlug && (
           <Link
             href={`/nextinations/${countrySlug}/v2/overview`}
             className="flex-1 rounded-[var(--radius-btn)] border border-line px-3 py-[9px] text-center text-[12.5px] font-semibold text-navy transition-[background-color,border-color] duration-150 hover:border-line-strong hover:bg-[#fbfcfe]"
           >
-            {countryName}
+            Open {countryName} guide
           </Link>
         )}
       </div>

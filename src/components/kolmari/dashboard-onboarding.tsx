@@ -2,21 +2,22 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
-import { ArrowRight, X } from 'lucide-react'
+import { ArrowRight, Check, Sparkles, X } from 'lucide-react'
+import type { PlanTier } from '@/lib/plan-tiers'
 import { Greeting } from './dashboard/greeting'
 
 type TargetRect = { top: number; left: number; width: number; height: number }
 
 const STEPS = [
   {
-    selector: '#dashboard-progress',
-    title: 'See the whole journey',
-    copy: 'Your Progress Tracker keeps the same eight-stage position as My Plan.',
+    selector: '#next-action-heading',
+    title: 'Start with one clear action',
+    copy: 'Kolmari puts the highest-priority planning action first so you always know what to do next.',
   },
   {
     selector: '#dashboard-destinations',
-    title: 'Find your strongest fits',
-    copy: 'Your Top Destinations becomes personalized after you complete your profile.',
+    title: 'See your strongest fits',
+    copy: 'Your Destinations panel shows your top matched countries and a concise visa-options preview.',
   },
   {
     selector: '[data-onboarding="explore-nav"]',
@@ -39,10 +40,62 @@ function hasSavedDestinations() {
   }
 }
 
-export function DashboardWelcome({ firstName, firstVisitCandidate, profileComplete }: {
+function UpgradeSection({ planTier }: { planTier: PlanTier }) {
+  const copy = planTier === 'free'
+    ? {
+        eyebrow: 'Explorer plan',
+        title: 'Unlock your full move plan',
+        detail: 'Personalized Pathway eligibility, full Documents and Readiness Tracker, plus the full Cost Calculator.',
+        cta: 'View upgrade options',
+      }
+    : planTier === 'plus'
+      ? {
+          eyebrow: 'Plus plan',
+          title: 'Need multi-destination planning?',
+          detail: 'Navigator adds side-by-side comparison, household modeling, and multiple active Move Plans.',
+          cta: 'Compare with Navigator',
+        }
+      : {
+          eyebrow: 'Navigator plan',
+          title: 'Your full planning workspace is active',
+          detail: 'Manage your plan and review the features included with your current Kolmari tier.',
+          cta: 'Manage plan',
+        }
+
+  return (
+    <section
+      className="min-w-0 rounded-[var(--radius-card)] border border-line bg-white px-4 py-3 shadow-tile sm:max-w-[520px]"
+      aria-label="Kolmari plan options"
+    >
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <p className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-[0.12em] text-gold-deep">
+            <Sparkles size={12} aria-hidden="true" /> {copy.eyebrow}
+          </p>
+          <p className="mt-1 text-sm font-bold text-navy">{copy.title}</p>
+          <p className="mt-0.5 text-[11.5px] leading-5 text-muted">{copy.detail}</p>
+        </div>
+        <Link
+          href="/settings?tab=billing"
+          className="inline-flex min-h-9 shrink-0 items-center justify-center gap-1.5 rounded-[var(--radius-btn)] bg-gold px-3.5 text-xs font-bold text-navy-deep transition-colors hover:bg-[#e0b40c]"
+        >
+          {copy.cta} <ArrowRight size={13} aria-hidden="true" />
+        </Link>
+      </div>
+      {planTier === 'free' && (
+        <p className="mt-2 flex items-center gap-1.5 text-[10.5px] font-semibold text-muted">
+          <Check size={12} className="text-ok" aria-hidden="true" /> Your Explorer features stay available if you do not upgrade.
+        </p>
+      )}
+    </section>
+  )
+}
+
+export function DashboardWelcome({ firstName, firstVisitCandidate, profileComplete, planTier }: {
   firstName: string
   firstVisitCandidate: boolean
   profileComplete: boolean
+  planTier: PlanTier
 }) {
   const [firstVisit, setFirstVisit] = useState(firstVisitCandidate)
   const [tourOpen, setTourOpen] = useState(false)
@@ -102,15 +155,19 @@ export function DashboardWelcome({ firstName, firstVisitCandidate, profileComple
 
   return (
     <>
-      {/* The dashboard's single greeting. Kept here rather than in the page so
-          the walkthrough and the header stay together. */}
-      <div id="dashboard-header" className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="font-display text-[22px] font-bold text-navy sm:text-[26px]">
-          {firstVisit ? <>Welcome, {firstName}</> : <Greeting firstName={firstName} />}
-        </h1>
-        <Link href={profileComplete ? '/flutter' : '/profile-wizard'} className="gold-button">
-          {profileComplete ? 'Enter Flutter Mode' : 'Build My Kolmari Plan'} <ArrowRight size={16} />
-        </Link>
+      <div id="dashboard-header" className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+        <div className="flex min-h-12 items-center">
+          <h1 className="font-display text-[22px] font-bold text-navy sm:text-[26px]">
+            {firstVisit ? <>Welcome, {firstName}</> : <Greeting firstName={firstName} />}
+          </h1>
+        </div>
+        {profileComplete ? (
+          <UpgradeSection planTier={planTier} />
+        ) : (
+          <Link href="/profile-wizard" className="gold-button self-start">
+            Build My Kolmari Plan <ArrowRight size={16} />
+          </Link>
+        )}
       </div>
 
       {tourOpen && (
