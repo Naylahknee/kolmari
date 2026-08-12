@@ -1,5 +1,4 @@
 import { requireCurrentUser } from '@/lib/auth'
-import { COUNTRIES } from '@/lib/countries'
 import {
   journeyPercent,
   journeyStages,
@@ -13,6 +12,8 @@ import { rankNextinations } from '@/lib/userProfile'
 import { getBoard } from '@/lib/command-center'
 import { getDashboardLayout } from '@/lib/dashboard-layout-store'
 import { visibleWidgets, type WidgetId } from '@/lib/dashboard-layout'
+import { getGeneratedDashboardDestinationVersion } from '@/lib/country-assets'
+import { getApprovedDashboardDestination } from '@/lib/country-visuals/data'
 import {
   buildNextActions,
   buildShortlist,
@@ -33,14 +34,6 @@ import { JourneyTracker } from '@/components/kolmari/dashboard/journey-tracker'
 import { NextActionCard, ShortlistPanel } from '@/components/kolmari/dashboard/panels'
 import '@/styles/journey-tracker.css'
 
-/**
- * The dashboard. Panels are chosen and ordered by the user in
- * Account → Dashboard; `DASHBOARD_WIDGETS` holds the shipped default. The
- * Journey tracker is not one of those panels — it stays docked to the right of
- * the content column at every layout.
- */
-
-/** Last-saved stamp for the tracker footer, formatted in UTC so markup hydrates unchanged. */
 function savedAtLabel(updatedAt: string | null): string | null {
   if (!updatedAt) return null
   const parsed = new Date(updatedAt)
@@ -48,12 +41,22 @@ function savedAtLabel(updatedAt: string | null): string | null {
   return `${parsed.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'UTC' })} UTC`
 }
 
-function destinationRow(country: (typeof COUNTRIES)[number], match: number | null): DestinationRow {
-  // Dashboard nested-country artwork has its own asset authority. Do not resolve
-  // the Country Page hero here. The dedicated `dashboard_destination` generator
-  // will populate this source; until then the nested card renders its branded
-  // Dashboard-specific fallback.
-  return { country, match, imageSrc: null }
+async function destinationRow(
+  country: ReturnType<typeof rankNextinations>[number]['country'],
+  match: number,
+): Promise<DestinationRow> {
+  const generatedVersion = await getGeneratedDashboardDestinationVersion(country.slug)
+  const approved = generatedVersion ? null : getApprovedDashboardDestination(country.slug)
+  const imageSrc = generatedVersion
+    ? `/api/country-asset?slug=${country.slug}&type=dashboard_destination&v=${generatedVersion}`
+    : approved?.src ?? `/flags-png/${country.code.toLowerCase()}.png`
+
+  return {
+    country,
+    match,
+    imageSrc,
+    focalPoint: approved?.focalPoint ?? { x: 50, y: 50 },
+  }
 }
 
 export default async function DashboardPage() {
@@ -96,12 +99,14 @@ export default async function DashboardPage() {
   const tasks = buildNextActions(input, shortlist)
   const suggestions = buildSuggestions(input, shortlist)
 
-  const destinationRows: DestinationRow[] = rankedList.length > 0
-    ? rankedList.slice(0, 3).map((item) => destinationRow(item.country, item.match.score))
-    : COUNTRIES.slice(0, 3).map((country) => destinationRow(country, null))
+  // This panel shows real matched countries only. Incomplete profiles never get
+  // arbitrary country rows presented as matches.
+  const destinationRows: DestinationRow[] = complete
+    ? await Promise.all(rankedList.slice(0, 3).map((item) => destinationRow(item.country, item.match.score)))
+    : []
 
   const savedCountry = plan?.saved_nextination
-    ? COUNTRIES.find((c) => c.name === plan.saved_nextination || c.slug === plan.saved_nextination) ?? null
+    ? rankedList.map((item) => item.country).find((country) => country.name === plan.saved_nextination || country.slug === plan.saved_nextination) ?? null
     : null
 
   const pathwayDetail = plan?.selected_pathway
@@ -110,19 +115,15 @@ export default async function DashboardPage() {
       ? 'No pathway saved to your plan yet. Compare the routes that fit your profile.'
       : 'Finish the Profile Wizard before Pathway signals are calculated.'
 
-  // Each widget renders on demand, so a panel the user turned off costs nothing.
   const PANELS: Record<WidgetId, () => React.ReactNode> = {
     nextAction: () => (
-      <NextActionCard
-        task={tasks[0]}
-        stageLine={`Stage ${currentStage} of ${PLAN_STAGES.length} · ${stageName}`}
-      />
+      <NextActionCard task={tasks[0]} stageLine={`Stage ${currentStage} of ${PLAN_STAGES.length} · ${stageName}`} />
     ),
     planningAreas: () => (
       <DashboardPlanningAreasCard plan={plan} profileComplete={complete} dependents={profile.dependents} />
     ),
     deadlines: () => <DashboardDeadlinesCard plan={plan} today={today} />,
-    destinations: () => <DashboardDestinationsCard rows={destinationRows} ranked={rankedList.length > 0} />,
+    destinations: () => <DashboardDestinationsCard rows={destinationRows} profileComplete={complete} />,
     activePathway: () => (
       <DashboardActivePathwayCard
         pathway={plan?.selected_pathway ?? null}
@@ -132,18 +133,14 @@ export default async function DashboardPage() {
       />
     ),
     askKolmari: () => <DecisionWorkspaceStarter suggestions={suggestions} />,
-    shortlist: () => (
-      <ShortlistPanel items={shortlist} ranked={complete && shortlist.some((s) => s.score !== null)} />
-    ),
-    foodHealth: () => (
-      <DashboardFoodHealthCard countrySlug={savedCountry?.slug ?? null} countryName={savedCountry?.name ?? null} />
-    ),
+    shortlist: () => <ShortlistPanel items={shortlist} ranked={complete && shortlist.some((s) => s.score !== null)} />,
+    foodHealth: () => <DashboardFoodHealthCard countrySlug={savedCountry?.slug ?? null} countryName={savedCountry?.name ?? null} />,
     commandCenter: () => <DashboardCommandCenterCard board={board} />,
   }
 
-  // Full-width panels stack; compact panels share an auto-fit row. Destinations
-  // remains one parent Dashboard panel; its matched-country cards are nested in
-  // that panel and use their own internal responsive grid.
+  // Preserve the existing Dashboard shell and widget customization. Only the
+  // existing Destinations parent panel spans the main content width it needs for
+  // its nested match grid.
   const shown = visibleWidgets(layout)
   const FULL: WidgetId[] = ['nextAction', 'planningAreas', 'destinations', 'askKolmari', 'shortlist', 'foodHealth', 'commandCenter']
   const blocks: { kind: 'full' | 'row'; ids: WidgetId[] }[] = []
@@ -159,8 +156,6 @@ export default async function DashboardPage() {
     <div className="flex flex-col gap-4">
       <DashboardWelcome firstName={firstName} firstVisitCandidate={firstVisitCandidate} profileComplete={complete} />
 
-      {/* Content column + the docked Journey tracker. The tracker animates its
-          own width, so this column reflows wider whenever it is collapsed. */}
       <div className="flex flex-col gap-4 min-[861px]:flex-row">
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           {shown.length === 0 && (
@@ -173,10 +168,7 @@ export default async function DashboardPage() {
             block.kind === 'full' ? (
               <div key={`${block.ids[0]}-${index}`}>{PANELS[block.ids[0]]()}</div>
             ) : (
-              <div
-                key={`row-${index}`}
-                className="grid items-start gap-4 [grid-template-columns:repeat(auto-fit,minmax(252px,1fr))]"
-              >
+              <div key={`row-${index}`} className="grid items-start gap-4 [grid-template-columns:repeat(auto-fit,minmax(252px,1fr))]">
                 {block.ids.map((id) => <div key={id}>{PANELS[id]()}</div>)}
               </div>
             ),
