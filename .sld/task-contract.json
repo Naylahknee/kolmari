@@ -2,15 +2,7 @@
   "taskId": "dashboard-destinations-country-design-system-extension",
   "instruction": "Extend the existing Dashboard Destinations parent panel with up to three real ranked matched-country cards and a Visa Options preview for the #1 match. Add a dedicated dashboard_destination visual asset and admin generation workflow. Do not rebuild or refactor the Dashboard shell. Preserve Journey Tracker, Dashboard customization, matching/ranking/profile/plan logic, unrelated widgets, Your World, and existing PATHWAYS data. Add canonical design schema documentation in docs.",
   "objective": "Implement the approved Country Design System extension and Dashboard Destinations panel behavior: one existing Destinations widget containing top-3 nested matched-country cards, dedicated dashboard_destination imagery with manual admin generation/approval and no runtime generation, and a PATHWAYS-backed Visa Options preview beneath the grid.",
-  "allowedEntities": [
-    "Country Design System",
-    "Country Visual Assets",
-    "Country Page Generator Engine",
-    "Dashboard Destinations Panel",
-    "Dashboard Destination Card",
-    "Dashboard Widget Registry",
-    "Country Asset API"
-  ],
+  "allowedEntities": [],
   "allowedFiles": [
     ".sld/task-contract.json",
     "docs/country-design-schema.md",
