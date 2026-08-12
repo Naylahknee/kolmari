@@ -1,31 +1,26 @@
 import Link from 'next/link'
 import type { CountryDetail } from '@/lib/countries'
-import { regionList } from '@/lib/destinations-data'
 import { PATHWAYS } from '@/lib/pathways'
 import { DashboardDestinationPanel } from '@/components/kolmari/dashboard/destination-panel'
 
 export type DestinationRow = {
   country: CountryDetail
-  match: number | null
+  match: number
   imageSrc: string | null
-}
-
-function monthlyCost(country: CountryDetail): string | null {
-  for (const region of regionList) {
-    const estimate = region.countries.find((item) => item.slug === country.slug)?.monthlyCost
-    if (estimate !== undefined) return `$${estimate.toLocaleString()}/mo`
-  }
-  return null
+  focalPoint?: { x: number; y: number }
 }
 
 /**
- * The existing white Dashboard Destinations card is the parent panel.
- * Matched country cards are nested inside it; the visa-options preview belongs
- * below the nested grid in the same parent panel.
+ * Existing Dashboard Destinations parent panel.
+ * This remains one Dashboard widget; the top matched countries are nested
+ * visual cards inside it and Visa Options for the #1 match sit beneath the grid.
  */
-export function DashboardDestinationsCard({ rows, ranked }: { rows: DestinationRow[]; ranked: boolean }) {
+export function DashboardDestinationsCard({ rows, profileComplete }: {
+  rows: DestinationRow[]
+  profileComplete: boolean
+}) {
   const lead = rows[0]?.country ?? null
-  const visaOptions = lead ? PATHWAYS.filter((pathway) => pathway.country === lead.name) : []
+  const visaOptions = lead ? PATHWAYS.filter((pathway) => pathway.country === lead.name).slice(0, 3) : []
 
   return (
     <section
@@ -38,63 +33,57 @@ export function DashboardDestinationsCard({ rows, ranked }: { rows: DestinationR
         <Link href="/your-world" className="text-xs font-bold text-info hover:text-navy">Explore more</Link>
       </div>
 
-      {rows.length ? (
+      {rows.length > 0 ? (
         <>
-          <div className="grid gap-[14px] [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]">
-            {rows.map(({ country, match, imageSrc }, index) => (
+          <div className="grid gap-[14px] [grid-template-columns:repeat(auto-fit,minmax(260px,1fr))]">
+            {rows.map(({ country, match, imageSrc, focalPoint }, index) => (
               <DashboardDestinationPanel
                 key={country.slug}
                 rank={index + 1}
-                data={{
-                  country,
-                  match,
-                  imageSrc,
-                  routeLabel: country.visaType || null,
-                  monthlyCost: monthlyCost(country),
-                }}
+                data={{ country, match, imageSrc, focalPoint }}
               />
             ))}
           </div>
 
           {lead ? (
-            <div className="mt-5 border-t border-line pt-4">
+            <section className="mt-5 border-t border-line pt-4" aria-labelledby="dashboard-visa-options-heading">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-gold-deep">Pathways</p>
-                  <h3 className="mt-1 text-[15px] font-bold text-navy">Visa Options for {lead.name}</h3>
-                </div>
+                <h3 id="dashboard-visa-options-heading" className="text-[15px] font-bold text-navy">
+                  Visa Options for {lead.name}
+                </h3>
                 <Link href="/pathways" className="text-xs font-bold text-info hover:text-navy">View all pathways</Link>
               </div>
 
-              {visaOptions.length ? (
-                <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                  {visaOptions.slice(0, 4).map((pathway) => (
-                    <Link
-                      key={pathway.id}
-                      href="/pathways"
-                      className="rounded-[10px] border border-line bg-canvas px-3 py-3 transition-[background-color,border-color] duration-150 hover:border-gold hover:bg-gold-soft/20"
-                    >
-                      <p className="text-[12.5px] font-bold text-navy">{pathway.name}</p>
-                      <p className="mt-1 text-[10.5px] leading-4 text-muted">{pathway.category}</p>
-                    </Link>
+              {visaOptions.length > 0 ? (
+                <ul className="mt-3 divide-y divide-line rounded-[10px] border border-line bg-white">
+                  {visaOptions.map((pathway) => (
+                    <li key={pathway.id}>
+                      <Link
+                        href="/pathways"
+                        className="block px-3 py-3 transition-colors duration-150 hover:bg-canvas focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold"
+                      >
+                        <span className="block text-[12.5px] font-bold text-navy">{pathway.name}</span>
+                        <span className="mt-0.5 block text-[10.5px] text-muted">{pathway.category}</span>
+                      </Link>
+                    </li>
                   ))}
-                </div>
+                </ul>
               ) : (
                 <p className="mt-3 rounded-[10px] border border-dashed border-line-strong bg-canvas px-4 py-3 text-[12px] leading-5 text-muted">
-                  Visa options for {lead.name} are still being verified.
+                  No researched visa pathways are available for this country yet.
                 </p>
               )}
-            </div>
-          ) : null}
-
-          {!ranked ? (
-            <p className="mt-3 text-[10.5px] text-muted-soft">Complete your Kolmari Profile to see ranked Match Scores.</p>
+            </section>
           ) : null}
         </>
       ) : (
         <div className="rounded-[14px] border border-dashed border-line-strong bg-canvas px-5 py-8 text-center">
-          <p className="text-sm font-bold text-navy">No destination matches yet</p>
-          <p className="mt-1 text-[12px] leading-5 text-muted">Complete your Kolmari Profile or explore Your World to begin.</p>
+          <p className="text-sm font-bold text-navy">{profileComplete ? 'No destination matches available' : 'Complete your Kolmari Profile to see your matches'}</p>
+          <p className="mt-1 text-[12px] leading-5 text-muted">
+            {profileComplete
+              ? 'Kolmari does not have a valid ranked destination to show here yet.'
+              : 'Your ranked country cards will appear here after your profile is complete.'}
+          </p>
         </div>
       )}
     </section>
