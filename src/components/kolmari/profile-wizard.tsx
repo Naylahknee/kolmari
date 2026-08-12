@@ -30,9 +30,6 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
     return {
       wizard_status: wizardStatus,
       display_name: profile.display_name,
-      // v1 is built for US-based movers; we assume a US starting point rather
-      // than asking for citizenship directly. Ancestry ties are collected in a
-      // later step. Existing values are preserved for retakes.
       citizenship: profile.citizenship ?? 'United States',
       current_country: profile.current_country,
       monthly_income: profile.monthly_income,
@@ -98,7 +95,7 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
     setError('')
     try {
       await persist('completed')
-      router.push('/nextinations?source=quiz')
+      router.push('/dashboard')
       router.refresh()
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'Unable to complete your Profile.')
@@ -130,7 +127,7 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
       <div className="mt-5 grid gap-5 sm:grid-cols-2"><div><p className="text-sm font-bold">Spouse or partner included?</p><div className="mt-2 grid grid-cols-2 gap-2"><Choice active={profile.spouse === true} onClick={() => update('spouse', true)}>Yes</Choice><Choice active={profile.spouse === false} onClick={() => update('spouse', false)}>No</Choice></div></div><div><p className="text-sm font-bold">Ancestry or family connections abroad?</p><div className="mt-2 grid grid-cols-2 gap-2"><Choice active={profile.ancestry_connections === 'None known'} onClick={() => update('ancestry_connections', 'None known')}>None known</Choice><Choice active={Boolean(profile.ancestry_connections && profile.ancestry_connections !== 'None known')} onClick={() => update('ancestry_connections', '')}>Yes</Choice></div></div></div>
       {profile.ancestry_connections !== null && profile.ancestry_connections !== 'None known' ? <div className="mt-5"><TextField label="Countries and relationships" value={profile.ancestry_connections} onChange={(value) => update('ancestry_connections', value)} /></div> : null}</section>,
     <section key="destination"><StepLabel step={5} title="Where are you drawn to?" copy="Choose the regions to prioritize. Pick 'Open to anywhere' if you want Kolmari to cast a wide net." /><div className="mt-7 grid gap-3 sm:grid-cols-2">{regions.map((region) => <Choice key={region} active={profile.preferred_regions.includes(region)} onClick={() => update('preferred_regions', profile.preferred_regions.includes(region) ? profile.preferred_regions.filter((item) => item !== region) : [...profile.preferred_regions, region])}>{region}</Choice>)}</div></section>,
-    <section key="timeline"><StepLabel step={6} title="When are you planning to move?" copy="Timing affects which routes are realistic. Finish to reveal your top Destination." /><div className="mt-8 max-w-sm"><SelectField label="Desired relocation timeline" value={profile.timeline} options={timelines} onChange={(value) => update('timeline', value)} /></div></section>,
+    <section key="timeline"><StepLabel step={6} title="When are you planning to move?" copy="Timing affects which routes are realistic. Finish to save your results and continue to your Dashboard." /><div className="mt-8 max-w-sm"><SelectField label="Desired relocation timeline" value={profile.timeline} options={timelines} onChange={(value) => update('timeline', value)} /></div></section>,
   ]
 
   return (
@@ -138,7 +135,7 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
       <div className="mx-auto max-w-3xl">
         <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm font-bold text-gold-deep">{isRetake ? 'Edit Profile' : 'Profile Wizard'}</p><p className="text-xs text-muted">Step {step + 1} of {panels.length}</p></div><Link href={isRetake ? '/settings' : '/destinations'} className="text-sm font-bold text-muted">Exit wizard</Link></div>
         <div className="mt-4 flex gap-1.5" aria-hidden>{panels.map((_, index) => <span key={index} className={`h-2 flex-1 rounded-full ${index <= step ? 'bg-gold' : 'bg-line'}`} />)}</div>
-        <div className="card-surface mt-6 p-6 sm:p-10">{panels[step]}{error ? <p role="alert" className="mt-6 rounded-xl bg-danger/10 px-4 py-3 text-sm font-semibold text-danger">{error}</p> : null}<div className="mt-10 flex items-center justify-between gap-3"><button type="button" onClick={() => setStep((current) => Math.max(0, current - 1))} disabled={step === 0 || saving} className="inline-flex min-h-12 items-center gap-2 rounded-xl px-3 font-bold text-muted disabled:opacity-0"><ArrowLeft size={17} />Back</button>{step < panels.length - 1 ? <button type="button" onClick={next} disabled={!canContinue() || saving} className="gold-button disabled:cursor-not-allowed disabled:opacity-50">{saving ? <LoaderCircle size={16} className="animate-spin" /> : null}Continue<ArrowRight size={17} /></button> : <button type="button" onClick={finish} disabled={!canContinue() || saving} className="gold-button disabled:cursor-not-allowed disabled:opacity-50">{saving ? <LoaderCircle size={16} className="animate-spin" /> : null}Reveal my top Destination<ArrowRight size={17} /></button>}</div></div>
+        <div className="card-surface mt-6 p-6 sm:p-10">{panels[step]}{error ? <p role="alert" className="mt-6 rounded-xl bg-danger/10 px-4 py-3 text-sm font-semibold text-danger">{error}</p> : null}<div className="mt-10 flex items-center justify-between gap-3"><button type="button" onClick={() => setStep((current) => Math.max(0, current - 1))} disabled={step === 0 || saving} className="inline-flex min-h-12 items-center gap-2 rounded-xl px-3 font-bold text-muted disabled:opacity-0"><ArrowLeft size={17} />Back</button>{step < panels.length - 1 ? <button type="button" onClick={next} disabled={!canContinue() || saving} className="gold-button disabled:cursor-not-allowed disabled:opacity-50">{saving ? <LoaderCircle size={16} className="animate-spin" /> : null}Continue<ArrowRight size={17} /></button> : <button type="button" onClick={finish} disabled={!canContinue() || saving} className="gold-button disabled:cursor-not-allowed disabled:opacity-50">{saving ? <LoaderCircle size={16} className="animate-spin" /> : null}Finish and go to Dashboard<ArrowRight size={17} /></button>}</div></div>
         {!isRetake ? <button type="button" onClick={skip} disabled={saving} className="mx-auto mt-5 block text-sm font-bold text-muted underline-offset-4 hover:underline">Skip for now and explore destinations</button> : null}
         <p className="mx-auto mt-5 max-w-xl text-center text-xs leading-5 text-muted">Your answers support planning information only. Kolmari does not provide legal approval or immigration advice.</p>
       </div>
@@ -165,4 +162,3 @@ function SelectField<T extends string>({ label, value, options, onChange }: { la
 function Choice({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return <button type="button" onClick={onClick} aria-pressed={active} className={`flex min-h-14 items-center justify-between rounded-card border px-4 py-3 text-left text-sm font-bold transition ${active ? 'border-gold bg-gold-soft/60' : 'border-line bg-white hover:border-gold/50'}`}>{children}{active ? <Check size={17} /> : null}</button>
 }
-
