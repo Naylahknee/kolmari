@@ -2,32 +2,21 @@ import { getCountryCenter } from '@/lib/country-geo'
 import {
   countryVisualAssetsSchema,
   heroAssetPath,
+  dashboardDestinationAssetPath,
   cityAssetPath,
   type CountryVisualAssets,
   type SnapshotMapConfig,
 } from './schema'
 
-/* Per-country visual asset registry.
- *
- * This is the single source the country-page template reads from. It stays PURE
- * (no DB, no server-only imports) so both the server template and the client
- * admin tool can import it.
- *
- * An entry only declares `hero` once the WebP has actually been committed to
- * /public — that gates the country page between "approved hero artwork" and the
- * branded fallback, with no runtime filesystem check. City images use an
- * <img onError> fallback instead, so they do not need to be pre-registered. */
-
-type LngLat = [number, number] // GeoJSON/Mapbox order: [lng, lat]
+type LngLat = [number, number]
 type Focal = { x: number; y: number }
-
 type CityOverride = { slug: string; name: string; focalPoint?: Focal }
 
 type CountryVisualOverride = {
   countryName: string
   countryCode: string
-  /** Present only when an approved hero WebP is committed under /public. */
   hero?: { src: string; alt: string; focalPoint?: Focal }
+  dashboardDestination?: { src: string; alt: string; cropSafeZone?: number; focalPoint?: Focal }
   snapshot?: {
     center?: LngLat
     zoom?: number
@@ -41,11 +30,6 @@ const OVERRIDES: Record<string, CountryVisualOverride> = {
   portugal: {
     countryName: 'Portugal',
     countryCode: 'PT',
-    // No committed hero yet: the old flag-map artwork used a raised-relief
-    // silhouette (a cutout), which the National Flag Shadow Hero standard
-    // rejects. Portugal falls back to the same flag + translucent-shadow hero as
-    // every other country until a to-standard fabric hero is generated and
-    // committed at /images/countries/portugal/portugal-hero.webp.
     snapshot: {
       center: [-8.0, 39.5],
       zoom: 5.2,
@@ -61,8 +45,6 @@ const OVERRIDES: Record<string, CountryVisualOverride> = {
   mexico: {
     countryName: 'Mexico',
     countryCode: 'MX',
-    // Hero WebP not yet committed → falls back until /images/countries/mexico/
-    // mexico-hero.webp lands, at which point add a `hero` block here.
     snapshot: {
       center: [-102.0, 23.6],
       zoom: 3.8,
@@ -77,13 +59,10 @@ const OVERRIDES: Record<string, CountryVisualOverride> = {
   },
 }
 
-/** Resolve the full visual-asset record for a country, or null if we have no
- *  center coordinate and no override to build a sensible snapshot from. */
 export function getCountryVisualAssets(slug: string): CountryVisualAssets | null {
   const override = OVERRIDES[slug]
   const center = getCountryCenter(slug)
-  const snapCenter: LngLat | null =
-    override?.snapshot?.center ?? (center ? [center.lng, center.lat] : null)
+  const snapCenter: LngLat | null = override?.snapshot?.center ?? (center ? [center.lng, center.lat] : null)
   if (!snapCenter) return null
 
   const record: CountryVisualAssets = {
@@ -93,38 +72,58 @@ export function getCountryVisualAssets(slug: string): CountryVisualAssets | null
       alt: override?.hero?.alt ?? `${override?.countryName ?? slug} hero artwork`,
       focalPoint: override?.hero?.focalPoint ?? { x: 50, y: 50 },
     },
+    dashboardDestination: override?.dashboardDestination
+      ? {
+          src: override.dashboardDestination.src,
+          alt: override.dashboardDestination.alt,
+          cropSafeZone: override.dashboardDestination.cropSafeZone ?? 70,
+          focalPoint: override.dashboardDestination.focalPoint ?? { x: 50, y: 50 },
+        }
+      : undefined,
     snapshotMap: {
       center: snapCenter,
       zoom: override?.snapshot?.zoom ?? 4,
       bounds: override?.snapshot?.bounds,
       capital: override?.snapshot?.capital,
     },
-    cities: (override?.cities ?? []).map((c) => ({
-      slug: c.slug,
-      name: c.name,
-      imageSrc: cityAssetPath(slug, c.slug),
-      imageAlt: `${c.name}, ${override?.countryName ?? slug}`,
-      focalPoint: c.focalPoint,
+    cities: (override?.cities ?? []).map((city) => ({
+      slug: city.slug,
+      name: city.name,
+      imageSrc: cityAssetPath(slug, city.slug),
+      imageAlt: `${city.name}, ${override?.countryName ?? slug}`,
+      focalPoint: city.focalPoint,
     })),
   }
 
-  // Validate defensively; a malformed override should fail loudly in dev.
   return countryVisualAssetsSchema.parse(record)
 }
 
-/** True only when a country has an approved, committed hero WebP (or PNG). */
 export function hasApprovedHero(slug: string): boolean {
   return Boolean(OVERRIDES[slug]?.hero)
 }
 
-/** The approved hero source + focal point, or null when none is committed. */
 export function getApprovedHero(slug: string): { src: string; focalPoint: Focal } | null {
   const hero = OVERRIDES[slug]?.hero
   if (!hero) return null
   return { src: hero.src, focalPoint: hero.focalPoint ?? { x: 50, y: 50 } }
 }
 
-/** Seed a SnapshotMapConfig for the admin tool from the registry + geo data. */
+/** Approved committed Dashboard-specific artwork only; never falls back to hero. */
+export function getApprovedDashboardDestination(slug: string): { src: string; focalPoint: Focal; cropSafeZone: number } | null {
+  const asset = OVERRIDES[slug]?.dashboardDestination
+  if (!asset) return null
+  return {
+    src: asset.src,
+    focalPoint: asset.focalPoint ?? { x: 50, y: 50 },
+    cropSafeZone: asset.cropSafeZone ?? 70,
+  }
+}
+
+/** Canonical committed path used when an approved file is added to /public. */
+export function getDashboardDestinationCommittedPath(slug: string) {
+  return dashboardDestinationAssetPath(slug)
+}
+
 export function getSnapshotMapConfig(slug: string): SnapshotMapConfig | null {
   const assets = getCountryVisualAssets(slug)
   const override = OVERRIDES[slug]

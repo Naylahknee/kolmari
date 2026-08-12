@@ -1,39 +1,61 @@
 {
-  "taskId": "country-hero-metric-typography",
-  "instruction": "typography is not the same. Please check all country pages and implement the following: 1. Use a shared CSS component \u2014 explicitly define the font features for the .metrics container and its children instead of relying on inherited styles. 2. Implement CSS variables (design tokens) for the metric font family, value size and bold weight. 3. Use font-variant-numeric: tabular-nums for the data figures. 4. Component-based architecture \u2014 wrap this logic inside a single MetricButton component so the HTML structure and associated styles are bundled together and reused identically everywhere.",
-  "objective": "Hero metric panels render identical typography on every country page: explicit font declarations on .metrics and its children, design tokens for family/size/weight, tabular figures, and one MetricButton component used by both the Portugal hero and the data-driven hero.",
-  "allowedEntities": [
-    "Country Hero"
-  ],
+  "taskId": "dashboard-journey-header-dropdown",
+  "instruction": "Convert the existing Dashboard Journey progress tracker from the right-docked animated side rail into a hidden header dropdown. Remove all docked/collapsed rail behavior and layout reservation. Add a compact Journey stage pill to the workspace top header on Dashboard only for users with paid tracker access. Clicking it opens the unchanged tracker contents as a fixed 322px overlay without pushing page content. Preserve all previously authorized Dashboard Destinations and Country Design System changes already present on this branch.",
+  "objective": "Preserve the Journey Tracker data, stage/task accordion, progress calculation, paid gating, and My Plan link while changing only its presentation from a docked rail to a default-closed header-triggered overlay, without invalidating previously authorized branch work.",
+  "allowedEntities": [],
   "allowedFiles": [
-    "src/styles/country-template.css",
-    "src/components/country-template/CountryHero.tsx",
-    "src/components/country-template/MetricButton.tsx",
-    "docs/kolmari/CURRENT-STATE.md",
+    ".github/workflows/pr-build-verify.yml",
     ".sld/task-contract.json",
-    ".sld/baseline.json"
+    "docs/country-design-schema.md",
+    "docs/country-design-system.md",
+    "docs/country-hero-generator.md",
+    "docs/dashboard-destination-panels.md",
+    "src/app/(app)/(workspace)/dashboard/page.tsx",
+    "src/app/(app)/(workspace)/settings/country-hero/page.tsx",
+    "src/app/api/admin/country-asset/route.ts",
+    "src/app/api/admin/country-hero/route.ts",
+    "src/app/api/country-asset/route.ts",
+    "src/components/country-template/TopBar.tsx",
+    "src/components/kolmari/dashboard-side-cards.tsx",
+    "src/components/kolmari/dashboard/destination-panel.tsx",
+    "src/components/kolmari/dashboard/journey-tracker.tsx",
+    "src/lib/country-assets.ts",
+    "src/lib/country-visuals/data.ts",
+    "src/lib/country-visuals/prompt.ts",
+    "src/lib/country-visuals/schema.ts",
+    "src/lib/dashboard-layout.ts",
+    "src/styles/journey-tracker.css"
   ],
   "allowedActions": [
     "CREATE",
     "MODIFY",
     "RESTYLE",
-    "REFACTOR",
     "REWIRE"
   ],
   "allowedUIRegions": [
-    "country hero metric panels"
+    "Dashboard Journey Tracker",
+    "workspace top header Journey slot",
+    "previously authorized Dashboard Destinations panel and Country Page Generator surfaces"
   ],
   "requiredChanges": [
-    "explicit font declarations on .metrics and its children in src/styles/country-template.css",
-    "design tokens for the metric font family, value size and bold weight",
-    "font-variant-numeric: tabular-nums on the metric value",
-    "a single MetricButton component imported by every hero variant"
+    "remove the 322px and 56px right-docked Journey rail shell, collapsed strip, vertical Journey label, status dots, counter rail, and slide transform behavior",
+    "make the tracker occupy zero Dashboard layout space when closed and allow Dashboard content to use the freed width",
+    "add a default-closed header pill showing a 15px yellow check circle, Journey label, currentStage/totalStages, and chevron with aria-expanded",
+    "render the header pill only when the existing paid Readiness Tracker entitlement is available",
+    "open the existing full tracker content as a fixed 322px right-aligned overlay below the 56px header without pushing content",
+    "preserve current-stage values, progress percent, eight-stage accordion, task lists, saved timestamp, and Open My Plan behavior",
+    "support close from the panel chevron, outside click, and Escape"
   ],
   "forbiddenChanges": [
-    "src/lib",
-    "src/app",
-    "src/components/kolmari",
-    "src/components/country-template/tabs"
+    "rebuild or refactor the Dashboard widget system",
+    "alter Dashboard Destinations behavior beyond previously authorized branch work",
+    "Journey stage calculation changes",
+    "Journey task or suggestion content changes",
+    "Kolmari Plan state changes",
+    "profile or subscription model changes",
+    "navigation redesign",
+    "country page changes beyond previously authorized branch work",
+    "database schema migrations"
   ],
   "createdFrom": "user-request"
 }

@@ -2,14 +2,13 @@ import { z } from 'zod'
 
 /* Country Visual Asset Engine — shared schemas.
  *
- * Three asset kinds power every Kolmari country page:
- *   1. Hero image   — AI-generated flag + translucent country-silhouette shadow.
- *   2. Snapshot map — the existing interactive Mapbox locator (config only,
- *                     never AI-generated).
- *   3. City images  — AI-generated premium editorial travel photography.
- *
- * The generator inputs live here alongside the resolved `CountryVisualAssets`
- * record that the country-page template reads from. */
+ * Four visual asset kinds support Kolmari country surfaces:
+ *   1. Hero image             — country-page National Flag Shadow Hero.
+ *   2. Snapshot map           — existing Mapbox locator configuration; never AI-generated.
+ *   3. City images            — editorial city photography.
+ *   4. Dashboard destination  — compact, crop-safe matched-country artwork for the
+ *                               existing Dashboard Destinations parent panel.
+ */
 
 const quality = z.enum(['low', 'medium', 'high']).default('medium')
 const slug = z
@@ -19,15 +18,14 @@ const slug = z
   .max(80)
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Use a lowercase, hyphenated slug (e.g. mexico-city).')
 
+const focalPoint = z.object({ x: z.number().min(0).max(100), y: z.number().min(0).max(100) })
+
 // ----------------------------------------------------------------------------
-// 1. Hero image generator input (the "Mexico Shadow Standard")
+// 1. Country-page hero image input — National Flag Shadow Hero
 // ----------------------------------------------------------------------------
 export const heroImageInputSchema = z.object({
   countryName: z.string().trim().min(2).max(80),
   countrySlug: slug,
-  // Optional ISO-3166-1 alpha-2 code. When set, the generator can feed the
-  // country's own flag raster (public/flags-png/{code}.png) to the image-edits
-  // endpoint so the output preserves the real flag instead of inventing one.
   flagCode: z.string().trim().length(2).optional(),
   protectedSymbolDescription: z.string().trim().min(2).max(240),
   protectedSymbolPosition: z.string().trim().min(2).max(200),
@@ -38,10 +36,27 @@ export const heroImageInputSchema = z.object({
   shadowOpacity: z.number().int().min(5).max(60).default(22),
   shadowDepth: z.string().trim().min(2).max(160).default('gentle embossed relief with soft edge definition'),
   flagTextureIntensity: z.string().trim().min(2).max(160).default('subtle matte woven fabric with soft folds'),
-  focalPoint: z.object({ x: z.number().min(0).max(100), y: z.number().min(0).max(100) }).default({ x: 50, y: 50 }),
+  focalPoint: focalPoint.default({ x: 50, y: 50 }),
   quality,
 })
 export type HeroImageInput = z.infer<typeof heroImageInputSchema>
+
+// ----------------------------------------------------------------------------
+// 2. Dashboard destination image input
+// ----------------------------------------------------------------------------
+export const dashboardDestinationImageInputSchema = z.object({
+  countryName: z.string().trim().min(2).max(80),
+  countrySlug: slug,
+  flagCode: z.string().trim().length(2).optional(),
+  protectedSymbolDescription: z.string().trim().min(2).max(240),
+  protectedSymbolPosition: z.string().trim().min(2).max(200),
+  safeZonePercent: z.number().int().min(5).max(40).default(15),
+  compositionGuidance: z.string().trim().min(2).max(400).default('flag-led compact editorial composition optimized for small dashboard cards'),
+  cropSafeZone: z.number().int().min(50).max(90).default(70),
+  focalPoint: focalPoint.default({ x: 50, y: 50 }),
+  quality,
+})
+export type DashboardDestinationImageInput = z.infer<typeof dashboardDestinationImageInputSchema>
 
 // ----------------------------------------------------------------------------
 // 3. City image generator input
@@ -60,27 +75,26 @@ export const cityImageInputSchema = z.object({
 })
 export type CityImageInput = z.infer<typeof cityImageInputSchema>
 
-// The POST body for the generator route is a discriminated union on assetType.
-// (Snapshot maps are not AI-generated, so they never hit this endpoint.)
+const styleReferenceDataUrl = z
+  .string()
+  .regex(/^data:image\/[a-z+.-]+;base64,/i, 'Expected a base64 image data URL.')
+  .max(8_000_000)
+  .optional()
+
+// Snapshot maps never hit the image generator endpoint.
 export const generatorRequestSchema = z.discriminatedUnion('assetType', [
-  heroImageInputSchema.extend({
-    assetType: z.literal('hero'),
-    // Optional base64 data URL of a style-reference image (e.g. an approved hero).
-    // When present it is passed to the image-edits endpoint as a style exemplar so
-    // the generated hero matches its fabric/shadow/silhouette look.
-    styleReferenceDataUrl: z
-      .string()
-      .regex(/^data:image\/[a-z+.-]+;base64,/i, 'Expected a base64 image data URL.')
-      .max(8_000_000)
-      .optional(),
-  }),
+  heroImageInputSchema.extend({ assetType: z.literal('hero'), styleReferenceDataUrl }),
+  dashboardDestinationImageInputSchema.extend({ assetType: z.literal('dashboard_destination') }),
   cityImageInputSchema.extend({ assetType: z.literal('city') }),
 ])
 export type GeneratorRequest = z.infer<typeof generatorRequestSchema>
-export type GeneratedAssetType = 'hero' | 'city'
+
+// Preserve existing storage/API names; add the new type without renaming existing
+// persisted values or requiring a database migration.
+export type GeneratedAssetType = 'hero' | 'city' | 'dashboard_destination'
 
 // ----------------------------------------------------------------------------
-// 2. Snapshot map configuration (drives the existing Mapbox locator)
+// Snapshot map configuration
 // ----------------------------------------------------------------------------
 export const snapshotMapConfigSchema = z.object({
   countrySlug: slug,
@@ -89,9 +103,7 @@ export const snapshotMapConfigSchema = z.object({
   centerLat: z.number().min(-90).max(90),
   centerLng: z.number().min(-180).max(180),
   zoom: z.number().min(0).max(22).default(4),
-  bounds: z
-    .tuple([z.tuple([z.number(), z.number()]), z.tuple([z.number(), z.number()])])
-    .optional(),
+  bounds: z.tuple([z.tuple([z.number(), z.number()]), z.tuple([z.number(), z.number()])]).optional(),
   capitalName: z.string().trim().max(80).default(''),
   capitalLat: z.number().min(-90).max(90).optional(),
   capitalLng: z.number().min(-180).max(180).optional(),
@@ -101,10 +113,8 @@ export const snapshotMapConfigSchema = z.object({
 export type SnapshotMapConfig = z.infer<typeof snapshotMapConfigSchema>
 
 // ----------------------------------------------------------------------------
-// Resolved per-country visual asset record read by the country-page template
+// Resolved per-country visual asset record
 // ----------------------------------------------------------------------------
-const focalPoint = z.object({ x: z.number().min(0).max(100), y: z.number().min(0).max(100) })
-
 export const countryVisualAssetsSchema = z.object({
   countrySlug: slug,
   hero: z.object({
@@ -112,38 +122,40 @@ export const countryVisualAssetsSchema = z.object({
     alt: z.string().min(1),
     focalPoint,
   }),
+  dashboardDestination: z.object({
+    src: z.string().min(1),
+    alt: z.string().min(1),
+    cropSafeZone: z.number().int().min(50).max(90).default(70),
+    focalPoint,
+  }).optional(),
   snapshotMap: z.object({
-    // GeoJSON/Mapbox order: [lng, lat].
     center: z.tuple([z.number(), z.number()]),
     zoom: z.number().min(0).max(22),
     bounds: z.tuple([z.tuple([z.number(), z.number()]), z.tuple([z.number(), z.number()])]).optional(),
-    capital: z
-      .object({ name: z.string().min(1), lat: z.number(), lng: z.number() })
-      .optional(),
+    capital: z.object({ name: z.string().min(1), lat: z.number(), lng: z.number() }).optional(),
   }),
-  cities: z.array(
-    z.object({
-      slug,
-      name: z.string().min(1),
-      imageSrc: z.string().min(1),
-      imageAlt: z.string().min(1),
-      focalPoint: focalPoint.optional(),
-    }),
-  ),
+  cities: z.array(z.object({
+    slug,
+    name: z.string().min(1),
+    imageSrc: z.string().min(1),
+    imageAlt: z.string().min(1),
+    focalPoint: focalPoint.optional(),
+  })),
 })
 export type CountryVisualAssets = z.infer<typeof countryVisualAssetsSchema>
 
-/** Build the canonical hero asset path for a country slug. */
 export function heroAssetPath(countrySlug: string) {
   return `/images/countries/${countrySlug}/${countrySlug}-hero.webp`
 }
 
-/** Build the canonical city image path for a country + city slug. */
+export function dashboardDestinationAssetPath(countrySlug: string) {
+  return `/images/countries/${countrySlug}/${countrySlug}-dashboard-destination.webp`
+}
+
 export function cityAssetPath(countrySlug: string, citySlug: string) {
   return `/images/countries/${countrySlug}/cities/${citySlug}.webp`
 }
 
-/** CSS object-position string from a focal point (defaults to centered). */
 export function focalToObjectPosition(point?: { x: number; y: number }) {
   const x = point?.x ?? 50
   const y = point?.y ?? 50

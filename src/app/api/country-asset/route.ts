@@ -1,12 +1,11 @@
 import { getGeneratedAsset } from '@/lib/country-assets'
+import type { GeneratedAssetType } from '@/lib/country-visuals/schema'
 
 export const runtime = 'nodejs'
 
-// Public serve endpoint for saved generated visuals (hero + city). Returns the
-// stored bytes with an image content type, or 404 when nothing is saved so the
-// caller's fallback (composite hero / flag) takes over. No admin gate — these
-// are approved, public country images.
+// Public serve endpoint for approved generated country visuals.
 //   /api/country-asset?slug=portugal&type=hero
+//   /api/country-asset?slug=portugal&type=dashboard_destination
 //   /api/country-asset?slug=portugal&type=city&city=lisbon
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -14,13 +13,15 @@ export async function GET(request: Request) {
   const type = searchParams.get('type')
   const city = searchParams.get('city') ?? ''
 
-  if (!slug || (type !== 'hero' && type !== 'city')) {
+  const allowed = new Set<GeneratedAssetType>(['hero', 'city', 'dashboard_destination'])
+  if (!slug || !type || !allowed.has(type as GeneratedAssetType)) {
     return new Response('Bad request', { status: 400 })
   }
 
+  const assetType = type as GeneratedAssetType
   let asset: { base64: string; contentType: string } | null = null
   try {
-    asset = await getGeneratedAsset(slug, type, type === 'city' ? city : '')
+    asset = await getGeneratedAsset(slug, assetType, assetType === 'city' ? city : '')
   } catch {
     return new Response('Unavailable', { status: 503 })
   }
@@ -30,7 +31,6 @@ export async function GET(request: Request) {
   return new Response(bytes, {
     headers: {
       'Content-Type': asset.contentType,
-      // Versioned by the ?v= stamp the caller adds, so it's safe to cache hard.
       'Cache-Control': 'public, max-age=300, s-maxage=86400',
     },
   })

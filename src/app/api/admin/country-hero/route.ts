@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getRequestUser } from '@/lib/auth'
 import { generatorRequestSchema, type GeneratedAssetType } from '@/lib/country-visuals/schema'
-import { buildHeroPrompt, buildHeroEditPrompt, buildCityPrompt } from '@/lib/country-visuals/prompt'
+import { buildHeroPrompt, buildHeroEditPrompt, buildDashboardDestinationPrompt, buildCityPrompt } from '@/lib/country-visuals/prompt'
 
 export const runtime = 'nodejs'
 export const maxDuration = 120
@@ -11,8 +11,6 @@ type OpenAIImageResponse = {
   error?: { message?: string }
 }
 
-// A base64 image data URL → Blob for a multipart image input. Returns null when
-// the string is not a recognizable image data URL.
 function dataUrlToImage(dataUrl: string): { blob: Blob; filename: string } | null {
   const match = /^data:(image\/[a-z+.-]+);base64,(.+)$/i.exec(dataUrl)
   if (!match) return null
@@ -27,15 +25,26 @@ function isAllowedAdmin(email: string) {
     ?.split(',')
     .map((value) => value.trim().toLowerCase())
     .filter(Boolean)
-
   if (!configured?.length) return process.env.NODE_ENV !== 'production'
   return configured.includes(email.toLowerCase())
 }
 
-// The Country Visual Asset Engine generates two AI asset types — the flag +
-// silhouette hero and premium city photography. (Snapshot maps are Mapbox and
-// never hit this endpoint.) Each type has its own prompt, output size, and
-// canonical filename.
+async function fetchFlag(requestUrl: string, code?: string) {
+  if (!code) return null
+  try {
+    const flagUrl = new URL(`/flags-png/${code.toLowerCase()}.png`, requestUrl)
+    const flagRes = await fetch(flagUrl)
+    if (!flagRes.ok) return null
+    const flagBytes = Buffer.from(await flagRes.arrayBuffer())
+    return { blob: new Blob([flagBytes], { type: 'image/png' }), filename: `${code.toLowerCase()}.png` }
+  } catch {
+    return null
+  }
+}
+
+// Country Page Generator Engine image endpoint. This remains admin-only and
+// generates exactly one preview image per request. Nothing is saved here; saving
+// is a separate explicit admin approval action through /api/admin/country-asset.
 export async function POST(request: Request) {
   const user = await getRequestUser(request)
   if (!user) return NextResponse.json({ error: 'Authentication required.' }, { status: 401 })
@@ -43,14 +52,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'You do not have permission to generate country artwork.' }, { status: 403 })
   }
 
-  // Server-only secret. On this project (Next.js App Router via OpenNext for
-  // Cloudflare) runtime secrets are read from process.env — the same mechanism
-  // that already powers process.env.DATABASE_URL / process.env.JWT_SECRET in
-  // production. The key is never sent to the browser and never logged.
   const apiKey = process.env.OPENAI_API_KEY?.trim()
   if (!apiKey) {
     return NextResponse.json(
-      { error: 'Image generation is unavailable: OPENAI_API_KEY is not configured on the server. Set it as an encrypted Cloudflare Worker secret and redeploy.' },
+      { error: 'Image generation is unavailable: OPENAI_API_KEY is not configured on the server.' },
       { status: 503 },
     )
   }
@@ -64,57 +69,37 @@ export async function POST(request: Request) {
 
   const parsed = generatorRequestSchema.safeParse(json)
   if (!parsed.success) {
-    return NextResponse.json(
-      { error: 'Please correct the highlighted fields.', issues: parsed.error.flatten() },
-      { status: 400 },
-    )
+    return NextResponse.json({ error: 'Please correct the highlighted fields.', issues: parsed.error.flatten() }, { status: 400 })
   }
 
   const data = parsed.data
   const assetType: GeneratedAssetType = data.assetType
-
-  // For a hero, gather any image inputs (the country's own flag raster + an
-  // optional style reference). When at least one is available we use the
-  // image-*edits* endpoint so the output preserves the real flag and matches the
-  // reference look; otherwise we fall back to plain text-to-image generation.
-  const heroImages: Array<{ blob: Blob; filename: string }> = []
-  let hasFlag = false
+  const editImages: Array<{ blob: Blob; filename: string }> = []
   let hasStyleRef = false
+
+  if (data.assetType === 'hero' || data.assetType === 'dashboard_destination') {
+    const flag = await fetchFlag(request.url, data.flagCode)
+    if (flag) editImages.push(flag)
+  }
+
   if (data.assetType === 'hero') {
-    if (data.flagCode) {
-      try {
-        const flagUrl = new URL(`/flags-png/${data.flagCode.toLowerCase()}.png`, request.url)
-        const flagRes = await fetch(flagUrl)
-        if (flagRes.ok) {
-          const flagBytes = Buffer.from(await flagRes.arrayBuffer())
-          heroImages.push({ blob: new Blob([flagBytes], { type: 'image/png' }), filename: `${data.flagCode.toLowerCase()}.png` })
-          hasFlag = true
-        }
-      } catch {
-        // No flag raster available — fall through (text prompt or reference-only).
-      }
-    }
-    // Style reference: an uploaded exemplar wins; otherwise fall back to the
-    // committed National Flag Shadow Hero standard so the approved look is
-    // applied automatically. The built-in reference is only attached alongside
-    // the country's own flag, so the reference's country identity can't bleed in.
     if (data.styleReferenceDataUrl) {
       const ref = dataUrlToImage(data.styleReferenceDataUrl)
       if (ref) {
-        heroImages.push({ blob: ref.blob, filename: `reference.${ref.filename.split('.').pop()}` })
+        editImages.push({ blob: ref.blob, filename: `reference.${ref.filename.split('.').pop()}` })
         hasStyleRef = true
       }
-    } else if (hasFlag) {
+    } else if (editImages.length) {
       try {
         const refUrl = new URL('/references/national-flag-shadow-hero.webp', request.url)
         const refRes = await fetch(refUrl)
         if (refRes.ok) {
           const refBytes = Buffer.from(await refRes.arrayBuffer())
-          heroImages.push({ blob: new Blob([refBytes], { type: 'image/webp' }), filename: 'reference.webp' })
+          editImages.push({ blob: new Blob([refBytes], { type: 'image/webp' }), filename: 'reference.webp' })
           hasStyleRef = true
         }
       } catch {
-        // No built-in reference available — proceed with the flag alone.
+        // Proceed with the real flag alone.
       }
     }
   }
@@ -122,18 +107,26 @@ export async function POST(request: Request) {
   let prompt: string
   let size: string
   let filename: string
+
   if (data.assetType === 'hero') {
-    prompt = heroImages.length ? buildHeroEditPrompt(data, { hasStyleRef }) : buildHeroPrompt(data)
+    prompt = editImages.length ? buildHeroEditPrompt(data, { hasStyleRef }) : buildHeroPrompt(data)
     size = '1536x1024'
     filename = `${data.countrySlug}-hero.webp`
+  } else if (data.assetType === 'dashboard_destination') {
+    prompt = buildDashboardDestinationPrompt(data)
+    size = '1536x1024'
+    filename = `${data.countrySlug}-dashboard-destination.webp`
   } else {
     prompt = buildCityPrompt(data)
-    size = '1024x1024'
+    // gpt-image-2 supports square/portrait/landscape presets; use the closest
+    // supported landscape output to the documented 1200×800 city standard.
+    size = '1536x1024'
     filename = `${data.citySlug}.webp`
   }
 
-  // Hero with image inputs → multipart edits; everything else → JSON generations.
-  const useEdits = data.assetType === 'hero' && heroImages.length > 0
+  // Hero and dashboard_destination may use the official flag raster as an edit
+  // input. Dashboard images intentionally do NOT use the hero style reference.
+  const useEdits = (data.assetType === 'hero' || data.assetType === 'dashboard_destination') && editImages.length > 0
 
   let response: Response
   try {
@@ -142,14 +135,13 @@ export async function POST(request: Request) {
       form.append('model', 'gpt-image-2')
       form.append('prompt', prompt)
       form.append('size', size)
-      form.append('quality', parsed.data.quality)
+      form.append('quality', data.quality)
       form.append('output_format', 'webp')
       form.append('background', 'opaque')
       form.append('n', '1')
-      for (const img of heroImages) form.append('image[]', img.blob, img.filename)
+      for (const image of editImages) form.append('image[]', image.blob, image.filename)
       response = await fetch('https://api.openai.com/v1/images/edits', {
         method: 'POST',
-        // No Content-Type header — fetch sets the multipart boundary from FormData.
         headers: { Authorization: `Bearer ${apiKey}` },
         body: form,
         signal: AbortSignal.timeout(115_000),
@@ -157,43 +149,32 @@ export async function POST(request: Request) {
     } else {
       response = await fetch('https://api.openai.com/v1/images/generations', {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'gpt-image-2',
           prompt,
           size,
-          quality: parsed.data.quality,
+          quality: data.quality,
           output_format: 'webp',
           background: 'opaque',
           n: 1,
         }),
-        // gpt-image-2 can take a while; bound it so a hung request fails cleanly.
         signal: AbortSignal.timeout(115_000),
       })
     }
   } catch (caught) {
-    // Log only the failure kind — never the request (which carries the key).
     console.error('OpenAI image request failed', caught instanceof Error ? caught.name : 'unknown')
     return NextResponse.json({ error: 'Could not reach the image service. Please try again.' }, { status: 504 })
   }
 
   const result = (await response.json().catch(() => ({}))) as OpenAIImageResponse
   if (!response.ok) {
-    // result.error?.message is OpenAI's message — it does not contain our key.
     console.error('OpenAI image generation failed', response.status, result.error?.message)
-    return NextResponse.json(
-      { error: result.error?.message ?? 'Image generation failed.' },
-      { status: response.status >= 500 ? 502 : 400 },
-    )
+    return NextResponse.json({ error: result.error?.message ?? 'Image generation failed.' }, { status: response.status >= 500 ? 502 : 400 })
   }
 
   const base64 = result.data?.[0]?.b64_json
-  if (!base64) {
-    return NextResponse.json({ error: 'The image service returned no image.' }, { status: 502 })
-  }
+  if (!base64) return NextResponse.json({ error: 'The image service returned no image.' }, { status: 502 })
 
   return NextResponse.json({
     imageDataUrl: `data:image/webp;base64,${base64}`,
