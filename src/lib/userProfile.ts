@@ -90,9 +90,16 @@ export function calculateCountryMatch(profile: RelocationProfile, country: Count
   score += Math.min(25, strong * 14 + possible * 5)
   if (strong > 0) reasons.push(`${strong} Pathway${strong > 1 ? 's' : ''} may support your move to ${country.name}`)
 
-  if (profile.remote && /nomad|remote|d7/i.test(country.visaType)) {
+  // Route-fit tie breaker. The previous matcher treated Portugal's D7 route as
+  // a remote-work route, which caused many otherwise different profiles to tie
+  // and then fall back to Portugal because it appears first in COUNTRIES.
+  if (profile.remote && /nomad|remote/i.test(country.visaType)) {
     score += 10
     reasons.push(`${country.name} offers a route suited to remote income`)
+  }
+  if (profile.goals.includes('Passive Income / Retirement') && /d7|passive|retire|retirement/i.test(country.visaType)) {
+    score += 10
+    if (reasons.length < 3) reasons.push(`${country.name} has a route aligned with passive-income or retirement planning`)
   }
 
   score += country.safety === 'High' ? 10 : 6
