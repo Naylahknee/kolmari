@@ -1,15 +1,18 @@
 {
-  "taskId": "dashboard-layout-builder",
-  "instruction": "Keep Dashboard destination cards non-navigational, retain concise visa pathway information inside the existing Destinations parent panel, establish Progress by planning area, Active pathway, and Deadlines and blockers as the default second Dashboard column, and extend Account → Dashboard into an interactive drag-and-drop layout builder with optimized templates for all Dashboard panels including Journey.",
-  "objective": "Give each user one persisted Dashboard layout contract with two reorderable columns, show/hide controls, optimized templates, and Journey placement while preserving existing panel data and business logic.",
+  "taskId": "dashboard-layout-builder-and-affordance-audit",
+  "instruction": "Keep Dashboard destination cards non-navigational, retain concise visa pathway information inside the existing Destinations parent panel, establish Progress by planning area, Active pathway, and Deadlines and blockers as the default second Dashboard column, extend Account → Dashboard into an interactive drag-and-drop layout builder with optimized templates for all Dashboard panels including Journey, replace the completed-profile Flutter Mode header CTA with a plan-aware upgrade section, and audit/fix Dashboard Norman-door affordance problems without changing underlying business logic.",
+  "objective": "Give each user one persisted Dashboard layout contract with two reorderable columns, explicit panel affordances, plan-aware upgrade access, optimized templates, and Journey placement while preserving existing match, pathway, Journey, profile, and plan logic.",
   "allowedEntities": [],
   "allowedFiles": [
     ".github/workflows/pr-build-verify.yml",
     ".sld/task-contract.json",
     "docs/dashboard-destination-panels.md",
     "docs/dashboard-layout-builder.md",
+    "docs/dashboard-norman-door-audit.md",
     "src/app/(app)/(workspace)/dashboard/page.tsx",
     "src/components/kolmari/account-tabs.tsx",
+    "src/components/kolmari/dashboard-onboarding.tsx",
+    "src/components/kolmari/dashboard-side-cards.tsx",
     "src/components/kolmari/dashboard/customize.tsx",
     "src/components/kolmari/dashboard/destination-panel.tsx",
     "src/components/kolmari/dashboard/journey-tracker.tsx",
@@ -17,16 +20,29 @@
     "src/styles/journey-tracker.css"
   ],
   "allowedActions": ["CREATE", "MODIFY", "RESTYLE", "REWIRE"],
-  "allowedUIRegions": ["Dashboard Destinations parent panel", "Dashboard primary column", "Dashboard second column", "Account Dashboard layout editor", "Journey tracker"],
+  "allowedUIRegions": [
+    "Dashboard header greeting and plan action",
+    "Dashboard Destinations parent panel",
+    "Dashboard Active pathway panel",
+    "Dashboard primary column",
+    "Dashboard second column",
+    "Account Dashboard layout editor",
+    "Journey tracker"
+  ],
   "requiredChanges": [
     "Dashboard destination image cards do not navigate to country pages",
     "visa pathway preview stays below matched cards inside the Destinations parent panel",
+    "visa pathway preview rows are informational and use one explicit Pathways navigation control",
     "default second column contains Progress by planning area, Active pathway, and Deadlines and blockers",
     "Account Dashboard tab supports native drag and drop between primary and second columns with accessible button alternatives",
     "optimized layout templates are available",
     "all Dashboard panels can be shown or hidden and rearranged",
     "Journey tracker participates in customization and can remain the default header dropdown or become a Dashboard panel",
-    "existing saved v1 layouts migrate safely to the v2 layout contract"
+    "existing saved v1 layouts migrate safely to the v2 layout contract",
+    "completed-profile Dashboard header no longer promotes Enter Flutter Mode",
+    "plan-aware upgrade section links explicitly to Account Billing",
+    "stale first-visit walkthrough target is replaced with a current Dashboard surface",
+    "ambiguous Active pathway link labels are made explicit"
   ],
   "forbiddenChanges": [
     "country page redesign",
@@ -35,7 +51,7 @@
     "Journey stage or task calculation changes",
     "profile or subscription model changes",
     "database schema migrations",
-    "Dashboard panel content rewrites unrelated to layout"
+    "Dashboard panel content rewrites unrelated to layout, upgrade access, or affordance clarity"
   ],
   "createdFrom": "user-request"
 }
