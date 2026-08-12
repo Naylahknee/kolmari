@@ -86,7 +86,7 @@ export default async function DashboardPage() {
   return (
     <div className="flex flex-col gap-4">
       {headerJourney && <JourneyTracker {...journeyProps} mode="header" />}
-      <DashboardWelcome firstName={firstName} firstVisitCandidate={firstVisitCandidate} profileComplete={complete} />
+      <DashboardWelcome firstName={firstName} firstVisitCandidate={firstVisitCandidate} profileComplete={complete} planTier={profile.plan} />
       {main.length === 0 && side.length === 0 ? (
         <p className="rounded-[var(--radius-card)] border border-dashed border-line-strong bg-white px-4 py-8 text-center text-sm text-muted">Every dashboard panel is hidden. Turn them back on in Account → Dashboard.</p>
       ) : (
