@@ -6,13 +6,13 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, ChevronDown, MapPinned } from 'lucide-react'
 import type { WorldPin } from './your-world-map'
+import { YourWorldMap } from './your-world-map'
 
 /**
- * "Matched destinations" map — a static Mapbox image ported from the demo's
- * World page. Each matched country is dropped as a gold star pin on a dark map,
- * with an "Open a match" pill row beneath it. Uses the Mapbox Static Images API
- * so there is no client GL bundle to load; falls back to a dark placeholder when
- * no token is configured or the image fails.
+ * Matched destinations map. Prefer the Mapbox static image when a public token
+ * is available, but always render Kolmari's built-in SVG world map when the
+ * token is absent or the remote image fails. The page should never collapse to
+ * a non-map placeholder just because Mapbox is unavailable.
  */
 function buildMapUrl(pins: WorldPin[], token: string): string {
   const geo = {
@@ -24,7 +24,6 @@ function buildMapUrl(pins: WorldPin[], token: string): string {
     })),
   }
   const overlay = `geojson(${encodeURIComponent(JSON.stringify(geo))})`
-  // A single point makes /auto/ zoom in too far, so frame it at a fixed low zoom.
   const camera = pins.length === 1 ? `${pins[0].lng},${pins[0].lat},3.1,0` : 'auto'
   const padding = pins.length === 1 ? '' : 'padding=70&'
   return `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/${overlay}/${camera}/1000x360@2x?${padding}access_token=${encodeURIComponent(token)}`
@@ -58,25 +57,17 @@ export function WorldMatchMap({ pins }: { pins: WorldPin[] }) {
   const count = pins.length
 
   if (count === 0) {
-    return (
-      <section className="overflow-hidden rounded-card" style={{ background: '#0d1b39' }}>
-        <div className="flex flex-wrap items-center gap-3 p-5">
-          <span className="grid size-9 place-items-center rounded-full bg-gold text-navy-deep" aria-hidden="true">
-            <MapPinned size={17} />
-          </span>
-          <div>
-            <p className="text-sm font-bold text-white">Plot your matched destinations</p>
-            <p className="text-xs text-white/65">Complete your Kolmari Profile to pin personalized matches.</p>
-          </div>
-          <Link href="/profile-wizard" className="ml-auto inline-flex min-h-9 items-center gap-1.5 rounded-full bg-white/10 px-3 text-xs font-bold text-white hover:bg-white/15">
-            Complete profile <ArrowRight size={13} aria-hidden="true" />
-          </Link>
-        </div>
-      </section>
-    )
+    return <YourWorldMap pins={pins} />
   }
 
   const mapUrl = token ? buildMapUrl(pins, token) : null
+
+  // The application already ships a self-contained accessible world map. Use
+  // it as the real fallback so missing Mapbox configuration never produces a
+  // blank/non-map panel.
+  if (!mapUrl || imgFailed) {
+    return <YourWorldMap pins={pins} />
+  }
 
   return (
     <section className="overflow-hidden rounded-card" style={{ background: '#0d1b39' }}>
@@ -96,29 +87,14 @@ export function WorldMatchMap({ pins }: { pins: WorldPin[] }) {
 
       {open && (
         <div className="px-5 pb-5">
-          {mapUrl && !imgFailed ? (
-            <img
-              src={mapUrl}
-              alt={`Map highlighting ${pins.map((p) => p.name).join(', ')} with location pins`}
-              loading="lazy"
-              onError={() => setImgFailed(true)}
-              className="block w-full rounded-[12px] object-cover"
-              style={{ aspectRatio: '1000 / 360', minHeight: 220, background: '#102142' }}
-            />
-          ) : (
-            <div
-              role="img"
-              aria-label={`Matched destinations: ${pins.map((p) => p.name).join(', ')}`}
-              className="grid w-full place-items-center rounded-[12px] text-center"
-              style={{ aspectRatio: '1000 / 360', minHeight: 220, background: '#102142' }}
-            >
-              <div className="px-6">
-                <MapPinned size={22} className="mx-auto text-gold" aria-hidden="true" />
-                <p className="mt-2 text-sm font-semibold text-white">{count} matched {count === 1 ? 'destination' : 'destinations'}</p>
-                <p className="mt-1 text-xs text-white/55">Open a match below to explore it.</p>
-              </div>
-            </div>
-          )}
+          <img
+            src={mapUrl}
+            alt={`Map highlighting ${pins.map((p) => p.name).join(', ')} with location pins`}
+            loading="lazy"
+            onError={() => setImgFailed(true)}
+            className="block w-full rounded-[12px] object-cover"
+            style={{ aspectRatio: '1000 / 360', minHeight: 220, background: '#102142' }}
+          />
           <MatchPills pins={pins} />
         </div>
       )}
