@@ -13,8 +13,6 @@ import { rankNextinations } from '@/lib/userProfile'
 import { getBoard } from '@/lib/command-center'
 import { getDashboardLayout } from '@/lib/dashboard-layout-store'
 import { visibleWidgets, type WidgetId } from '@/lib/dashboard-layout'
-import { getGeneratedHeroVersion } from '@/lib/country-assets'
-import { getApprovedHero } from '@/lib/country-visuals/data'
 import {
   buildNextActions,
   buildShortlist,
@@ -50,14 +48,12 @@ function savedAtLabel(updatedAt: string | null): string | null {
   return `${parsed.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'UTC' })} UTC`
 }
 
-async function destinationRow(country: (typeof COUNTRIES)[number], match: number | null): Promise<DestinationRow> {
-  const generatedVersion = await getGeneratedHeroVersion(country.slug)
-  const approved = generatedVersion ? null : getApprovedHero(country.slug)
-  const imageSrc = generatedVersion
-    ? `/api/country-asset?slug=${country.slug}&type=hero&v=${generatedVersion}`
-    : approved?.src ?? null
-
-  return { country, match, imageSrc }
+function destinationRow(country: (typeof COUNTRIES)[number], match: number | null): DestinationRow {
+  // Dashboard nested-country artwork has its own asset authority. Do not resolve
+  // the Country Page hero here. The dedicated `dashboard_destination` generator
+  // will populate this source; until then the nested card renders its branded
+  // Dashboard-specific fallback.
+  return { country, match, imageSrc: null }
 }
 
 export default async function DashboardPage() {
@@ -101,8 +97,8 @@ export default async function DashboardPage() {
   const suggestions = buildSuggestions(input, shortlist)
 
   const destinationRows: DestinationRow[] = rankedList.length > 0
-    ? await Promise.all(rankedList.slice(0, 3).map((item) => destinationRow(item.country, item.match.score)))
-    : await Promise.all(COUNTRIES.slice(0, 3).map((country) => destinationRow(country, null)))
+    ? rankedList.slice(0, 3).map((item) => destinationRow(item.country, item.match.score))
+    : COUNTRIES.slice(0, 3).map((country) => destinationRow(country, null))
 
   const savedCountry = plan?.saved_nextination
     ? COUNTRIES.find((c) => c.name === plan.saved_nextination || c.slug === plan.saved_nextination) ?? null
@@ -145,8 +141,9 @@ export default async function DashboardPage() {
     commandCenter: () => <DashboardCommandCenterCard board={board} />,
   }
 
-  // Full-width panels stack; compact panels share an auto-fit row. Destination
-  // matches are full-width because their canonical template is a 1→3 card grid.
+  // Full-width panels stack; compact panels share an auto-fit row. Destinations
+  // remains one parent Dashboard panel; its matched-country cards are nested in
+  // that panel and use their own internal responsive grid.
   const shown = visibleWidgets(layout)
   const FULL: WidgetId[] = ['nextAction', 'planningAreas', 'destinations', 'askKolmari', 'shortlist', 'foodHealth', 'commandCenter']
   const blocks: { kind: 'full' | 'row'; ids: WidgetId[] }[] = []
