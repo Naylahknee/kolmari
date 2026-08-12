@@ -1,16 +1,12 @@
-import type { HeroImageInput, CityImageInput } from './schema'
+import type { HeroImageInput, DashboardDestinationImageInput, CityImageInput } from './schema'
 
 /* Prompt builders for the Country Visual Asset Engine.
  *
- * Hero: the "National Flag Shadow Hero" (Kolmari Standard) — the official flag as
- * full-bleed woven fabric with the complete country silhouette rendered as a
- * translucent superimposed shadow that inherits the flag colors beneath it. No
- * parchment cutout, no pin, no text. The national emblem is always protected.
- * Mexico is the visual reference, not the template. See
- * docs/kolmari/hero-image-standard.md.
- *
- * City: premium editorial travel photography of a real city environment. No
- * text, no flags, no collage, no fabricated landmarks. */
+ * Hero: National Flag Shadow Hero for country pages.
+ * Dashboard destination: a separate compact flag-led composition for the
+ * existing Dashboard Destinations panel. It is not the country-page hero.
+ * City: premium editorial travel photography.
+ */
 
 export function buildHeroPrompt(input: HeroImageInput) {
   return `Create a premium, wide-format country-page hero background for Kolmari.
@@ -19,61 +15,30 @@ COUNTRY
 ${input.countryName}
 
 COMPOSITION
-
 Use the official national flag of ${input.countryName} as the full-bleed background.
-
-Render the flag as realistic matte fabric with:
-- subtle folds
-- fine woven texture
-- soft directional lighting
-- controlled shadows
-- no glossy or plastic finish
-Fabric treatment: ${input.flagTextureIntensity}.
-
+Render the flag as realistic matte fabric with subtle folds, fine woven texture, soft directional lighting, controlled shadows, and no glossy or plastic finish.
 The flag must remain immediately recognizable.
 
 NATIONAL SYMBOL PROTECTION
-
 The flag contains the following important national symbol:
-
 ${input.protectedSymbolDescription}
 
 Its official position is:
-
 ${input.protectedSymbolPosition}
 
-The symbol must:
-- remain in its official position
-- remain fully visible
-- not be moved
-- not be redesigned
-- not be covered
-- retain at least ${input.safeZonePercent}% clear visual space
+The symbol must remain in its official position, fully visible, unaltered, uncovered, and retain at least ${input.safeZonePercent}% clear visual space.
 
 COUNTRY SILHOUETTE
-
 Place the complete geographic silhouette of ${input.countryName} across the flag.
-
 The full country must be visible, including:
 ${input.geographicRequirements}
 
-Render the silhouette as a subtle superimposed shadow rather than a solid object.
-
-The silhouette should:
-- inherit the flag colors beneath it
-- use approximately ${input.shadowOpacity}% opacity
-- have gentle embossed or debossed depth (${input.shadowDepth})
-- include soft edge definition
-- remain geographically recognizable
-- never cover or replace the national emblem
-- never appear as parchment, stone, paper, or a separate cutout
-
+Render the silhouette as a subtle superimposed shadow rather than a solid object. It should inherit the flag colors beneath it, use approximately ${input.shadowOpacity}% opacity, have ${input.shadowDepth}, remain geographically recognizable, and never appear as parchment, stone, paper, or a separate cutout.
 Silhouette scale: ${input.silhouetteScale}.
 Silhouette position: ${input.silhouettePosition}.
-Adjust the silhouette position and scale intelligently so both the national flag and complete country outline remain readable.
+Adjust intelligently so both the flag and full outline remain readable.
 
 LAYOUT
-
 - wide editorial hero composition
 - no text
 - no city labels
@@ -85,11 +50,9 @@ LAYOUT
 - no passport stamps
 - no decorative plants
 - no added symbols
-
-The result must work as a background behind left-aligned website content.
+- must work behind left-aligned website content
 
 STYLE
-
 Premium relocation platform
 Modern editorial
 High-end travel publication
@@ -97,45 +60,98 @@ Subtle dimensional realism
 Clean composition
 Strong visual identity
 
-Use a Mexico flag-and-silhouette composition as the visual standard for silhouette treatment, depth, and flag preservation — but do NOT reuse Mexico-specific geography, colors, or national symbols. Use ${input.countryName}'s own flag, its actual national symbols in their official positions, and its complete geographic silhouette.
+Mexico is the visual reference only for the approved fabric/shadow treatment. Do not reuse Mexico-specific geography, colors, symbols, emblem, or positioning.
 
 OUTPUT
-
 1536 × 1024
 Opaque WebP`
 }
 
-/* Edit-mode hero prompt for OpenAI's /v1/images/edits endpoint. Unlike the
- * text-to-image prompt above, this one is paired with attached input images:
- *   - image 1: the country's official flag (raster) — the subject to transform
- *   - image 2 (optional): a style reference (an approved hero) — the look to match
- * so the output preserves the real flag + emblem and inherits the reference's
- * fabric, shadow, and silhouette treatment instead of gpt-image inventing them. */
 export function buildHeroEditPrompt(input: HeroImageInput, opts: { hasStyleRef: boolean }) {
   const styleClause = opts.hasStyleRef
-    ? `Match the exact visual treatment of the SECOND attached image (the style reference): the same woven-fabric texture, folds, lighting, translucent superimposed country-silhouette shadow, shadow opacity and embossed depth, edge softness, and overall premium editorial finish. Apply that treatment to ${input.countryName}'s flag and geography — do NOT copy the reference country's flag, colors, emblem, or outline.`
-    : `Render the flag as premium matte woven fabric (subtle folds, fine texture, soft directional light) with the complete geographic silhouette of ${input.countryName} laid across it as a translucent superimposed shadow (~${input.shadowOpacity}% opacity, gentle embossed depth) that inherits the flag colors beneath it. Fabric treatment: ${input.flagTextureIntensity}.`
+    ? `Match the SECOND attached image only as a style reference for woven-fabric texture, folds, lighting, translucent silhouette treatment, depth, edge softness, and premium editorial finish. Do not copy that reference country's flag, colors, emblem, geography, or layout.`
+    : `Render the flag as premium matte woven fabric with subtle folds, fine texture, soft directional light, and the complete country silhouette as a translucent superimposed shadow.`
 
-  return `Transform the FIRST attached image — the official national flag of ${input.countryName} — into a premium, wide-format country-page hero background for the Kolmari relocation platform.
+  return `Transform the FIRST attached image — the official national flag of ${input.countryName} — into the Kolmari National Flag Shadow Hero.
 
 PRESERVE THE FLAG
-- Keep the flag's real colors, proportions, and layout exactly as in the attached image.
-- Keep the national symbol (${input.protectedSymbolDescription}, ${input.protectedSymbolPosition}) fully visible, in its official position, unaltered, uncovered, and never redesigned. Keep at least ${input.safeZonePercent}% clear space around it.
+- Keep the real colors, proportions, and layout exactly as provided.
+- Keep ${input.protectedSymbolDescription} at ${input.protectedSymbolPosition}, fully visible and unaltered.
+- Keep at least ${input.safeZonePercent}% clear space around protected national symbols.
 
 TREATMENT
 ${styleClause}
+Fabric treatment: ${input.flagTextureIntensity}.
+Shadow opacity: approximately ${input.shadowOpacity}%.
+Shadow depth: ${input.shadowDepth}.
 
 COUNTRY SILHOUETTE
 - Include the complete geographic silhouette of ${input.countryName}: ${input.geographicRequirements}.
-- Silhouette scale: ${input.silhouetteScale}. Position: ${input.silhouettePosition}.
-- The silhouette must never cover or replace the national emblem, and must never look like parchment, stone, paper, or a separate cutout.
+- Scale: ${input.silhouetteScale}.
+- Position: ${input.silhouettePosition}.
+- Never cover the national emblem.
+- Never render the silhouette as parchment, stone, paper, or a separate cutout.
 
 LAYOUT & EXCLUSIONS
-- Wide editorial hero composition that works as a background behind left-aligned website content.
-- No text, labels, city names, pins, stickers, collage, photographs, travel icons, passport stamps, plants, or added symbols.
+- wide editorial country-page hero
+- no text, labels, city names, pins, stickers, collage, photographs, travel icons, passport stamps, plants, or added symbols
+- leave usable content space for left-aligned page content
 
 OUTPUT
 1536 × 1024, opaque WebP.`
+}
+
+export function buildDashboardDestinationPrompt(input: DashboardDestinationImageInput) {
+  return `Create a premium Kolmari Dashboard Destination image for ${input.countryName}.
+
+PURPOSE
+This artwork is used only inside the existing Dashboard Destinations parent panel. It will be displayed as a compact matched-country card approximately 190px tall with fluid width. It is NOT a country-page hero and must be composed specifically for a small responsive crop.
+
+FLAG FIDELITY
+- Use the official national flag of ${input.countryName} as the visual foundation.
+- Preserve the real flag colors, proportions, and recognizable layout.
+- Render the flag with restrained premium editorial depth: realistic matte fabric, subtle folds, controlled lighting, and no glossy/plastic finish.
+
+NATIONAL SYMBOL PROTECTION
+Protected symbol: ${input.protectedSymbolDescription}
+Official position: ${input.protectedSymbolPosition}
+- Never move, redesign, distort, replace, or cover it.
+- Preserve at least ${input.safeZonePercent}% clear visual space around it.
+
+CROP-SAFE COMPOSITION
+- Master canvas: 1536 × 1024.
+- The central ${input.cropSafeZone}% of the frame is the crop-safe zone.
+- Keep all critical national identity, emblem detail, and visual focal content inside that central crop-safe zone.
+- The final card will use CSS background-size: cover at multiple widths, so edge content may be cropped.
+- Avoid critical information at the extreme left, right, top, and bottom edges.
+- Focal point target: ${input.focalPoint.x}% horizontal, ${input.focalPoint.y}% vertical.
+- Composition guidance: ${input.compositionGuidance}.
+
+SMALL-CARD READABILITY
+- Strong national recognizability at thumbnail/card scale.
+- Simpler composition than the full National Flag Shadow Hero when necessary.
+- Do not require the complete country silhouette.
+- Do not add city photography or unrelated travel imagery.
+- Maintain sufficient tonal separation for a navy readability overlay added later by the application.
+
+EXCLUDE
+- no text
+- no country names
+- no city labels
+- no Match Score
+- no rank marker
+- no badges
+- no visa names
+- no route labels
+- no UI elements
+- no icons
+- no collage
+- no travel stickers or passport stamps
+- no invented national symbols
+
+OUTPUT
+1536 × 1024
+Opaque WebP`
 }
 
 export function buildCityPrompt(input: CityImageInput) {
@@ -149,8 +165,7 @@ export function buildCityPrompt(input: CityImageInput) {
 SCENE
 Image type: ${input.imageType}.
 Setting: ${input.settingDescription}
-
-Show a realistic, natural ${input.imageType} of ${input.cityName} as it authentically looks — the kind of establishing photograph that helps someone imagine daily life there. ${landmark}
+Show a realistic, natural ${input.imageType} of ${input.cityName} as it authentically looks. ${landmark}
 
 STYLE
 - premium editorial travel photography
@@ -162,13 +177,13 @@ STYLE
 EXCLUDE
 - no text or captions
 - no labels or watermarks
-- no flags of any kind
+- no added flags
 - no collage or split frames
 - no travel stickers, stamps, or icons
 - no fabricated or relocated landmarks
 - no maps or diagrams${extraExclusions}
 
 OUTPUT
-1200 × 800
+1200 × 800 or closest supported landscape size
 Opaque WebP`
 }
