@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { UnitsProvider } from './client/UnitsControl'
 import { AnnouncementBar } from '@/components/kolmari/announcement-bar'
+import { FullWidthWorkspaceStyles } from '@/components/kolmari/full-width-workspace-styles'
 import { TopBar } from './TopBar'
 import { Sidebar } from './Sidebar'
 import { CountryHero, type CountryHeroData, type HeroArtwork, type HeroStatusChip } from './CountryHero'
@@ -45,6 +46,7 @@ export function CountryTemplate({ slug, active, fromQuiz = false, country, cente
   return (
     <UnitsProvider>
       <div className="country-template-root" data-plan={paid ? 'pro' : 'free'}>
+        <FullWidthWorkspaceStyles />
         <AnnouncementBar />
         <TopBar onToggleRail={toggleRail} />
         <div className="shell">
