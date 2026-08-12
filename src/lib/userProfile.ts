@@ -81,7 +81,6 @@ export function calculateCountryMatch(profile: RelocationProfile, country: Count
     score += 15
   }
 
-  // Visa access is country-specific and acts as a gate/floor (applied below).
   const evaluations = evaluatePathways(profile)
   const countryEvals = evaluations.filter((item) => item.country === country.name)
   const hasPathwayData = countryEvals.length > 0
@@ -90,21 +89,25 @@ export function calculateCountryMatch(profile: RelocationProfile, country: Count
   score += Math.min(25, strong * 14 + possible * 5)
   if (strong > 0) reasons.push(`${strong} Pathway${strong > 1 ? 's' : ''} may support your move to ${country.name}`)
 
-  if (profile.remote && /nomad|remote|d7/i.test(country.visaType)) {
+  // Route-fit tie breakers make the selected goal matter. D7 is a passive-income
+  // route, not a generic remote-work route; treating it as remote previously made
+  // many profiles tie and stable sorting then returned Portugal first every time.
+  if (profile.remote && /nomad|remote/i.test(country.visaType)) {
     score += 10
     reasons.push(`${country.name} offers a route suited to remote income`)
+  }
+  if (profile.goals.includes('Passive Income / Retirement') && /d7|passive|retire|retirement/i.test(country.visaType)) {
+    score += 10
+    if (reasons.length < 3) reasons.push(`${country.name} has a route aligned with passive-income or retirement planning`)
   }
 
   score += country.safety === 'High' ? 10 : 6
   if (country.safety === 'High' && reasons.length < 3) reasons.push(`${country.name} rates highly on general safety signals`)
 
-  // Q2 "what matters most" gives the chosen factor extra weight — only for the
-  // two factors the dataset can actually back (affordability, safety). Career /
-  // healthcare / quality-of-life stay generic rather than faked.
   if (profile.priority === 'Affordability' && profile.monthly_income !== null && profile.monthly_income >= country.incomeRequired) {
     score += 10
     if (reasons.length < 3) reasons.push('Weighted toward affordability, your top priority')
-  } else if (profile.priority === 'Safety' && country.safety === 'High') {
+  } else if ((profile.priority === 'Safety' || profile.priority === 'Safety and belonging') && country.safety === 'High') {
     score += 10
     if (reasons.length < 3) reasons.push('Weighted toward safety, your top priority')
   }
@@ -113,10 +116,6 @@ export function calculateCountryMatch(profile: RelocationProfile, country: Count
     ? `Central ${country.city} may exceed your current budget — smaller cities can be more affordable.`
     : `Costs vary widely by city; central ${country.city} runs higher than regional areas.`
 
-  // Visa access is the gate: when Kolmari has routes for this country but the
-  // profile qualifies for none, it cannot rank as a top match regardless of
-  // budget, region, or safety. Countries with no researched routes are left
-  // neutral rather than falsely gated.
   if (hasPathwayData && strong === 0 && possible === 0) {
     return {
       score: Math.min(45, Math.round(score)),

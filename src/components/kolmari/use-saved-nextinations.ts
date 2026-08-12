@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react'
 import { COUNTRIES } from '@/lib/countries'
 
-const STORAGE_KEY = 'kolmari:saved-destinations'
-const CHANGED_EVENT = 'kolmari:saved-destinations-changed'
+const STORAGE_KEY = 'kolmari:saved-nextinations'
+const CHANGED_EVENT = 'kolmari:saved-nextinations-changed'
 
 function readSaved(): string[] {
   try {

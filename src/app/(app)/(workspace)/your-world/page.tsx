@@ -18,6 +18,8 @@ export const metadata: Metadata = {
 // present it under the same 'Latin America' label the discoverable set uses.
 const regionLabel = (region: 'Europe' | 'Americas') => (region === 'Europe' ? 'Europe' : 'Latin America')
 
+const pageWidthClass = '-mx-2 sm:-mx-4 lg:-mx-6 2xl:-mx-8'
+
 export default async function YourWorldPage({ searchParams }: { searchParams: Promise<{ q?: string | string[] }> }) {
   const params = await searchParams
   const initialQuery = typeof params.q === 'string' ? params.q.slice(0, 100) : ''
@@ -49,7 +51,7 @@ export default async function YourWorldPage({ searchParams }: { searchParams: Pr
       code: country.code,
       region: regionLabel(country.region),
     }))
-    return <YourWorldGated matches={quizMatches} pins={pins} />
+    return <div className={pageWidthClass}><YourWorldGated matches={quizMatches} pins={pins} /></div>
   }
 
   // Matched (scored) cards, ranked by fit.
@@ -85,5 +87,9 @@ export default async function YourWorldPage({ searchParams }: { searchParams: Pr
     scored: false,
   }))
 
-  return <YourWorld key={initialQuery} pins={pins} cards={[...scoredCards, ...unscoredCards]} complete={complete} initialQuery={initialQuery} />
+  return (
+    <div className={pageWidthClass}>
+      <YourWorld key={initialQuery} pins={pins} cards={[...scoredCards, ...unscoredCards]} complete={complete} initialQuery={initialQuery} />
+    </div>
+  )
 }

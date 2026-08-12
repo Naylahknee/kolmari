@@ -1,3 +1,5 @@
-import { DocumentsManager } from '@/components/kolmari/documents-manager'
+import { redirect } from 'next/navigation'
 
-export default function DocumentsPage() { return <DocumentsManager /> }
+export default function DocumentsPage() {
+  redirect('/command-center?tab=documents')
+}

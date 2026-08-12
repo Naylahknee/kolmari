@@ -7,6 +7,7 @@ import { UnitsProvider } from '@/components/country-template/client/UnitsControl
 import { TopBar } from '@/components/country-template/TopBar'
 import { Sidebar } from '@/components/country-template/Sidebar'
 import { AnnouncementBar } from '@/components/kolmari/announcement-bar'
+import { FullWidthWorkspaceStyles } from '@/components/kolmari/full-width-workspace-styles'
 import {
   activityForPath,
   WORKSPACE_ACTIVITY_EVENT,
@@ -46,6 +47,7 @@ function NewWorkspaceChrome({ children }: { children: React.ReactNode }) {
   return (
     <UnitsProvider>
       <div>
+        <FullWidthWorkspaceStyles />
         <AnnouncementBar />
         <TopBar onToggleRail={toggleRail} />
         <div className="shell">

@@ -41,6 +41,8 @@ function hasSavedDestinations() {
 }
 
 function UpgradeSection({ planTier }: { planTier: PlanTier }) {
+  if (planTier === 'navigator') return null
+
   const copy = planTier === 'free'
     ? {
         eyebrow: 'Explorer plan',
@@ -48,19 +50,12 @@ function UpgradeSection({ planTier }: { planTier: PlanTier }) {
         detail: 'Personalized Pathway eligibility, full Documents and Readiness Tracker, plus the full Cost Calculator.',
         cta: 'View upgrade options',
       }
-    : planTier === 'plus'
-      ? {
-          eyebrow: 'Plus plan',
-          title: 'Need multi-destination planning?',
-          detail: 'Navigator adds side-by-side comparison, household modeling, and multiple active Move Plans.',
-          cta: 'Compare with Navigator',
-        }
-      : {
-          eyebrow: 'Navigator plan',
-          title: 'Your full planning workspace is active',
-          detail: 'Manage your plan and review the features included with your current Kolmari tier.',
-          cta: 'Manage plan',
-        }
+    : {
+        eyebrow: 'Plus plan',
+        title: 'Need multi-destination planning?',
+        detail: 'Navigator adds side-by-side comparison, household modeling, and multiple active Move Plans.',
+        cta: 'Compare with Navigator',
+      }
 
   return (
     <section
