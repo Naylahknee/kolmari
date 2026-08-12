@@ -1,10 +1,39 @@
 {
-  "taskId": "country-hero-standard",
-  "instruction": "The attached country hero panel is the standard for any and all country pages, including typography and font sizing.",
-  "objective": "Every country's hero metric panels match the approved standard: clickable panel with arrow affordance, big value + small unit, standard .m-v typography with no inline overrides.",
-  "allowedEntities": ["Country Hero"],
-  "allowedFiles": ["src/styles/country-template.css", "docs/kolmari/CURRENT-STATE.md", ".sld/task-contract.json", ".sld/baseline.json"],
-  "allowedActions": ["MODIFY", "RESTYLE"],
-  "forbiddenChanges": ["src/lib", "src/app", "src/components/kolmari"],
+  "taskId": "country-hero-metric-typography",
+  "instruction": "typography is not the same. Please check all country pages and implement the following: 1. Use a shared CSS component \u2014 explicitly define the font features for the .metrics container and its children instead of relying on inherited styles. 2. Implement CSS variables (design tokens) for the metric font family, value size and bold weight. 3. Use font-variant-numeric: tabular-nums for the data figures. 4. Component-based architecture \u2014 wrap this logic inside a single MetricButton component so the HTML structure and associated styles are bundled together and reused identically everywhere.",
+  "objective": "Hero metric panels render identical typography on every country page: explicit font declarations on .metrics and its children, design tokens for family/size/weight, tabular figures, and one MetricButton component used by both the Portugal hero and the data-driven hero.",
+  "allowedEntities": [
+    "Country Hero"
+  ],
+  "allowedFiles": [
+    "src/styles/country-template.css",
+    "src/components/country-template/CountryHero.tsx",
+    "src/components/country-template/MetricButton.tsx",
+    "docs/kolmari/CURRENT-STATE.md",
+    ".sld/task-contract.json",
+    ".sld/baseline.json"
+  ],
+  "allowedActions": [
+    "CREATE",
+    "MODIFY",
+    "RESTYLE",
+    "REFACTOR",
+    "REWIRE"
+  ],
+  "allowedUIRegions": [
+    "country hero metric panels"
+  ],
+  "requiredChanges": [
+    "explicit font declarations on .metrics and its children in src/styles/country-template.css",
+    "design tokens for the metric font family, value size and bold weight",
+    "font-variant-numeric: tabular-nums on the metric value",
+    "a single MetricButton component imported by every hero variant"
+  ],
+  "forbiddenChanges": [
+    "src/lib",
+    "src/app",
+    "src/components/kolmari",
+    "src/components/country-template/tabs"
+  ],
   "createdFrom": "user-request"
 }

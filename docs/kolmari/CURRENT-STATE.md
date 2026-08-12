@@ -527,3 +527,35 @@ mostly common; three real divergences are fixed:
 
 Portugal keeps its verified literal copy; only the shared presentation was
 unified. Verified structurally — both paths emit identical DOM, class for class.
+
+## Country hero — metric panel typography made explicit
+
+The hero metric panels were still not matching between Destinations. Measuring
+computed styles against the real stylesheet found the cause: a panel renders as a
+`<button>` when the figure is verified and a `<div>` when it is not, and the
+scoped reset `.country-template-root button:not(.rail button){color:inherit}`
+(specificity 0,2,2) outranked `.country-template-root .metric{color:#fff}`
+(0,2,0). Button panels were painting their value navy on the dark hero; div
+panels painted it white.
+
+Fixed by declaring the panel typography instead of inheriting it:
+
+- **Explicit declarations.** `.metrics` and every child (`.metric`, `.m-l`,
+  `.m-v`, `.m-v small`, `.m-n`) now state their own `font-family`, `font-size`,
+  `font-weight`, `line-height`, `letter-spacing` and `color`. Every selector
+  carries the `.metrics .metric` chain, which also lifts them clear of the button
+  reset, so both elements resolve identically.
+- **Design tokens.** `--font-family-main` (deferring to the app's `--font-sans`),
+  `--font-weight-bold/semibold/medium/normal` and
+  `--font-size-metric-label/value/unit/note` on `:root`.
+- **Tabular figures.** `font-variant-numeric: tabular-nums` on `.m-v` and its
+  unit, so costs and durations keep a fixed advance width across the four panels.
+- **One component.** `MetricButton.tsx` owns the panel markup and both states
+  (clickable button / "Being verified" div). Portugal's four hand-written panels
+  and the data-driven `DataMetric` now both render through it, with the four
+  icons shared from a single `MetricIcons` map.
+
+Verified in headless Chromium against the real stylesheet: the Portugal panel,
+the data-driven panel and the pending panel now report identical computed
+typography, the only remaining difference being the intended `.m-v-pending`
+muted colour.
