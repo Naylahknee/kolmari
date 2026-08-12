@@ -5,589 +5,221 @@
 **Parent widget:** `DashboardDestinationsCard`  
 **Nested matched-country card:** `DashboardDestinationPanel`
 
----
+## 1. Scope
 
-## 1. Canonical Hierarchy
-
-The **Destinations panel is the existing white Dashboard panel** shown alongside other Dashboard content.
-
-It is the parent container.
-
-The matched-country cards are nested inside that parent panel.
+This feature extends the existing Dashboard `Destinations` panel. It does **not** rebuild or refactor the Dashboard shell.
 
 ```text
 DASHBOARD
-│
-├── Active Pathway panel
-│
-├── DESTINATIONS PANEL  ← parent Dashboard panel
-│   │
-│   ├── Header
-│   │   ├── Destinations
-│   │   └── Explore more
-│   │
-│   ├── MATCHED-COUNTRY GRID
-│   │   ├── #1 country card
-│   │   ├── #2 country card
-│   │   └── #3 country card
-│   │
-│   └── VISA OPTIONS AREA
-│       └── Visa Options for {active/top country}
-│
-├── Deadlines and blockers panel
-│
-└── Journey Tracker
+└── DESTINATIONS PANEL  ← existing parent widget
+    ├── #1 matched-country card
+    ├── #2 matched-country card
+    ├── #3 matched-country card
+    └── Visa Options for #1 matched country
 ```
 
-The matched country cards do **not** replace the Destinations Dashboard panel.
+The three country cards are nested content, not Dashboard widgets.
 
-The image generator creates imagery for the **nested matched-country cards**, not for the outer Destinations panel.
+## 2. Header
 
----
+Preserve the existing parent-panel treatment:
 
-## 2. Required Visual Structure
+- title: `Destinations`
+- right-side link: `Explore more`
+- link route: `/your-world`
+- standard white Dashboard surface, border, radius, and padding
 
-The parent Destinations panel preserves Kolmari's standard Dashboard card treatment:
+## 3. Match behavior
 
-- white background
-- Kolmari card radius
-- standard border
-- standard tile shadow
-- Dashboard typography
-- existing `Destinations` heading
-- `Explore more` / `Explore Your World` navigation
+Source: `rankNextinations(profile)`.
 
-Inside the parent panel:
+- completed profile → show up to top 3 real ranked countries
+- fewer than 3 matches → show only available matches
+- incomplete profile → show no fake match cards
+- never fill with arbitrary `COUNTRIES.slice(...)` values
 
-```text
-┌──────────────────────────────────────────────────────────────┐
-│ Destinations                                   Explore more  │
-│                                                              │
-│ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐          │
-│ │ #1           │ │ #2           │ │ #3           │          │
-│ │              │ │              │ │              │          │
-│ │ COUNTRY      │ │ COUNTRY      │ │ COUNTRY      │          │
-│ │ HERO IMAGE   │ │ HERO IMAGE   │ │ HERO IMAGE   │          │
-│ │              │ │              │ │              │          │
-│ │ PORTUGAL     │ │ SPAIN        │ │ MEXICO       │          │
-│ └──────────────┘ └──────────────┘ └──────────────┘          │
-│                                                              │
-│ Visa Options for Portugal                                    │
-│ ──────────────────────────────────────────────────────────── │
-│ [researched visa/pathway options]                            │
-└──────────────────────────────────────────────────────────────┘
-```
+The card does not calculate ranking.
 
----
+## 4. Nested country card
 
-## 3. Match Source
+Visible content only:
 
-The panel does not calculate matches.
-
-It consumes the existing ranked result from:
-
-`rankNextinations(profile)`
-
-When the authenticated Profile is complete:
-
-```text
-PROFILE
-  ↓
-MATCH ENGINE
-  ↓
-RANKED COUNTRIES
-  ↓
-TOP 3 MATCHES
-  ↓
-DESTINATIONS PARENT PANEL
-  ↓
-3 NESTED COUNTRY CARDS
-```
-
-No score may be fabricated.
-
----
-
-## 4. Nested Country Card Template
-
-Each matched-country card follows the supplied Dashboard Country Match template.
-
-### Required card anatomy
-
-Top:
-
-- rank only: `#1`, `#2`, `#3`
-- optional Match Score if the product decision keeps it on this surface
-
-Center:
-
-- Dashboard-specific country hero image
-
-Bottom:
-
+- rank marker: `#1`, `#2`, `#3`
 - country name
 
-Secondary metadata must remain restrained. The country name and visual are dominant.
+Do not visibly show region, city, description, visa type, cost, Match Score, cost tier, ranking explanation, badges, eligibility metrics, or pathway detail.
 
-### Card dimensions
+Match Score remains available in the card's `aria-label`.
 
-Rendered target:
+Navigation:
 
-- approximately `190px` high on desktop
-- responsive width based on the parent grid
-- rounded corners consistent with Kolmari
-- `overflow-hidden`
+`/nextinations/{countrySlug}/v2/overview`
 
-### Grid
+## 5. Layout
 
-```text
-mobile:  1 column
-tablet:  2 columns when space requires
-desktop: 3 columns
-gap:     14–16px
+```css
+grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+gap: 14px;
 ```
 
-Use an auto-fit/minmax implementation when the parent Dashboard column becomes too narrow because the Journey Tracker is expanded.
+Preferred card height:
 
-The card grid must never overflow the parent Destinations panel.
+- desktop: 190px
+- tablet: ~180px
+- mobile: ~160px
 
----
+The existing parent `destinations` widget is marked `full: true` in the existing Dashboard widget registry so its internal grid has sufficient width. This is a sizing change to the existing widget, not a Dashboard rebuild.
 
-## 5. Dashboard Destination Image Is a Separate Asset Type
+## 6. Dashboard destination image asset
 
-The Dashboard nested-card image is **not the Country Page Hero asset**.
-
-Kolmari must maintain separate visual asset purposes:
-
-```text
-COUNTRY
-├── hero
-│   └── large Country Page hero
-│
-├── dashboard_destination
-│   └── image composed specifically for Dashboard nested cards
-│
-└── city
-    └── editorial city-card imagery
-```
-
-Do not use `hero` as the normal Dashboard image source.
-
-Do not crop the Country Page Hero and call it the Dashboard standard.
-
----
-
-## 6. Dashboard Destination Image Generation Standard
-
-### Asset type
+Dedicated asset type:
 
 `dashboard_destination`
 
-### Generation canvas
+It is not the country-page `hero`.
 
-Use OpenAI's supported landscape canvas:
+Generation master:
 
-`1536 × 1024`
+- 1536×1024
+- opaque WebP
+- central 70% crop-safe zone by default
+- official flag fidelity
+- protected national symbol placement
+- compact small-card composition
+- no generated text or UI
 
-### Display target
+File convention:
 
-The generated master is rendered into the nested Dashboard card at approximately:
+`public/images/countries/{country-slug}/{country-slug}-dashboard-destination.webp`
 
-```text
-responsive card width × 190px height
-object-fit: cover
-```
-
-The generation prompt must therefore be composed for aggressive responsive cropping.
-
-### Safe composition zone
-
-All essential visual information must remain inside the center **70%** of the generation canvas.
-
-Do not place protected geography, national symbols, or important focal detail near the extreme edges.
-
-### Generated-image exclusions
-
-The generated bitmap contains:
-
-- no country-name text
-- no Match Score
-- no rank
-- no visa text
-- no UI
-- no badges
-- no buttons
-
-React renders all interface text above the image.
-
----
-
-## 7. Dashboard Destination Generation Prompt Contract
-
-The Dashboard generator must use its own prompt builder.
-
-It must not call the Country Page hero prompt unchanged.
-
-Required prompt intent:
+## 7. Asset fallback
 
 ```text
-Create a premium Kolmari Dashboard Destination image for {COUNTRY}.
-
-PURPOSE
-This image will appear inside a compact matched-country card on the Kolmari Dashboard.
-It will be displayed at approximately 190px high and responsively cropped with object-fit: cover.
-
-COMPOSITION
-- landscape composition
-- keep the primary country-specific visual information inside the central 70% safe zone
-- maintain recognition at small card size
-- avoid critical information at extreme top, bottom, left, or right edges
-- create a strong single focal composition rather than a wide website-banner composition
-
-IDENTITY
-- accurately represent {COUNTRY}
-- preserve the country's actual national colors and protected national symbols when a flag treatment is used
-- use the country's real geographic silhouette when the Kolmari flag-shadow treatment is used
-- never substitute another country's geography or national symbols
-
-STYLE
-- Kolmari premium editorial visual system
-- clean
-- modern
-- high contrast at small size
-- restrained detail
-- visually legible beneath a dark navy readability overlay
-
-EXCLUDE
-- text
-- labels
-- rank numbers
-- Match Scores
-- UI
-- buttons
-- city labels
-- travel stickers
-- passport stamps
-- collage
-- invented landmarks
-
-OUTPUT
-1536 × 1024
-Opaque WebP
+approved generated dashboard_destination
+→ approved committed dashboardDestination
+→ official local flag
+→ neutral Kolmari fallback
 ```
 
-When using reference-guided generation, the country's real flag remains the subject and the approved Kolmari reference controls treatment only.
+Do not automatically substitute:
 
----
+- country-page hero
+- city imagery
+- Mapbox snapshot
 
-## 8. Image Storage and Reuse
+Normal Dashboard visits do not request image generation.
 
-Dashboard images are reusable **country-level assets**.
+## 8. Admin workflow
 
-Correct:
+`Dashboard Destination Images` is a dedicated Country Page Generator Engine tab.
+
+Workflow:
 
 ```text
-PORTUGAL
-  ↓
-ONE dashboard_destination asset
-  ↓
-User A matches Portugal → reuse
-User B matches Portugal → reuse
-User C matches Portugal → reuse
+admin enters country/image guidance
+→ generate one preview
+→ inspect responsive Dashboard crop
+→ download and/or explicitly Save approved image
 ```
 
-Incorrect:
+Generation remains protected by authentication and `KOLMARI_ADMIN_EMAILS`; `OPENAI_API_KEY` remains server-only.
+
+## 9. Visa Options preview
+
+The section appears beneath the nested match-card grid.
+
+Heading:
+
+`Visa Options for {#1 country}`
+
+Source: existing `PATHWAYS` data.
+
+- use the #1 ranked country only
+- display up to 3 researched pathways
+- keep rows concise
+- link to `/pathways`
+- do not invent routes
+- do not generate legal explanations
+
+No researched routes:
+
+`No researched visa pathways are available for this country yet.`
+
+No ranked country:
+
+Do not render Visa Options.
+
+## 10. Accessibility
+
+Each card:
+
+- semantic link
+- keyboard navigable
+- visible focus ring
+- visible country name
+- decorative background image
+- `aria-label` includes rank, country, and Match Score
+
+Visa Options uses a semantic section, heading, list, and links.
+
+## 11. Overlay
+
+Use approximately:
+
+```css
+linear-gradient(
+  rgba(13, 27, 57, 0.55) 0%,
+  rgba(13, 27, 57, 0.82) 100%
+)
+```
+
+Do not fully black out, grayscale, or hide the flag identity.
+
+## 12. Responsive validation
+
+Test with Journey Tracker expanded and collapsed at:
+
+- 1440px
+- 1024px
+- 768px
+- 390px
+
+Confirm:
+
+- Destinations remains one parent widget
+- cards wrap naturally
+- mobile is one column
+- Visa Options stay beneath cards
+- Journey Tracker is unchanged
+- no page overflow
+- country names stay readable
+
+## 13. Preservation rules
+
+Preserve:
+
+1. Dashboard shell and unrelated widgets.
+2. Journey Tracker behavior.
+3. Dashboard customization.
+4. Match and ranking logic.
+5. Profile logic.
+6. Plan state.
+7. Existing `PATHWAYS` data.
+8. Your World map.
+9. Country-page hero behavior.
+
+Do not add local Primary/Selected destination product state to this panel.
+
+## 14. Canonical behavior
 
 ```text
-User A match → generate image
-User B match → generate another image
-User C match → generate another image
+completed profile
+→ rankNextinations(profile)
+→ top 3 real matches
+→ existing Destinations parent panel
+→ nested rank + country-name cards
+→ dashboard_destination/flag/fallback imagery
+→ Visa Options for #1 from PATHWAYS
 ```
 
-The generated asset belongs to the country/surface combination, not to the user.
-
-Suggested persisted key:
-
-```text
-country_slug = portugal
-asset_type   = dashboard_destination
-```
-
-Suggested committed path when an asset is checked into `/public`:
-
-```text
-/public/images/countries/portugal/dashboard/portugal-dashboard-destination.webp
-```
-
----
-
-## 9. Dashboard Image Resolution Hierarchy
-
-The nested matched-country card resolves imagery in this order:
-
-```text
-1. Saved generated `dashboard_destination` asset
-   ↓ if absent
-2. Approved committed `dashboard_destination` asset
-   ↓ if absent
-3. Dashboard-specific branded fallback
-   + background ensure request
-```
-
-The normal fallback chain must **not** silently substitute the large Country Page `hero` asset.
-
-The Dashboard must not call OpenAI directly from the browser.
-
-`OPENAI_API_KEY` remains server-side.
-
----
-
-## 10. Dashboard-Specific Self-Heal
-
-The Dashboard image pipeline needs its own ensure behavior.
-
-Conceptual route:
-
-```text
-POST /api/internal/dashboard-destination/ensure
-{ slug: "portugal" }
-```
-
-Behavior:
-
-```text
-Dashboard asks for Portugal dashboard_destination
-        ↓
-asset exists?
-  ├── yes → render it
-  └── no
-       ↓
-       show Dashboard fallback immediately
-       ↓
-       claim country + dashboard_destination generation lock
-       ↓
-       generate once
-       ↓
-       save as dashboard_destination
-       ↓
-       refresh card
-```
-
-The lock must be scoped by **country + asset type**, so Country Page hero generation and Dashboard destination generation cannot block or overwrite each other.
-
----
-
-## 11. Visa Options Area
-
-The Visa Options section belongs **inside the parent Destinations panel, below the matched-country cards**.
-
-Default context:
-
-- use the user's top-ranked matched country when the panel first renders
-
-Example:
-
-`Visa Options for Portugal`
-
-The options must come from existing researched Kolmari Pathways data.
-
-The Dashboard must not invent a second visa engine.
-
-Each route preview may show:
-
-- pathway/visa name
-- fit state when a real evaluation exists
-- concise requirement signal
-- route to the full Pathways experience
-
-A `Show more` control may expand additional researched routes.
-
-If no researched pathway exists for the selected country, show an honest empty state.
-
----
-
-## 12. Country Card Interaction
-
-The matched-country card is a nested interactive unit inside the parent panel.
-
-Permitted behavior:
-
-- focus/activate a country for the Visa Options area
-- navigate to `/nextinations/{slug}/v2/overview`
-
-These two actions must be visually distinct if both are exposed.
-
-Do not make a single click ambiguously both change the Visa Options context and navigate away.
-
-If a lock/Primary action is later added, `event.stopPropagation()` is required so it does not trigger card navigation.
-
----
-
-## 13. Selected / Primary Destination
-
-A temporary **active card for viewing Visa Options** is allowed as local UI state.
-
-That active-card state is not the same as the user's persisted relocation decision.
-
-Do not write `Primary`, `Selected`, or `Decided` into product state from this panel until Kolmari's canonical destination relationship model defines that behavior.
-
----
-
-## 14. Responsive Behavior
-
-### Mobile
-
-```text
-Destinations parent panel
-  ↓
-#1 card
-#2 card
-#3 card
-  ↓
-Visa Options
-```
-
-No horizontal scrolling is required.
-
-### Tablet
-
-Use one or two nested columns according to available parent width.
-
-### Desktop
-
-Use three nested columns when the parent width safely supports them.
-
-The Journey Tracker remains separate from the Destinations parent panel.
-
----
-
-## 15. Animation
-
-Use restrained Dashboard microinteraction only:
-
-- subtle image scale on hover
-- subtle selected-card border/ring transition
-- smooth Visa Options disclosure
-- optional staggered card entrance
-
-Respect `prefers-reduced-motion`.
-
-No large bounce, parallax, or continuous animation.
-
----
-
-## 16. Failure States
-
-### Profile incomplete
-
-Do not fabricate ranked matches.
-
-The parent panel may show a Profile completion state or clearly marked unscored discovery content according to the Dashboard product rule.
-
-### Dashboard image unavailable
-
-Render the Dashboard-specific branded fallback.
-
-### Dashboard generation fails
-
-Keep fallback. Do not substitute another country's image.
-
-### Visa data unavailable
-
-Show:
-
-`Visa options for {country} are still being verified.`
-
-### Match Score unavailable
-
-Do not display a placeholder percentage.
-
----
-
-## 17. Component Ownership
-
-### `DashboardDestinationsCard`
-
-Owns:
-
-- outer white Destinations Dashboard panel
-- panel header
-- nested match-card grid
-- active Visa Options country context
-- Visa Options section
-
-### `DashboardDestinationPanel`
-
-Owns:
-
-- one nested matched-country card
-- rank display
-- Dashboard-specific country image
-- country name
-- card interactions
-
-### Dashboard image generator
-
-Owns:
-
-- `dashboard_destination` prompt
-- Dashboard-specific composition
-- Dashboard-specific asset storage
-- generation lock
-- fallback/ensure behavior
-
-It does not own:
-
-- Match calculation
-- visa eligibility
-- shortlist state
-- relocation decision state
-- Country Page hero generation
-
----
-
-## 18. Preservation Rules
-
-AI coding agents modifying this feature must preserve:
-
-1. The existing white Dashboard **Destinations panel** as the parent component.
-2. Matched country cards must remain nested inside that parent panel.
-3. Visa Options must remain inside the parent Destinations panel below the country grid.
-4. The Dashboard country image uses `dashboard_destination`, not the Country Page `hero` asset.
-5. Match ranking comes from the canonical match engine.
-6. Visa options come from canonical Pathways data.
-7. No fabricated Match Scores.
-8. No fabricated visa eligibility.
-9. No per-user AI image generation.
-10. Generation locks must distinguish asset type.
-11. The Journey Tracker remains a separate Dashboard structure.
-12. The outer Destinations panel must not be replaced by three independent Dashboard widgets.
-
----
-
-## 19. Canonical Behavior Flow
-
-```text
-USER COMPLETES PROFILE
-        ↓
-rankNextinations(profile)
-        ↓
-TOP 3 MATCHES
-        ↓
-DASHBOARD
-        ↓
-DESTINATIONS PARENT PANEL
-        ↓
-┌────────────┬────────────┬────────────┐
-│ #1         │ #2         │ #3         │
-│ Dashboard  │ Dashboard  │ Dashboard  │
-│ image      │ image      │ image      │
-│ PORTUGAL   │ SPAIN      │ MEXICO     │
-└────────────┴────────────┴────────────┘
-        ↓
-VISA OPTIONS FOR PORTUGAL
-        ↓
-CANONICAL PATHWAYS DATA
-```
-
-This document is the canonical design contract for the **Dashboard Destinations parent panel and its nested matched-country cards**.
+See also: `docs/country-design-schema.md`.
