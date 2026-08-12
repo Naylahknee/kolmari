@@ -1,0 +1,43 @@
+name: Cloudflare PR Preview
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build Cloudflare bundle
+        run: npx opennextjs-cloudflare build --config=wrangler.preview.jsonc
+        env:
+          NEXT_PUBLIC_MAPBOX_TOKEN: ${{ secrets.NEXT_PUBLIC_MAPBOX_TOKEN }}
+          JWT_SECRET: build-time-placeholder-not-used-at-runtime
+          DATABASE_URL: postgres://placeholder:placeholder@localhost:5432/placeholder
+
+      - name: Upload preview version
+        run: npx opennextjs-cloudflare upload --config=wrangler.preview.jsonc --preview-alias=correction-sprint-1-6
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          NEXT_PUBLIC_MAPBOX_TOKEN: ${{ secrets.NEXT_PUBLIC_MAPBOX_TOKEN }}
+          JWT_SECRET: build-time-placeholder-not-used-at-runtime
+          DATABASE_URL: postgres://placeholder:placeholder@localhost:5432/placeholder
