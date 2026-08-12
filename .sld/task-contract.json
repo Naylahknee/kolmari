@@ -1,57 +1,44 @@
 {
-  "taskId": "dashboard-layout-builder-and-affordance-audit",
-  "instruction": "Keep Dashboard destination cards non-navigational, retain concise visa pathway information inside the existing Destinations parent panel, establish Progress by planning area, Active pathway, and Deadlines and blockers as the default second Dashboard column, extend Account → Dashboard into an interactive drag-and-drop layout builder with optimized templates for all Dashboard panels including Journey, replace the completed-profile Flutter Mode header CTA with a plan-aware upgrade section, and audit/fix Dashboard Norman-door affordance problems without changing underlying business logic.",
-  "objective": "Give each user one persisted Dashboard layout contract with two reorderable columns, explicit panel affordances, plan-aware upgrade access, optimized templates, and Journey placement while preserving existing match, pathway, Journey, profile, and plan logic.",
+  "taskId": "dashboard-destination-selection-and-layout-preview",
+  "instruction": "Make matched-country cards inside the existing Dashboard Destinations parent panel selectable so clicking a match updates the visa-pathway information below the cards without navigating away from Dashboard, and add a live layout visualization window to Account → Dashboard that mirrors template selection, panel order, column placement, visibility, and Journey placement.",
+  "objective": "Keep Dashboard destination interaction local to the Destinations parent panel and let users visualize Dashboard layout changes before returning to the Dashboard, while preserving match logic, pathway data, plan state, subscription logic, and the existing persisted DashboardLayout contract.",
   "allowedEntities": [],
   "allowedFiles": [
-    ".github/workflows/pr-build-verify.yml",
     ".sld/task-contract.json",
     "docs/dashboard-destination-panels.md",
     "docs/dashboard-layout-builder.md",
     "docs/dashboard-norman-door-audit.md",
-    "src/app/(app)/(workspace)/dashboard/page.tsx",
-    "src/components/kolmari/account-tabs.tsx",
-    "src/components/kolmari/dashboard-onboarding.tsx",
     "src/components/kolmari/dashboard-side-cards.tsx",
     "src/components/kolmari/dashboard/customize.tsx",
-    "src/components/kolmari/dashboard/destination-panel.tsx",
-    "src/components/kolmari/dashboard/journey-tracker.tsx",
-    "src/lib/dashboard-layout.ts",
-    "src/styles/journey-tracker.css"
+    "src/components/kolmari/dashboard/destination-panel.tsx"
   ],
-  "allowedActions": ["CREATE", "MODIFY", "RESTYLE", "REWIRE"],
+  "allowedActions": ["MODIFY", "RESTYLE", "REWIRE"],
   "allowedUIRegions": [
-    "Dashboard header greeting and plan action",
     "Dashboard Destinations parent panel",
-    "Dashboard Active pathway panel",
-    "Dashboard primary column",
-    "Dashboard second column",
+    "Dashboard matched-country selectors",
+    "Dashboard Visa Options preview",
     "Account Dashboard layout editor",
-    "Journey tracker"
+    "Account Dashboard live layout preview"
   ],
   "requiredChanges": [
-    "Dashboard destination image cards do not navigate to country pages",
-    "visa pathway preview stays below matched cards inside the Destinations parent panel",
-    "visa pathway preview rows are informational and use one explicit Pathways navigation control",
-    "default second column contains Progress by planning area, Active pathway, and Deadlines and blockers",
-    "Account Dashboard tab supports native drag and drop between primary and second columns with accessible button alternatives",
-    "optimized layout templates are available",
-    "all Dashboard panels can be shown or hidden and rearranged",
-    "Journey tracker participates in customization and can remain the default header dropdown or become a Dashboard panel",
-    "existing saved v1 layouts migrate safely to the v2 layout contract",
-    "completed-profile Dashboard header no longer promotes Enter Flutter Mode",
-    "plan-aware upgrade section links explicitly to Account Billing",
-    "stale first-visit walkthrough target is replaced with a current Dashboard surface",
-    "ambiguous Active pathway link labels are made explicit"
+    "matched-country cards are clickable selectors rather than country-page links",
+    "#1 match is the default viewing selection",
+    "selecting #1, #2, or #3 updates Visa Options below the cards for that country",
+    "destination selection remains temporary presentation state and does not mutate saved, shortlist, selected, primary, or plan destination state",
+    "selected match has a clear visible and accessible state",
+    "Account Dashboard includes a live visualization window driven by the existing DashboardLayout state",
+    "layout preview updates immediately for templates, drag/drop moves, column moves, show/hide changes, Journey placement, and reset",
+    "layout preview does not create a second Dashboard state or perform Dashboard data queries"
   ],
   "forbiddenChanges": [
-    "country page redesign",
+    "country page navigation from Dashboard matched-country cards",
     "match calculation changes",
-    "visa pathway calculation changes",
+    "visa pathway data or qualification calculation changes",
     "Journey stage or task calculation changes",
     "profile or subscription model changes",
     "database schema migrations",
-    "Dashboard panel content rewrites unrelated to layout, upgrade access, or affordance clarity"
+    "new persisted destination-selection state",
+    "new Dashboard layout persistence model"
   ],
   "createdFrom": "user-request"
 }
