@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { CountryDetail } from '@/lib/countries'
 import { regionList } from '@/lib/destinations-data'
+import { PATHWAYS } from '@/lib/pathways'
 import { DashboardDestinationPanel } from '@/components/kolmari/dashboard/destination-panel'
 
 export type DestinationRow = {
@@ -18,46 +19,78 @@ function monthlyCost(country: CountryDetail): string | null {
 }
 
 /**
- * Canonical Dashboard destination-match surface.
- *
- * It is intentionally presentation + navigation only. Saving, shortlisting, and
- * selecting a primary destination must use the canonical destination state model
- * rather than introducing card-local state.
+ * The existing white Dashboard Destinations card is the parent panel.
+ * Matched country cards are nested inside it; the visa-options preview belongs
+ * below the nested grid in the same parent panel.
  */
 export function DashboardDestinationsCard({ rows, ranked }: { rows: DestinationRow[]; ranked: boolean }) {
+  const lead = rows[0]?.country ?? null
+  const visaOptions = lead ? PATHWAYS.filter((pathway) => pathway.country === lead.name) : []
+
   return (
     <section
       id="dashboard-destinations"
       className="rounded-[var(--radius-card)] border border-line bg-white p-4 shadow-tile sm:p-5"
       aria-labelledby="destinations-heading"
     >
-      <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.13em] text-gold-deep">Your matches</p>
-          <h2 id="destinations-heading" className="mt-1 text-[18px] font-bold text-navy">Destinations</h2>
-          <p className="mt-1 text-[12px] leading-5 text-muted">
-            {ranked ? 'Your strongest current country matches, ranked from your Kolmari Profile.' : 'Explore destinations now; complete your Kolmari Profile to unlock ranked Match Scores.'}
-          </p>
-        </div>
-        <Link href="/your-world" className="text-xs font-bold text-info hover:text-navy">Explore Your World</Link>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h2 id="destinations-heading" className="text-[18px] font-bold text-navy">Destinations</h2>
+        <Link href="/your-world" className="text-xs font-bold text-info hover:text-navy">Explore more</Link>
       </div>
 
       {rows.length ? (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {rows.map(({ country, match, imageSrc }, index) => (
-            <DashboardDestinationPanel
-              key={country.slug}
-              rank={index + 1}
-              data={{
-                country,
-                match,
-                imageSrc,
-                routeLabel: country.visaType || null,
-                monthlyCost: monthlyCost(country),
-              }}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid gap-[14px] [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]">
+            {rows.map(({ country, match, imageSrc }, index) => (
+              <DashboardDestinationPanel
+                key={country.slug}
+                rank={index + 1}
+                data={{
+                  country,
+                  match,
+                  imageSrc,
+                  routeLabel: country.visaType || null,
+                  monthlyCost: monthlyCost(country),
+                }}
+              />
+            ))}
+          </div>
+
+          {lead ? (
+            <div className="mt-5 border-t border-line pt-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-gold-deep">Pathways</p>
+                  <h3 className="mt-1 text-[15px] font-bold text-navy">Visa Options for {lead.name}</h3>
+                </div>
+                <Link href="/pathways" className="text-xs font-bold text-info hover:text-navy">View all pathways</Link>
+              </div>
+
+              {visaOptions.length ? (
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  {visaOptions.slice(0, 4).map((pathway) => (
+                    <Link
+                      key={pathway.id}
+                      href="/pathways"
+                      className="rounded-[10px] border border-line bg-canvas px-3 py-3 transition-[background-color,border-color] duration-150 hover:border-gold hover:bg-gold-soft/20"
+                    >
+                      <p className="text-[12.5px] font-bold text-navy">{pathway.name}</p>
+                      <p className="mt-1 text-[10.5px] leading-4 text-muted">{pathway.category}</p>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-3 rounded-[10px] border border-dashed border-line-strong bg-canvas px-4 py-3 text-[12px] leading-5 text-muted">
+                  Visa options for {lead.name} are still being verified.
+                </p>
+              )}
+            </div>
+          ) : null}
+
+          {!ranked ? (
+            <p className="mt-3 text-[10.5px] text-muted-soft">Complete your Kolmari Profile to see ranked Match Scores.</p>
+          ) : null}
+        </>
       ) : (
         <div className="rounded-[14px] border border-dashed border-line-strong bg-canvas px-5 py-8 text-center">
           <p className="text-sm font-bold text-navy">No destination matches yet</p>
