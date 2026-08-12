@@ -10,7 +10,7 @@ type TargetRect = { top: number; left: number; width: number; height: number }
 
 const STEPS = [
   {
-    selector: '#dashboard-next-action',
+    selector: '#next-action-heading',
     title: 'Start with one clear action',
     copy: 'Kolmari puts the highest-priority planning action first so you always know what to do next.',
   },
