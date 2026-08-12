@@ -1,92 +1,76 @@
-/* Journey tracker — collapsible vertical progress rail docked right of the
- * dashboard content. Written as plain CSS (not utilities) because the shell
- * animates between two fixed widths and layers a rail behind a sliding panel;
- * the measurements below are the approved spec values.
+/* Journey tracker — hidden Dashboard header dropdown.
  *
- * Palette is the app's own: navy #0d1b39/#17305b, yellow #f3c516, gold text
- * #c99a00, teal (done) #1f9d94, red (blocker) #f0637a/#b3243c, borders #e7ebf1,
- * muted #6b7a92/#8090a8. */
+ * The tracker owns zero Dashboard layout width. Its compact trigger is portaled
+ * into the shared top header and the full tracker opens as a fixed overlay.
+ * Palette: navy #0d1b39/#17305b, yellow #f3c516, gold text #c99a00,
+ * teal #1f9d94, red #f0637a/#b3243c, borders #e7ebf1. */
 
-.jt-shell {
-  position: relative;
-  display: flex;
-  flex: 0 0 auto;
-  width: 322px;
-  align-self: stretch;
-  transition: width .42s cubic-bezier(.4, 0, .2, 1);
-}
-.jt-shell[data-open='false'] { width: 56px; }
-
-/* ── Collapsed rail ─────────────────────────────────────────────────────── */
-.jt-rail {
-  position: absolute;
-  inset: 0 auto 0 0;
-  display: flex;
-  width: 56px;
-  flex-direction: column;
+/* ── Header trigger ─────────────────────────────────────────────────────── */
+.jt-toggle {
+  display: inline-flex;
+  min-height: 30px;
   align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 18px 0;
+  gap: 6px;
+  padding: 4px 9px 4px 6px;
   border: 1px solid #e7ebf1;
-  border-radius: 12px;
+  border-radius: 999px;
   background: #fff;
-  box-shadow: 0 10px 30px -26px rgba(16, 34, 68, .5);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .24s ease;
+  color: #17305b;
+  white-space: nowrap;
+  transition: border-color .14s ease, background-color .14s ease;
 }
-.jt-shell[data-open='false'] .jt-rail { opacity: 1; pointer-events: auto; }
-.jt-rail:hover { border-color: #dbe1ea; }
-
-.jt-rail-badge {
+.jt-toggle:hover,
+.jt-toggle[data-open='true'] {
+  border-color: #f3c516;
+  background: #fdfbf3;
+}
+.jt-toggle:focus-visible {
+  outline: 2px solid rgba(243, 197, 22, .5);
+  outline-offset: 2px;
+}
+.jt-toggle-check {
   display: grid;
-  width: 26px;
-  height: 26px;
+  width: 15px;
+  height: 15px;
   flex: 0 0 auto;
   place-items: center;
   border-radius: 50%;
   background: #f3c516;
   color: #17305b;
 }
-.jt-rail-word {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  font-size: 10px;
+.jt-toggle-label {
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: .18em;
-  text-transform: uppercase;
+  line-height: 1;
   color: #17305b;
+  white-space: nowrap;
 }
-.jt-rail-dots { display: flex; flex-direction: column; gap: 5px; }
-.jt-rail-dots i {
-  display: block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #dbe1ea;
+.jt-toggle-chevron {
+  flex: 0 0 auto;
+  color: #6b7a92;
+  transition: transform .16s ease;
 }
-.jt-rail-dots i[data-state='done'] { background: #1f9d94; }
-.jt-rail-dots i[data-state='current'] { background: #f3c516; }
-.jt-rail-count { font-size: 11px; font-weight: 700; color: #8090a8; }
+.jt-toggle[data-open='true'] .jt-toggle-chevron { transform: rotate(180deg); }
 
-/* ── Expanded panel ─────────────────────────────────────────────────────── */
-.jt-panel {
-  display: flex;
-  flex: 1 1 auto;
-  min-height: 420px;
-  flex-direction: column;
-  overflow: hidden;
+/* ── Fixed dropdown ─────────────────────────────────────────────────────── */
+.jt-dropdown {
+  position: fixed;
+  top: 66px;
+  right: 18px;
+  z-index: 90;
+  width: 322px;
+  max-width: calc(100vw - 36px);
+  max-height: calc(100vh - 84px);
+  overflow: auto;
   border: 1px solid #e7ebf1;
   border-radius: 12px;
   background: #fff;
-  box-shadow: 0 10px 30px -18px rgba(13, 27, 57, .45);
-  transition: transform .42s cubic-bezier(.4, 0, .2, 1), opacity .28s ease;
+  box-shadow: 0 24px 50px -18px rgba(13, 27, 57, .5), 0 2px 8px rgba(13, 27, 57, .12);
+  animation: jt-dropdown-in .16s ease-out;
 }
-.jt-shell[data-open='false'] .jt-panel {
-  transform: translateX(112%);
-  opacity: 0;
-  pointer-events: none;
+@keyframes jt-dropdown-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .jt-head { padding: 14px 14px 13px; }
@@ -109,9 +93,9 @@
   border-radius: 8px;
   background: #fff;
   color: #6b7a92;
-  transition: background-color .14s, color .14s;
+  transition: background-color .14s, color .14s, border-color .14s;
 }
-.jt-collapse:hover { background: #f4f6f9; color: #17305b; }
+.jt-collapse:hover { border-color: #f3c516; background: #fdfbf3; color: #17305b; }
 
 .jt-summary {
   display: flex;
@@ -134,11 +118,8 @@
 .jt-bar i { display: block; height: 100%; border-radius: 999px; background: #f3c516; }
 
 /* ── Stage list ─────────────────────────────────────────────────────────── */
-.jt-stages { flex: 1 1 auto; overflow-y: auto; padding: 4px 8px 8px; list-style: none; }
+.jt-stages { padding: 4px 8px 8px; list-style: none; }
 .jt-stage { position: relative; }
-
-/* Continuous connector behind the discs: teal through completed stages,
-   light gray from the current one down. */
 .jt-stage::before {
   content: '';
   position: absolute;
@@ -161,7 +142,7 @@
   width: 100%;
   align-items: center;
   gap: 10px;
-  padding: 8px 8px;
+  padding: 8px;
   border-radius: 9px;
   text-align: left;
   transition: background-color .14s;
@@ -177,15 +158,15 @@
   height: 26px;
   flex: 0 0 auto;
   place-items: center;
+  border: 1px dashed #dbe1ea;
   border-radius: 50%;
   background: #fff;
-  border: 1px dashed #dbe1ea;
   color: #b3bfd0;
   box-shadow: 0 0 0 3px #fff;
 }
 .jt-stage[data-state='done'] .jt-disc {
-  background: #1f9d94;
   border: 1px solid #1f9d94;
+  background: #1f9d94;
   color: #fff;
 }
 .jt-stage[data-state='current'] .jt-disc {
@@ -204,7 +185,6 @@
 .jt-stage[data-state='current'] .jt-stage-name { font-weight: 700; color: #17305b; }
 .jt-stage[data-state='done'] .jt-stage-name { color: #17305b; }
 .jt-stage-meta { display: block; margin-top: 1px; font-size: 10.5px; color: #8090a8; }
-
 .jt-chev { flex: 0 0 auto; color: #8090a8; transition: transform .2s; }
 .jt-stage[data-open='true'] .jt-chev { transform: rotate(180deg); }
 
@@ -216,11 +196,11 @@
   width: 13px;
   height: 13px;
   flex: 0 0 auto;
-  border-radius: 50%;
   border: 1px dashed #c7d0dd;
+  border-radius: 50%;
 }
-.jt-task[data-status='done'] i { background: #ddf1ef; border: 1px solid #1f9d94; }
-.jt-task[data-status='blocked'] i { background: #fdeaee; border: 1px solid #f0637a; }
+.jt-task[data-status='done'] i { border: 1px solid #1f9d94; background: #ddf1ef; }
+.jt-task[data-status='blocked'] i { border: 1px solid #f0637a; background: #fdeaee; }
 .jt-task-label { min-width: 0; font-size: 11.8px; color: #6b7a92; }
 .jt-task[data-status='blocked'] .jt-task-label { font-weight: 700; color: #17305b; }
 .jt-blocker {
@@ -264,22 +244,17 @@
 .jt-cta:hover { background: #0d1b39; }
 .jt-saved { flex: 0 0 auto; font-size: 10.5px; color: #8090a8; }
 
-/* ── Narrow screens ─────────────────────────────────────────────────────── */
-/* Below 860px the rail is hidden entirely and the tracker becomes a normal
-   full-width card in the stack, so nothing is docked off-screen. */
-@media (max-width: 860px) {
-  .jt-shell,
-  .jt-shell[data-open='false'] { width: 100%; }
-  .jt-rail { display: none; }
-  .jt-shell[data-open='false'] .jt-panel {
-    transform: none;
-    opacity: 1;
-    pointer-events: auto;
+@media (max-width: 540px) {
+  .jt-dropdown {
+    right: 10px;
+    width: calc(100vw - 20px);
+    max-width: none;
+    max-height: calc(100vh - 76px);
   }
-  .jt-collapse { display: none; }
-  .jt-stages { max-height: none; }
+  .jt-toggle-label { font-size: 10.5px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .jt-shell, .jt-panel { transition: none; }
+  .jt-dropdown { animation: none; }
+  .jt-toggle-chevron, .jt-chev { transition: none; }
 }
