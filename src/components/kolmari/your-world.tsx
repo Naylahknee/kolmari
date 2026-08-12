@@ -1,5 +1,7 @@
 'use client'
 
+/* eslint-disable @next/next/no-img-element */
+
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Heart, Search, SlidersHorizontal } from 'lucide-react'
@@ -37,36 +39,37 @@ type SortMode = 'az' | 'match' | 'cost' | 'safety'
 function Filters({
   region, setRegion, budget, setBudget, visa, setVisa, household, setHousehold, healthcare, setHealthcare, regions, visas, stacked,
 }: {
-  region: string; setRegion: (v: string) => void
-  budget: string; setBudget: (v: string) => void
-  visa: string; setVisa: (v: string) => void
-  household: string; setHousehold: (v: string) => void
-  healthcare: string; setHealthcare: (v: string) => void
-  regions: string[]; visas: string[]
+  region: string; setRegion: (value: string) => void
+  budget: string; setBudget: (value: string) => void
+  visa: string; setVisa: (value: string) => void
+  household: string; setHousehold: (value: string) => void
+  healthcare: string; setHealthcare: (value: string) => void
+  regions: string[]
+  visas: string[]
   stacked?: boolean
 }) {
   const box = stacked ? 'w-full' : ''
   return (
     <>
-      <select aria-label="Filter by region" className={`${pillClass} ${box} ${region ? 'border-gold text-navy' : ''}`} value={region} onChange={(e) => setRegion(e.target.value)}>
+      <select aria-label="Filter by region" className={`${pillClass} ${box} ${region ? 'border-gold text-navy' : ''}`} value={region} onChange={(event) => setRegion(event.target.value)}>
         <option value="">Region</option>
-        {regions.map((r) => <option key={r} value={r}>{r}</option>)}
+        {regions.map((item) => <option key={item} value={item}>{item}</option>)}
       </select>
-      <select aria-label="Filter by monthly budget" className={`${pillClass} ${box} ${budget ? 'border-gold text-navy' : ''}`} value={budget} onChange={(e) => setBudget(e.target.value)}>
+      <select aria-label="Filter by monthly budget" className={`${pillClass} ${box} ${budget ? 'border-gold text-navy' : ''}`} value={budget} onChange={(event) => setBudget(event.target.value)}>
         <option value="">Monthly budget</option>
-        {BUDGET_BANDS.map((b) => <option key={b.id} value={b.id}>{b.label}</option>)}
+        {BUDGET_BANDS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
       </select>
-      <select aria-label="Filter by visa route" className={`${pillClass} ${box} ${visa ? 'border-gold text-navy' : ''}`} value={visa} onChange={(e) => setVisa(e.target.value)}>
+      <select aria-label="Filter by visa route" className={`${pillClass} ${box} ${visa ? 'border-gold text-navy' : ''}`} value={visa} onChange={(event) => setVisa(event.target.value)}>
         <option value="">Visa route</option>
-        {visas.map((v) => <option key={v} value={v}>{v}</option>)}
+        {visas.map((item) => <option key={item} value={item}>{item}</option>)}
       </select>
-      <select aria-label="Filter by household" className={`${pillClass} ${box} ${household ? 'border-gold text-navy' : ''}`} value={household} onChange={(e) => setHousehold(e.target.value)}>
+      <select aria-label="Filter by household" className={`${pillClass} ${box} ${household ? 'border-gold text-navy' : ''}`} value={household} onChange={(event) => setHousehold(event.target.value)}>
         <option value="">Household</option>
         <option value="solo">Solo</option>
         <option value="couple">Couple</option>
         <option value="family">Family</option>
       </select>
-      <select aria-label="Filter by healthcare" className={`${pillClass} ${box} ${healthcare ? 'border-gold text-navy' : ''}`} value={healthcare} onChange={(e) => setHealthcare(e.target.value)}>
+      <select aria-label="Filter by healthcare" className={`${pillClass} ${box} ${healthcare ? 'border-gold text-navy' : ''}`} value={healthcare} onChange={(event) => setHealthcare(event.target.value)}>
         <option value="">Healthcare</option>
         <option value="profile">Matched to my profile</option>
         <option value="overview">Country overview available</option>
@@ -111,22 +114,22 @@ export function YourWorld({ pins, cards, complete, initialQuery = '' }: { pins: 
     }
   }, [])
 
-  const regions = useMemo(() => [...new Set(cards.map((c) => c.region))].sort(), [cards])
-  const visas = useMemo(() => [...new Set(cards.map((c) => c.route).filter((v): v is string => Boolean(v)))].sort(), [cards])
+  const regions = useMemo(() => [...new Set(cards.map((card) => card.region))].sort(), [cards])
+  const visas = useMemo(() => [...new Set(cards.map((card) => card.route).filter((value): value is string => Boolean(value)))].sort(), [cards])
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    const band = BUDGET_BANDS.find((b) => b.id === budget)
-    const rows = cards.filter((c) => {
-      if (region && c.region !== region) return false
-      if (visa && c.route !== visa) return false
-      if (band) {
-        if (c.incomeRequired === null || !band.test(c.incomeRequired)) return false
-      }
-      if (healthcare === 'profile' && !c.scored) return false
-      if (q && !`${c.name} ${c.city} ${c.region} ${c.route ?? ''}`.toLowerCase().includes(q)) return false
-      // Household-specific country metrics will come from the country-data phase.
-      // Keep the selected household visible without fabricating country scores.
+    const band = BUDGET_BANDS.find((item) => item.id === budget)
+    const rows = cards.filter((card) => {
+      if (region && card.region !== region) return false
+      if (visa && card.route !== visa) return false
+      if (band && (card.incomeRequired === null || !band.test(card.incomeRequired))) return false
+      if (healthcare === 'profile' && !card.scored) return false
+      if (q && !`${card.name} ${card.city} ${card.region} ${card.route ?? ''}`.toLowerCase().includes(q)) return false
+
+      // The controls are intentionally enabled now. Country-specific household
+      // and healthcare metrics arrive in the separate country-data phase, so
+      // valid selections are retained without inventing unsupported scores.
       if (household && !['solo', 'couple', 'family'].includes(household)) return false
       return true
     })
@@ -135,16 +138,22 @@ export function YourWorld({ pins, cards, complete, initialQuery = '' }: { pins: 
       if (sort === 'match') return (b.score ?? -1) - (a.score ?? -1) || a.name.localeCompare(b.name)
       if (sort === 'cost') return (a.incomeRequired ?? Number.MAX_SAFE_INTEGER) - (b.incomeRequired ?? Number.MAX_SAFE_INTEGER) || a.name.localeCompare(b.name)
       if (sort === 'safety') {
-        const safetyRank = (value: string | null) => value === 'Very safe' ? 2 : value === 'Safe' ? 1 : 0
-        return safetyRank(b.safety) - safetyRank(a.safety) || a.name.localeCompare(b.name)
+        const rank = (value: string | null) => value === 'Very safe' ? 2 : value === 'Safe' ? 1 : 0
+        return rank(b.safety) - rank(a.safety) || a.name.localeCompare(b.name)
       }
       return a.name.localeCompare(b.name)
     })
   }, [cards, query, region, visa, budget, household, healthcare, sort])
 
   const activeCount = [region, budget, visa, household, healthcare].filter(Boolean).length
-  const clearFilters = () => {
-    setRegion(''); setBudget(''); setVisa(''); setHousehold(''); setHealthcare(''); setQuery('')
+
+  function clearFilters() {
+    setRegion('')
+    setBudget('')
+    setVisa('')
+    setHousehold('')
+    setHealthcare('')
+    setQuery('')
   }
 
   function toggleSaved(slug: string) {
@@ -167,16 +176,16 @@ export function YourWorld({ pins, cards, complete, initialQuery = '' }: { pins: 
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
               <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />
-              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search countries" aria-label="Search destinations" className="h-[38px] w-full rounded-[8px] border-[0.8px] border-[#E7EBF1] bg-[#FBFCFE] pl-9 pr-3 text-sm text-navy placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-gold/30" />
+              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search countries" aria-label="Search destinations" className="h-[38px] w-full rounded-[8px] border-[0.8px] border-[#E7EBF1] bg-[#FBFCFE] pl-9 pr-3 text-sm text-navy placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-gold/30" />
             </div>
             <div className="hidden flex-wrap items-center gap-2 xl:flex">
               <Filters region={region} setRegion={setRegion} budget={budget} setBudget={setBudget} visa={visa} setVisa={setVisa} household={household} setHousehold={setHousehold} healthcare={healthcare} setHealthcare={setHealthcare} regions={regions} visas={visas} />
             </div>
-            <button type="button" onClick={() => setOpen((v) => !v)} aria-expanded={open} className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border-[0.8px] px-3 text-[12px] font-semibold xl:hidden ${activeCount ? 'border-gold text-navy' : 'border-[#E7EBF1] text-[#42536E]'}`}>
+            <button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border-[0.8px] px-3 text-[12px] font-semibold xl:hidden ${activeCount ? 'border-gold text-navy' : 'border-[#E7EBF1] text-[#42536E]'}`}>
               <SlidersHorizontal size={14} aria-hidden="true" /> Filters{activeCount ? ` · ${activeCount}` : ''}
             </button>
           </div>
-          {open && <div className="mt-3 grid gap-2 xl:hidden"><Filters region={region} setRegion={setRegion} budget={budget} setBudget={setBudget} visa={visa} setVisa={setVisa} household={household} setHousehold={setHousehold} healthcare={healthcare} setHealthcare={setHealthcare} regions={regions} visas={visas} stacked /></div>}
+          {open ? <div className="mt-3 grid gap-2 xl:hidden"><Filters region={region} setRegion={setRegion} budget={budget} setBudget={setBudget} visa={visa} setVisa={setVisa} household={household} setHousehold={setHousehold} healthcare={healthcare} setHealthcare={setHealthcare} regions={regions} visas={visas} stacked /></div> : null}
         </div>
       </div>
 
@@ -192,19 +201,22 @@ export function YourWorld({ pins, cards, complete, initialQuery = '' }: { pins: 
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className="mr-1 text-xs font-bold text-muted">Sort by</span>
           {([
-            ['match', 'Match'], ['az', 'A–Z'], ['cost', 'Cost'], ['safety', 'Green Book / Safety'],
+            ['match', 'Match'],
+            ['az', 'A–Z'],
+            ['cost', 'Cost'],
+            ['safety', 'Green Book / Safety'],
           ] as Array<[SortMode, string]>).map(([id, label]) => (
             <button key={id} type="button" onClick={() => setSort(id)} className={`${pillClass} ${sort === id ? 'border-gold bg-gold-soft/40 text-navy' : ''}`}>{label}</button>
           ))}
-          {(activeCount > 0 || query) ? <button type="button" onClick={clearFilters} className="ml-1 text-xs font-bold text-muted hover:text-navy">Clear filters</button> : null}
+          {activeCount > 0 || query ? <button type="button" onClick={clearFilters} className="ml-1 text-xs font-bold text-muted hover:text-navy">Clear filters</button> : null}
         </div>
 
-        {!complete && (
+        {!complete ? (
           <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-card border border-gold/25 bg-gold-soft/30 p-4">
             <p className="text-sm text-navy">Complete your Kolmari Profile to unlock Match sorting.</p>
             <Link href="/profile-wizard" className="gold-button">Start Wizard <ArrowRight size={15} /></Link>
           </div>
-        )}
+        ) : null}
 
         {filtered.length > 0 ? (
           <div className="mt-4 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -232,9 +244,8 @@ function FeatureIcon({ kind, label }: { kind: 'climate' | 'safety' | 'infrastruc
 }
 
 function CountryPanel({ card, saved, onToggleSave }: { card: RecCard; saved: boolean; onToggleSave: () => void }) {
-  const cost = card.cost ?? '—'
   return (
-    <article className="group overflow-hidden rounded-[14px] border border-line bg-white shadow-tile transition hover:-translate-y-0.5 hover:border-gold/40 hover:shadow-card">
+    <article className="group relative overflow-hidden rounded-[14px] border border-line bg-white shadow-tile transition hover:-translate-y-0.5 hover:border-gold/40 hover:shadow-card">
       <Link href={`/nextinations/${card.slug}/v2/overview`} className="relative block h-[210px] overflow-hidden bg-[#e9edf3]">
         <img
           src={`/api/country-asset?slug=${card.slug}&type=dashboard_destination`}
@@ -254,17 +265,22 @@ function CountryPanel({ card, saved, onToggleSave }: { card: RecCard; saved: boo
             {card.score !== null ? <strong className="text-lg text-gold">{card.score}%</strong> : null}
           </div>
           <div className="mt-2 flex items-center gap-2 text-xs font-semibold text-white/85">
-            <span>{cost}</span><span>·</span><span>{card.safety ?? 'Safety pending'}</span>
+            <span>{card.cost ?? '—'}</span><span>·</span><span>{card.safety ?? 'Safety pending'}</span>
             {card.score === null ? <span className="ml-auto rounded-full bg-white/15 px-2 py-0.5 text-[10px]">Explore</span> : null}
           </div>
         </div>
       </Link>
-      <button type="button" onClick={onToggleSave} aria-pressed={saved} aria-label={saved ? `Remove ${card.name} from saved countries` : `Save ${card.name}`} className="absolute" />
-      <div className="relative flex items-center justify-between border-t border-line px-4 py-3">
-        <div className="flex items-center gap-2"><FeatureIcon kind="climate" label="Climate"/><FeatureIcon kind="safety" label="Safety"/><FeatureIcon kind="infrastructure" label="Infrastructure"/><FeatureIcon kind="internet" label="Internet"/><FeatureIcon kind="cost" label="Cost of living"/></div>
-        <button type="button" onClick={onToggleSave} aria-pressed={saved} aria-label={saved ? `Remove ${card.name} from saved countries` : `Save ${card.name}`} className={`grid size-9 place-items-center rounded-full border transition ${saved ? 'border-gold bg-gold-soft text-gold-deep' : 'border-line bg-white text-muted hover:border-gold hover:text-navy'}`}>
-          <Heart size={17} fill={saved ? 'currentColor' : 'none'} />
-        </button>
+
+      <button type="button" onClick={onToggleSave} aria-pressed={saved} aria-label={saved ? `Remove ${card.name} from saved countries` : `Save ${card.name}`} className={`absolute right-3 top-3 z-10 grid size-9 place-items-center rounded-full border shadow-sm transition ${saved ? 'border-gold bg-gold-soft text-gold-deep' : 'border-white/70 bg-white/90 text-navy hover:border-gold'}`}>
+        <Heart size={17} fill={saved ? 'currentColor' : 'none'} />
+      </button>
+
+      <div className="flex items-center gap-2 border-t border-line px-4 py-3" aria-label={`${card.name} country features`}>
+        <FeatureIcon kind="climate" label="Climate" />
+        <FeatureIcon kind="safety" label="Safety" />
+        <FeatureIcon kind="infrastructure" label="Infrastructure" />
+        <FeatureIcon kind="internet" label="Internet" />
+        <FeatureIcon kind="cost" label="Cost of living" />
       </div>
     </article>
   )
