@@ -31,7 +31,8 @@ export default async function CommandCenterPage({ searchParams }: { searchParams
     getKolmariPlan(user.id),
   ])
   const plan = existingPlan ?? emptyKolmariPlan(user.id)
-  const ranked = hasCompletedProfile(profile) ? rankNextinations(profile) : []
+  const profileComplete = hasCompletedProfile(profile)
+  const ranked = profileComplete ? rankNextinations(profile) : []
   const planTab = ['overview', 'checklist', 'documents', 'budget', 'notes'].includes(params.planTab ?? '')
     ? params.planTab as 'overview' | 'checklist' | 'documents' | 'budget' | 'notes'
     : 'overview'
@@ -46,12 +47,7 @@ export default async function CommandCenterPage({ searchParams }: { searchParams
 
       <nav className="mb-6 flex flex-wrap gap-2 border-b border-line pb-3" aria-label="Command Center sections">
         {TABS.map((tab) => (
-          <Link
-            key={tab.id}
-            href={`/command-center?tab=${tab.id}`}
-            aria-current={active === tab.id ? 'page' : undefined}
-            className={`rounded-full px-4 py-2 text-sm font-bold transition ${active === tab.id ? 'bg-navy text-white' : 'border border-line bg-white text-navy hover:border-gold/50'}`}
-          >
+          <Link key={tab.id} href={`/command-center?tab=${tab.id}`} aria-current={active === tab.id ? 'page' : undefined} className={`rounded-full px-4 py-2 text-sm font-bold transition ${active === tab.id ? 'bg-navy text-white' : 'border border-line bg-white text-navy hover:border-gold/50'}`}>
             {tab.label}
           </Link>
         ))}
@@ -59,14 +55,14 @@ export default async function CommandCenterPage({ searchParams }: { searchParams
 
       {active === 'my-plan' ? (
         <>
-          <TopCountriesGrid initial={board} />
+          <TopCountriesGrid initial={board} suggested={ranked.slice(0, 3).map(({ country }) => country.name)} />
           <PlanWorkspace
             initial={plan}
             nextinations={COUNTRIES.map((country) => country.name)}
             pathways={PATHWAYS.map((pathway) => `${pathway.country} — ${pathway.name}`)}
             profileHousehold={profile.wizard_status === 'completed' ? profile.family_size : null}
             profileMonthlyIncome={profile.wizard_status === 'completed' ? profile.monthly_income : null}
-            profileComplete={hasCompletedProfile(profile)}
+            profileComplete={profileComplete}
             dependents={profile.dependents}
             initialTab={planTab}
           />
@@ -78,7 +74,7 @@ export default async function CommandCenterPage({ searchParams }: { searchParams
           <div className="rounded-[var(--radius-card)] border border-line bg-white p-5 shadow-tile">
             <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-gold-deep">Assessment</p>
             <h2 id="quiz-results-heading" className="mt-1 font-display text-xl font-bold text-navy">Your Quiz Results</h2>
-            {!hasCompletedProfile(profile) ? (
+            {!profileComplete ? (
               <div className="mt-4 rounded-xl border border-dashed border-line-strong bg-canvas p-5">
                 <p className="text-sm font-semibold text-navy">You have not completed your Kolmari Profile yet.</p>
                 <Link href="/profile-wizard" className="gold-button mt-3 inline-flex">Complete quiz</Link>
