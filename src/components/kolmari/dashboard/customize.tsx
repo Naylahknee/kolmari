@@ -88,6 +88,8 @@ export function DashboardCustomizer({ initial }: { initial: DashboardLayout }) {
         </div>
       </section>
 
+      <DashboardLayoutPreview layout={layout} disabled={disabled} />
+
       <section className="card-surface p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3"><div><h3 className="font-bold text-navy">Journey tracker placement</h3><p className="mt-1 text-xs text-muted">Header dropdown remains the default. Switch to Dashboard panel to make Journey part of the draggable canvas.</p></div><div className="inline-flex rounded-full border border-line bg-canvas p-1"><button type="button" onClick={() => setJourneyPlacement('header')} className={`rounded-full px-3 py-1.5 text-xs font-bold ${layout.journeyPlacement === 'header' ? 'bg-white text-navy shadow-sm' : 'text-muted'}`}>Header dropdown</button><button type="button" onClick={() => setJourneyPlacement('panel')} className={`rounded-full px-3 py-1.5 text-xs font-bold ${layout.journeyPlacement === 'panel' ? 'bg-white text-navy shadow-sm' : 'text-muted'}`}>Dashboard panel</button></div></div>
       </section>
@@ -98,6 +100,72 @@ export function DashboardCustomizer({ initial }: { initial: DashboardLayout }) {
       </section>
 
       <p className="flex min-h-5 items-center gap-1.5 text-xs text-muted" role="status" aria-live="polite">{saving && <LoaderCircle size={12} className="animate-spin"/>}{status}</p>
+    </div>
+  )
+}
+
+function DashboardLayoutPreview({ layout, disabled }: { layout: DashboardLayout; disabled: Set<WidgetId> }) {
+  const showJourneyHeader = layout.journeyPlacement === 'header' && !disabled.has('journeyTracker')
+  const visible = (ids: WidgetId[]) => ids.filter((id) => !disabled.has(id) && !(id === 'journeyTracker' && layout.journeyPlacement === 'header'))
+  const main = visible(layout.main)
+  const side = visible(layout.side)
+  const shown = main.length + side.length + (showJourneyHeader ? 1 : 0)
+
+  return (
+    <section className="card-surface overflow-hidden" aria-labelledby="dashboard-preview-heading">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-4 sm:px-6">
+        <div>
+          <h3 id="dashboard-preview-heading" className="font-bold text-navy">Live layout preview</h3>
+          <p className="mt-0.5 text-xs text-muted">Updates immediately as you choose a template, move a panel, or hide/show content.</p>
+        </div>
+        <span className="rounded-full bg-canvas px-2.5 py-1 text-[11px] font-bold text-muted">
+          {shown} of {DASHBOARD_WIDGETS.length} panels shown
+        </span>
+      </div>
+
+      <div className="bg-[#eef2f7] p-3 sm:p-5">
+        <div className="mx-auto max-w-[900px] overflow-hidden rounded-[14px] border border-[#d8dee8] bg-[#f8fafc] shadow-sm">
+          <div className="flex h-9 items-center justify-between border-b border-[#dce2ea] bg-white px-3">
+            <div className="flex items-center gap-2">
+              <span className="size-2 rounded-full bg-gold" />
+              <span className="text-[8px] font-extrabold uppercase tracking-[0.12em] text-navy">Kolmari Dashboard</span>
+            </div>
+            {showJourneyHeader && (
+              <span className="rounded-full border border-gold/70 bg-[#fdfbf3] px-2 py-1 text-[7px] font-extrabold text-navy">Journey · header</span>
+            )}
+          </div>
+
+          <div className={`grid min-h-[255px] gap-2 p-3 ${side.length ? 'grid-cols-[minmax(0,1fr)_34%]' : 'grid-cols-1'}`}>
+            <PreviewColumn ids={main} label="Main" />
+            {side.length > 0 && <PreviewColumn ids={side} label="Second" compact />}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function PreviewColumn({ ids, label, compact = false }: { ids: WidgetId[]; label: string; compact?: boolean }) {
+  return (
+    <div className="min-w-0">
+      <p className="mb-1.5 text-[7px] font-extrabold uppercase tracking-[0.12em] text-muted-soft">{label}</p>
+      <div className="flex flex-col gap-1.5">
+        {ids.length ? ids.map((id) => {
+          const def = widgetDef(id)
+          const tall = id === 'destinations' || id === 'journeyTracker' || id === 'shortlist'
+          return (
+            <div
+              key={id}
+              className={`flex items-center rounded-[7px] border border-[#dce2ea] bg-white px-2 shadow-[0_2px_5px_rgba(13,27,57,.05)] ${tall ? (compact ? 'h-11' : 'h-14') : 'h-8'}`}
+              title={def.label}
+            >
+              <span className="truncate text-[7.5px] font-bold leading-none text-navy">{def.label}</span>
+            </div>
+          )
+        }) : (
+          <div className="grid h-16 place-items-center rounded-[7px] border border-dashed border-[#cfd7e3] text-[7px] font-semibold text-muted-soft">Empty column</div>
+        )}
+      </div>
     </div>
   )
 }

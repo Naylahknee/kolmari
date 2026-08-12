@@ -12,24 +12,25 @@ This feature extends the existing Dashboard `Destinations` panel. It does **not*
 ```text
 DASHBOARD
 └── DESTINATIONS PANEL
-    ├── #1 matched-country card
-    ├── #2 matched-country card
-    ├── #3 matched-country card
-    └── Visa Options for #1 matched country
+    ├── #1 matched-country selector
+    ├── #2 matched-country selector
+    ├── #3 matched-country selector
+    └── Visa Options for selected matched country
 ```
 
-The three country cards are nested information surfaces, not Dashboard widgets and not country-page navigation controls.
+The three country cards are nested selectors inside the parent panel. They are not Dashboard widgets and they do not navigate to country pages.
 
 ## 2. Header
 
 Preserve:
 
 - title: `Destinations`
-- right-side link: `Explore more`
+- helper copy: `Select a match to preview its visa pathways below.` when matches exist
+- right-side link: `Explore more destinations`
 - link route: `/your-world`
 - standard white Dashboard surface, border, radius, and padding
 
-`Explore more` is the explicit navigation path from this parent panel into destination discovery.
+`Explore more destinations` is the explicit navigation path from this parent panel into destination discovery.
 
 ## 3. Match behavior
 
@@ -42,18 +43,32 @@ Source: `rankNextinations(profile)`.
 
 The card does not calculate ranking.
 
-## 4. Nested country card
+## 4. Nested country selector
 
-Visible content only:
+Visible content:
 
 - rank marker: `#1`, `#2`, `#3`
 - country name
+- `Viewing` state indicator only for the currently selected card
 
-Do not visibly show region, city, description, visa type, cost, Match Score, cost tier, ranking explanation, badges, eligibility metrics, or pathway detail.
+Do not visibly show region, city, description, visa type, cost, Match Score, cost tier, ranking explanation, eligibility metrics, or pathway detail inside the image card.
 
 Match Score remains available in the card's accessible label.
 
-**Interaction rule:** clicking or tapping the matched-country card does nothing. The card must not redirect to a country page. It is a visual summary of the ranked result inside the Dashboard parent panel.
+### Interaction rule
+
+The matched-country card is a button-like selector, not navigation.
+
+Clicking or tapping a card:
+
+1. sets that match as the temporary viewing selection inside the Destinations parent panel;
+2. updates the Visa Options section below the cards to that country;
+3. does **not** leave `/dashboard`;
+4. does **not** save, shortlist, select, or otherwise change the user's destination product state.
+
+The #1 ranked country is the default viewing selection when the panel first renders.
+
+Selected cards use a visible Kolmari gold border/ring and a `Viewing` indicator. Keyboard focus must remain visible.
 
 ## 5. Layout
 
@@ -107,14 +122,16 @@ Visa Options are part of the parent Destinations panel and appear beneath the ne
 
 Heading:
 
-`Visa Options for {#1 country}`
+`Visa Options for {selected country}`
 
 Source: existing researched `PATHWAYS` data.
 
-- use the #1 ranked country only
-- display up to 3 researched pathways
+- selected country defaults to #1 match
+- selecting #2 or #3 updates this section in place
+- display up to 3 researched pathways for the selected country
 - keep rows concise: pathway name + category
-- the parent may include one explicit `View all pathways` link to `/pathways`
+- pathway rows remain informational
+- one explicit `Open Pathways` link may navigate to `/pathways`
 - do not invent routes
 - do not generate legal explanations
 
@@ -126,14 +143,16 @@ No ranked country: do not render Visa Options.
 
 ## 9. Accessibility
 
-Each matched-country card:
+Each matched-country selector:
 
-- is a semantic article/information surface rather than a link
-- has a visible country name and rank
-- treats the background image as decorative
-- exposes rank, country, and Match Score through its accessible label
+- uses a semantic button
+- is keyboard operable
+- exposes `aria-pressed` for selected state
+- references the Visa Options region with `aria-controls`
+- has a visible focus state
+- exposes rank, country, Match Score, and the result of activation in its accessible label
 
-Visa Options uses a semantic section, heading, and list. Explicit navigation links remain separately identifiable controls.
+The Visa Options region uses `aria-live="polite"` so its heading/content change can be announced after a new country is selected.
 
 ## 10. Overlay
 
@@ -168,8 +187,9 @@ Confirm:
 - Destinations remains one parent widget
 - matched cards wrap naturally
 - mobile is one column
-- Visa Options stay beneath cards
-- cards do not navigate
+- selecting any card updates Visa Options below
+- selection never navigates away from Dashboard
+- Visa Options remain inside the parent panel
 - no page overflow
 - country names stay readable
 
@@ -177,7 +197,7 @@ Confirm:
 
 Preserve match/ranking logic, profile logic, plan state, existing `PATHWAYS`, Your World, and country-page hero behavior. Dashboard layout customization controls panel placement only.
 
-Do not add local Primary/Selected destination product state to this panel.
+The temporary selected card is presentation state only. Do not convert it into Primary, Saved, Shortlisted, or Selected destination product state.
 
 ## 14. Canonical behavior
 
@@ -186,6 +206,8 @@ completed profile
 → rankNextinations(profile)
 → top 3 real matches
 → existing Destinations parent panel
-→ non-navigational rank + country-name cards
-→ concise Visa Options for #1 ranked country
+→ #1 selected by default
+→ user may select #1 / #2 / #3
+→ Visa Options below update to selected country
+→ no country-page navigation
 ```

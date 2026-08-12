@@ -1,4 +1,7 @@
+'use client'
+
 import Link from 'next/link'
+import { useState } from 'react'
 import type { CountryDetail } from '@/lib/countries'
 import { PATHWAYS } from '@/lib/pathways'
 import { DashboardDestinationPanel } from '@/components/kolmari/dashboard/destination-panel'
@@ -12,15 +15,20 @@ export type DestinationRow = {
 
 /**
  * Existing Dashboard Destinations parent panel.
- * This remains one Dashboard widget; the top matched countries are nested
- * visual cards inside it and Visa Options for the #1 match sit beneath the grid.
+ * The top matched countries are selectable nested cards. Selection changes only
+ * the visa-options preview beneath the grid; it never navigates away from the
+ * Dashboard or changes the user's saved/shortlisted destination state.
  */
 export function DashboardDestinationsCard({ rows, profileComplete }: {
   rows: DestinationRow[]
   profileComplete: boolean
 }) {
-  const lead = rows[0]?.country ?? null
-  const visaOptions = lead ? PATHWAYS.filter((pathway) => pathway.country === lead.name).slice(0, 3) : []
+  const [selectedSlug, setSelectedSlug] = useState(rows[0]?.country.slug ?? '')
+  const selectedRow = rows.find((row) => row.country.slug === selectedSlug) ?? rows[0] ?? null
+  const selectedCountry = selectedRow?.country ?? null
+  const visaOptions = selectedCountry
+    ? PATHWAYS.filter((pathway) => pathway.country === selectedCountry.name).slice(0, 3)
+    : []
 
   return (
     <section
@@ -29,7 +37,12 @@ export function DashboardDestinationsCard({ rows, profileComplete }: {
       aria-labelledby="destinations-heading"
     >
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h2 id="destinations-heading" className="text-[18px] font-bold text-navy">Destinations</h2>
+        <div>
+          <h2 id="destinations-heading" className="text-[18px] font-bold text-navy">Destinations</h2>
+          {rows.length > 0 && (
+            <p className="mt-0.5 text-[11px] text-muted">Select a match to preview its visa pathways below.</p>
+          )}
+        </div>
         <Link href="/your-world" className="text-xs font-bold text-info hover:text-navy">Explore more destinations</Link>
       </div>
 
@@ -40,17 +53,24 @@ export function DashboardDestinationsCard({ rows, profileComplete }: {
               <DashboardDestinationPanel
                 key={country.slug}
                 rank={index + 1}
+                selected={selectedCountry?.slug === country.slug}
+                onSelect={() => setSelectedSlug(country.slug)}
                 data={{ country, match, imageSrc, focalPoint }}
               />
             ))}
           </div>
 
-          {lead ? (
-            <section className="mt-5 border-t border-line pt-4" aria-labelledby="dashboard-visa-options-heading">
+          {selectedCountry ? (
+            <section
+              id="dashboard-visa-options"
+              className="mt-5 border-t border-line pt-4"
+              aria-labelledby="dashboard-visa-options-heading"
+              aria-live="polite"
+            >
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h3 id="dashboard-visa-options-heading" className="text-[15px] font-bold text-navy">
-                    Visa Options for {lead.name}
+                    Visa Options for {selectedCountry.name}
                   </h3>
                   <p className="mt-0.5 text-[10.5px] text-muted">Research preview — open Pathways for eligibility details.</p>
                 </div>

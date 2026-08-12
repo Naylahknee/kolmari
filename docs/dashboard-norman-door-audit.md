@@ -19,7 +19,7 @@ Dashboard controls should make three things obvious before interaction:
 | --- | --- | --- |
 | Dashboard header | `Enter Flutter Mode` acted as the dominant top-right CTA even though the Dashboard is the planning home and Flutter is a later execution mode. | **FIXED** — replaced with plan/upgrade section after profile completion. |
 | Dashboard first-visit tour | The tour still targeted the former docked progress tracker after Journey moved to the header dropdown. | **FIXED** — walkthrough now starts from the current Recommended next action, then Destinations. |
-| Destination match image cards | Image-backed cards previously looked and behaved like navigation despite the product rule that they are informational match panels. | **FIXED** — cards are static information surfaces with no link, pointer action, or hover-navigation treatment. |
+| Destination match image cards | Static image cards did not communicate that the user could inspect another matched country's visa options without leaving Dashboard. | **FIXED** — cards are semantic selection buttons. A visible `Viewing` state, gold selected ring, helper copy, `aria-pressed`, and `aria-controls` make the result explicit. Selection updates Visa Options below and never navigates to a country page. |
 | Visa Options rows | Full rows linked to the generic Pathways page, making each route look like a distinct route-specific action even though every row went to the same destination. | **FIXED** — rows are informational; one explicit `Open Pathways` link owns navigation. |
 | Active pathway country action | A button labeled only with the country name did not state that it opens the country guide. | **FIXED** — explicit `Open {country} guide` label. |
 | Active pathway route action | `View pathway` was weaker than the actual action. | **FIXED** — explicit `Review active pathway` / `Find a pathway` labels. |
@@ -27,6 +27,23 @@ Dashboard controls should make three things obvious before interaction:
 | Optional Shortlist cards | The whole card gains hover border/shadow while only the footer control is actionable, which can imply whole-card clickability. | **OPEN / LOW** — remove whole-card hover affordance or make only the actual button visually reactive. |
 | Legacy `OrientationHeader` | Contains an `Enter Flutter Mode` CTA but is not used by the current Dashboard page. | **OPEN / TECHNICAL DEBT** — remove or update if this legacy component is retained. |
 | Legacy `JourneyPanel` next milestone | A chevron appears beside non-interactive milestone text, visually implying navigation. The current Dashboard uses `JourneyTracker`, not this panel. | **OPEN / TECHNICAL DEBT** — remove chevron if the legacy panel remains available. |
+
+## Destination selector contract
+
+The matched-country cards are interactive, but their action is **local inspection**, not navigation.
+
+```text
+select Portugal
+→ Visa Options for Portugal
+
+select Spain
+→ Visa Options for Spain
+
+select Estonia
+→ Visa Options for Estonia
+```
+
+Selection does not change Saved, Shortlisted, Selected, Primary, or My Plan destination state.
 
 ## Upgrade section contract
 
@@ -46,4 +63,4 @@ For an incomplete profile, the existing `Build My Kolmari Plan` action remains b
 
 ## Preservation rule
 
-Do not make informational Dashboard cards clickable merely to make the interface feel more interactive. A visible navigation treatment must correspond to a specific destination or state-changing action.
+Interactive styling must correspond to a clear result. Destination match cards may be interactive only for selecting which country's information is shown inside the same parent panel; they must not silently become country-page links or destination-state controls.

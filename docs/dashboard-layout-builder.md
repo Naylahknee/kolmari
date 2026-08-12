@@ -18,7 +18,7 @@ Dashboard
 │       ├── #1 matched country
 │       ├── #2 matched country
 │       ├── #3 matched country
-│       └── Visa Options for #1 match
+│       └── Visa Options for currently viewed match
 └── Second column
     ├── Progress by planning area
     ├── Active pathway
@@ -29,9 +29,7 @@ The Journey tracker defaults to the hidden header dropdown and therefore occupie
 
 ## Destination interaction
 
-Nested matched-country image cards inside the Destinations parent panel are information surfaces only. They do not navigate to country pages when clicked.
-
-The parent panel provides concise visa-pathway information below the matched-country grid using existing researched `PATHWAYS` data.
+Nested matched-country image cards inside the Destinations parent panel are selectors, not navigation. Selecting a card changes only the Visa Options preview beneath the cards. The Dashboard remains in place and no Saved/Shortlisted/Selected destination product state changes.
 
 ## Layout contract
 
@@ -97,6 +95,30 @@ Users can:
 - restore the shipped default
 
 Changes persist automatically through `/api/dashboard-layout`.
+
+## Live layout visualization
+
+The Account Dashboard editor includes a `Live layout preview` window driven by the same in-memory `DashboardLayout` object that is persisted to the API.
+
+The preview must update immediately when the user:
+
+- chooses a template
+- drags or moves a panel
+- moves a panel between columns
+- shows or hides a panel
+- switches Journey between header and panel placement
+- resets the Dashboard
+
+The preview represents:
+
+- the relative Main-column and Second-column structure
+- the current panel order
+- hidden panels by omission
+- Journey as a header pill when `journeyPlacement === "header"`
+- Journey as a panel when `journeyPlacement === "panel"`
+- a one-column visualization when the second column has no visible panels
+
+The preview is a layout visualization, not a duplicate functioning Dashboard. It must not run Dashboard data queries, mutate plan state, or create a second layout contract.
 
 ## Preservation rules
 
