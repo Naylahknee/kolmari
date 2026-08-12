@@ -1,4 +1,5 @@
 import { requireCurrentUser } from '@/lib/auth'
+import { COUNTRIES } from '@/lib/countries'
 import {
   journeyPercent,
   journeyStages,
@@ -11,7 +12,7 @@ import { getProfile, hasCompletedProfile } from '@/lib/profile'
 import { rankNextinations } from '@/lib/userProfile'
 import { getBoard } from '@/lib/command-center'
 import { getDashboardLayout } from '@/lib/dashboard-layout-store'
-import { visibleWidgets, type WidgetId } from '@/lib/dashboard-layout'
+import { visibleWidgets, widgetDef, type WidgetId } from '@/lib/dashboard-layout'
 import { getGeneratedDashboardDestinationVersion } from '@/lib/country-assets'
 import { getApprovedDashboardDestination } from '@/lib/country-visuals/data'
 import {
@@ -99,14 +100,14 @@ export default async function DashboardPage() {
   const tasks = buildNextActions(input, shortlist)
   const suggestions = buildSuggestions(input, shortlist)
 
-  // This panel shows real matched countries only. Incomplete profiles never get
-  // arbitrary country rows presented as matches.
   const destinationRows: DestinationRow[] = complete
     ? await Promise.all(rankedList.slice(0, 3).map((item) => destinationRow(item.country, item.match.score)))
     : []
 
+  // Preserve the existing plan-owned saved destination lookup for unrelated
+  // Dashboard panels; the Destinations enhancement does not alter plan state.
   const savedCountry = plan?.saved_nextination
-    ? rankedList.map((item) => item.country).find((country) => country.name === plan.saved_nextination || country.slug === plan.saved_nextination) ?? null
+    ? COUNTRIES.find((country) => country.name === plan.saved_nextination || country.slug === plan.saved_nextination) ?? null
     : null
 
   const pathwayDetail = plan?.selected_pathway
@@ -138,14 +139,11 @@ export default async function DashboardPage() {
     commandCenter: () => <DashboardCommandCenterCard board={board} />,
   }
 
-  // Preserve the existing Dashboard shell and widget customization. Only the
-  // existing Destinations parent panel spans the main content width it needs for
-  // its nested match grid.
   const shown = visibleWidgets(layout)
-  const FULL: WidgetId[] = ['nextAction', 'planningAreas', 'destinations', 'askKolmari', 'shortlist', 'foodHealth', 'commandCenter']
   const blocks: { kind: 'full' | 'row'; ids: WidgetId[] }[] = []
   for (const id of shown) {
-    const isFull = FULL.includes(id)
+    // Use the existing widget registry as the source of truth for panel sizing.
+    const isFull = widgetDef(id).full
     const last = blocks[blocks.length - 1]
     if (isFull) blocks.push({ kind: 'full', ids: [id] })
     else if (last?.kind === 'row') last.ids.push(id)
