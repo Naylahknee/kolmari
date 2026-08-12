@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ArrowRight, Check, Lock } from 'lucide-react'
-import { YourWorldMap, type WorldPin } from './your-world-map'
+import { WorldMatchMap, type WorldPin } from './world-match-map'
 
 // Countries surfaced from the user's quiz/profile ranking. Names are shown free;
 // the Match Score behind them is a Pro feature, so only the top match links
@@ -12,7 +12,7 @@ const UPGRADE_HREF = '/coming-soon?feature=plus'
 // What free browsing includes. Descriptive copy only — no per-user data.
 const FREE_TILES: { title: string; body: string }[] = [
   { title: 'The interactive map', body: 'Open any region or matched Destination from the illustrated world.' },
-  { title: 'Destination overviews', body: 'Read available Overview tabs without exposing a paid Match Score.' },
+  { title: 'Destination overviews', body: 'Read any country\u2019s overview for free. Filtering, scoring, and saving are Pro.' },
   { title: 'Region guides', body: 'What each region tends to be good and bad at.' },
   { title: 'Ways in, by country', body: 'The route families available, without the eligibility check.' },
 ]
@@ -47,12 +47,12 @@ export function YourWorldGated({ matches, pins }: { matches: QuizMatch[]; pins: 
         <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Explore</p>
         <h1 className="mt-1 font-display text-3xl font-bold text-navy sm:text-4xl">Your World</h1>
         <p className="mt-1 max-w-2xl text-sm text-muted">
-          Browse the world map and read any country&rsquo;s overview for free. Filtering, scoring, and saving are Pro.
+          Browse the world map and read any countrys overview for free. Filtering, scoring, and saving are Pro.
         </p>
       </div>
 
       <div className="mt-5">
-        <YourWorldMap pins={pins} />
+        <WorldMatchMap pins={pins} />
       </div>
 
       <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1.55fr)_minmax(300px,1fr)]">
@@ -63,7 +63,7 @@ export function YourWorldGated({ matches, pins }: { matches: QuizMatch[]; pins: 
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-lg font-bold text-navy">Free to browse</h2>
-                <p className="mt-1 text-sm text-muted">Every country&rsquo;s Overview tab is open. Portugal is fully researched; the others are in progress.</p>
+                <p className="mt-1 text-sm text-muted">Every countrys Overview tab is open. Portugal is fully researched; the others are in progress.</p>
               </div>
               <span className="shrink-0 rounded-pill bg-ok-soft px-2.5 py-1 text-[11px] font-bold text-ok">Included free</span>
             </div>
