@@ -66,6 +66,5 @@ See My Next Steps
 
 ## Do not use
 
-- "Kolmari", "Kolmari", "Nextination", "Nexicution", "Kolmarier" in public UI
 - Generic travel-product language ("journey", "destination" for a vacation concept)
 - Fabricated scores, Match Scores, or readiness values
