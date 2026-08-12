@@ -1,65 +1,43 @@
 {
-  "taskId": "dashboard-destinations-country-design-system-extension",
-  "instruction": "Extend the existing Dashboard Destinations parent panel with up to three real ranked matched-country cards and a Visa Options preview for the #1 match. Add a dedicated dashboard_destination visual asset and admin generation workflow. Do not rebuild or refactor the Dashboard shell. Preserve Journey Tracker, Dashboard customization, matching/ranking/profile/plan logic, unrelated widgets, Your World, and existing PATHWAYS data. Add canonical design schema documentation in docs.",
-  "objective": "Implement the approved Country Design System extension and Dashboard Destinations panel behavior: one existing Destinations widget containing top-3 nested matched-country cards, dedicated dashboard_destination imagery with manual admin generation/approval and no runtime generation, and a PATHWAYS-backed Visa Options preview beneath the grid.",
+  "taskId": "dashboard-journey-header-dropdown",
+  "instruction": "Convert the existing Dashboard Journey progress tracker from the right-docked animated side rail into a hidden header dropdown. Remove all docked/collapsed rail behavior and layout reservation. Add a compact Journey stage pill to the workspace top header on Dashboard only for users with paid tracker access. Clicking it opens the unchanged tracker contents as a fixed 322px overlay without pushing page content.",
+  "objective": "Preserve the Journey Tracker data, stage/task accordion, progress calculation, gating, and My Plan link while changing only its presentation from a docked rail to a default-closed header-triggered overlay.",
   "allowedEntities": [],
   "allowedFiles": [
     ".sld/task-contract.json",
-    "docs/country-design-schema.md",
-    "docs/country-design-system.md",
-    "docs/country-hero-generator.md",
-    "docs/dashboard-destination-panels.md",
     "src/app/(app)/(workspace)/dashboard/page.tsx",
-    "src/app/(app)/(workspace)/settings/country-hero/page.tsx",
-    "src/app/api/admin/country-asset/route.ts",
-    "src/app/api/admin/country-hero/route.ts",
-    "src/app/api/country-asset/route.ts",
-    "src/components/kolmari/dashboard-side-cards.tsx",
-    "src/components/kolmari/dashboard/destination-panel.tsx",
-    "src/lib/country-assets.ts",
-    "src/lib/country-visuals/data.ts",
-    "src/lib/country-visuals/prompt.ts",
-    "src/lib/country-visuals/schema.ts",
-    "src/lib/dashboard-layout.ts"
+    "src/components/country-template/TopBar.tsx",
+    "src/components/kolmari/dashboard/journey-tracker.tsx",
+    "src/styles/journey-tracker.css"
   ],
   "allowedActions": [
-    "CREATE",
     "MODIFY",
     "RESTYLE",
     "REWIRE"
   ],
   "allowedUIRegions": [
-    "existing Dashboard Destinations parent panel",
-    "nested Dashboard matched-country cards",
-    "Visa Options preview inside Destinations",
-    "Country Page Generator Engine admin tabs and previews"
+    "Dashboard Journey Tracker",
+    "workspace top header Journey slot"
   ],
   "requiredChanges": [
-    "keep Destinations as one existing Dashboard parent widget and do not rebuild the Dashboard shell",
-    "show up to three real ranked matches only after profile completion",
-    "display rank and country name only on nested matched-country cards while retaining Match Score in accessibility text",
-    "add dashboard_destination to visual schemas, generator request types, approved storage, serving, and registry contracts without renaming existing hero or city persisted types",
-    "use a 1536x1024 Dashboard destination generation master with a default central 70 percent crop-safe zone",
-    "keep Dashboard destination generation admin-only, one image per request, and require explicit review/save approval",
-    "use dashboard_destination then committed dashboard asset then official flag then neutral fallback; never auto-substitute country hero, city image, or Mapbox snapshot",
-    "show up to three existing PATHWAYS entries for the number-one matched country beneath the matched-card grid",
-    "mark the existing destinations widget full-width using the existing widget registry so the nested grid has sufficient room",
-    "add docs/country-design-schema.md and align Country Design System and Dashboard Destinations documentation"
+    "remove the 322px and 56px right-docked Journey rail shell, collapsed strip, vertical Journey label, status dots, counter rail, and slide transform behavior",
+    "make the tracker occupy zero Dashboard layout space when closed and allow Dashboard content to use the freed width",
+    "add a default-closed header pill showing a 15px yellow check circle, Journey label, currentStage/totalStages, and chevron with aria-expanded",
+    "render the header pill only when the existing paid Readiness Tracker entitlement is available",
+    "open the existing full tracker content as a fixed 322px right-aligned overlay below the 56px header without pushing content",
+    "preserve current-stage values, progress percent, eight-stage accordion, task lists, saved timestamp, and Open My Plan behavior",
+    "support close from the panel chevron, outside click, and Escape"
   ],
   "forbiddenChanges": [
-    "Dashboard shell redesign or navigation redesign",
-    "new Dashboard widgets for individual matched countries",
-    "Journey Tracker behavior",
-    "Match Score calculation or ranking logic",
-    "profile logic or Profile Wizard",
-    "Kolmari Plan state or destination decision state",
-    "Your World map or unrelated Mapbox components",
-    "Flutter Mode",
-    "PATHWAYS source data",
-    "authentication or subscriptions",
-    "database schema migrations",
-    "runtime Dashboard image generation",
-    "per-user AI image generation"
+    "Dashboard widget refactor or redesign",
+    "Dashboard Destinations changes",
+    "Journey stage calculation changes",
+    "Journey task or suggestion content changes",
+    "Kolmari Plan state changes",
+    "profile or subscription model changes",
+    "navigation redesign",
+    "country page changes",
+    "database schema migrations"
   ],
   "createdFrom": "user-request"
 }
