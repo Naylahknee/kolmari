@@ -1,6 +1,7 @@
 import { flagSrc } from '@/lib/flags'
 import { countryFacts } from '@/lib/country-facts'
 import { CountryOutline } from './CountryOutline'
+import { MetricButton } from './MetricButton'
 import { HeroAutoGenerate } from './HeroAutoGenerate'
 import { focalToObjectPosition } from '@/lib/country-visuals/schema'
 
@@ -69,12 +70,14 @@ function HeroBackdrop({ code, artwork }: { code: string; artwork?: HeroArtwork |
   )
 }
 
-/** The arrow affordance every hero metric panel carries. */
-const MetricArrow = (
-  <svg className="m-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-    <path d="M5 12h14M13 6l6 6-6 6" />
-  </svg>
-)
+/** The four hero metric icons, shared by every Destination so the panels read
+ *  the same whichever hero variant renders them. */
+const MetricIcons = {
+  cost: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /></svg>,
+  route: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="6" cy="6" r="2.5" /><circle cx="18" cy="18" r="2.5" /><path d="M8.5 6H15a3 3 0 010 6H9a3 3 0 000 6h6.5" /></svg>,
+  time: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>,
+  citizenship: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="3" width="16" height="18" rx="2" /><circle cx="12" cy="10" r="2.6" /><path d="M8.5 17c.9-1.8 2-2.6 3.5-2.6s2.6.8 3.5 2.6" /></svg>,
+}
 
 /**
  * Split a metric into the large figure and its small unit, matching the approved
@@ -89,23 +92,11 @@ function splitMetric(value: string): [string, string | null] {
   return [value, null]
 }
 
-/** Honest metric card for a country without a verified metric dataset. */
-function VerifyingMetric({ label, icon }: { label: string; icon: React.ReactNode }) {
-  return (
-    <div className="metric" aria-disabled="true">
-      <span className="m-l">{icon} {label}</span>
-      {/* Standard .m-v typography — the muted treatment is a class, not an
-          inline font-size, so every hero sizes identically. */}
-      <span className="m-v m-v-pending">Being verified</span>
-      <span className="m-n">Pending an official source</span>
-    </div>
-  )
-}
-
 /**
  * Metric card that shows a verified value + its note/source, or the honest
- * "being verified" state when the value is null. Renders the same clickable
- * panel as the approved standard, so every country page behaves alike.
+ * "being verified" state when the value is null. Splits the raw string into
+ * figure + unit and hands both to the shared MetricButton, so a data-driven
+ * panel is the same component as the approved standard.
  */
 function DataMetric({ label, icon, value, note, onOpen, openLabel }: {
   label: string
@@ -115,15 +106,17 @@ function DataMetric({ label, icon, value, note, onOpen, openLabel }: {
   onOpen?: () => void
   openLabel?: string
 }) {
-  if (!value) return <VerifyingMetric label={label} icon={icon} />
-  const [figure, unit] = splitMetric(value)
+  const [figure, unit] = value ? splitMetric(value) : [null, null]
   return (
-    <button className="metric" onClick={onOpen} aria-label={openLabel ?? label}>
-      {MetricArrow}
-      <span className="m-l">{icon} {label}</span>
-      <span className="m-v">{figure}{unit ? <> <small>{unit}</small></> : null}</span>
-      {note && <span className="m-n">{note}</span>}
-    </button>
+    <MetricButton
+      label={label}
+      icon={icon}
+      value={figure}
+      unit={unit ?? undefined}
+      note={note ?? undefined}
+      onOpen={onOpen}
+      openLabel={openLabel}
+    />
   )
 }
 
@@ -172,30 +165,42 @@ export function CountryHero({
           <HeroStatus chips={statusChips} />
         </div>
         <div className="metrics">
-          <button className="metric" onClick={() => go('cost-housing')} aria-label="Cost against your budget. Opens Cost and Housing.">
-            <svg className="m-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-            <span className="m-l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /></svg> Cost vs your budget</span>
-            <span className="m-v">$2,365 <small>/ mo</small></span>
-            <span className="m-n">couple in Lisbon · <b>34% under</b> budget</span>
-          </button>
-          <button className="metric" onClick={() => go('move-there')} aria-label="Your best route. Opens Move There.">
-            <svg className="m-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-            <span className="m-l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="6" cy="6" r="2.5" /><circle cx="18" cy="18" r="2.5" /><path d="M8.5 6H15a3 3 0 010 6H9a3 3 0 000 6h6.5" /></svg> Your best route</span>
-            <span className="m-v">D8 <small>digital nomad</small></span>
-            <span className="m-n"><b>You qualify</b> · 2 items outstanding</span>
-          </button>
-          <button className="metric" onClick={() => go('move-there')} aria-label="Time to residency. Opens Move There.">
-            <svg className="m-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-            <span className="m-l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg> Time to residency</span>
-            <span className="m-v">4 <small>to 7 months</small></span>
-            <span className="m-n">filing to landing · <b className="warn">consulate backlog</b></span>
-          </button>
-          <button className="metric" onClick={() => go('move-there')} aria-label="Path to citizenship. Opens Move There.">
-            <svg className="m-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-            <span className="m-l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="3" width="16" height="18" rx="2" /><circle cx="12" cy="10" r="2.6" /><path d="M8.5 17c.9-1.8 2-2.6 3.5-2.6s2.6.8 3.5 2.6" /></svg> Path to citizenship</span>
-            <span className="m-v">5 <small>years</small></span>
-            <span className="m-n">fastest tier in the EU · needs <b>A2</b></span>
-          </button>
+          <MetricButton
+            label="Cost vs your budget"
+            onOpen={() => go('cost-housing')}
+            openLabel="Cost against your budget. Opens Cost and Housing."
+            icon={MetricIcons.cost}
+            value="$2,365"
+            unit="/ mo"
+            note={<>couple in Lisbon · <b>34% under</b> budget</>}
+          />
+          <MetricButton
+            label="Your best route"
+            onOpen={() => go('move-there')}
+            openLabel="Your best route. Opens Move There."
+            icon={MetricIcons.route}
+            value="D8"
+            unit="digital nomad"
+            note={<><b>You qualify</b> · 2 items outstanding</>}
+          />
+          <MetricButton
+            label="Time to residency"
+            onOpen={() => go('move-there')}
+            openLabel="Time to residency. Opens Move There."
+            icon={MetricIcons.time}
+            value="4"
+            unit="to 7 months"
+            note={<>filing to landing · <b className="warn">consulate backlog</b></>}
+          />
+          <MetricButton
+            label="Path to citizenship"
+            onOpen={() => go('move-there')}
+            openLabel="Path to citizenship. Opens Move There."
+            icon={MetricIcons.citizenship}
+            value="5"
+            unit="years"
+            note={<>fastest tier in the EU · needs <b>A2</b></>}
+          />
         </div>
       </section>
     )
@@ -242,7 +247,7 @@ export function CountryHero({
           label="Cost vs your budget"
           onOpen={() => go('cost-housing')}
           openLabel="Cost against your budget. Opens Cost and Housing."
-          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /></svg>}
+          icon={MetricIcons.cost}
           value={data?.monthlyCostUsd != null ? `$${data.monthlyCostUsd.toLocaleString()}/mo` : null}
           note={data?.sources?.monthlyCostUsd ?? null}
         />
@@ -250,7 +255,7 @@ export function CountryHero({
           label="Your best route"
           onOpen={() => go('move-there')}
           openLabel="Your best route. Opens Move There."
-          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="6" cy="6" r="2.5" /><circle cx="18" cy="18" r="2.5" /><path d="M8.5 6H15a3 3 0 010 6H9a3 3 0 000 6h6.5" /></svg>}
+          icon={MetricIcons.route}
           value={data?.primaryVisaRoute ?? visaType ?? null}
           note={data?.sources?.primaryVisaRoute ?? 'Confirm your eligibility with the official authority'}
         />
@@ -258,7 +263,7 @@ export function CountryHero({
           label="Time to residency"
           onOpen={() => go('move-there')}
           openLabel="Time to residency. Opens Move There."
-          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>}
+          icon={MetricIcons.time}
           value={data?.timeToResidency ?? null}
           note={data?.sources?.timeToResidency ?? null}
         />
@@ -266,7 +271,7 @@ export function CountryHero({
           label="Path to citizenship"
           onOpen={() => go('move-there')}
           openLabel="Path to citizenship. Opens Move There."
-          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="3" width="16" height="18" rx="2" /><circle cx="12" cy="10" r="2.6" /><path d="M8.5 17c.9-1.8 2-2.6 3.5-2.6s2.6.8 3.5 2.6" /></svg>}
+          icon={MetricIcons.citizenship}
           value={data?.pathToCitizenship ?? null}
           note={data?.sources?.pathToCitizenship ?? null}
         />

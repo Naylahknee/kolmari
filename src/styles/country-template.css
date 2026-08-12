@@ -3,6 +3,22 @@
    Import once in the v2 layout. */
 
 
+/* Typography tokens for the hero metric panels. Held here, at the document
+   root, so the panel styling never depends on what it happens to be nested
+   inside — the family defers to the app's own --font-sans and only falls back
+   to the literal stack if that token is absent. */
+:root{
+  --font-family-main:var(--font-sans, Geist, ui-sans-serif, system-ui, sans-serif);
+  --font-weight-bold:700;
+  --font-weight-semibold:600;
+  --font-weight-medium:500;
+  --font-weight-normal:400;
+  --font-size-metric-label:10.5px;
+  --font-size-metric-value:22px;
+  --font-size-metric-unit:12px;
+  --font-size-metric-note:11px;
+}
+
 .country-template-root{
   --navy:#17305b; --navy-deep:#0d1b39; --navy-card:#122a52;
   --gold:#f3c516; --gold-deep:#c99a00; --gold-soft:#fbeeb6;
@@ -150,24 +166,46 @@
 /* Free accounts get the panels frosted: the labels stay readable so the value is
    visible, but the figures are not legible until Kolmari Pro. Paid accounts see
    them crisp. Applied on the hero root so it needs no per-panel markup. */
-.country-template-root[data-plan="free"] .metric .m-v,
-.country-template-root[data-plan="free"] .metric .m-n{filter:blur(5px);user-select:none}
-.country-template-root .metric{position:relative;display:flex;flex-direction:column;justify-content:center;width:100%;min-height:88px;text-align:left;padding:14px 30px 14px 18px;
-  border-right:1px solid rgba(255,255,255,.12);color:#fff;transition:.15s;cursor:pointer}
-.country-template-root .metric:hover{background:rgba(255,255,255,.07)}
-.country-template-root .metric:focus-visible{outline:2px solid var(--gold);outline-offset:-3px}
+.country-template-root[data-plan="free"] .metrics .metric .m-v,
+.country-template-root[data-plan="free"] .metrics .metric .m-n{filter:blur(5px);user-select:none}
+/* Metric panel typography is declared here in full rather than inherited. A
+   panel renders as a <button> when it is clickable and a <div> when the figure
+   is still being verified, and the two elements do not arrive at the same
+   computed font or colour on their own: the scoped `button{font:inherit;
+   color:inherit}` reset above outranked a single-class `.metric` rule, so the
+   button panels were painting their value navy on the dark hero while the div
+   panels painted it white. Every declaration below is explicit and every
+   selector carries the `.metrics .metric` chain, so both elements resolve to
+   the same values wherever a hero is rendered. */
+.country-template-root .metrics{font-family:var(--font-family-main)}
+.country-template-root .metrics .metric{position:relative;display:flex;flex-direction:column;justify-content:center;width:100%;min-height:88px;text-align:left;padding:14px 30px 14px 18px;
+  border-right:1px solid rgba(255,255,255,.12);
+  font-family:var(--font-family-main);font-size:14px;font-weight:var(--font-weight-normal);line-height:1.55;letter-spacing:normal;color:#fff;
+  transition:.15s;cursor:pointer}
+.country-template-root .metrics .metric:hover{background:rgba(255,255,255,.07)}
+.country-template-root .metrics .metric:focus-visible{outline:2px solid var(--gold);outline-offset:-3px}
 .country-template-root .m-go{position:absolute;right:13px;top:16px;width:13px;height:13px;stroke-width:2.4;
   color:rgba(255,255,255,.32);transition:.15s}
-.country-template-root .metric:hover .m-go{color:var(--gold);transform:translateX(2px)}
-.country-template-root .metric:last-child{border-right:none}
-.country-template-root .m-l{display:flex;align-items:center;gap:6px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:rgba(255,255,255,.6)}
-.country-template-root .m-l svg{width:13px;height:13px;stroke-width:2.1}
-.country-template-root .m-v{display:block;font-size:22px;font-weight:700;letter-spacing:-.02em;margin-top:5px;line-height:1.1}
-.country-template-root .m-v-pending{color:rgba(255,255,255,.72)}
-.country-template-root .m-v small{font-size:12px;font-weight:500;color:rgba(255,255,255,.58);letter-spacing:0}
-.country-template-root .m-n{display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:11px;line-height:1.35;color:rgba(255,255,255,.56);margin-top:3px}
-.country-template-root .m-n b{color:#8fe0d3;font-weight:600}
-.country-template-root .m-n b.warn{color:var(--gold)}
+.country-template-root .metrics .metric:hover .m-go{color:var(--gold);transform:translateX(2px)}
+.country-template-root .metrics .metric:last-child{border-right:none}
+.country-template-root .metrics .metric .m-l{display:flex;align-items:center;gap:6px;
+  font-family:var(--font-family-main);font-size:var(--font-size-metric-label);font-weight:var(--font-weight-semibold);line-height:1.55;letter-spacing:.08em;text-transform:uppercase;
+  color:rgba(255,255,255,.6)}
+.country-template-root .metrics .metric .m-l svg{width:13px;height:13px;stroke-width:2.1}
+/* tabular-nums keeps the figures on a fixed advance width, so costs and
+   durations line up across the four panels and do not shift as values change. */
+.country-template-root .metrics .metric .m-v{display:block;
+  font-family:var(--font-family-main);font-size:var(--font-size-metric-value);font-weight:var(--font-weight-bold);line-height:1.1;letter-spacing:-.02em;font-variant-numeric:tabular-nums;
+  color:#fff;margin-top:5px}
+.country-template-root .metrics .metric .m-v-pending{color:rgba(255,255,255,.72)}
+.country-template-root .metrics .metric .m-v small{
+  font-family:var(--font-family-main);font-size:var(--font-size-metric-unit);font-weight:var(--font-weight-medium);letter-spacing:0;font-variant-numeric:tabular-nums;
+  color:rgba(255,255,255,.58)}
+.country-template-root .metrics .metric .m-n{display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  font-family:var(--font-family-main);font-size:var(--font-size-metric-note);font-weight:var(--font-weight-normal);line-height:1.35;letter-spacing:normal;
+  color:rgba(255,255,255,.56);margin-top:3px}
+.country-template-root .metrics .metric .m-n b{color:#8fe0d3;font-weight:var(--font-weight-semibold)}
+.country-template-root .metrics .metric .m-n b.warn{color:var(--gold)}
 
 /* ══ tabs ══ */
 .country-template-root .tabbar{position:sticky;top:56px;z-index:30;margin-top:16px;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden}
@@ -790,15 +828,15 @@ body.rail-collapsed .country-template-root .mark-bf{display:block;width:27px;hei
   /* Mobile rail/drawer behaviour also comes from workspace-chrome.css. */
   .country-template-root .main{width:100%;padding:14px}
   .country-template-root .metrics{grid-template-columns:1fr 1fr}
-  .country-template-root .metric:nth-child(2){border-right:none}
-  .country-template-root .metric:nth-child(-n+2){border-bottom:1px solid rgba(255,255,255,.12)}
+  .country-template-root .metrics .metric:nth-child(2){border-right:none}
+  .country-template-root .metrics .metric:nth-child(-n+2){border-bottom:1px solid rgba(255,255,255,.12)}
 }
 @media (max-width:640px){
   .country-template-root .main{padding:10px}
   .country-template-root .hero{min-height:0}
   .country-template-root .hero-body{padding:22px 18px 0}
   .country-template-root .metrics{grid-template-columns:1fr}
-  .country-template-root .metric{border-right:none;border-bottom:1px solid rgba(255,255,255,.12)}
+  .country-template-root .metrics .metric{border-right:none;border-bottom:1px solid rgba(255,255,255,.12)}
   .country-template-root .facts,.country-template-root .reasons{grid-template-columns:repeat(2,1fr)}
   .country-template-root .sec{padding:16px 15px 18px}
   .country-template-root .sec-head{align-items:flex-start;flex-direction:column;gap:8px}
