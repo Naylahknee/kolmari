@@ -81,6 +81,7 @@ export function CountryTemplate({ slug, active, fromQuiz = false, country, cente
   const go = (s: string) => router.push(`/nextinations/${slug}/v2/${s}`)
   const toggleRail = () => document.body.classList.toggle('rail-collapsed')
   useEffect(() => { if (window.innerWidth <= 900) document.body.classList.remove('rail-collapsed') }, [])
+  const overviewMode = active === 'overview'
 
   return (
     <UnitsProvider>
@@ -97,10 +98,10 @@ export function CountryTemplate({ slug, active, fromQuiz = false, country, cente
               {paid && <TabBar slug={slug} active={active} />}
               <WhyExplore country={country} rich={rich} paid={paid} />
               {paid ? (
-                <div className={`cols${active === 'overview' ? ' overview-cols' : ''}`}><div>{children}</div><RightRail rich={rich} country={country} match={match} /></div>
+                <div className={`cols${overviewMode ? ' overview-cols' : ''}`}><div>{children}</div><RightRail rich={rich} country={country} match={match} overviewMode={overviewMode} /></div>
               ) : (
                 <div className="country-gated-zone">
-                  <div className="country-gated-blur" aria-hidden="true"><div className="cols"><div>{children}</div><RightRail rich={rich} country={country} match={match} /></div></div>
+                  <div className="country-gated-blur" aria-hidden="true"><div className="cols"><div>{children}</div><RightRail rich={rich} country={country} match={match} overviewMode /></div></div>
                   <UpgradeOverlay countryName={country.name} />
                 </div>
               )}
