@@ -5,7 +5,6 @@ import { saveGeneratedAsset } from '@/lib/country-assets'
 
 export const runtime = 'nodejs'
 
-// Same allowlist gate as the generator route (KOLMARI_ADMIN_EMAILS).
 function isAllowedAdmin(email: string) {
   const configured = process.env.KOLMARI_ADMIN_EMAILS
     ?.split(',')
@@ -18,12 +17,12 @@ function isAllowedAdmin(email: string) {
 const slug = z.string().trim().min(2).max(80).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
 const saveSchema = z.discriminatedUnion('assetType', [
   z.object({ assetType: z.literal('hero'), countrySlug: slug, imageDataUrl: z.string().min(1) }),
+  z.object({ assetType: z.literal('dashboard_destination'), countrySlug: slug, imageDataUrl: z.string().min(1) }),
   z.object({ assetType: z.literal('city'), countrySlug: slug, citySlug: slug, imageDataUrl: z.string().min(1) }),
 ])
 
-// Persist an approved generated image to Neon so the country page can serve it
-// from /api/country-asset without a redeploy. Admin-only; the image bytes come
-// straight from the generator preview (a data: URL).
+// Persist an explicitly approved generated image. Dashboard destination images
+// use this same admin-only review/save path and are never saved by normal visits.
 export async function POST(request: Request) {
   const user = await getRequestUser(request)
   if (!user) return NextResponse.json({ error: 'Authentication required.' }, { status: 401 })
@@ -43,7 +42,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Please provide a valid asset to save.', issues: parsed.error.flatten() }, { status: 400 })
   }
 
-  // data:image/webp;base64,XXXX  →  contentType + base64 payload
   const match = /^data:(image\/[a-z+.-]+);base64,(.+)$/i.exec(parsed.data.imageDataUrl)
   if (!match) {
     return NextResponse.json({ error: 'Expected a base64 image data URL.' }, { status: 400 })
