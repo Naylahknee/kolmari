@@ -230,7 +230,7 @@ export function buildResume(input: DashboardInput): ResumeCard {
       title: `Finish “${movingDoc.name}”`,
       detail: whenLine,
       cta: 'Open documents',
-      href: '/documents',
+      href: '/command-center?tab=documents',
     }
   }
 
@@ -243,7 +243,7 @@ export function buildResume(input: DashboardInput): ResumeCard {
       title: openTask.text,
       detail: whenLine,
       cta: 'Open checklist',
-      href: '/my-plan?tab=checklist',
+      href: '/command-center?tab=my-plan&planTab=checklist',
     }
   }
 
@@ -316,7 +316,7 @@ export function buildNextActions(input: DashboardInput, shortlist: ShortlistItem
         why: 'This task is past the date you set for it.',
         minutes: null,
         cta: 'Open',
-        href: '/my-plan?tab=checklist',
+        href: '/command-center?tab=my-plan&planTab=checklist',
         reason: 'Overdue items rank first because everything scheduled after them slips.',
       })
     }
@@ -344,7 +344,7 @@ export function buildNextActions(input: DashboardInput, shortlist: ShortlistItem
       why: 'Your plan needs a destination before it can track documents or dates.',
       minutes: 2,
       cta: 'Choose',
-      href: '/my-plan',
+      href: '/command-center',
       reason: 'Every downstream step — pathway, documents, budget — is scoped to a destination.',
     })
   } else if (!hasDestination) {
@@ -378,7 +378,7 @@ export function buildNextActions(input: DashboardInput, shortlist: ShortlistItem
       why: 'This improves affordability estimates across your shortlist.',
       minutes: 5,
       cta: 'Add budget',
-      href: '/my-plan?tab=budget',
+      href: '/command-center?tab=my-plan&planTab=budget',
       reason: 'Affordability comparisons stay blank until real figures exist to compare against.',
     })
   }
@@ -402,7 +402,7 @@ export function buildNextActions(input: DashboardInput, shortlist: ShortlistItem
       why: 'Your saved pathway has document requirements to collect and verify.',
       minutes: 10,
       cta: 'Open documents',
-      href: '/documents',
+      href: '/command-center?tab=documents',
       reason: 'Documents take the longest lead time, so they start once a pathway is fixed.',
     })
   }
@@ -414,7 +414,7 @@ export function buildNextActions(input: DashboardInput, shortlist: ShortlistItem
       why: 'Deadlines and document expirations are calculated back from this date.',
       minutes: 2,
       cta: 'Set date',
-      href: '/my-plan',
+      href: '/command-center?tab=my-plan',
       reason: 'Without a date Kolmari cannot tell you what is urgent versus what can wait.',
     })
   }
@@ -428,140 +428,42 @@ export function buildNextActions(input: DashboardInput, shortlist: ShortlistItem
         why: 'The next open task on your move checklist.',
         minutes: null,
         cta: 'Open',
-        href: '/my-plan?tab=checklist',
-        reason: 'Pulled straight from your own checklist order.',
+        href: '/command-center?tab=my-plan&planTab=checklist',
+        reason: 'Once your plan exists, the next incomplete checklist item becomes the continuation point.',
       })
     }
-  }
-
-  if (tasks.length === 0) {
-    add({
-      id: 'caught-up',
-      title: 'You’re caught up',
-      why: 'No open deadlines or tasks. Review your plan or advance your move stage.',
-      minutes: null,
-      cta: 'Open My Plan',
-      href: '/my-plan',
-      reason: 'Nothing in your plan is currently blocked or overdue.',
-    })
   }
 
   return tasks
 }
 
-// --- Needs your attention ----------------------------------------------------
-
-export type AlertKind = 'action' | 'changed' | 'reminder'
-export type DashAlert = {
-  id: string
-  kind: AlertKind
-  title: string
-  /** What it means and what to do about it. */
-  detail: string
-  cta: string
-  href: string
-}
-
-export const ALERT_KIND_LABEL: Record<AlertKind, string> = {
-  action: 'Action required',
-  changed: 'Changed',
-  reminder: 'Reminder',
-}
-
-/**
- * Real alerts only. Every one is derived from a date the user actually saved —
- * a document expiration, a task due date, or the target move date. Kolmari has
- * no live requirements feed, so no "changed" alerts are manufactured here.
- */
-export function buildAlerts(input: DashboardInput): DashAlert[] {
-  const { plan, today } = input
-  if (!plan) return []
-  const alerts: DashAlert[] = []
-
-  // A document that expires before the move — the classic passport trap.
-  for (const doc of plan.documents) {
-    if (!doc.expirationDate || doc.status === 'APPROVED') continue
-    const daysLeft = daysUntil(doc.expirationDate, today)
-    if (daysLeft === null) continue
-    const expiresBeforeMove =
-      plan.target_move_date !== null && doc.expirationDate < plan.target_move_date
-    if (daysLeft < 0) {
-      alerts.push({
-        id: `doc-expired-${doc.id}`,
-        kind: 'action',
-        title: `${doc.name} has expired`,
-        detail: 'Renew it before you file — an expired document will stop your application.',
-        cta: 'Open documents',
-        href: '/documents',
-      })
-    } else if (expiresBeforeMove) {
-      alerts.push({
-        id: `doc-before-move-${doc.id}`,
-        kind: 'action',
-        title: `${doc.name} expires before your move date`,
-        detail: `It expires in ${daysLeft} day${daysLeft === 1 ? '' : 's'}, ahead of your target move date. Renew it first.`,
-        cta: 'Open documents',
-        href: '/documents',
-      })
-    } else if (daysLeft <= 90) {
-      alerts.push({
-        id: `doc-soon-${doc.id}`,
-        kind: 'reminder',
-        title: `${doc.name} expires in ${daysLeft} day${daysLeft === 1 ? '' : 's'}`,
-        detail: 'Renewals can take weeks. Start it before it blocks your application.',
-        cta: 'Open documents',
-        href: '/documents',
-      })
-    }
-  }
-
-  // Overdue and imminent tasks the user dated themselves.
-  for (const task of plan.checklist) {
-    if (task.done || !task.due) continue
-    const daysLeft = daysUntil(task.due, today)
-    if (daysLeft === null) continue
-    if (daysLeft < 0) {
-      alerts.push({
-        id: `task-overdue-${task.id}`,
-        kind: 'action',
-        title: `“${task.text}” is overdue`,
-        detail: `It was due ${Math.abs(daysLeft)} day${Math.abs(daysLeft) === 1 ? '' : 's'} ago. Complete it or move the date.`,
-        cta: 'Open checklist',
-        href: '/my-plan?tab=checklist',
-      })
-    } else if (daysLeft <= 14) {
-      alerts.push({
-        id: `task-soon-${task.id}`,
-        kind: 'reminder',
-        title: `“${task.text}” is due in ${daysLeft} day${daysLeft === 1 ? '' : 's'}`,
-        detail: 'Coming up on your own checklist.',
-        cta: 'Open checklist',
-        href: '/my-plan?tab=checklist',
-      })
-    }
-  }
-
-  const RANK: Record<AlertKind, number> = { action: 0, changed: 1, reminder: 2 }
-  return alerts.sort((a, b) => RANK[a.kind] - RANK[b.kind]).slice(0, 3)
-}
-
 // --- Ask Kolmari suggestions -------------------------------------------------
 
-export type Suggestion = { question: string; icon: 'money' | 'globe' | 'compare' | 'route' }
-
-/** At most three chips, chosen from the user's actual state. */
-export function buildSuggestions(input: DashboardInput, shortlist: ShortlistItem[]): Suggestion[] {
-  const out: Suggestion[] = []
-  const primary = shortlist[0]
-
-  if (primary) out.push({ question: `Can I afford ${primary.name}?`, icon: 'money' })
-  if (!input.plan?.selected_pathway && primary) {
-    out.push({ question: `Which pathways fit me in ${primary.name}?`, icon: 'route' })
+export function buildSuggestions(input: DashboardInput, shortlist: ShortlistItem[]): string[] {
+  if (!input.profileComplete) {
+    return [
+      'Where can I realistically move?',
+      'What should I know before I relocate abroad?',
+      'What does Kolmari need from me to calculate matches?',
+    ]
   }
   if (shortlist.length >= 2) {
-    out.push({ question: `Compare ${shortlist[0].name} and ${shortlist[1].name}`, icon: 'compare' })
+    return [
+      `Can I afford ${shortlist[0].name}?`,
+      `What visa pathways fit me in ${shortlist[0].name}?`,
+      `Compare ${shortlist[0].name} and ${shortlist[1].name}`,
+    ]
   }
-  out.push({ question: 'Where can I realistically move?', icon: 'globe' })
-
-  return out.slice(0, 3)
+  if (shortlist.length === 1) {
+    return [
+      `Can I afford ${shortlist[0].name}?`,
+      `What pathways fit me in ${shortlist[0].name}?`,
+      `What should I research next about ${shortlist[0].name}?`,
+    ]
+  }
+  return [
+    'Where can I realistically move?',
+    'Which countries fit my household?',
+    'How much money would I need to relocate?',
+  ]
 }
