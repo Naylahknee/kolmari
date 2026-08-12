@@ -1,4 +1,5 @@
-import 'dotenv/config'
+import dotenv from 'dotenv'
+dotenv.config({ path: '.env.local' })
 import { readFileSync, readdirSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { neon } from '@neondatabase/serverless'
