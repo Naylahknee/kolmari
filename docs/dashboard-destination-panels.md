@@ -7,27 +7,29 @@
 
 ## 1. Scope
 
-This feature extends the existing Dashboard `Destinations` panel. It does **not** rebuild or refactor the Dashboard shell.
+This feature extends the existing Dashboard `Destinations` panel. It does **not** rebuild or replace the Dashboard shell.
 
 ```text
 DASHBOARD
-└── DESTINATIONS PANEL  ← existing parent widget
+└── DESTINATIONS PANEL
     ├── #1 matched-country card
     ├── #2 matched-country card
     ├── #3 matched-country card
     └── Visa Options for #1 matched country
 ```
 
-The three country cards are nested content, not Dashboard widgets.
+The three country cards are nested information surfaces, not Dashboard widgets and not country-page navigation controls.
 
 ## 2. Header
 
-Preserve the existing parent-panel treatment:
+Preserve:
 
 - title: `Destinations`
 - right-side link: `Explore more`
 - link route: `/your-world`
 - standard white Dashboard surface, border, radius, and padding
+
+`Explore more` is the explicit navigation path from this parent panel into destination discovery.
 
 ## 3. Match behavior
 
@@ -49,11 +51,9 @@ Visible content only:
 
 Do not visibly show region, city, description, visa type, cost, Match Score, cost tier, ranking explanation, badges, eligibility metrics, or pathway detail.
 
-Match Score remains available in the card's `aria-label`.
+Match Score remains available in the card's accessible label.
 
-Navigation:
-
-`/nextinations/{countrySlug}/v2/overview`
+**Interaction rule:** clicking or tapping the matched-country card does nothing. The card must not redirect to a country page. It is a visual summary of the ranked result inside the Dashboard parent panel.
 
 ## 5. Layout
 
@@ -68,13 +68,11 @@ Preferred card height:
 - tablet: ~180px
 - mobile: ~160px
 
-The existing parent `destinations` widget is marked `full: true` in the existing Dashboard widget registry so its internal grid has sufficient width. This is a sizing change to the existing widget, not a Dashboard rebuild.
+The Destinations panel may occupy the primary Dashboard column so its internal matched-country grid has sufficient width.
 
 ## 6. Dashboard destination image asset
 
-Dedicated asset type:
-
-`dashboard_destination`
+Dedicated asset type: `dashboard_destination`.
 
 It is not the country-page `hero`.
 
@@ -101,43 +99,22 @@ approved generated dashboard_destination
 → neutral Kolmari fallback
 ```
 
-Do not automatically substitute:
+Do not automatically substitute the country-page hero, city imagery, or Mapbox snapshot. Normal Dashboard visits do not request image generation.
 
-- country-page hero
-- city imagery
-- Mapbox snapshot
+## 8. Visa Options preview
 
-Normal Dashboard visits do not request image generation.
-
-## 8. Admin workflow
-
-`Dashboard Destination Images` is a dedicated Country Page Generator Engine tab.
-
-Workflow:
-
-```text
-admin enters country/image guidance
-→ generate one preview
-→ inspect responsive Dashboard crop
-→ download and/or explicitly Save approved image
-```
-
-Generation remains protected by authentication and `KOLMARI_ADMIN_EMAILS`; `OPENAI_API_KEY` remains server-only.
-
-## 9. Visa Options preview
-
-The section appears beneath the nested match-card grid.
+Visa Options are part of the parent Destinations panel and appear beneath the nested matched-country grid.
 
 Heading:
 
 `Visa Options for {#1 country}`
 
-Source: existing `PATHWAYS` data.
+Source: existing researched `PATHWAYS` data.
 
 - use the #1 ranked country only
 - display up to 3 researched pathways
-- keep rows concise
-- link to `/pathways`
+- keep rows concise: pathway name + category
+- the parent may include one explicit `View all pathways` link to `/pathways`
 - do not invent routes
 - do not generate legal explanations
 
@@ -145,24 +122,20 @@ No researched routes:
 
 `No researched visa pathways are available for this country yet.`
 
-No ranked country:
+No ranked country: do not render Visa Options.
 
-Do not render Visa Options.
+## 9. Accessibility
 
-## 10. Accessibility
+Each matched-country card:
 
-Each card:
+- is a semantic article/information surface rather than a link
+- has a visible country name and rank
+- treats the background image as decorative
+- exposes rank, country, and Match Score through its accessible label
 
-- semantic link
-- keyboard navigable
-- visible focus ring
-- visible country name
-- decorative background image
-- `aria-label` includes rank, country, and Match Score
+Visa Options uses a semantic section, heading, and list. Explicit navigation links remain separately identifiable controls.
 
-Visa Options uses a semantic section, heading, list, and links.
-
-## 11. Overlay
+## 10. Overlay
 
 Use approximately:
 
@@ -175,9 +148,15 @@ linear-gradient(
 
 Do not fully black out, grayscale, or hide the flag identity.
 
+## 11. Dashboard relationship
+
+The Dashboard layout is controlled by `docs/dashboard-layout-builder.md`.
+
+Default composition places Destinations in the primary column and Progress by planning area, Active pathway, and Deadlines and blockers in the second column. The Journey tracker defaults to the header dropdown but may be placed in the Dashboard canvas through Account → Dashboard.
+
 ## 12. Responsive validation
 
-Test with Journey Tracker expanded and collapsed at:
+Test at:
 
 - 1440px
 - 1024px
@@ -187,26 +166,16 @@ Test with Journey Tracker expanded and collapsed at:
 Confirm:
 
 - Destinations remains one parent widget
-- cards wrap naturally
+- matched cards wrap naturally
 - mobile is one column
 - Visa Options stay beneath cards
-- Journey Tracker is unchanged
+- cards do not navigate
 - no page overflow
 - country names stay readable
 
 ## 13. Preservation rules
 
-Preserve:
-
-1. Dashboard shell and unrelated widgets.
-2. Journey Tracker behavior.
-3. Dashboard customization.
-4. Match and ranking logic.
-5. Profile logic.
-6. Plan state.
-7. Existing `PATHWAYS` data.
-8. Your World map.
-9. Country-page hero behavior.
+Preserve match/ranking logic, profile logic, plan state, existing `PATHWAYS`, Your World, and country-page hero behavior. Dashboard layout customization controls panel placement only.
 
 Do not add local Primary/Selected destination product state to this panel.
 
@@ -217,9 +186,6 @@ completed profile
 → rankNextinations(profile)
 → top 3 real matches
 → existing Destinations parent panel
-→ nested rank + country-name cards
-→ dashboard_destination/flag/fallback imagery
-→ Visa Options for #1 from PATHWAYS
+→ non-navigational rank + country-name cards
+→ concise Visa Options for #1 ranked country
 ```
-
-See also: `docs/country-design-schema.md`.
