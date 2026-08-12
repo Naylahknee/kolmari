@@ -9,6 +9,7 @@ import { getProfile, hasCompletedProfile } from '@/lib/profile'
 import { rankNextinations } from '@/lib/userProfile'
 import { DocumentsManager } from '@/components/kolmari/documents-manager'
 import { PlanWorkspace } from '@/components/kolmari/plan/PlanWorkspace'
+import { CommandCenterBoard } from '@/components/kolmari/command-center/board'
 import { TopCountriesGrid } from '@/components/kolmari/command-center/top-countries'
 
 export const metadata: Metadata = { title: 'Command Center | Kolmari' }
@@ -42,7 +43,7 @@ export default async function CommandCenterPage({ searchParams }: { searchParams
       <div className="mb-5">
         <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-gold-deep">Planning workspace</p>
         <h1 className="mt-1 font-display text-[27px] font-bold text-navy">Command Center</h1>
-        <p className="mt-1 max-w-2xl text-sm text-muted">Keep your plan, assessment results, and relocation documents together in one workspace.</p>
+        <p className="mt-1 max-w-2xl text-sm text-muted">Keep your plan, assessment results, destination research, and relocation documents together in one workspace.</p>
       </div>
 
       <nav className="mb-6 flex flex-wrap gap-2 border-b border-line pb-3" aria-label="Command Center sections">
@@ -66,6 +67,9 @@ export default async function CommandCenterPage({ searchParams }: { searchParams
             dependents={profile.dependents}
             initialTab={planTab}
           />
+          <div className="mt-8 border-t border-line pt-8">
+            <CommandCenterBoard initial={board} />
+          </div>
         </>
       ) : null}
 
