@@ -24,7 +24,7 @@
 | **Community Fit** | A qualitative belonging and daily-life consideration | Cards and Greenbook Insights |
 | **Flutter Mode** | The transition from research to execution | Primary dashboard action |
 | **Progress Tracker** | Checklist and progress system | Dashboard and tracker |
-| **Kolmari Klub** | The community of people planning relocation | Community section |
+| **Kolmari Club** | The community of people planning relocation | Community section |
 
 ## Visual system
 
@@ -58,7 +58,7 @@ Build My Move Plan
 Explore Countries
 View My Pathways
 Enter Flutter Mode
-Join Kolmari Klub
+Join Kolmari Club
 Save Destination
 Compare Destinations
 See My Next Steps
