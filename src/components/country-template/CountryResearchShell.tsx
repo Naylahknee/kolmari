@@ -1,6 +1,7 @@
 'use client'
 import { useEffect } from 'react'
 import { UnitsProvider } from './client/UnitsControl'
+import { FullWidthWorkspaceStyles } from '@/components/kolmari/full-width-workspace-styles'
 import { TopBar } from './TopBar'
 import { Sidebar } from './Sidebar'
 
@@ -16,6 +17,7 @@ export function CountryResearchShell({ children }: { children: React.ReactNode }
   return (
     <UnitsProvider>
       <div className="country-template-root">
+        <FullWidthWorkspaceStyles />
         <TopBar onToggleRail={toggleRail} />
         <div className="shell">
           <button type="button" className="rail-backdrop" onClick={toggleRail} aria-label="Close navigation" />
