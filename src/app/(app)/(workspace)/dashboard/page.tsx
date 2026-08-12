@@ -8,7 +8,7 @@ import {
   PLAN_STAGES,
   getKolmariPlan,
 } from '@/lib/kolmari-plan'
-import { getProfile, hasCompletedProfile } from '@/lib/profile'
+import { getProfile, hasCompletedProfile, isPaid } from '@/lib/profile'
 import { rankNextinations } from '@/lib/userProfile'
 import { getBoard } from '@/lib/command-center'
 import { getDashboardLayout } from '@/lib/dashboard-layout-store'
@@ -71,6 +71,7 @@ export default async function DashboardPage() {
   const today = new Date()
 
   const complete = hasCompletedProfile(profile)
+  const trackerUnlocked = isPaid(profile)
   const firstName = profile.display_name || user.email.split('@')[0]
   const currentStage = plan?.journey_stage ?? 1
   const stageRows = journeyStages(plan, today)
@@ -152,27 +153,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <DashboardWelcome firstName={firstName} firstVisitCandidate={firstVisitCandidate} profileComplete={complete} />
-
-      <div className="flex flex-col gap-4 min-[861px]:flex-row">
-        <div className="flex min-w-0 flex-1 flex-col gap-4">
-          {shown.length === 0 && (
-            <p className="rounded-[var(--radius-card)] border border-dashed border-line-strong bg-white px-4 py-8 text-center text-sm text-muted">
-              Every dashboard panel is hidden. Turn them back on in Account → Dashboard.
-            </p>
-          )}
-
-          {blocks.map((block, index) =>
-            block.kind === 'full' ? (
-              <div key={`${block.ids[0]}-${index}`}>{PANELS[block.ids[0]]()}</div>
-            ) : (
-              <div key={`row-${index}`} className="grid items-start gap-4 [grid-template-columns:repeat(auto-fit,minmax(252px,1fr))]">
-                {block.ids.map((id) => <div key={id}>{PANELS[id]()}</div>)}
-              </div>
-            ),
-          )}
-        </div>
-
+      {trackerUnlocked && (
         <JourneyTracker
           rows={stageRows}
           currentStage={currentStage}
@@ -181,6 +162,26 @@ export default async function DashboardPage() {
           totalStages={PLAN_STAGES.length}
           savedAt={savedAtLabel(plan?.updated_at ?? null)}
         />
+      )}
+
+      <DashboardWelcome firstName={firstName} firstVisitCandidate={firstVisitCandidate} profileComplete={complete} />
+
+      <div className="flex min-w-0 flex-1 flex-col gap-4">
+        {shown.length === 0 && (
+          <p className="rounded-[var(--radius-card)] border border-dashed border-line-strong bg-white px-4 py-8 text-center text-sm text-muted">
+            Every dashboard panel is hidden. Turn them back on in Account → Dashboard.
+          </p>
+        )}
+
+        {blocks.map((block, index) =>
+          block.kind === 'full' ? (
+            <div key={`${block.ids[0]}-${index}`}>{PANELS[block.ids[0]]()}</div>
+          ) : (
+            <div key={`row-${index}`} className="grid items-start gap-4 [grid-template-columns:repeat(auto-fit,minmax(252px,1fr))]">
+              {block.ids.map((id) => <div key={id}>{PANELS[id]()}</div>)}
+            </div>
+          ),
+        )}
       </div>
     </div>
   )
