@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ArrowRight, Check, Lock } from 'lucide-react'
-import { WorldMatchMap, type WorldPin } from './world-match-map'
+import { WorldMatchMap } from './world-match-map'
+import type { WorldPin } from './your-world-map'
 
 // Countries surfaced from the user's quiz/profile ranking. Names are shown free;
 // the Match Score behind them is a Pro feature, so only the top match links
