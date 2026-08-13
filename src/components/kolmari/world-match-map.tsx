@@ -7,6 +7,10 @@ import Link from 'next/link'
 import { ArrowRight, ChevronDown, MapPinned } from 'lucide-react'
 import type { WorldPin } from './your-world-map'
 
+// Re-exported so callers that already import WorldMatchMap can take the pin type
+// from the same module (your-world-gated.tsx does).
+export type { WorldPin }
+
 /**
  * "Matched destinations" map — a static Mapbox image ported from the demo's
  * World page. Each matched country is dropped as a gold star pin on a dark map,

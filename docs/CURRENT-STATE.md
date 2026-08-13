@@ -559,3 +559,40 @@ Verified in headless Chromium against the real stylesheet: the Portugal panel,
 the data-driven panel and the pending panel now report identical computed
 typography, the only remaining difference being the intended `.m-v-pending`
 muted colour.
+
+## Workspace margins — one content column on every page
+
+Two separate problems sat behind "fix the margins".
+
+**1. The build was red.** `main` at `f1f3fdb` (PR #147) failed to compile —
+`your-world-gated.tsx` imports `WorldPin` from `./world-match-map`, which imports
+the type but never re-exported it. Deploy #172 failed, so the live site was
+frozen on the older build #171. `world-match-map.tsx` now re-exports the type.
+
+**2. Country pages had their own content column.** `workspace-shell.tsx` returns
+`children` directly for `/nextinations/…/v2`, so country pages never get
+`.main.workspace-main` — they use `country-template.css`'s own `.main`, which was
+`max-width:1500px; padding:18px 20px 60px` with **no** `margin-inline:auto`. Every
+other workspace page is a centred 1240px column with 28px gutters. On a wide
+monitor a country page therefore hugged the rail and ran 260px wider than the
+rest of the app.
+
+Fixed by making the column a shared pair of tokens rather than two hard-coded
+copies: `--workspace-column: 1240px` and `--workspace-gutter: 28px` on `:root` in
+`workspace-chrome.css`, read by both `.main.workspace-main` and
+`.country-template-root .main` (each with a literal fallback so the column cannot
+collapse if the token bundle is ever absent). Country pages keep their own
+vertical rhythm — only the column width, side gutters and centring are shared.
+
+Measured in headless Chromium against the real compiled CSS bundles, at 1565 /
+1920 / 2560px, for both a workspace page and a country page:
+
+| | column | gutter | centred | doc overflow |
+|---|---|---|---|---|
+| workspace | 1240px | 28px | yes | 0px |
+| country | 1240px | 28px | yes | 0px |
+
+Zero elements extend past the viewport at any of the three widths. The same
+measurement showed that when the workspace stylesheet chunk is absent the page
+loses the rail width, the column and the gutters entirely and overflows right —
+which is what a stale or unstyled build looks like.

@@ -300,15 +300,26 @@ body.rail-collapsed .rail-title { display: none; }
 .rail .icon-btn:hover { background: rgba(255,255,255,.06); color: #fff; }
 body.rail-collapsed .rail .icon-btn svg { transform: scaleX(-1); }
 
+/* The workspace content column. Held as tokens because country pages render
+   their own shell (workspace-shell.tsx returns children directly for
+   /nextinations/…/v2) and so cannot inherit this rule — country-template.css
+   reads the same two values instead of carrying its own, which is how the
+   columns drifted to 1500px/20px and left country pages hugging the rail while
+   every other page sat centred. */
+:root {
+  --workspace-column: 1240px;
+  --workspace-gutter: 28px;
+}
+
 .main.workspace-main {
   flex: 1;
   min-width: 0;
   width: 100%;
   /* One consistent content column + centered margins across every workspace
      page, so page-to-page margins/padding match. */
-  max-width: 1240px;
+  max-width: var(--workspace-column, 1240px);
   margin-inline: auto;
-  padding: 24px 28px 64px;
+  padding: 24px var(--workspace-gutter, 28px) 64px;
 }
 
 .sb-label { font-size: 9.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #6b7f9e; padding: 0 10px; margin: 18px 0 6px; }

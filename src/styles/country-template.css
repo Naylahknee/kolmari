@@ -86,7 +86,12 @@
 .country-template-root .dot{width:6px;height:6px;border-radius:50%;background:var(--teal)}
 .country-template-root .dot.mid{background:var(--gold)}.country-template-root .dot.low{background:#7d90b0}
 
-.country-template-root .main{flex:1;min-width:0;padding:18px 20px 60px;max-width:1500px}
+/* Same content column as every other workspace page. Country pages bypass the
+   app shell, so they read the shared tokens from workspace-chrome.css rather
+   than inherit its rule; without the centring they hugged the rail while the
+   rest of the app sat centred. Vertical rhythm stays as authored for this
+   template — only the column and its side gutters are shared. */
+.country-template-root .main{flex:1;min-width:0;width:100%;max-width:var(--workspace-column, 1240px);margin-inline:auto;padding:18px var(--workspace-gutter, 28px) 60px}
 .country-template-root .workspace-main{max-width:none;width:100%}
 .country-template-root .workspace-main img{
   border:0!important;
