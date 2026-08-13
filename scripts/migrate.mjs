@@ -11,6 +11,10 @@ if (!process.env.DATABASE_URL || !/^postgres(ql)?:\/\//.test(process.env.DATABAS
 const sql = neon(process.env.DATABASE_URL)
 const directory = resolve(process.cwd(), 'db', 'migrations')
 for (const filename of readdirSync(directory).filter((name) => name.endsWith('.sql')).sort()) {
-  await sql.query(readFileSync(resolve(directory, filename), 'utf8'))
+  const content = readFileSync(resolve(directory, filename), 'utf8')
+  const statements = content.split(';').map(s => s.trim()).filter(Boolean)
+  for (const statement of statements) {
+    await sql.query(statement)
+  }
   console.log(`Applied ${filename}`)
 }
