@@ -1,0 +1,83 @@
+.page :global(article[class*="min-h-[188px]"]) {
+  min-height: 248px !important;
+  background: #0d1b39 !important;
+}
+
+/* Restore the approved image-backed treatment: the country flag is the card
+   artwork, not a faint watermark behind a white card. */
+.page :global(article[class*="min-h-[188px]"] > img.absolute.inset-0) {
+  opacity: 1 !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  filter: saturate(.94) contrast(1.02);
+}
+
+.page :global(article[class*="min-h-[188px]"] > div.absolute.inset-0) {
+  background: linear-gradient(
+    to top,
+    rgba(13, 27, 57, .94) 0%,
+    rgba(13, 27, 57, .72) 33%,
+    rgba(13, 27, 57, .22) 72%,
+    rgba(13, 27, 57, .08) 100%
+  ) !important;
+}
+
+.page :global(article[class*="min-h-[188px]"] > button.relative.z-10) {
+  min-height: 190px;
+  display: flex !important;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 18px 18px 12px !important;
+}
+
+/* The background itself is now the country identity; remove the redundant
+   miniature flag tile from the foreground. */
+.page :global(article[class*="min-h-[188px]"] > button.relative.z-10 > div:first-child > img) {
+  display: none !important;
+}
+
+.page :global(article[class*="min-h-[188px]"] > button.relative.z-10 h3) {
+  color: #fff !important;
+  font-size: 20px !important;
+  font-weight: 800 !important;
+  text-shadow: 0 1px 3px rgba(13, 27, 57, .45);
+}
+
+.page :global(article[class*="min-h-[188px]"] > button.relative.z-10 p) {
+  color: rgba(255, 255, 255, .86) !important;
+}
+
+.page :global(article[class*="min-h-[188px]"] > button.relative.z-10 > div:nth-child(2)) {
+  margin-top: 10px !important;
+  color: #fff;
+}
+
+.page :global(article[class*="min-h-[188px]"] > button.relative.z-10 > div:nth-child(2) > span[class*="text-teal"]) {
+  color: #fff !important;
+  text-shadow: 0 1px 2px rgba(13, 27, 57, .4);
+}
+
+/* Keep the save control readable over any flag/scene. */
+.page :global(article[class*="min-h-[188px]"] > button.absolute.right-3.top-3) {
+  border-radius: 9999px !important;
+  background: rgba(255, 255, 255, .94) !important;
+  box-shadow: 0 2px 8px rgba(13, 27, 57, .15);
+}
+
+/* The approved colored country signals remain on a clean white footer bar. */
+.page :global(article[class*="min-h-[188px]"] > div.relative.z-10) {
+  min-height: 58px;
+  margin-top: 0 !important;
+  background: #fff !important;
+  border-top-color: #eef1f6 !important;
+}
+
+@media (max-width: 767px) {
+  .page :global(article[class*="min-h-[188px]"]) {
+    min-height: 230px !important;
+  }
+
+  .page :global(article[class*="min-h-[188px]"] > button.relative.z-10) {
+    min-height: 172px;
+  }
+}
