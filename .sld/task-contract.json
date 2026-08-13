@@ -1,44 +1,36 @@
 {
-  "taskId": "dashboard-destination-selection-and-layout-preview",
-  "instruction": "Make matched-country cards inside the existing Dashboard Destinations parent panel selectable so clicking a match updates the visa-pathway information below the cards without navigating away from Dashboard, and add a live layout visualization window to Account → Dashboard that mirrors template selection, panel order, column placement, visibility, and Journey placement.",
-  "objective": "Keep Dashboard destination interaction local to the Destinations parent panel and let users visualize Dashboard layout changes before returning to the Dashboard, while preserving match logic, pathway data, plan state, subscription logic, and the existing persisted DashboardLayout contract.",
-  "allowedEntities": [],
-  "allowedFiles": [
-    ".sld/task-contract.json",
-    "docs/dashboard-destination-panels.md",
-    "docs/dashboard-layout-builder.md",
-    "docs/dashboard-norman-door-audit.md",
-    "src/components/kolmari/dashboard-side-cards.tsx",
-    "src/components/kolmari/dashboard/customize.tsx",
-    "src/components/kolmari/dashboard/destination-panel.tsx"
+  "taskId": "workspace-margins",
+  "instruction": "Can you fix the margins in the current build. Confirmed scope: both the clipping/overflow seen on Your World and a spacing pass on the shared workspace content column, affecting every workspace page.",
+  "objective": "Every workspace page presents the same content column: one shared max-width, one shared gutter, centred the same way. Country pages currently use their own 1500px/20px left-aligned column and must be brought onto the shared values. Also unblock the build, which is failing on a missing WorldPin re-export.",
+  "allowedEntities": [
+    "Navigation Shell",
+    "Country Page"
   ],
-  "allowedActions": ["MODIFY", "RESTYLE", "REWIRE"],
+  "allowedFiles": [
+    "src/styles/workspace-chrome.css",
+    "src/styles/country-template.css",
+    "src/components/kolmari/world-match-map.tsx",
+    "docs/CURRENT-STATE.md",
+    ".sld/task-contract.json",
+    ".sld/baseline.json"
+  ],
+  "allowedActions": [
+    "MODIFY",
+    "RESTYLE"
+  ],
   "allowedUIRegions": [
-    "Dashboard Destinations parent panel",
-    "Dashboard matched-country selectors",
-    "Dashboard Visa Options preview",
-    "Account Dashboard layout editor",
-    "Account Dashboard live layout preview"
+    "workspace content column",
+    "country page content column"
   ],
   "requiredChanges": [
-    "matched-country cards are clickable selectors rather than country-page links",
-    "#1 match is the default viewing selection",
-    "selecting #1, #2, or #3 updates Visa Options below the cards for that country",
-    "destination selection remains temporary presentation state and does not mutate saved, shortlist, selected, primary, or plan destination state",
-    "selected match has a clear visible and accessible state",
-    "Account Dashboard includes a live visualization window driven by the existing DashboardLayout state",
-    "layout preview updates immediately for templates, drag/drop moves, column moves, show/hide changes, Journey placement, and reset",
-    "layout preview does not create a second Dashboard state or perform Dashboard data queries"
+    "country page content column adopts the shared workspace max-width, gutter and centring",
+    "re-export WorldPin from world-match-map so the build compiles"
   ],
   "forbiddenChanges": [
-    "country page navigation from Dashboard matched-country cards",
-    "match calculation changes",
-    "visa pathway data or qualification calculation changes",
-    "Journey stage or task calculation changes",
-    "profile or subscription model changes",
-    "database schema migrations",
-    "new persisted destination-selection state",
-    "new Dashboard layout persistence model"
+    "src/lib",
+    "src/app",
+    "src/components/kolmari/your-world.tsx",
+    "src/components/country-template/tabs"
   ],
   "createdFrom": "user-request"
 }
