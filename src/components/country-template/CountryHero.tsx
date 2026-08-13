@@ -33,12 +33,8 @@ function HeroBackdrop({ code, artwork }: { code: string; artwork?: HeroArtwork |
     : <div className="hero-bg hero-bg-empty" aria-hidden="true" />
 }
 
-/**
- * Shared hero for every country page. The existing per-country hero background
- * remains untouched. Per the locked/unlocked reference, the only descriptive
- * text rendered over that background is the country name. The small flag tile
- * remains visual identification rather than additional copy.
- */
+/** Shared hero for every locked and unlocked country page. Preserve the
+ * existing country background and show only the country name over it. */
 export function CountryHero({
   country,
   heroArtwork = null,
@@ -62,10 +58,7 @@ export function CountryHero({
         <div className="hero-scrim" aria-hidden="true" />
         <Link href="/your-world" className="hero-back-pill">← All destinations</Link>
         <div className="hero-body">
-          <div className="hero-title-row">
-            <span className="hero-flag-tile" aria-hidden="true"><img src={flagSrc(country.code)} alt="" /></span>
-            <h1 className="hero-name">{country.name}</h1>
-          </div>
+          <h1 className="hero-name">{country.name}</h1>
         </div>
       </div>
     </section>
