@@ -596,3 +596,39 @@ Zero elements extend past the viewport at any of the three widths. The same
 measurement showed that when the workspace stylesheet chunk is absent the page
 loses the rail width, the column and the gutters entirely and overflows right —
 which is what a stale or unstyled build looks like.
+
+## Restore: country-template.css was committed truncated
+
+`ef4b0f9a` ("Make country page topbar and tabbar full-width relative to
+viewport") deleted **605 lines** of `src/styles/country-template.css` — the file
+went from 853 lines / 73.6 KB to 296 / 23.9 KB. An elided diff was written to
+disk verbatim: 17 rules were cut off mid-declaration and replaced with the
+literal text `[...]`, and two placeholder comments
+(`/* ... rest of file unchanged ... */`) stood in for the deleted content. The
+build failed on `Unknown word bord` at line 63, taking deploys #173 and #174 red.
+
+Restored the file from `f1f3fdb` (the last version that built) and re-applied,
+by hand, both changes that belonged on top of it:
+
+- **The shared content column** (from #154): `.country-template-root .main` reads
+  `--workspace-column` / `--workspace-gutter`, centred, so country pages match
+  every other workspace page.
+- **The full-bleed header band** (ef4b0f9a's intent): `--ct-rail-width` token,
+  `body.rail-collapsed` override to 64px, and the rail-offset width on `.topbar`,
+  plus its narrow-viewport edge-to-edge override.
+
+One correction to that feature: it applied the same rail offset to `.tabbar`, but
+`.tabbar` renders **inside** `.main` while `.topbar` is a root-level sibling of
+`.shell`. With the content column now centred, a 256px offset would have pushed
+the tabbar out of its column, so the tabbar spans the column and only the topbar
+carries the offset.
+
+Measured against the real compiled CSS with the true DOM order:
+
+| viewport | overflow | rail | main | topbar | tabbar |
+|---|---|---|---|---|---|
+| 1565 | 0px | 256 | left 290.5, w 1240 | left 256, w 1309 | left 318.5, w 1184 |
+| 2560 | 0px | 256 | left 788, w 1240 | left 256, w 2304 | left 816, w 1184 |
+
+Zero offenders at both widths. The hero metric typography from the earlier pass
+survives the restore (`.m-v` = 22px, tabular-nums, white).
