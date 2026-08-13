@@ -83,6 +83,15 @@ export function CountryTemplate({ slug, active, fromQuiz = false, country, cente
   useEffect(() => { if (window.innerWidth <= 900) document.body.classList.remove('rail-collapsed') }, [])
   const overviewMode = active === 'overview'
 
+  const overviewBody = paid ? (
+    <div className="cols overview-cols"><div>{children}</div><RightRail rich={rich} country={country} match={match} overviewMode /></div>
+  ) : (
+    <div className="country-gated-zone">
+      <div className="country-gated-blur" aria-hidden="true"><div className="cols overview-cols"><div>{children}</div><RightRail rich={rich} country={country} match={match} overviewMode /></div></div>
+      <UpgradeOverlay countryName={country.name} />
+    </div>
+  )
+
   return (
     <UnitsProvider>
       <div className="country-template-root" data-plan={paid ? 'pro' : 'free'}>
@@ -93,19 +102,23 @@ export function CountryTemplate({ slug, active, fromQuiz = false, country, cente
           <button type="button" className="rail-backdrop" onClick={toggleRail} aria-label="Close navigation" />
           <Sidebar />
           <main className="main">
-            <div className="country-page-card">
+            <div className="country-hero-card">
               <CountryHero go={go} fromQuiz={fromQuiz} country={country} center={center} visaType={visaType} rich={rich} data={data} heroArtwork={heroArtwork} statusChips={statusChips} paid={paid} />
-              {paid && <TabBar slug={slug} active={active} />}
-              <WhyExplore country={country} rich={rich} paid={paid} />
-              {paid ? (
-                <div className={`cols${overviewMode ? ' overview-cols' : ''}`}><div>{children}</div><RightRail rich={rich} country={country} match={match} overviewMode={overviewMode} /></div>
-              ) : (
-                <div className="country-gated-zone">
-                  <div className="country-gated-blur" aria-hidden="true"><div className="cols"><div>{children}</div><RightRail rich={rich} country={country} match={match} overviewMode /></div></div>
-                  <UpgradeOverlay countryName={country.name} />
-                </div>
-              )}
             </div>
+
+            {paid && <TabBar slug={slug} active={active} />}
+
+            {overviewMode ? (
+              <section className="country-overview-panel">
+                <WhyExplore country={country} rich={rich} paid={paid} />
+                {overviewBody}
+              </section>
+            ) : (
+              <section className="country-content-panel">
+                <WhyExplore country={country} rich={rich} paid={paid} />
+                <div className="cols"><div>{children}</div><RightRail rich={rich} country={country} match={match} overviewMode={false} /></div>
+              </section>
+            )}
           </main>
         </div>
       </div>
