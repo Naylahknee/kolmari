@@ -1,29 +1,38 @@
 export function FullWidthWorkspaceStyles() {
   return (
     <style>{`
-      /* Full-width application canvas. Keep the shared sidebar, but let the
-         working surface consume every remaining pixel of the viewport. */
+      /* Full-width application canvas. Main fills the space REMAINING beside
+         the sidebar; width:100% here would mean sidebar + viewport width and
+         causes the horizontal overflow seen in Your World. */
       .shell {
+        display: flex;
         width: 100%;
         min-width: 0;
+        max-width: 100%;
+        overflow-x: clip;
       }
 
       .shell > .main,
       .main.workspace-main,
       .country-template-root .main {
-        flex: 1 1 auto;
+        flex: 1 1 0%;
         min-width: 0;
-        width: 100%;
+        width: auto !important;
         max-width: none !important;
         margin-left: 0 !important;
         margin-right: 0 !important;
         padding-left: 10px !important;
         padding-right: 10px !important;
+        overflow-x: clip;
       }
 
-      /* Remove page-level centering/max-width constraints without touching
-         intentionally narrow controls, dialogs, or cards that are not page
-         wrappers. */
+      /* Page wrappers should use the whole main canvas. Do not remove width
+         constraints from intentionally narrow controls/dialogs/cards. */
+      .main.workspace-main > *,
+      .country-template-root .main > * {
+        min-width: 0;
+      }
+
       .main.workspace-main .max-w-screen-xl,
       .main.workspace-main .max-w-screen-2xl,
       .country-template-root .main .max-w-screen-xl,
@@ -36,13 +45,20 @@ export function FullWidthWorkspaceStyles() {
         margin-right: 0 !important;
       }
 
-      /* The shared rail already has a desktop collapse control. Expanded it
-         remains 256px; collapsed it drops to 64px, returning 192px to main. */
+      .country-template-root .country-page-card {
+        width: 100%;
+        max-width: none;
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      /* Expanded rail stays 256px; the existing collapse control reduces it to
+         64px. In both states main simply takes the remainder. */
       body.rail-collapsed .shell > .main,
       body.rail-collapsed .main.workspace-main,
       body.rail-collapsed .country-template-root .main {
-        flex: 1 1 auto;
-        width: 100%;
+        flex: 1 1 0%;
+        width: auto !important;
         max-width: none !important;
       }
 
