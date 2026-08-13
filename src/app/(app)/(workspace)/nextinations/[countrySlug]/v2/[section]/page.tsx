@@ -8,7 +8,6 @@ import { getCountryData } from '@/lib/country-data'
 import { getApprovedHero } from '@/lib/country-visuals/data'
 import { getGeneratedHeroVersion } from '@/lib/country-assets'
 import { PersonalizedCountrySummary } from '@/components/country-template/PersonalizedCountrySummary'
-import { SimpleCountryView } from '@/components/country-template/SimpleCountryView'
 import { LockedTab } from '@/components/country-template/LockedTab'
 import { CountryTemplate } from '@/components/country-template/CountryTemplate'
 import { TAB_SLUGS, type TabSlug } from '@/components/country-template/TabBar'
@@ -46,10 +45,6 @@ export async function generateMetadata({ params }: Props) {
   return { title: `${country.name} — ${label} | Kolmari` }
 }
 
-/**
- * What each tab actually contains. Shown (titles only) on the locked card so a
- * free account can see what Kolmari Pro adds without the research itself.
- */
 const LOCKED_TITLE: Record<TabSlug, string> = {
   'overview': 'Your personalized overview',
   'move-there': 'Your route in, and what it will take',
@@ -95,9 +90,6 @@ const TAB_SECTIONS: Record<TabSlug, string[]> = {
   ],
 }
 
-/** Honest "being verified" panel shown for deeper tabs of countries whose
- *  detailed dataset is not yet bound (everything except Portugal). Keeps the
- *  rich frame without borrowing another country's figures. */
 function ResearchingTab({ name, label }: { name: string; label: string }) {
   return (
     <section className="card-surface p-8 text-center">
@@ -134,44 +126,34 @@ export default async function CountryV2Page({ params, searchParams }: Props) {
 
   const paid = isPaid(profile)
 
-  // FREE plan, country NOT matched to this user: the simple, non-expanded view.
-  // A matched destination keeps the full frame below so the user can see what
-  // their match actually bought them.
+  // All free users now use the same redesigned CountryTemplate shell so the
+  // specified hero + Why Explore + blurred Flutter gate appears consistently.
+  // Previously unmatched free destinations returned SimpleCountryView here,
+  // bypassing the new layout entirely.
   const freeRanked = !paid ? rankNextinations(profile) : []
   const freeMatchIdx = freeRanked.findIndex((r) => r.country.slug === countrySlug)
-  if (!paid && freeMatchIdx < 0) {
-    return (
-      <SimpleCountryView
-        country={templateCountry}
-        visaType={detail?.visaType}
-        incomeRequired={detail?.incomeRequired}
-        summary={detail?.summary}
-      />
-    )
-  }
 
-  // PAID plan: the rich, Portugal-style page for any country.
   const source = (await searchParams).source
   const fromQuiz = source === 'quiz'
 
-  // Real Match Score from the user's profile ranking (null when unscored /
-  // profile incomplete) — the right rail renders this instead of a placeholder.
   const ranked = paid ? rankNextinations(profile) : freeRanked
   const rankIdx = paid ? ranked.findIndex((r) => r.country.slug === countrySlug) : freeMatchIdx
   const rankedMatch = rankIdx >= 0 ? ranked[rankIdx].match : null
   const matchInfo = rankIdx >= 0
-    ? { score: rankedMatch!.score, rank: rankIdx + 1, total: ranked.length, reasons: rankedMatch!.reasons }
+    ? {
+        score: rankedMatch!.score,
+        rank: rankIdx + 1,
+        total: ranked.length,
+        reasons: rankedMatch!.reasons,
+        tradeoff: rankedMatch!.tradeoff,
+      }
     : null
 
-  // Hero artwork resolution: a saved generated hero (Neon, served from
-  // /api/country-asset) wins → then committed /public artwork → then the
-  // branded gradient + outline fallback inside CountryHero.
   const heroVersion = await getGeneratedHeroVersion(countrySlug)
   const heroArtwork = heroVersion
     ? { src: `/api/country-asset?slug=${countrySlug}&type=hero&v=${heroVersion}`, focalPoint: { x: 50, y: 50 } }
     : getApprovedHero(countrySlug)
 
-  // Verified relocation figures for the hero panels (honest empties when unset).
   const cd = await getCountryData(countrySlug)
   const heroData = {
     primaryVisaRoute: cd.primary_visa_route,
@@ -181,16 +163,12 @@ export default async function CountryV2Page({ params, searchParams }: Props) {
     sources: cd.sources,
   }
 
-  // Required hero status indicators (Country Design System) — real data only.
   const statusChips: Array<{ label: string; tone?: 'gold' | 'good' | 'muted' }> = []
   if (matchInfo) statusChips.push({ label: `Matched · #${matchInfo.rank} of ${matchInfo.total}`, tone: 'gold' })
   const routeLabel = cd.primary_visa_route ?? detail?.visaType
   if (routeLabel) statusChips.push({ label: `Route: ${routeLabel}`, tone: 'good' })
   statusChips.push(cd.last_verified ? { label: 'Data verified', tone: 'good' } : { label: 'Data being verified', tone: 'muted' })
 
-  // Personalized Summary (Country Design System): shown only on the Overview tab
-  // when we have real, calculated Match Score data — never fabricated, never an
-  // empty placeholder. Expanded by default for the user's #1 match.
   const overviewPrefix = active === 'overview' && matchInfo && rankedMatch ? (
     <PersonalizedCountrySummary
       countrySlug={countrySlug}
@@ -214,12 +192,7 @@ export default async function CountryV2Page({ params, searchParams }: Props) {
     />
   ) : null
 
-  // Portugal is the only fully verified dataset — it renders the approved rich
-  // tabs. Every other country renders the same rich frame with honest,
-  // data-driven content.
   if (countrySlug === 'portugal') {
-    // Free + matched: Overview keeps section 1 and the personalization teaser;
-    // every other tab is locked. Mirrors the demo's richOverview / lockedTab split.
     const locked = (
       <LockedTab
         countryName={record.name}
