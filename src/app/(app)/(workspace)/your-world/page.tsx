@@ -8,6 +8,7 @@ import { COUNTRIES, DISCOVERABLE_COUNTRIES } from '@/lib/countries'
 import { getCountryCenter } from '@/lib/country-geo'
 import { getProfile, hasCompletedProfile, isPaid } from '@/lib/profile'
 import { rankNextinations } from '@/lib/userProfile'
+import styles from './your-world-cards.module.css'
 
 export const metadata: Metadata = {
   title: 'Your World | Kolmari',
@@ -51,7 +52,7 @@ export default async function YourWorldPage({ searchParams }: { searchParams: Pr
       code: country.code,
       region: regionLabel(country.region),
     }))
-    return <div className={pageWidthClass}><YourWorldGated matches={quizMatches} pins={pins} /></div>
+    return <div className={`${pageWidthClass} ${styles.page}`}><YourWorldGated matches={quizMatches} pins={pins} /></div>
   }
 
   // Matched (scored) cards, ranked by fit.
@@ -88,7 +89,7 @@ export default async function YourWorldPage({ searchParams }: { searchParams: Pr
   }))
 
   return (
-    <div className={pageWidthClass}>
+    <div className={`${pageWidthClass} ${styles.page}`}>
       <YourWorld key={initialQuery} pins={pins} cards={[...scoredCards, ...unscoredCards]} complete={complete} initialQuery={initialQuery} />
     </div>
   )
