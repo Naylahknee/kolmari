@@ -43,11 +43,20 @@ body.rail-collapsed .country-template-root{--ct-rail-width:64px}
    otherwise flatten every sidebar row and turn its labels white — which is why
    the sidebar used to look different on country pages. Excluding it here keeps
    one source of truth instead of re-asserting the sidebar's styling per rule. */
-.country-template-root *:not(.rail, .rail *){box-sizing:border-box;margin:0;padding:0}
+/* The reset lives in @layer base so Tailwind's utilities, which sit in
+   @layer utilities, outrank it. Specificity alone could not fix this: this file
+   is unlayered, and unlayered styles beat layered ones no matter how weak the
+   selector, so `*{padding:0}` here silently zeroed every `p-*`, `m-*` and
+   `gap-*` on any React component rendered inside a country page — the component
+   then drew flush against its own edges. Inside the layer the country page's own
+   unlayered rules below still win, so nothing else changes. */
+@layer base {
+  .country-template-root *:not(.rail, .rail *){box-sizing:border-box;margin:0;padding:0}
+  .country-template-root button:not(.rail button){font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+  .country-template-root a:not(.rail a){color:inherit;text-decoration:none}
+}
 .country-template-root{-webkit-text-size-adjust:100%}
 .country-template-root{font-family:Geist,ui-sans-serif,system-ui,sans-serif;background:var(--canvas);color:var(--ink);font-size:14px;line-height:1.55}
-.country-template-root button:not(.rail button){font:inherit;color:inherit;background:none;border:none;cursor:pointer}
-.country-template-root a:not(.rail a){color:inherit;text-decoration:none}
 .country-template-root :focus-visible{outline:2px solid var(--gold-deep);outline-offset:2px;border-radius:6px}
 @media (prefers-reduced-motion:reduce){.country-template-root *{transition:none!important}}
 .country-template-root .card-surface{background:#fff;border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--shadow-card)}
@@ -833,7 +842,9 @@ body.rail-collapsed .country-template-root .mark-bf{display:block;width:27px;hei
   .country-template-root .topbar-zone-a{padding:0;justify-content:center}
   .country-template-root .mark{display:none}
   .country-template-root .zone-a-actions{display:flex}
-  .country-template-root .zone-a-actions .icon-btn:first-child{display:none}
+  /* The single button in zone-a IS the drawer toggle. Hiding :first-child hid
+     it, and .mark is hidden here too, so the header left cell was an empty
+     56px column with a border and the sidebar could not be opened at all. */
   .country-template-root .topbar-zone-b{padding:0 10px 0 12px}
   .country-template-root .page-section,
   .country-template-root .header-pill,
