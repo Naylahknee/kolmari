@@ -1,36 +1,24 @@
 {
-  "taskId": "workspace-margins",
-  "instruction": "Can you fix the margins in the current build. Confirmed scope: both the clipping/overflow seen on Your World and a spacing pass on the shared workspace content column, affecting every workspace page.",
-  "objective": "Every workspace page presents the same content column: one shared max-width, one shared gutter, centred the same way. Country pages currently use their own 1500px/20px left-aligned column and must be brought onto the shared values. Also unblock the build, which is failing on a missing WorldPin re-export.",
-  "allowedEntities": [
-    "Navigation Shell",
-    "Country Page"
-  ],
+  "taskId": "sld-prd-0-3-1",
+  "instruction": "Create the SLD Engine PRD as a standalone document, project-neutral, incorporating the universally applicable findings from the field trial. No indicators of an update.",
+  "objective": "A single versioned PRD file in the repository defining SLD Engine 0.3.1, usable to govern any project, with no project-specific values in normative text.",
+  "allowedEntities": [],
   "allowedFiles": [
-    "src/styles/workspace-chrome.css",
-    "src/styles/country-template.css",
-    "src/components/kolmari/world-match-map.tsx",
-    "docs/CURRENT-STATE.md",
-    ".sld/task-contract.json",
-    ".sld/baseline.json"
+    "docs/SLD-ENGINE-0.3.1-PRD.md",
+    ".sld/task-contract.json"
   ],
-  "allowedActions": [
-    "MODIFY",
-    "RESTYLE"
-  ],
-  "allowedUIRegions": [
-    "workspace content column",
-    "country page content column"
-  ],
+  "allowedActions": ["CREATE", "MODIFY"],
   "requiredChanges": [
-    "country page content column adopts the shared workspace max-width, gutter and centring",
-    "re-export WorldPin from world-match-map so the build compiles"
+    {
+      "artifact": "docs/SLD-ENGINE-0.3.1-PRD.md",
+      "mustContain": "SLD Engine 0.3.1"
+    }
   ],
   "forbiddenChanges": [
-    "src/lib",
-    "src/app",
-    "src/components/kolmari/your-world.tsx",
-    "src/components/country-template/tabs"
+    "src/",
+    "scripts/",
+    ".github/",
+    "docs/14-SLD-GOVERNANCE.md"
   ],
   "createdFrom": "user-request"
 }
