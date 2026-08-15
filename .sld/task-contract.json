@@ -1,24 +1,32 @@
 {
-  "taskId": "sld-prd-0-3-1",
-  "instruction": "Create the SLD Engine PRD as a standalone document, project-neutral, incorporating the universally applicable findings from the field trial. No indicators of an update.",
-  "objective": "A single versioned PRD file in the repository defining SLD Engine 0.3.1, usable to govern any project, with no project-specific values in normative text.",
+  "taskId": "country-mobile-two-bugs",
+  "instruction": "Mobile: the sidebar menu is collapsed and condensed with no way to expand. The personalization section is laid out incorrectly and smashed together.",
+  "objective": "On the country page at mobile widths the sidebar drawer can be opened, and Tailwind-styled components render with their intended spacing instead of being flattened by the scoped reset.",
   "allowedEntities": [],
   "allowedFiles": [
-    "docs/SLD-ENGINE-0.3.1-PRD.md",
+    "src/styles/country-template.css",
     ".sld/task-contract.json"
   ],
-  "allowedActions": ["CREATE", "MODIFY"],
+  "allowedActions": [
+    "MODIFY",
+    "RESTYLE"
+  ],
+  "allowedUIRegions": [
+    "country page mobile header",
+    "country page content spacing"
+  ],
   "requiredChanges": [
     {
-      "artifact": "docs/SLD-ENGINE-0.3.1-PRD.md",
-      "mustContain": "SLD Engine 0.3.1"
+      "artifact": "src/styles/country-template.css",
+      "mustContain": "@layer base"
     }
   ],
   "forbiddenChanges": [
-    "src/",
-    "scripts/",
-    ".github/",
-    "docs/14-SLD-GOVERNANCE.md"
+    "src/components/",
+    "src/app/",
+    "src/lib/",
+    "src/sld/",
+    ".github/"
   ],
   "createdFrom": "user-request"
 }
