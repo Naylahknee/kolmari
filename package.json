@@ -31,10 +31,10 @@
     "@neondatabase/serverless": "^1.1.0",
     "@opennextjs/cloudflare": "^1.20.2",
     "bcryptjs": "^3.0.3",
-    "jose": "^6.2.8",
-    "lucide-react": "^1.31.0",
+    "jose": "^6.2.9",
+    "lucide-react": "^1.32.0",
     "mapbox-gl": "^3.28.1",
-    "next": "^16.3.0",
+    "next": "^16.3.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "zod": "^4.4.3"
