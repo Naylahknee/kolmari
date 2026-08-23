@@ -3,6 +3,7 @@ import 'server-only'
 import { getSql } from './db'
 import { PLAN_TIERS, type PlanTier } from './profile'
 import { isAdminEmail } from './admin'
+import { isDemoEmail } from './demo-identity'
 
 // ─── Users & plans ──────────────────────────────────────────────────────────
 
@@ -33,7 +34,7 @@ export async function listUsers(): Promise<AdminUser[]> {
     display_name: r.display_name,
     plan: PLAN_TIERS.includes(r.plan) ? r.plan : 'free',
     wizard_status: r.wizard_status,
-    is_admin: r.is_first === true || r.is_first === 't' || isAdminEmail(r.email),
+    is_admin: !isDemoEmail(r.email) && (r.is_first === true || r.is_first === 't' || isAdminEmail(r.email)),
   }))
 }
 

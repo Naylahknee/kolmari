@@ -1,4 +1,5 @@
 import { getRequestUser } from '@/lib/auth'
+import { isDemoEmail } from '@/lib/demo-identity'
 import { getProfile } from '@/lib/profile'
 import { getKolmariPlan } from '@/lib/kolmari-plan'
 import { getSql } from '@/lib/db'
@@ -6,6 +7,10 @@ import { getSql } from '@/lib/db'
 export async function POST(request: Request) {
   const user = await getRequestUser(request)
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  // The demo profile is seeded sample data, so there is nothing meaningful to export.
+  if (isDemoEmail(user.email)) {
+    return Response.json({ error: 'Not available in the demo.' }, { status: 403 })
+  }
 
   try {
     // Gather all user-linked data available in the current application.

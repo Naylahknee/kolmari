@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { isAdminEmail } from './admin'
+import { isDemoEmail } from './demo-identity'
 import { getSql } from './db'
 import { PLAN_TIERS, type PlanTier } from './plan-tiers'
 
@@ -250,7 +251,10 @@ export async function getProfile(userId: number) {
   // existing isPaid/plan gate opens. No gate logic or real-user data changes.
   // The first registered account (the owner) is always an admin with zero
   // config; ADMIN_EMAILS grants access to any additional admins.
-  const isFirst = isFirstRaw === true || isFirstRaw === 't'
+  // The demo account is excluded from the owner promotion: it already carries
+  // the top plan from its seeded persona, and being users row #1 on a fresh
+  // database must not hand it the owner's standing.
+  const isFirst = (isFirstRaw === true || isFirstRaw === 't') && !isDemoEmail(email)
   if (isFirst || isAdminEmail(email)) profile.plan = 'navigator'
   return profile
 }

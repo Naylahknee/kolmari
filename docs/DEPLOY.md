@@ -47,6 +47,26 @@ Cloudflare dashboard → Workers & Pages → **kolmari** → Settings → Variab
 - `JWT_SECRET` — session signing secret (required for sign-in)
 - `DATABASE_URL` — Neon Postgres connection string
 - `NEXT_PUBLIC_MAPBOX_TOKEN` — optional, enables real map tiles
+- `ADMIN_EMAILS` — comma-separated admin allowlist; leave unset and no account is admin
+- `DEMO_ACCESS_CODE` — optional. Sets the code for the shared demo account at
+  `/demo`. **Unset means the demo is disabled entirely** and `POST /api/demo`
+  returns 404. Server-side only (not `NEXT_PUBLIC_`), so the value never reaches
+  the browser. Rotate it at any time to invalidate every demo link you have
+  handed out.
+
+### About the demo account
+
+`/demo` signs visitors into one shared account (`demo@kolmari.app`) seeded with a
+realistic profile so the product looks populated rather than empty. Two
+properties are enforced in code, not by configuration:
+
+- **It is never an admin.** `isAdminUser()` and `isAdminEmail()` deny it
+  outright — including when it is the first registered user, which would
+  otherwise grant admin automatically on a fresh database.
+- **It cannot be broken by visitors.** Changing its password, requesting its
+  deletion, revoking all sessions and exporting its data all return 403.
+
+Entering the code re-seeds the profile, so every demo starts from the same state.
 
 ## Clean up the old worker
 
