@@ -2,6 +2,7 @@ import { compare, hash } from 'bcryptjs'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getRequestUser, SESSION_COOKIE } from '@/lib/auth'
+import { isDemoEmail } from '@/lib/demo-identity'
 import { getSql } from '@/lib/db'
 import { strongPasswordSchema } from '@/lib/schemas'
 import { isSameOrigin } from '@/lib/security'
@@ -18,6 +19,10 @@ export async function POST(request: Request) {
 
   const user = await getRequestUser(request)
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  // Changing the password would lock every other demo visitor out of the shared account.
+  if (isDemoEmail(user.email)) {
+    return Response.json({ error: 'Not available in the demo.' }, { status: 403 })
+  }
 
   try {
     const parsed = schema.safeParse(await request.json())

@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { getSql } from './db'
+import { isDemoEmail } from './demo-identity'
 import type { SessionUser } from './auth'
 
 /**
@@ -15,6 +16,10 @@ import type { SessionUser } from './auth'
  */
 export function isAdminEmail(email: string | null | undefined): boolean {
   if (!email) return false
+  // The shared demo account is never an admin, even if its address were added
+  // to ADMIN_EMAILS by mistake. Enforced here rather than left to whoever
+  // edits that variable.
+  if (isDemoEmail(email)) return false
   const allow = (process.env.ADMIN_EMAILS ?? '')
     .split(',')
     .map((entry) => entry.trim().toLowerCase())
@@ -29,6 +34,10 @@ export function isAdminEmail(email: string | null | undefined): boolean {
  */
 export async function isAdminUser(user: SessionUser | null | undefined): Promise<boolean> {
   if (!user) return false
+  // Checked BEFORE the first-registered-user rule below. On a fresh or
+  // re-seeded database the demo route can create users row #1, which would
+  // otherwise make the demo account an admin with no ADMIN_EMAILS entry at all.
+  if (isDemoEmail(user.email)) return false
   if (isAdminEmail(user.email)) return true
   const rows = (await getSql()`SELECT MIN(id) AS min_id FROM users`) as { min_id: number | null }[]
   return rows[0]?.min_id === user.id

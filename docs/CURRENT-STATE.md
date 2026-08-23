@@ -632,3 +632,55 @@ Measured against the real compiled CSS with the true DOM order:
 
 Zero offenders at both widths. The hero metric typography from the earlier pass
 survives the restore (`.m-v` = 22px, tabular-nums, white).
+
+## Demo access code
+
+A shared demo account so people can try Kolmari without signing up. Reachable
+from `/demo` (accepts `?code=` so a link lands the recipient on a prefilled
+form) and from a "Have a demo code?" link on the login page.
+
+`POST /api/demo` mirrors `api/login/route.ts` rather than inventing a second
+auth style: same same-origin CSRF check, same 10-per-15-minutes IP rate limit,
+same cookie shape — with a 24h session instead of 7 days. The code is compared
+in constant time so response timing cannot leak it character by character, and
+it lives only in `DEMO_ACCESS_CODE`. **Unset means the demo is off** and the
+endpoint returns 404; this repository is public, so a credential must never
+appear in source (the same reason `ADMIN_EMAILS` is an environment variable).
+
+The seeded persona is the point. Kolmari's value is the personalization, so an
+unseeded demo would land on `wizard_status: 'not_started'`, redirect to the
+wizard, and show empty states everywhere. `DEMO_PERSONA` fills the fields
+`rankNextinations()` actually reads and puts the account on the `navigator`
+plan, so every paid surface is visible. Entering the code re-seeds, so each
+demo starts from the same state.
+
+**Admin lockout, enforced in code.** Keeping the demo email out of
+`ADMIN_EMAILS` would not have been enough: `isAdminUser()` also grants admin to
+the first registered user, and `getProfile()` promotes that user to `navigator`.
+On a fresh or re-seeded database the demo route can create `users` row #1, which
+would have made the demo an admin with no configuration at all. So `isAdminUser()`
+denies the demo *before* the first-user query, `isAdminEmail()` denies it even if
+allowlisted, and both `getProfile()` and the admin user list exclude it.
+
+`demo-identity.ts` is a dependency-free leaf holding the identity and code
+primitives, so `admin.ts`, `profile.ts` and `admin-data.ts` can recognise the
+demo account without an import cycle back through `demo.ts` → `profile.ts` —
+the same split `plan-tiers.ts` uses.
+
+Four account routes return 403 for the demo user so one visitor cannot break the
+shared account for everyone: `change-password`, `deletion-request`,
+`sign-out-all` and `data-export`. Normal sign-out (`/api/logout`) still works.
+
+**Verified.** Seven unit tests over the compiled modules, including two security
+cases and a control that proves they are not false passes: the demo is denied
+even when listed in `ADMIN_EMAILS`, and denied *before* any DB access (with
+`DATABASE_URL` unset it returns false rather than throwing, while a normal user
+in the same conditions throws `DATABASE_URL` — proving the guard ordering).
+Against a running server: cross-origin 403, wrong code 401, missing code 401,
+correct code passes the gates and reaches the seeding step, 429 after the rate
+limit, 404 with `DEMO_ACCESS_CODE` unset, login link present, `?code=` prefills.
+
+**Not verified locally:** anything requiring the database — the seed itself, the
+populated dashboard, and the Pro treatment on country pages. The app uses the
+Neon HTTP client, which cannot target a local Postgres instance. These need a
+check against the deployed site once `DEMO_ACCESS_CODE` is set.

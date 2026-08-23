@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { compare } from 'bcryptjs'
 import { getRequestUser, SESSION_COOKIE } from '@/lib/auth'
+import { isDemoEmail } from '@/lib/demo-identity'
 import { getSql } from '@/lib/db'
 import { isSameOrigin } from '@/lib/security'
 
@@ -18,6 +19,10 @@ export async function POST(request: Request) {
 
   const user = await getRequestUser(request)
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  // Deleting this account would remove the demo itself.
+  if (isDemoEmail(user.email)) {
+    return Response.json({ error: 'Not available in the demo.' }, { status: 403 })
+  }
 
   try {
     const parsed = schema.safeParse(await request.json())
