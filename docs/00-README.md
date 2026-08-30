@@ -32,6 +32,7 @@ Kolmari's existing production behavior remains the functional source of truth. T
 | `08-CONTENT-STANDARDS.md` | Voice, hierarchy, empty states |
 | `09-IMPLEMENTATION-RULES.md` | Architecture, phases, completion criteria |
 | `10-LLM-RULES.md` | Mandatory instructions for AI contributors |
+| `14-MOVE-PROFILE-QUIZ-MAPPING.md` | Authoritative quiz → Move Profile → downstream behavior contract |
 | `REBRAND-MIGRATION.md` | Migration strategy and classification |
 | `REPLACEMENT-MATRIX.md` | Legacy-to-Kolmari term mapping |
 | `ROUTE-MIGRATION.md` | Route compatibility and redirect plan |
