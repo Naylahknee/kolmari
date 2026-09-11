@@ -39,7 +39,7 @@ export function analyzeData(changeSet, manifest) {
     if (matched) {
       const touchedProtected = protectedTables.filter((t) => containsTerm(text, t))
       findings.push({
-        layer: 'data',
+        layer: 'content',
         class: 'destructiveChange',
         decision: manifest.policies.destructiveChange,
         path: change.path,

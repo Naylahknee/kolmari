@@ -4,8 +4,8 @@
  * aggregates their findings into a single deterministic decision.
  *
  * Rules:
- *  - Severity order: BLOCK > REVIEW > WARN > ALLOW. The final decision is the
- *    highest-severity finding present.
+ *  - Progression order: BLOCK > INSUFFICIENT_EVIDENCE > REVIEW_REQUIRED >
+ *    ALLOW_WITH_WARNING > ALLOW. The strictest finding wins.
  *  - Scope is evaluated FIRST. An unauthorized change BLOCKs immediately and the
  *    seven layers are not consulted — permission is prior to risk.
  *  - Empty findings ⇒ ALLOW, but only for a change already proven in scope.
@@ -27,12 +27,20 @@ import { analyzeBehavior } from '../layers/layer-4-behavior.js'
 import { analyzeData } from '../layers/layer-5-data.js'
 import { analyzeInterface } from '../layers/layer-6-interface.js'
 import { analyzeIntent } from '../layers/layer-7-intent.js'
+import { analyzeExecution } from '../layers/layer-7-execution.js'
 import { runScopeGate } from '../scope/scope-gate.js'
+import { isCanonicalLayer, SLD_LAYER_IDS } from '../layers/canonical.js'
 
 /** @type {Record<Decision, number>} */
-const SEVERITY = { ALLOW: 0, WARN: 1, REVIEW: 2, BLOCK: 3 }
+const SEVERITY = {
+  ALLOW: 0,
+  ALLOW_WITH_WARNING: 1,
+  REVIEW_REQUIRED: 2,
+  INSUFFICIENT_EVIDENCE: 3,
+  BLOCK: 4,
+}
 /** @type {Decision[]} */
-const BY_SEVERITY = ['ALLOW', 'WARN', 'REVIEW', 'BLOCK']
+const BY_SEVERITY = ['ALLOW', 'ALLOW_WITH_WARNING', 'REVIEW_REQUIRED', 'INSUFFICIENT_EVIDENCE', 'BLOCK']
 
 /**
  * Highest-severity decision across findings.
@@ -53,14 +61,24 @@ export function aggregateDecision(findings) {
  * @returns {EvaluationResult['summary']}
  */
 function summarize(findings) {
-  const summary = { ALLOW: 0, WARN: 0, REVIEW: 0, BLOCK: 0 }
+  const summary = { ALLOW: 0, ALLOW_WITH_WARNING: 0, REVIEW_REQUIRED: 0, BLOCK: 0, INSUFFICIENT_EVIDENCE: 0 }
   for (const f of findings) summary[f.decision] += 1
   return summary
 }
 
 /**
+ * Guard against the exact ontology drift SLD exists to prevent. A rule family
+ * may change, but every emitted finding must belong to the canonical model.
+ * @param {Finding[]} findings
+ */
+function assertCanonicalFindings(findings) {
+  const invalid = findings.find((finding) => !isCanonicalLayer(finding.layer))
+  if (invalid) throw new Error(`non-canonical SLD layer emitted: ${invalid.layer}`)
+}
+
+/**
  * Validate the shape of a ChangeSet before analysis. A malformed input is a
- * fail-closed BLOCK, not a crash.
+ * fail-closed INSUFFICIENT_EVIDENCE, not a crash.
  * @param {unknown} changeSet
  * @returns {changeSet is ChangeSet}
  */
@@ -87,16 +105,16 @@ export function evaluateChangeSet(changeSet, manifest, baseline = null, now, con
   try {
     if (!isValidChangeSet(changeSet)) {
       return {
-        decision: 'BLOCK',
+        decision: 'INSUFFICIENT_EVIDENCE',
         findings: [
           {
-            layer: 'architecture',
+            layer: 'execution',
             class: 'unknownChange',
-            decision: 'BLOCK',
+            decision: 'INSUFFICIENT_EVIDENCE',
             message: 'Malformed change set — cannot evaluate. Failing closed.',
           },
         ],
-        summary: { ALLOW: 0, WARN: 0, REVIEW: 0, BLOCK: 1 },
+        summary: { ALLOW: 0, ALLOW_WITH_WARNING: 0, REVIEW_REQUIRED: 0, BLOCK: 0, INSUFFICIENT_EVIDENCE: 1 },
         failedClosed: true,
         evaluatedAt: now,
       }
@@ -111,7 +129,7 @@ export function evaluateChangeSet(changeSet, manifest, baseline = null, now, con
     const scope = runScopeGate(changeSet, manifest, contract)
     if (scope.findings.length > 0) {
       return {
-        decision: 'BLOCK',
+        decision: aggregateDecision(scope.findings),
         findings: scope.findings,
         summary: summarize(scope.findings),
         failedClosed: false,
@@ -129,16 +147,24 @@ export function evaluateChangeSet(changeSet, manifest, baseline = null, now, con
       ...analyzeData(changeSet, manifest),
       ...analyzeInterface(changeSet, manifest),
       ...analyzeIntent(changeSet, manifest),
+      ...analyzeExecution(changeSet, manifest, baseline, contract),
     ]
+
+    assertCanonicalFindings(findings)
+
+    const applicable = Array.isArray(manifest.protectedLayers)
+      ? manifest.protectedLayers
+      : SLD_LAYER_IDS
+    const applicableFindings = findings.filter((finding) => applicable.includes(finding.layer))
 
     // An empty change set (or one with only unrecognized, harmless edits) is an
     // explicit ALLOW rather than a silent pass.
-    const decision = findings.length ? aggregateDecision(findings) : 'ALLOW'
+    const decision = applicableFindings.length ? aggregateDecision(applicableFindings) : 'ALLOW'
 
     return {
       decision,
-      findings,
-      summary: summarize(findings),
+      findings: applicableFindings,
+      summary: summarize(applicableFindings),
       failedClosed: false,
       ledger: scope.ledger,
       evaluatedAt: now,
@@ -147,16 +173,16 @@ export function evaluateChangeSet(changeSet, manifest, baseline = null, now, con
     // FAIL CLOSED. Never leak an error object (could carry paths/values).
     const message = err instanceof Error ? err.message : 'unknown analysis error'
     return {
-      decision: 'BLOCK',
+      decision: 'INSUFFICIENT_EVIDENCE',
       findings: [
         {
-          layer: 'architecture',
+          layer: 'execution',
           class: 'unknownChange',
-          decision: 'BLOCK',
+          decision: 'INSUFFICIENT_EVIDENCE',
           message: `SLD analysis failed; blocking by policy (fail-closed): ${message}`,
         },
       ],
-      summary: { ALLOW: 0, WARN: 0, REVIEW: 0, BLOCK: 1 },
+      summary: { ALLOW: 0, ALLOW_WITH_WARNING: 0, REVIEW_REQUIRED: 0, BLOCK: 0, INSUFFICIENT_EVIDENCE: 1 },
       failedClosed: true,
       evaluatedAt: now,
     }

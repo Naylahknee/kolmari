@@ -25,7 +25,7 @@ export function analyzeInterface(changeSet, manifest) {
 
     if (protectedComponents.includes(p) && change.changeType !== 'add') {
       findings.push({
-        layer: 'interface',
+        layer: 'design',
         class: 'designSystemDrift',
         decision: manifest.policies.designSystemDrift,
         path: p,
@@ -43,7 +43,7 @@ export function analyzeInterface(changeSet, manifest) {
         )
         if (declRe.test(text)) {
           findings.push({
-            layer: 'interface',
+            layer: 'design',
             class: 'designSystemDrift',
             decision: manifest.policies.designSystemDrift,
             path: p,

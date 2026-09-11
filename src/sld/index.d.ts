@@ -11,18 +11,22 @@
  * password, key, or connection string.
  */
 
-export type Decision = 'ALLOW' | 'WARN' | 'REVIEW' | 'BLOCK'
+export type Decision =
+  | 'ALLOW'
+  | 'ALLOW_WITH_WARNING'
+  | 'REVIEW_REQUIRED'
+  | 'BLOCK'
+  | 'INSUFFICIENT_EVIDENCE'
 
 /** The seven layers, in canonical order. */
 export type Layer =
-  | 'scope'
   | 'identity'
-  | 'architecture'
-  | 'dependencies'
+  | 'design'
   | 'behavior'
-  | 'data'
-  | 'interface'
-  | 'intent'
+  | 'system'
+  | 'logic'
+  | 'content'
+  | 'execution'
 
 /** Deterministic finding classes → policy keys in the manifest. */
 export type FindingClass =
@@ -38,6 +42,10 @@ export type FindingClass =
   | 'forbiddenTerm'
   | 'duplicateAppRoot'
   | 'harmlessChange'
+  | 'invalidContractApproval'
+  | 'missingRequiredChange'
+  | 'contentLoss'
+  | 'generationArtifactCorruption'
 
 export type ChangeType = 'add' | 'modify' | 'delete' | 'rename'
 
@@ -69,6 +77,14 @@ export interface FileChange {
    * being in scope does not put every property of it in scope.
    */
   states?: string[]
+  /** Behaviors touched by this change when the contract narrows behavior scope. */
+  behaviors?: string[]
+  /** UI regions touched by this change when the contract narrows region scope. */
+  uiRegions?: string[]
+  /** Deterministic magnitude evidence supplied by the scanner. */
+  baselineLineCount?: number
+  addedLineCount?: number
+  removedLineCount?: number
 }
 
 export interface ChangeSet {
@@ -90,6 +106,7 @@ export interface Finding {
 export type ScopeAction =
   | 'CREATE' | 'MODIFY' | 'DELETE' | 'MOVE' | 'RENAME'
   | 'REFACTOR' | 'RESTYLE' | 'REWIRE' | 'MIGRATE'
+  | 'REWRITE_COPY'
 
 /** Exactly what the user authorized. Absent from it means PRESERVE. */
 export interface TaskContract {
@@ -103,7 +120,15 @@ export interface TaskContract {
   allowedBehaviors: string[]
   allowedUIRegions: string[]
   allowedStates: string[]
-  requiredChanges: string[]
+  requiredChanges: Array<
+    | string
+    | {
+        artifact: string
+        mustExist?: boolean
+        mustContain?: string
+        mustMatch?: string
+      }
+  >
   forbiddenChanges: string[]
   invariants: string[]
   propagationRules: Array<{ from: string; to: string; reason: string }>
@@ -111,6 +136,11 @@ export interface TaskContract {
   grants: string[]
   ambiguityPolicy: 'BLOCK' | 'ALLOW'
   createdFrom: string
+  status: 'draft' | 'approved' | 'superseded'
+  draftedBy: string
+  approvedBy: string
+  implementingActor: string
+  approvedAt: string
 }
 
 export interface CompiledScope {
@@ -120,6 +150,8 @@ export interface CompiledScope {
   unresolvedEntities: string[]
   actions: ScopeAction[]
   states: string[]
+  behaviors: string[]
+  uiRegions: string[]
   forbidden: string[]
   ambiguityPolicy: 'BLOCK' | 'ALLOW'
 }
@@ -127,13 +159,23 @@ export interface CompiledScope {
 /** Per-task record of what was authorized, what was not, and what was noticed. */
 export interface ChangeLedger {
   taskId: string | null
-  authorized: Array<{ path: string; entity: string; states: string[]; action: ScopeAction; source: string }>
+  authorized: Array<{
+    path: string
+    entity: string
+    states: string[]
+    behaviors: string[]
+    uiRegions: string[]
+    action: ScopeAction
+    source: string
+  }>
   unauthorized: Array<{ path: string; reason: string }>
   observations: Array<{ observation: string; action: 'none'; reason: string }>
 }
 
 export interface Manifest {
   version: number
+  /** Canonical operational layers enabled for this project. */
+  protectedLayers?: Layer[]
   application: {
     name: string
     description?: string
@@ -172,6 +214,12 @@ export interface Manifest {
   intent: {
     productPrinciples: string[]
   }
+  integrity?: {
+    magnitudeReviewThreshold: number
+    magnitudeBlockThreshold: number
+    elisionMarkers: string[]
+    excludedGlobs: string[]
+  }
   /** Entity name → file globs implementing it. Powers entity-level scope. */
   entities?: Record<string, string[]>
   policies: Record<FindingClass, Decision>
@@ -184,7 +232,7 @@ export interface Baseline {
   manifestVersion: number
   application: { name: string; root: string }
   /** path → { hash, size, layerTags } for every governed file. */
-  files: Record<string, { hash: string; size: number; tags: string[] }>
+  files: Record<string, { hash: string; size: number; lineCount?: number; tags: string[] }>
   /** Discovered app roots (>1 ⇒ duplicate-project drift). */
   appRoots: string[]
   /** Import edges: path → list of local module specifiers it imports. */
@@ -198,9 +246,10 @@ export interface EvaluationResult {
   findings: Finding[]
   summary: {
     ALLOW: number
-    WARN: number
-    REVIEW: number
+    ALLOW_WITH_WARNING: number
+    REVIEW_REQUIRED: number
     BLOCK: number
+    INSUFFICIENT_EVIDENCE: number
   }
   failedClosed: boolean
   /** Scope ledger for the evaluated change set, when a contract was supplied. */
@@ -217,6 +266,8 @@ export interface AuditEntry {
 }
 
 export const KOLMARI_MANIFEST: Manifest
+export const SLD_LAYER_IDS: readonly Layer[]
+export function isCanonicalLayer(layer: string): layer is Layer
 
 /**
  * Pure, deterministic evaluation. No I/O, no LLM, no randomness, no clock unless
@@ -232,6 +283,12 @@ export function evaluateChangeSet(
 
 /** Build a TaskContract from an authored description. Never widens scope. */
 export function createTaskContract(input: Partial<TaskContract>): TaskContract
+
+/** Record approval separately from contract drafting. Self-approval is invalid. */
+export function approveTaskContract(
+  contract: TaskContract,
+  approval: Pick<TaskContract, 'approvedBy' | 'implementingActor' | 'approvedAt'>,
+): TaskContract
 
 /** A contract must name a concrete target and an action, else it is not permission. */
 export function validateTaskContract(

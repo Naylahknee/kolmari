@@ -5,9 +5,25 @@
  */
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { KOLMARI_MANIFEST, createTaskContract, evaluateChangeSet, aggregateDecision } from '../index.js'
+import {
+  KOLMARI_MANIFEST,
+  SLD_LAYER_IDS,
+  approveTaskContract,
+  createTaskContract,
+  evaluateChangeSet,
+  aggregateDecision,
+} from '../index.js'
 
 const M = KOLMARI_MANIFEST
+
+const approvedContract = (input) => approveTaskContract(createTaskContract({
+  ...input,
+  draftedBy: 'test-drafter',
+}), {
+  approvedBy: 'test-owner',
+  implementingActor: 'test-agent',
+  approvedAt: '2026-09-11T00:00:00.000Z',
+})
 
 /**
  * These tests exercise the SEVEN LAYERS — i.e. risk, given permission. Under
@@ -15,15 +31,29 @@ const M = KOLMARI_MANIFEST
  * runs, so each case is evaluated under a wide-open maintenance contract. Scope
  * enforcement itself is covered in scope.test.mjs.
  */
-const WIDE = createTaskContract({
+const WIDE = approvedContract({
   taskId: 'layer-tests',
   instruction: 'Exercise the seven layer analyzers.',
-  allowedDirectories: ['src', 'db', '.open-next', 'kolmari-copy'],
-  allowedActions: ['CREATE', 'MODIFY', 'DELETE', 'RENAME', 'MOVE', 'REFACTOR', 'RESTYLE', 'REWIRE', 'MIGRATE'],
+  allowedDirectories: ['src', 'db', 'docs', '.open-next', 'kolmari-copy'],
+  allowedActions: ['CREATE', 'MODIFY', 'DELETE', 'RENAME', 'MOVE', 'REFACTOR', 'RESTYLE', 'REWIRE', 'MIGRATE', 'REWRITE_COPY'],
+  grants: ['SLD_ENGINE_MAINTENANCE'],
+})
+const WIDE_NO_DELETE = approvedContract({
+  taskId: 'layer-tests-no-delete',
+  instruction: 'Exercise integrity analysis without deletion authority.',
+  allowedDirectories: ['src', 'docs'],
+  allowedActions: ['CREATE', 'MODIFY', 'RENAME', 'MOVE', 'REFACTOR', 'RESTYLE', 'REWIRE', 'MIGRATE', 'REWRITE_COPY'],
   grants: ['SLD_ENGINE_MAINTENANCE'],
 })
 
 const cs = (changes) => ({ label: 'test', changes })
+
+test('canonical layer registry exactly matches the SLD operational ontology', () => {
+  assert.deepEqual(SLD_LAYER_IDS, [
+    'identity', 'design', 'behavior', 'system', 'logic', 'content', 'execution',
+  ])
+  assert.deepEqual(M.protectedLayers, SLD_LAYER_IDS)
+})
 
 test('an AUTHORIZED harmless change is ALLOWed (permission proven first)', () => {
   const r = evaluateChangeSet(cs([
@@ -51,7 +81,7 @@ test('Layer 5 — destructive SQL on a protected table BLOCKs', () => {
     { path: 'db/migrations/003.sql', changeType: 'add', addedText: 'DROP TABLE users;' },
   ]), M, null, undefined, WIDE)
   assert.equal(r.decision, 'BLOCK')
-  const f = r.findings.find((x) => x.layer === 'data')
+  const f = r.findings.find((x) => x.layer === 'content')
   assert.ok(f)
   assert.match(f.message, /protected table/i)
 })
@@ -68,7 +98,7 @@ test('Layer 5 — lowercase destructive SQL in a migration IS caught', () => {
     { path: 'db/migrations/004.sql', changeType: 'add', addedText: 'drop table users;' },
   ]), M, null, undefined, WIDE)
   assert.equal(r.decision, 'BLOCK')
-  assert.ok(r.findings.some((f) => f.layer === 'data'))
+  assert.ok(r.findings.some((f) => f.layer === 'content'))
 })
 
 test('Layer 7 — rendering the words "Match Score" is not a fabricated score', () => {
@@ -82,19 +112,19 @@ test('Layer 7 — a hard-coded Match Score value IS flagged', () => {
   const r = evaluateChangeSet(cs([
     { path: 'src/lib/country-data.ts', changeType: 'add', addedText: 'export const PT = { matchScore: 92 }' },
   ]), M, null, undefined, WIDE)
-  assert.equal(r.decision, 'REVIEW')
+  assert.equal(r.decision, 'REVIEW_REQUIRED')
   assert.ok(r.findings.some((f) => f.detail === 'literal-match-score'))
 })
 
-test('Layer 3 — UI component importing the DB client is a dependency violation (REVIEW)', () => {
+test('Logic — UI component importing the DB client is a dependency violation (REVIEW_REQUIRED)', () => {
   const r = evaluateChangeSet(cs([
     { path: 'src/components/kolmari/widget.tsx', changeType: 'add', addedText: "import { getSql } from '@/lib/db'", imports: ['@/lib/db'] },
   ]), M, null, undefined, WIDE)
-  assert.ok(['REVIEW', 'BLOCK'].includes(r.decision))
-  assert.ok(r.findings.some((f) => f.layer === 'dependencies'))
+  assert.ok(['REVIEW_REQUIRED', 'BLOCK'].includes(r.decision))
+  assert.ok(r.findings.some((f) => f.layer === 'logic'))
 })
 
-test('Layer 3 — server-only module in a client component is an architecture violation (BLOCK)', () => {
+test('Logic — server-only module in a client component is an architecture violation (BLOCK)', () => {
   const r = evaluateChangeSet(cs([
     {
       path: 'src/components/kolmari/widget.tsx',
@@ -135,11 +165,11 @@ test('Layer 3 — falls back to the diff text when the scanner did not decide', 
   assert.equal(r.decision, 'BLOCK')
 })
 
-test('Layer 4 — touching a protected feature triggers REVIEW', () => {
+test('Behavior — touching a protected feature triggers REVIEW_REQUIRED', () => {
   const r = evaluateChangeSet(cs([
     { path: 'src/lib/auth.ts', changeType: 'modify', addedText: '// tweak' },
   ]), M, null, undefined, WIDE)
-  assert.equal(r.decision, 'REVIEW')
+  assert.equal(r.decision, 'REVIEW_REQUIRED')
   assert.ok(r.findings.some((f) => f.layer === 'behavior' && f.detail === 'authentication'))
 })
 
@@ -162,16 +192,16 @@ test('Layer 6 — editing a protected design component WARNs', () => {
   const r = evaluateChangeSet(cs([
     { path: 'src/components/country-template/Sidebar.tsx', changeType: 'modify', addedText: '// restyle' },
   ]), M, null, undefined, WIDE)
-  assert.equal(r.decision, 'WARN')
+  assert.equal(r.decision, 'ALLOW_WITH_WARNING')
   assert.ok(r.findings.some((f) => f.class === 'designSystemDrift'))
 })
 
-test('Layer 7 — travel-app framing triggers REVIEW', () => {
+test('Identity — travel-app framing triggers REVIEW_REQUIRED', () => {
   const r = evaluateChangeSet(cs([
     { path: 'src/components/hero.tsx', changeType: 'add', addedText: 'Book your flight and vacation package today!' },
   ]), M, null, undefined, WIDE)
-  assert.equal(r.decision, 'REVIEW')
-  assert.ok(r.findings.some((f) => f.layer === 'intent'))
+  assert.equal(r.decision, 'REVIEW_REQUIRED')
+  assert.ok(r.findings.some((f) => f.layer === 'identity'))
 })
 
 test('priority: BLOCK dominates a mix of findings', () => {
@@ -183,20 +213,20 @@ test('priority: BLOCK dominates a mix of findings', () => {
 })
 
 test('aggregateDecision picks the highest severity', () => {
-  assert.equal(aggregateDecision([{ decision: 'WARN' }, { decision: 'REVIEW' }, { decision: 'ALLOW' }]), 'REVIEW')
-  assert.equal(aggregateDecision([{ decision: 'WARN' }]), 'WARN')
+  assert.equal(aggregateDecision([{ decision: 'ALLOW_WITH_WARNING' }, { decision: 'REVIEW_REQUIRED' }, { decision: 'ALLOW' }]), 'REVIEW_REQUIRED')
+  assert.equal(aggregateDecision([{ decision: 'ALLOW_WITH_WARNING' }]), 'ALLOW_WITH_WARNING')
   assert.equal(aggregateDecision([]), 'ALLOW')
 })
 
-test('FAIL CLOSED — a malformed change set BLOCKs', () => {
+test('FAIL CLOSED — malformed input returns INSUFFICIENT_EVIDENCE', () => {
   const r = evaluateChangeSet({ changes: 'not-an-array' }, M, null, undefined, WIDE)
-  assert.equal(r.decision, 'BLOCK')
+  assert.equal(r.decision, 'INSUFFICIENT_EVIDENCE')
   assert.equal(r.failedClosed, true)
 })
 
-test('FAIL CLOSED — a missing manifest BLOCKs', () => {
+test('FAIL CLOSED — a missing manifest returns INSUFFICIENT_EVIDENCE', () => {
   const r = evaluateChangeSet(cs([{ path: 'a.ts', changeType: 'add' }]), null, null, undefined, WIDE)
-  assert.equal(r.decision, 'BLOCK')
+  assert.equal(r.decision, 'INSUFFICIENT_EVIDENCE')
   assert.equal(r.failedClosed, true)
 })
 
@@ -226,12 +256,49 @@ test('structural layers still apply to exempt surfaces', () => {
     },
   ]), M, null, undefined, WIDE)
   assert.notEqual(r.decision, 'ALLOW')
-  assert.ok(r.findings.some((f) => f.layer === 'dependencies'))
+  assert.ok(r.findings.some((f) => f.layer === 'logic'))
 })
 
 test('test fixtures may quote destructive SQL without blocking', () => {
   const r = evaluateChangeSet(cs([
     { path: 'src/sld/__tests__/engine.test.mjs', changeType: 'modify', addedText: "addedText: 'DROP TABLE users;'" },
   ]), M, null, undefined, WIDE)
+  assert.equal(r.decision, 'ALLOW')
+})
+
+test('Layer 7 — silent majority content loss without DELETE authorization BLOCKs', () => {
+  const r = evaluateChangeSet(cs([{
+    path: 'src/lib/example.ts',
+    changeType: 'modify',
+    addedText: 'export const retained = true',
+    removedText: Array.from({ length: 70 }, (_, i) => `export const old${i} = ${i}`).join('\n'),
+    baselineLineCount: 100,
+    removedLineCount: 70,
+  }]), M, null, undefined, WIDE_NO_DELETE)
+  assert.equal(r.decision, 'BLOCK')
+  assert.ok(r.findings.some((f) => f.layer === 'execution' && f.class === 'contentLoss'))
+})
+
+test('Layer 7 — AI elision plus substantial content loss BLOCKs corruption', () => {
+  const r = evaluateChangeSet(cs([{
+    path: 'src/lib/example.ts',
+    changeType: 'modify',
+    addedText: '// ... rest of file unchanged',
+    removedText: Array.from({ length: 50 }, (_, i) => `export const old${i} = ${i}`).join('\n'),
+    baselineLineCount: 100,
+    removedLineCount: 50,
+  }]), M, null, undefined, WIDE_NO_DELETE)
+  assert.equal(r.decision, 'BLOCK')
+  assert.ok(r.findings.some((f) => f.class === 'generationArtifactCorruption'))
+})
+
+test('Layer 7 — elision markers in documentation remain exempt', () => {
+  const r = evaluateChangeSet(cs([{
+    path: 'docs/example.md',
+    changeType: 'modify',
+    addedText: '... rest of file unchanged',
+    baselineLineCount: 100,
+    removedLineCount: 80,
+  }]), M, null, undefined, WIDE)
   assert.equal(r.decision, 'ALLOW')
 })

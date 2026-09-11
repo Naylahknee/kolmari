@@ -134,7 +134,7 @@ export function isSqlSurface(path, migrationsDir) {
  * @returns {boolean}
  */
 export function isGovernanceSource(path) {
-  return path.startsWith('src/sld/') || path === 'scripts/sld.mjs'
+  return path.startsWith('src/sld/') || path.startsWith('src/app/api/sld/') || path === 'scripts/sld.mjs'
 }
 
 /** Test files, which must contain the very strings they assert on. */

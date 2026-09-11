@@ -11,7 +11,7 @@
  *   scan                 print a summary of the current baseline scan
  *   diff [ref]           show files changed vs <ref> (default origin/main, else HEAD)
  *   analyze [ref]        evaluate the diff vs <ref> and print findings (no exit code)
- *   check [ref]          analyze + exit non-zero if decision is REVIEW or BLOCK (CI gate)
+ *   check [ref]          analyze + encode review/blocking decisions as exit status (CI gate)
  *   impact <path...>     print the blast radius of changing the given files
  *   drift                compare the working tree to the stored baseline
  *   audit [n]            print the last n audit entries (default 20)
@@ -50,7 +50,13 @@ const C = {
   reset: '\x1b[0m', bold: '\x1b[1m', dim: '\x1b[2m',
   red: '\x1b[31m', green: '\x1b[32m', yellow: '\x1b[33m', blue: '\x1b[34m', cyan: '\x1b[36m',
 }
-const DECISION_COLOR = { ALLOW: C.green, WARN: C.yellow, REVIEW: C.blue, BLOCK: C.red }
+const DECISION_COLOR = {
+  ALLOW: C.green,
+  ALLOW_WITH_WARNING: C.yellow,
+  REVIEW_REQUIRED: C.blue,
+  INSUFFICIENT_EVIDENCE: C.yellow,
+  BLOCK: C.red,
+}
 
 function now() {
   return new Date().toISOString()
@@ -87,7 +93,7 @@ function printLedger(ledger) {
     console.log(`${C.green}  AUTHORIZED${C.reset}`)
     for (const a of ledger.authorized) {
       console.log(`    ${a.path}`)
-      console.log(`${C.dim}      entity: ${a.entity} · state: ${a.states.join(', ')} · action: ${a.action} · source: ${a.source}${C.reset}`)
+      console.log(`${C.dim}      entity: ${a.entity} · state: ${a.states.join(', ')} · behavior: ${a.behaviors.join(', ')} · UI region: ${a.uiRegions.join(', ')} · action: ${a.action} · source: ${a.source}${C.reset}`)
     }
   }
   if (ledger.unauthorized.length) {
@@ -119,7 +125,7 @@ function printResult(result) {
   console.log(`${C.bold}SLD decision:${C.reset} ${col}${C.bold}${result.decision}${C.reset}` +
     (result.failedClosed ? ` ${C.red}(failed closed)${C.reset}` : ''))
   const s = result.summary
-  console.log(`${C.dim}  BLOCK ${s.BLOCK}  REVIEW ${s.REVIEW}  WARN ${s.WARN}  ALLOW ${s.ALLOW}${C.reset}`)
+  console.log(`${C.dim}  BLOCK ${s.BLOCK}  INSUFFICIENT ${s.INSUFFICIENT_EVIDENCE}  REVIEW ${s.REVIEW_REQUIRED}  WARNING ${s.ALLOW_WITH_WARNING}  ALLOW ${s.ALLOW}${C.reset}`)
   if (result.findings.length) {
     console.log('')
     for (const f of result.findings) printFinding(f)
@@ -188,8 +194,8 @@ function cmdAnalyze(exitOnSeverity) {
   printResult(result)
   printLedger(result.ledger)
   recordAudit(cs, result)
-  if (exitOnSeverity && (result.decision === 'REVIEW' || result.decision === 'BLOCK')) {
-    process.exitCode = result.decision === 'BLOCK' ? 2 : 1
+  if (exitOnSeverity && ['REVIEW_REQUIRED', 'INSUFFICIENT_EVIDENCE', 'BLOCK'].includes(result.decision)) {
+    process.exitCode = ['BLOCK', 'INSUFFICIENT_EVIDENCE'].includes(result.decision) ? 2 : 1
   }
 }
 
@@ -239,7 +245,7 @@ function cmdAudit() {
     try {
       const e = JSON.parse(line)
       const col = DECISION_COLOR[e.decision] || C.reset
-      console.log(`${C.dim}${e.at}${C.reset}  ${col}${e.decision.padEnd(6)}${C.reset}  ${e.label}  ${C.dim}(B${e.counts.BLOCK} R${e.counts.REVIEW} W${e.counts.WARN} A${e.counts.ALLOW})${C.reset}`)
+      console.log(`${C.dim}${e.at}${C.reset}  ${col}${e.decision.padEnd(22)}${C.reset}  ${e.label}  ${C.dim}(B${e.counts.BLOCK} I${e.counts.INSUFFICIENT_EVIDENCE} R${e.counts.REVIEW_REQUIRED} W${e.counts.ALLOW_WITH_WARNING} A${e.counts.ALLOW})${C.reset}`)
     } catch {
       // skip malformed line
     }

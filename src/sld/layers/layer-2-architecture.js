@@ -40,7 +40,7 @@ export function analyzeArchitecture(changeSet, manifest, baseline) {
     const atCanonicalRoot = dir === root || (root === '.' && dir === '.')
     if (!atCanonicalRoot) {
       findings.push({
-        layer: 'architecture',
+        layer: 'system',
         class: 'duplicateAppRoot',
         decision: manifest.policies.duplicateAppRoot,
         path: p,
@@ -54,7 +54,7 @@ export function analyzeArchitecture(changeSet, manifest, baseline) {
   // condition can't silently persist across evaluations.
   if (baseline && Array.isArray(baseline.appRoots) && baseline.appRoots.length > 1) {
     findings.push({
-      layer: 'architecture',
+      layer: 'system',
       class: 'duplicateAppRoot',
       decision: manifest.policies.duplicateAppRoot,
       message: `Baseline records ${baseline.appRoots.length} application roots: ${baseline.appRoots.join(', ')}. A single canonical Kolmari root is required.`,
