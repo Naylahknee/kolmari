@@ -1,28 +1,34 @@
 # 14 — SLD (Seven Layer Dip) Governance Engine
 
-The SLD engine is Kolmari's **runtime architectural-governance / change-control**
+The SLD engine is Kolmari's **runtime preservation-governance / change-control**
 system. It is executable, deterministic application logic — not documentation and
 not an LLM prompt. Given a proposed set of file changes, it returns one decision:
 
 ```
-ALLOW  <  WARN  <  REVIEW  <  BLOCK
+ALLOW < ALLOW_WITH_WARNING < REVIEW_REQUIRED
+      < INSUFFICIENT_EVIDENCE < BLOCK
 ```
 
-The highest-severity finding wins. It **fails closed**: any malformed input,
-missing manifest, or internal error returns `BLOCK`. There is no LLM in the
+The strictest finding wins. It **fails closed**: any malformed input,
+missing manifest, or internal error returns `INSUFFICIENT_EVIDENCE`. There is no LLM in the
 decision path, so the same change always yields the same decision.
 
 ## The seven layers
 
-| # | Layer        | Guards                                                                 | Analyzer |
-|---|--------------|-----------------------------------------------------------------------|----------|
-| 1 | Identity     | Protected product language; retired brand terms (e.g. "Nexit")        | `layers/layer-1-identity.js` |
-| 2 | Architecture | Single canonical app root — no duplicate/nested Kolmari               | `layers/layer-2-architecture.js` |
-| 3 | Dependencies | Forbidden import edges (UI→DB); server-only modules in client code    | `layers/layer-3-dependencies.js` |
-| 4 | Behavior     | Protected/critical features (auth, match-scoring, plan, command-center)| `layers/layer-4-behavior.js` |
-| 5 | Data         | Destructive DB operations on protected tables                          | `layers/layer-5-data.js` |
-| 6 | Interface    | Design-system drift; re-implementing reusable primitives              | `layers/layer-6-interface.js` |
-| 7 | Intent       | Relocation-not-travel framing; fabricated-data smells                 | `layers/layer-7-intent.js` |
+| # | Canonical layer | Current deterministic rule families |
+|---|-----------------|---------------------------------------|
+| 1 | Identity | Protected language, retired terms, relocation framing |
+| 2 | Design | Protected components and reusable design primitives |
+| 3 | Behavior | Protected interactions and critical features |
+| 4 | System | App roots, architecture, routes and structural authority |
+| 5 | Logic | Dependency boundaries, scoring and validation rules |
+| 6 | Content | Copy, records, data mutation and destructive SQL |
+| 7 | Execution | Authorization, scope, verification, content loss and AI-elision integrity |
+
+Architecture, dependencies, data, interface and intent are technical rule
+families. They map underneath the canonical seven layers and do not replace the
+SLD ontology. `layers/canonical.js` is the executable registry; tests assert
+exact conformance to the PRD.
 
 ## Architecture (why it is split)
 
@@ -65,7 +71,7 @@ npm run sld:baseline    # (re)write baseline.json from the working tree
 npm run sld:scan        # summarize the current scan (files, edges, env names, roots)
 npm run sld:diff        # list files changed vs origin/main (or HEAD)
 npm run sld:analyze     # evaluate the diff and print findings (never exits non-zero)
-npm run sld:check       # analyze + exit 2 on BLOCK, 1 on REVIEW (CI gate)
+npm run sld:check       # exit 2 on BLOCK/insufficient evidence, 1 on review
 npm run sld:impact -- src/lib/db.ts   # blast radius of changing given files
 npm run sld:drift       # compare working tree to the stored baseline
 npm run sld:audit       # print recent audit entries
@@ -87,7 +93,8 @@ decision.
 ## CI
 
 `.github/workflows/sld.yml` runs `sld:test` (blocking) and `sld:check` (fails the
-job only on a `BLOCK` decision; `REVIEW`/`WARN` are advisory annotations).
+job only on a `BLOCK` or `INSUFFICIENT_EVIDENCE` decision;
+`REVIEW_REQUIRED`/`ALLOW_WITH_WARNING` are advisory annotations).
 
 ## Scope enforcement (the governing rule)
 
@@ -100,8 +107,10 @@ USER REQUEST → TASK CONTRACT → SCOPE GATE → SOURCE/ENTITY/STATE/ACTION
   → SEVEN LAYERS → IMPLEMENTATION → POST-CHANGE VERIFICATION → AUDIT
 ```
 
-**Default deny.** An unspecified change is `BLOCK` — never ALLOW, WARN, REVIEW or
-"harmless". `harmlessChange` remains a risk classification and is explicitly not
+**Default deny.** An unspecified change is `BLOCK` — never `ALLOW`,
+`ALLOW_WITH_WARNING` or `REVIEW_REQUIRED`. Missing, invalid, ambiguous or
+self-approved authority returns `INSUFFICIENT_EVIDENCE`, never permission. A
+`harmlessChange` remains a risk classification and is explicitly not
 authorization: an unauthorized harmless change still blocks.
 
 - `src/sld/scope/task-contract.js` — the TaskContract: allowed files,
@@ -114,7 +123,7 @@ authorization: an unauthorized harmless change still blocks.
   through the manifest's `entities` registry, and an entity it cannot resolve is
   ambiguity, which blocks rather than widening to "everything".
 - `src/sld/scope/scope-gate.js` — runs before all seven layers. Enforces
-  file-, entity-, state- and action-level authorization, protects SLD's own
+  file-, entity-, behavior-, UI-region-, state- and action-level authorization, protects SLD's own
   governance surface, and emits the change ledger.
 
 **Levels of authorization.** A file in scope does not put every property of it in
@@ -129,6 +138,10 @@ change to SOURCE → ENTITY → STATE → ACTION, or recording why it could not 
 mapped. `npm run sld:verify` re-runs the gate over the real git diff after
 implementation; any change that cannot be traced back to the contract is an
 unauthorized change and the task fails.
+
+Contracts are drafts until a distinct human approver records approval. Structured
+`requiredChanges` are verified against the added content for their named
+artifact; an unmet `mustContain` or `mustMatch` requirement blocks completion.
 
 CLI: `npm run sld:contract` (inspect the active contract) and `npm run sld:verify`
 (post-change verification). The API route accepts an optional `taskContract` and

@@ -1,54 +1,53 @@
 {
-  "taskId": "demo-access-code",
-  "instruction": "Please create a login code to use for people to demo the site. Do not allow the user to have access to admin panel for demo account.",
-  "objective": "A shared demo account reachable by an env-configured code from /demo and the login page, seeded with a realistic profile on the top plan, permanently barred from the admin panel and from account-destructive actions.",
+  "taskId": "sld-031-canonical-governance-repair",
+  "instruction": "Correct and repair the SLD governance and engine against the approved SLD Engine 0.3.1 PRD without redesigning the SLD framework.",
+  "objective": "Restore the canonical operational preservation ontology, enforce contract approval separation and structured content requirements, detect silent AI-generated content loss, and add regression tests that prevent the engine from drifting away from SLD again.",
   "allowedEntities": [
-    "Authentication"
+    "SLD Engine"
   ],
   "allowedFiles": [
-    "src/lib/demo.ts",
-    "src/lib/demo-identity.ts",
-    "src/lib/admin.ts",
-    "src/lib/admin-data.ts",
-    "src/lib/profile.ts",
-    "src/app/api/demo/route.ts",
-    "src/app/(auth)/demo/page.tsx",
-    "src/app/(auth)/login/page.tsx",
-    "src/components/kolmari/demo-form.tsx",
-    "src/app/api/account/change-password/route.ts",
-    "src/app/api/account/deletion-request/route.ts",
-    "src/app/api/account/sign-out-all/route.ts",
-    "src/app/api/account/data-export/route.ts",
-    "docs/DEPLOY.md",
-    "docs/CURRENT-STATE.md",
-    ".env.example",
-    ".sld/task-contract.json"
+    ".github/workflows/sld.yml",
+    ".sld/task-contract.json",
+    "docs/14-SLD-GOVERNANCE.md",
+    "src/app/api/sld/evaluate/route.ts"
   ],
   "allowedActions": [
     "CREATE",
     "MODIFY",
     "REWIRE",
-    "RESTYLE"
-  ],
-  "allowedUIRegions": [
-    "demo entry",
-    "login page footer"
+    "REWRITE_COPY"
   ],
   "requiredChanges": [
     {
-      "artifact": "src/lib/admin.ts",
-      "mustContain": "isDemoEmail"
+      "artifact": "src/sld/layers/canonical.js",
+      "mustContain": "SLD_LAYER_IDS"
     },
     {
-      "artifact": "src/app/api/demo/route.ts",
-      "mustContain": "checkDemoCode"
+      "artifact": "src/sld/scope/task-contract.js",
+      "mustContain": "approveTaskContract"
+    },
+    {
+      "artifact": "src/sld/scope/scope-gate.js",
+      "mustContain": "missingRequiredChange"
+    },
+    {
+      "artifact": "src/sld/layers/layer-7-execution.js",
+      "mustContain": "generationArtifactCorruption"
     }
   ],
   "forbiddenChanges": [
-    "src/app/api/login/route.ts",
-    "src/lib/auth.ts",
-    "src/sld/",
-    ".github/"
+    "src/components/",
+    "src/lib/",
+    "db/",
+    "public/"
   ],
-  "createdFrom": "user-request"
+  "grants": [
+    "SLD_ENGINE_MAINTENANCE"
+  ],
+  "status": "approved",
+  "draftedBy": "Codex",
+  "approvedBy": "Naylahknee",
+  "implementingActor": "Codex",
+  "approvedAt": "2026-09-11T21:00:00.000Z",
+  "createdFrom": "current-user-request"
 }

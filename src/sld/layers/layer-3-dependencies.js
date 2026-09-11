@@ -34,7 +34,7 @@ export function analyzeDependencies(changeSet, manifest) {
       for (const edge of edges) {
         if (matchGlob(from, edge.fromGlob) && matchGlob(spec, edge.toGlob)) {
           findings.push({
-            layer: 'dependencies',
+            layer: 'logic',
             class: 'dependencyViolation',
             decision: manifest.policies.dependencyViolation,
             path: from,
@@ -56,7 +56,7 @@ export function analyzeDependencies(changeSet, manifest) {
           const modNoExt = mod.replace(/\.(ts|tsx|js|jsx)$/, '')
           if (spec === mod || spec === modNoExt || underPath(spec, modNoExt)) {
             findings.push({
-              layer: 'dependencies',
+              layer: 'logic',
               class: 'architectureViolation',
               decision: manifest.policies.architectureViolation,
               path: from,

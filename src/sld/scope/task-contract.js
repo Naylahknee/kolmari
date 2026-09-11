@@ -16,6 +16,7 @@
 /** Every action a contract can grant. Permission to one never implies another. */
 export const SCOPE_ACTIONS = /** @type {ScopeAction[]} */ ([
   'CREATE', 'MODIFY', 'DELETE', 'MOVE', 'RENAME', 'REFACTOR', 'RESTYLE', 'REWIRE', 'MIGRATE',
+  'REWRITE_COPY',
 ])
 
 /**
@@ -42,7 +43,14 @@ export const MANDATORY_INVARIANTS = [
  * contract explicitly grants SLD_ENGINE_MAINTENANCE, so a coding agent cannot
  * weaken the referee because the referee is inconvenient.
  */
-export const GOVERNANCE_PATHS = ['src/sld/', '.sld/', 'docs/kolmari/14-SLD-GOVERNANCE.md', 'scripts/sld.mjs']
+export const GOVERNANCE_PATHS = [
+  'src/sld/',
+  'src/app/api/sld/',
+  '.sld/',
+  '.github/workflows/sld.yml',
+  'docs/14-SLD-GOVERNANCE.md',
+  'scripts/sld.mjs',
+]
 
 /**
  * Per-task working files that live under .sld/ but are INPUTS to governance
@@ -63,6 +71,17 @@ export const SLD_MAINTENANCE_GRANT = 'SLD_ENGINE_MAINTENANCE'
  */
 export function createTaskContract(input) {
   const list = (v) => (Array.isArray(v) ? v.filter((x) => typeof x === 'string' && x.length > 0) : [])
+  const requiredChanges = Array.isArray(input.requiredChanges)
+    ? input.requiredChanges.filter((requirement) => {
+        if (typeof requirement === 'string') return requirement.length > 0
+        return Boolean(
+          requirement &&
+          typeof requirement === 'object' &&
+          typeof requirement.artifact === 'string' &&
+          requirement.artifact.length > 0,
+        )
+      })
+    : []
   const actions = list(input.allowedActions)
     .map((a) => a.toUpperCase())
     .filter((a) => (SCOPE_ACTIONS).includes(/** @type {ScopeAction} */ (a)))
@@ -78,13 +97,35 @@ export function createTaskContract(input) {
     allowedBehaviors: list(input.allowedBehaviors),
     allowedUIRegions: list(input.allowedUIRegions),
     allowedStates: list(input.allowedStates),
-    requiredChanges: list(input.requiredChanges),
+    requiredChanges,
     forbiddenChanges: list(input.forbiddenChanges),
     invariants: [...new Set([...MANDATORY_INVARIANTS, ...list(input.invariants)])],
     propagationRules: Array.isArray(input.propagationRules) ? input.propagationRules : [],
     grants: list(input.grants),
     ambiguityPolicy: input.ambiguityPolicy === 'ALLOW' ? 'ALLOW' : 'BLOCK',
     createdFrom: typeof input.createdFrom === 'string' ? input.createdFrom : 'user-request',
+    status: input.status === 'approved' || input.status === 'superseded' ? input.status : 'draft',
+    draftedBy: typeof input.draftedBy === 'string' ? input.draftedBy : '',
+    approvedBy: typeof input.approvedBy === 'string' ? input.approvedBy : '',
+    implementingActor: typeof input.implementingActor === 'string' ? input.implementingActor : '',
+    approvedAt: typeof input.approvedAt === 'string' ? input.approvedAt : '',
+  }
+}
+
+/**
+ * Approval is a separate operation from drafting. The resulting contract is
+ * still validated by the Scope Gate, including the self-approval prohibition.
+ * @param {TaskContract} contract
+ * @param {{ approvedBy: string, implementingActor: string, approvedAt: string }} approval
+ * @returns {TaskContract}
+ */
+export function approveTaskContract(contract, approval) {
+  return {
+    ...contract,
+    status: 'approved',
+    approvedBy: approval.approvedBy,
+    implementingActor: approval.implementingActor,
+    approvedAt: approval.approvedAt,
   }
 }
 
@@ -99,6 +140,15 @@ export function createTaskContract(input) {
 export function validateTaskContract(contract) {
   if (!contract || typeof contract !== 'object') {
     return { ok: false, reason: 'No TaskContract supplied. An agent change requires explicit authorization.' }
+  }
+  if (contract.status !== 'approved') {
+    return { ok: false, reason: 'TaskContract is not approved. Drafting a contract is not authorization.' }
+  }
+  if (!contract.approvedBy || !contract.implementingActor || !contract.approvedAt) {
+    return { ok: false, reason: 'TaskContract approval evidence is incomplete.' }
+  }
+  if (contract.approvedBy.trim().toLowerCase() === contract.implementingActor.trim().toLowerCase()) {
+    return { ok: false, reason: 'TaskContract is self-approved. The approver must differ from the implementing actor.' }
   }
   if (!contract.instruction || contract.instruction.trim().length === 0) {
     return { ok: false, reason: 'TaskContract has no instruction — the authorizing user request is missing.' }

@@ -14,14 +14,11 @@
  * all; the seven layers only judge whether an already-authorized change violates
  * protected architecture. Permission and risk are separate dimensions.
  *
- * The seven layers:
- *   1. Identity      — protected/forbidden product language
- *   2. Architecture  — single canonical app root, no duplicate/nested project
- *   3. Dependencies  — forbidden import edges, server-only boundary
- *   4. Behavior      — protected/critical features
- *   5. Data          — destructive DB operations
- *   6. Interface     — design-system drift
- *   7. Intent        — product-intent (relocation, not travel; no fabricated data)
+ * Canonical operational preservation layers:
+ *   Identity · Design · Behavior · System · Logic · Content · Execution
+ *
+ * Architecture, dependencies, data, interface, and intent remain technical
+ * rule families mapped underneath the canonical SLD ontology.
  */
 export { KOLMARI_MANIFEST, default as manifest } from './manifest/kolmari.manifest.js'
 export { evaluateChangeSet, aggregateDecision } from './engine/decision-engine.js'
@@ -30,9 +27,11 @@ export { buildAuditEntry } from './audit/audit.js'
 export { runScopeGate, verifyAgainstContract } from './scope/scope-gate.js'
 export {
   createTaskContract,
+  approveTaskContract,
   validateTaskContract,
   SCOPE_ACTIONS,
   MANDATORY_INVARIANTS,
   SLD_MAINTENANCE_GRANT,
 } from './scope/task-contract.js'
 export { compileTaskContract } from './scope/task-compiler.js'
+export { SLD_LAYER_IDS, isCanonicalLayer } from './layers/canonical.js'

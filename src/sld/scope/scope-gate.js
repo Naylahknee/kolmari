@@ -85,9 +85,28 @@ function impliedActions(change) {
       if (c.action === 'RESTYLE' && !UI_CAPABLE.test(change.path)) continue
       if (c.test(text)) out.push({ action: c.action, label: c.label })
     }
-    if (looksLikeCopyChange(text)) out.push({ action: 'MODIFY', label: 'copy change' })
+    if (looksLikeCopyChange(text)) out.push({ action: 'REWRITE_COPY', label: 'user-visible copy change' })
   }
   return out
+}
+
+/**
+ * Enforce a narrowed semantic dimension without guessing. When the contract
+ * names allowed values, missing evidence is not treated as broad permission.
+ * @param {string} label
+ * @param {string[]} allowed
+ * @param {string[] | undefined} declared
+ * @returns {string[]}
+ */
+function semanticScopeReasons(label, allowed, declared) {
+  if (allowed.length === 0) return []
+  if (!Array.isArray(declared) || declared.length === 0) {
+    return [`TaskContract is ${label}-scoped but the change declares no ${label}, so it cannot be proven in scope.`]
+  }
+  const unauthorized = declared.filter(
+    (value) => !allowed.some((candidate) => candidate.toLowerCase() === value.toLowerCase()),
+  )
+  return unauthorized.length > 0 ? [`Change touches unauthorized ${label}(s): ${unauthorized.join(', ')}.`] : []
 }
 
 /**
@@ -115,9 +134,9 @@ export function runScopeGate(changeSet, manifest, contract) {
   if (!validity.ok) {
     if (changes.length === 0) return { findings, ledger }
     findings.push({
-      layer: 'scope',
-      class: 'unknownScope',
-      decision: 'BLOCK',
+      layer: 'execution',
+      class: 'invalidContractApproval',
+      decision: 'INSUFFICIENT_EVIDENCE',
       message: `${validity.reason} No change may proceed without a valid TaskContract.`,
     })
     for (const change of changes) {
@@ -133,12 +152,19 @@ export function runScopeGate(changeSet, manifest, contract) {
   // scope. Under the default policy that BLOCKs rather than resolving to "all".
   if (scope.unresolvedEntities.length > 0 && scope.ambiguityPolicy === 'BLOCK') {
     findings.push({
-      layer: 'scope',
+      layer: 'execution',
       class: 'unknownScope',
-      decision: 'BLOCK',
+      decision: 'INSUFFICIENT_EVIDENCE',
       message: `TaskContract names entities SLD cannot resolve deterministically: ${scope.unresolvedEntities.join(', ')}. Add them to the manifest entity registry or name files explicitly.`,
       detail: scope.unresolvedEntities.join(','),
     })
+    for (const change of changes) {
+      ledger.unauthorized.push({
+        path: change.path,
+        reason: `Contract target cannot be resolved: ${scope.unresolvedEntities.join(', ')}.`,
+      })
+    }
+    return { findings, ledger }
   }
 
   const governanceAllowed = allowsGovernanceEdits(active)
@@ -176,21 +202,17 @@ export function runScopeGate(changeSet, manifest, contract) {
 
     // State-level: when the contract narrows to specific states, a change must
     // declare which state it touches and that state must be authorized.
-    if (scope.states.length > 0) {
-      const declared = Array.isArray(change.states) ? change.states : []
-      if (declared.length === 0) {
-        reasons.push('TaskContract is state-scoped but the change declares no state, so it cannot be proven in scope.')
-      } else {
-        const bad = declared.filter((s) => !scope.states.some((a) => a.toLowerCase() === s.toLowerCase()))
-        if (bad.length > 0) reasons.push(`Change touches unauthorized state(s): ${bad.join(', ')}.`)
-      }
-    }
+    reasons.push(...semanticScopeReasons('state', scope.states, change.states))
+    reasons.push(...semanticScopeReasons('behavior', scope.behaviors, change.behaviors))
+    reasons.push(...semanticScopeReasons('UI region', scope.uiRegions, change.uiRegions))
 
     if (reasons.length === 0) {
       ledger.authorized.push({
         path,
         entity: entityForPath(path, scope) ?? '(named file)',
         states: Array.isArray(change.states) && change.states.length ? change.states : ['(unspecified)'],
+        behaviors: Array.isArray(change.behaviors) && change.behaviors.length ? change.behaviors : ['(unspecified)'],
+        uiRegions: Array.isArray(change.uiRegions) && change.uiRegions.length ? change.uiRegions : ['(unspecified)'],
         action: CHANGE_TYPE_ACTION[change.changeType] ?? 'MODIFY',
         source: active.taskId,
       })
@@ -200,7 +222,7 @@ export function runScopeGate(changeSet, manifest, contract) {
     const reason = reasons.join(' ')
     ledger.unauthorized.push({ path, reason })
     findings.push({
-      layer: 'scope',
+      layer: 'execution',
       class: 'unauthorizedChange',
       decision: 'BLOCK',
       path,
@@ -212,10 +234,11 @@ export function runScopeGate(changeSet, manifest, contract) {
   // A required change that never arrived is worth surfacing, but it is an
   // incompleteness rather than an unauthorized act, so it does not BLOCK.
   for (const required of active.requiredChanges) {
-    const met = changes.some((c) => c.path === required || c.path.endsWith(required))
+    const artifact = typeof required === 'string' ? required : required.artifact
+    const met = changes.some((c) => c.path === artifact || c.path.endsWith(artifact))
     if (!met) {
       ledger.observations.push({
-        observation: `TaskContract lists "${required}" as a required change, but no such change is present.`,
+        observation: `TaskContract lists "${artifact}" as a required change, but no such change is present.`,
         action: 'none',
         reason: 'Reported for completeness; absence of a change is not an unauthorized change.',
       })
@@ -236,6 +259,34 @@ export function runScopeGate(changeSet, manifest, contract) {
  */
 export function verifyAgainstContract(actualDiff, manifest, contract) {
   const { findings, ledger } = runScopeGate(actualDiff, manifest, contract)
+  if (contract && findings.every((finding) => finding.class !== 'invalidContractApproval')) {
+    for (const requirement of contract.requiredChanges || []) {
+      const rule = typeof requirement === 'string' ? { artifact: requirement } : requirement
+      const change = actualDiff.changes.find(
+        (candidate) => candidate.path === rule.artifact || candidate.path.endsWith(rule.artifact),
+      )
+      let satisfied = Boolean(change && change.changeType !== 'delete')
+      if (satisfied && rule.mustContain) satisfied = (change.addedText || '').includes(rule.mustContain)
+      if (satisfied && rule.mustMatch) {
+        try {
+          satisfied = new RegExp(rule.mustMatch).test(change.addedText || '')
+        } catch {
+          satisfied = false
+        }
+      }
+      if (rule.mustExist === false) satisfied = !change || change.changeType === 'delete'
+      if (!satisfied) {
+        findings.push({
+          layer: 'execution',
+          class: 'missingRequiredChange',
+          decision: 'BLOCK',
+          path: rule.artifact,
+          message: `Required content-level change was not satisfied for ${rule.artifact}.`,
+          detail: rule.mustContain || rule.mustMatch || (rule.mustExist === false ? 'must-not-exist' : 'must-exist'),
+        })
+      }
+    }
+  }
   const unauthorizedCount = ledger.unauthorized.length
   return { pass: unauthorizedCount === 0 && findings.length === 0, unauthorizedCount, ledger, findings }
 }
