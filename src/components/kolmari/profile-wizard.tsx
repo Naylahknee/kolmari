@@ -1,168 +1,145 @@
-﻿'use client'
+'use client'
 
-import Link from 'next/link'
+import { Wordmark } from './wordmark'
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, Check, LoaderCircle } from 'lucide-react'
-import type { PathwayGoal, RelocationProfile, WizardStatus } from '@/lib/profile'
+import type { RelocationProfile, WizardStatus } from '@/lib/profile'
+import { activeAnswers, chooseAnswer, emptyOnboarding, isAnswered, LANE_IDS, LANE_LINKS, LANES, type LaneId, type OnboardingState, type Question } from '@/lib/onboarding'
+const EnergyPortal = dynamic(() => import('@/components/kolmari/energy/energy-portal').then(module => module.EnergyPortal))
+import styles from './profile-wizard.module.css'
 
-const incomeTypes = ['Employment', 'Self-employment', 'Pension', 'Investments', 'Mixed', 'Other'] as const
-const educationLevels = ['Secondary school', 'Associate degree', 'Bachelorâ€™s degree', 'Masterâ€™s degree', 'Doctorate', 'Professional credential', 'Other'] as const
-const householdTypes = ['Solo', 'Couple', 'Family', 'Other'] as const
-const regions = ['North America', 'Latin America', 'Europe', 'Africa', 'Asia', 'Oceania', 'Open to anywhere'] as const
-const timelines = ['0-3 months', '3-6 months', '6-12 months', '12+ months', 'Just researching'] as const
-const goals: PathwayGoal[] = ['Remote Work', 'Employment', 'Entrepreneurship', 'Passive Income / Retirement', 'Education', 'Family Reunification', 'Ancestry', 'Investment']
-const priorities = ['Affordability', 'Safety', 'Career', 'Healthcare & schools', 'Quality of life'] as const
+const destinations = ['Portugal', 'Spain', 'Uruguay', 'Mexico', 'Costa Rica', 'Ghana', 'Malaysia', 'Albania']
+const priorities: Record<LaneId, string> = { health: 'Healthcare & schools', community: 'Safety', energy: 'Quality of life', work: 'Career', family: 'Healthcare & schools', money: 'Affordability' }
+const goals = ['Remote Work', 'Employment', 'Entrepreneurship', 'Passive Income / Retirement', 'Education', 'Family Reunification', 'Ancestry', 'Investment'] as const
 
 export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
   const router = useRouter()
-  const [step, setStep] = useState(0)
   const [profile, setProfile] = useState(initial)
+  const [setup, setSetup] = useState<OnboardingState>(initial.onboarding ?? emptyOnboarding())
+  const [step, setStep] = useState(initial.onboarding?.step ?? 0)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const isRetake = initial.wizard_status === 'completed'
+  const [destination, setDestination] = useState('')
+  const busy = useRef(false)
+  const heading = useRef<HTMLHeadingElement>(null)
+  const retake = initial.wizard_status === 'completed'
+  const questions = setup.lanes.flatMap(lane => LANES[lane].qs.map(q => ({ ...q, lane })))
+  const energyStep = setup.lanes.includes('energy') ? questions.length + 1 : -1
+  const originStep = questions.length + 1 + (energyStep > 0 ? 1 : 0)
+  const householdStep = originStep + 1
+  const reviewStep = householdStep + 1
+  const currentStep = Math.min(step, reviewStep)
+  const question = currentStep > 0 && currentStep <= questions.length ? questions[currentStep - 1] : null
+  const phase = currentStep === 0 ? 0 : currentStep < originStep ? 1 : currentStep < reviewStep ? 2 : 3
+  const selectedLanes = setup.lanes.map(id => LANES[id].short).join(', ')
 
   function update<K extends keyof RelocationProfile>(key: K, value: RelocationProfile[K]) {
-    setProfile((current) => ({ ...current, [key]: value }))
+    setProfile(previous => ({ ...previous, [key]: value }))
   }
-
-  function payload(wizardStatus: WizardStatus) {
-    return {
-      wizard_status: wizardStatus,
-      display_name: profile.display_name,
-      // v1 is built for US-based movers; we assume a US starting point rather
-      // than asking for citizenship directly. Ancestry ties are collected in a
-      // later step. Existing values are preserved for retakes.
-      citizenship: profile.citizenship ?? 'United States',
-      current_country: profile.current_country,
-      monthly_income: profile.monthly_income,
-      annual_income: profile.annual_income,
-      income_type: profile.income_type,
-      remote: profile.remote,
-      occupation: profile.occupation,
-      credentials: profile.credentials,
-      education: profile.education,
-      savings: profile.savings,
-      household_type: profile.household_type,
-      family_size: profile.family_size,
-      spouse: profile.spouse,
-      dependents: profile.dependents,
-      ancestry_connections: profile.ancestry_connections,
-      preferred_regions: profile.preferred_regions,
-      preferred_region: profile.preferred_regions[0] ?? null,
-      timeline: profile.timeline,
-      priority: profile.priority,
-      goals: profile.goals,
-      completed_at: wizardStatus === 'completed' ? new Date().toISOString() : profile.completed_at,
-    }
+  function navigate(next: number) {
+    setStep(next)
+    window.scrollTo({ top: 0, behavior: 'instant' })
+    requestAnimationFrame(() => heading.current?.focus())
   }
-
-  async function persist(wizardStatus: WizardStatus) {
+  function toggleLane(lane: LaneId) {
+    setSetup(previous => ({ ...previous, lanes: previous.lanes.includes(lane) ? previous.lanes.filter(id => id !== lane) : previous.lanes.length < 3 ? [...previous.lanes, lane] : previous.lanes }))
+  }
+  function answer(q: Question, option: string) {
+    setSetup(previous => ({ ...previous, answers: { ...previous.answers, [q.id]: chooseAnswer(q, previous.answers[q.id], option) } }))
+  }
+  function valid() {
+    if (currentStep === 0) return setup.lanes.length > 0
+    if (question) return isAnswered(setup.answers[question.id])
+    if (currentStep === originStep) return Boolean(profile.display_name?.trim() && profile.current_country?.trim() && profile.citizenship?.trim())
+    if (currentStep === householdStep) return Boolean(profile.household_type && profile.family_size && profile.dependents !== null && profile.spouse !== null && profile.timeline && profile.goals.length && profile.family_size >= 1 + (profile.spouse ? 1 : 0) + (profile.dependents ?? 0))
+    return true
+  }
+  async function persist(status: WizardStatus, nextStep: number) {
     const response = await fetch('/api/profile', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload(wizardStatus)),
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        wizard_status: status,
+        display_name: profile.display_name, citizenship: profile.citizenship, current_country: profile.current_country,
+        household_type: profile.household_type, family_size: profile.family_size, spouse: profile.spouse, dependents: profile.dependents,
+        timeline: profile.timeline, goals: profile.goals, priority: setup.lanes[0] ? priorities[setup.lanes[0]] : profile.priority,
+        monthly_income: profile.monthly_income, annual_income: profile.annual_income, income_type: profile.income_type,
+        remote: profile.remote, occupation: profile.occupation, credentials: profile.credentials, education: profile.education,
+        savings: profile.savings, ancestry_connections: profile.ancestry_connections, preferred_regions: profile.preferred_regions,
+        preferred_region: profile.preferred_regions[0] ?? profile.preferred_region,
+        onboarding: { ...setup, answers: activeAnswers(setup), step: nextStep },
+        completed_at: status === 'completed' ? profile.completed_at ?? new Date().toISOString() : profile.completed_at,
+      }),
     })
     const result = await response.json()
-    if (!response.ok) throw new Error(result.error ?? 'Unable to save your Profile.')
+    if (!response.ok) throw new Error(result.error ?? 'Unable to save your progress. Please try again.')
   }
-
-  function canContinue() {
-    if (step === 0) return profile.goals.length > 0 && Boolean(profile.priority)
-    if (step === 1) return Boolean(profile.display_name?.trim() && profile.current_country?.trim())
-    if (step === 2) return Boolean(profile.income_type)
-    if (step === 3) return profile.remote !== null && Boolean(profile.occupation?.trim() && profile.education && profile.household_type)
-      && profile.family_size !== null && profile.dependents !== null && profile.spouse !== null
-      && (profile.ancestry_connections === 'None known' || Boolean(profile.ancestry_connections?.trim()))
-    if (step === 4) return profile.preferred_regions.length > 0
-    return Boolean(profile.timeline)
-  }
-
-  async function next() {
-    if (!canContinue()) return
-    setSaving(true)
-    setError('')
+  async function saveAndContinue(exit = false) {
+    if (busy.current || (!exit && !valid())) return
+    busy.current = true; setSaving(true); setError('')
     try {
-      await persist(isRetake ? 'completed' : 'in_progress')
-      setStep((current) => current + 1)
+      const complete = currentStep === reviewStep && !exit
+      const nextStep = exit || complete ? currentStep : currentStep + 1
+      await persist(complete || retake ? 'completed' : exit ? 'skipped' : 'in_progress', nextStep)
+      if (exit || complete) { router.push(complete ? '/command-center' : retake ? '/settings' : '/destinations'); router.refresh() }
+      else navigate(nextStep)
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Unable to save your progress.')
-    } finally {
-      setSaving(false)
-    }
+      setError(reason instanceof Error ? reason.message : 'Unable to save. Your answers are still on this screen.')
+    } finally { busy.current = false; setSaving(false) }
   }
-
-  async function finish() {
-    if (!canContinue()) return
-    setSaving(true)
-    setError('')
-    try {
-      await persist('completed')
-      router.push('/nextinations?source=quiz')
-      router.refresh()
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Unable to complete your Profile.')
-      setSaving(false)
-    }
+  function toggleDestination(name: string) {
+    setSetup(previous => ({ ...previous, destinations: previous.destinations.includes(name) ? previous.destinations.filter(value => value !== name) : previous.destinations.length < 12 ? [...previous.destinations, name] : previous.destinations }))
   }
+  const title = currentStep === 0 ? 'How do you want to approach your move?'
+    : question ? question.q : currentStep === energyStep ? 'Explore your Energy focus'
+    : currentStep === originStep ? 'Where are you starting from?'
+    : currentStep === householdStep ? 'Who is moving, and when?'
+    : 'Your Command Center, around your priorities'
 
-  async function skip() {
-    setSaving(true)
-    setError('')
-    try {
-      await persist('skipped')
-      router.push('/destinations')
-      router.refresh()
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Unable to continue right now.')
-      setSaving(false)
-    }
-  }
-
-  const panels = [
-    <section key="goal"><StepLabel step={1} title="What's your main reason for moving?" copy="This is the biggest factor â€” it decides which Pathways even apply. Choose every category that fits." /><div className="mt-7 grid gap-3 sm:grid-cols-2">{goals.map((goal) => <Choice key={goal} active={profile.goals.includes(goal)} onClick={() => update('goals', profile.goals.includes(goal) ? profile.goals.filter((item) => item !== goal) : [...profile.goals, goal])}>{goal}</Choice>)}</div>
-      <div className="mt-8"><p className="text-sm font-bold text-navy">And what matters most in this move?</p><p className="mt-1 text-xs text-muted">Your top priority gets the most weight in your Match Scores. Pick one.</p><div className="mt-3 grid gap-3 sm:grid-cols-2">{priorities.map((p) => <Choice key={p} active={profile.priority === p} onClick={() => update('priority', p)}>{p}</Choice>)}</div></div></section>,
-    <section key="origin"><StepLabel step={2} title="Where are you starting from?" copy="Kolmari is built for US-based movers, so we assume a US starting point â€” no citizenship or passport questions. Ancestry ties come in a later step." /><div className="mt-7 grid gap-5 sm:grid-cols-2"><TextField label="What should we call you?" value={profile.display_name} onChange={(value) => update('display_name', value)} /><TextField label="Current country of residence" value={profile.current_country} onChange={(value) => update('current_country', value)} /></div></section>,
-    <section key="money"><StepLabel step={3} title="How do you earn?" copy="Just the category for now â€” how your income comes in. Exact income and savings figures come later, only when you build your Kolmari Plan." /><div className="mt-7 grid gap-5 sm:grid-cols-2"><SelectField label="Primary income type" value={profile.income_type} options={incomeTypes} onChange={(value) => update('income_type', value)} /></div></section>,
-    <section key="life"><StepLabel step={4} title="Your work, household, and ties" copy="These shape eligibility â€” remote work, credentials, dependents, and any ancestry connection." />
-      <div className="mt-7"><p className="text-sm font-bold">Can your current work be performed remotely?</p><div className="mt-3 grid grid-cols-2 gap-3"><Choice active={profile.remote === true} onClick={() => update('remote', true)}>Yes</Choice><Choice active={profile.remote === false} onClick={() => update('remote', false)}>No</Choice></div></div>
-      <div className="mt-5 grid gap-5 sm:grid-cols-2"><TextField label="Occupation" value={profile.occupation} onChange={(value) => update('occupation', value)} /><SelectField label="Highest education or credential" value={profile.education} options={educationLevels} onChange={(value) => update('education', value)} /><TextField label="Licenses or credentials (optional)" value={profile.credentials} onChange={(value) => update('credentials', value)} /><SelectField label="Household type" value={profile.household_type} options={householdTypes} onChange={(value) => update('household_type', value)} /><NumberField label="Total household members" value={profile.family_size} min={1} max={12} onChange={(value) => update('family_size', value)} /><NumberField label="Dependents" value={profile.dependents} min={0} max={11} onChange={(value) => update('dependents', value)} /></div>
-      <div className="mt-5 grid gap-5 sm:grid-cols-2"><div><p className="text-sm font-bold">Spouse or partner included?</p><div className="mt-2 grid grid-cols-2 gap-2"><Choice active={profile.spouse === true} onClick={() => update('spouse', true)}>Yes</Choice><Choice active={profile.spouse === false} onClick={() => update('spouse', false)}>No</Choice></div></div><div><p className="text-sm font-bold">Ancestry or family connections abroad?</p><div className="mt-2 grid grid-cols-2 gap-2"><Choice active={profile.ancestry_connections === 'None known'} onClick={() => update('ancestry_connections', 'None known')}>None known</Choice><Choice active={Boolean(profile.ancestry_connections && profile.ancestry_connections !== 'None known')} onClick={() => update('ancestry_connections', '')}>Yes</Choice></div></div></div>
-      {profile.ancestry_connections !== null && profile.ancestry_connections !== 'None known' ? <div className="mt-5"><TextField label="Countries and relationships" value={profile.ancestry_connections} onChange={(value) => update('ancestry_connections', value)} /></div> : null}</section>,
-    <section key="destination"><StepLabel step={5} title="Where are you drawn to?" copy="Choose the regions to prioritize. Pick 'Open to anywhere' if you want Kolmari to cast a wide net." /><div className="mt-7 grid gap-3 sm:grid-cols-2">{regions.map((region) => <Choice key={region} active={profile.preferred_regions.includes(region)} onClick={() => update('preferred_regions', profile.preferred_regions.includes(region) ? profile.preferred_regions.filter((item) => item !== region) : [...profile.preferred_regions, region])}>{region}</Choice>)}</div></section>,
-    <section key="timeline"><StepLabel step={6} title="When are you planning to move?" copy="Timing affects which routes are realistic. Finish to reveal your top Destination." /><div className="mt-8 max-w-sm"><SelectField label="Desired relocation timeline" value={profile.timeline} options={timelines} onChange={(value) => update('timeline', value)} /></div></section>,
-  ]
-
-  return (
-    <main className="min-h-screen bg-canvas px-5 py-8 sm:py-12">
-      <div className="mx-auto max-w-3xl">
-        <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm font-bold text-gold-deep">{isRetake ? 'Edit Profile' : 'Profile Wizard'}</p><p className="text-xs text-muted">Step {step + 1} of {panels.length}</p></div><Link href={isRetake ? '/settings' : '/destinations'} className="text-sm font-bold text-muted">Exit wizard</Link></div>
-        <div className="mt-4 flex gap-1.5" aria-hidden>{panels.map((_, index) => <span key={index} className={`h-2 flex-1 rounded-full ${index <= step ? 'bg-gold' : 'bg-line'}`} />)}</div>
-        <div className="card-surface mt-6 p-6 sm:p-10">{panels[step]}{error ? <p role="alert" className="mt-6 rounded-xl bg-danger/10 px-4 py-3 text-sm font-semibold text-danger">{error}</p> : null}<div className="mt-10 flex items-center justify-between gap-3"><button type="button" onClick={() => setStep((current) => Math.max(0, current - 1))} disabled={step === 0 || saving} className="inline-flex min-h-12 items-center gap-2 rounded-xl px-3 font-bold text-muted disabled:opacity-0"><ArrowLeft size={17} />Back</button>{step < panels.length - 1 ? <button type="button" onClick={next} disabled={!canContinue() || saving} className="gold-button disabled:cursor-not-allowed disabled:opacity-50">{saving ? <LoaderCircle size={16} className="animate-spin" /> : null}Continue<ArrowRight size={17} /></button> : <button type="button" onClick={finish} disabled={!canContinue() || saving} className="gold-button disabled:cursor-not-allowed disabled:opacity-50">{saving ? <LoaderCircle size={16} className="animate-spin" /> : null}Reveal my top Destination<ArrowRight size={17} /></button>}</div></div>
-        {!isRetake ? <button type="button" onClick={skip} disabled={saving} className="mx-auto mt-5 block text-sm font-bold text-muted underline-offset-4 hover:underline">Skip for now and explore destinations</button> : null}
-        <p className="mx-auto mt-5 max-w-xl text-center text-xs leading-5 text-muted">Your answers support planning information only. Kolmari does not provide legal approval or immigration advice.</p>
-      </div>
-    </main>
-  )
-}
-
-function StepLabel({ step, title, copy }: { step: number; title: string; copy: string }) {
-  return <div><p className="text-xs font-extrabold uppercase tracking-[.18em] text-gold-deep">Step {step}</p><h1 className="mt-2 font-display text-3xl font-bold text-navy sm:text-4xl">{title}</h1><p className="mt-3 text-sm leading-6 text-muted">{copy}</p></div>
-}
-
-function TextField({ label, value, onChange }: { label: string; value: string | null; onChange: (value: string) => void }) {
-  return <label className="text-sm font-bold">{label}<input className="field mt-2" value={value ?? ''} onChange={(event) => onChange(event.target.value)} /></label>
-}
-
-function NumberField({ label, value, onChange, min = 0, max = 100_000_000 }: { label: string; value: number | null; onChange: (value: number | null) => void; min?: number; max?: number }) {
-  return <label className="text-sm font-bold">{label}<input className="field mt-2" type="number" min={min} max={max} value={value ?? ''} onChange={(event) => onChange(event.target.value === '' ? null : Math.min(max, Math.max(min, Number(event.target.value))))} /></label>
-}
-
-function SelectField<T extends string>({ label, value, options, onChange }: { label: string; value: string | null; options: readonly T[]; onChange: (value: T) => void }) {
-  return <label className="text-sm font-bold">{label}<select className="field mt-2" value={value ?? ''} onChange={(event) => onChange(event.target.value as T)}><option value="" disabled>Select one</option>{options.map((option) => <option key={option}>{option}</option>)}</select></label>
+  return <main className={styles.page}>
+    <header className={styles.header}><Wordmark /><button onClick={() => saveAndContinue(true)} disabled={saving} className={styles.exit}>Save & exit</button></header>
+    <div className={styles.layout}>
+      <aside className={styles.rail} aria-label="Setup progress"><p className={styles.eyebrow}>YOUR KOLMARI PROFILE</p><h2>A plan that starts<br />with your life.</h2><p>Your priorities set the order. Every path leads to your Command Center.</p><ol>{['Your approach', 'Your priorities', 'Your household', 'Command Center'].map((label, i) => <li key={label} aria-current={phase === i ? 'step' : undefined}><span>{phase > i ? <Check size={15} /> : i + 1}</span><div><strong>{label}</strong><small>{i === 0 && setup.lanes.length ? selectedLanes : ['Choose up to three', 'Questions that fit you', 'Starting point and timing', 'Research and next steps'][i]}</small></div></li>)}</ol><p className={styles.railNote}>You can revise your answers later. Your other profile details stay with your account.</p></aside>
+      <section className={styles.content}>
+        <div className={styles.progressRow}><button type="button" aria-label="Previous step" onClick={() => navigate(Math.max(0, currentStep - 1))} disabled={currentStep === 0 || saving} className={styles.back}><ArrowLeft size={18} /></button><progress max={reviewStep} value={currentStep} aria-label="Onboarding progress" /><span>{currentStep + 1} / {reviewStep + 1}</span></div>
+        <p className={styles.eyebrow}>{question ? `${LANES[question.lane].short} · priority ${setup.lanes.indexOf(question.lane) + 1}` : ['QUESTION ONE — IT SETS THE REST', 'YOUR PRIORITIES', 'EVERY APPROACH ASKS THIS', 'READY TO BUILD'][phase]}</p>
+        <h1 ref={heading} tabIndex={-1}>{title}</h1>
+        <p className={styles.intro}>{currentStep === 0 ? 'Choose up to three, in priority order. Your first choice leads; the others add context.' : question ? question.help : currentStep === energyStep ? 'Optional and experimental. Practical visa, budget, health and safety research always stays separate. You can skip this and continue setup.' : currentStep === originStep ? 'Your residence and passport countries help you research the relevant routes. Neither is assumed.' : currentStep === householdStep ? 'Tell us who the plan needs to work for. Leave financial details unknown until you have them.' : 'Your answers and selected destinations will be saved to your account. No sample households, progress or matches.'}</p>
+        <fieldset disabled={saving} className={styles.fields}>
+        {currentStep === 0 && <div className={styles.lanes}>{LANE_IDS.map(id => { const lane = LANES[id]; const rank = setup.lanes.indexOf(id); return <button type="button" key={id} aria-pressed={rank >= 0} disabled={rank < 0 && setup.lanes.length >= 3} onClick={() => toggleLane(id)} className={styles.lane}><span className={styles.laneTop}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d={lane.d} /></svg><strong>{lane.title}</strong>{rank >= 0 && <b>{rank + 1}</b>}</span><span>{lane.blurb}</span><small>{rank >= 0 ? ['Primary priority', 'Second priority', 'Third priority'][rank] : lane.tag}</small></button> })}</div>}
+        {question && <><div className={styles.questionMeta}>{question.mode}</div><div className={styles.choices}>{question.opts.map(option => { const value = setup.answers[question.id]; return <Choice key={option} active={Array.isArray(value) ? value.includes(option) : value === option} onClick={() => answer(question, option)}>{option}</Choice> })}</div>{question.lane === 'health' && <p className={styles.note}>Saved for your research checklist. An allergen flag does not remove a destination or certify food safety.</p>}</>}
+        {currentStep === energyStep && <EnergyPortal />}
+        {currentStep === originStep && <div className={styles.formGrid}><TextField label="What should we call you?" value={profile.display_name} onChange={v => update('display_name', v)} maxLength={80} autoComplete="given-name" /><TextField label="Country where you live now" value={profile.current_country} onChange={v => update('current_country', v)} maxLength={80} autoComplete="country-name" /><TextField label="Passport citizenship(s)" value={profile.citizenship} onChange={v => update('citizenship', v)} maxLength={80} /><TextField label="Ancestry or family connections abroad (optional)" value={profile.ancestry_connections} onChange={v => update('ancestry_connections', v)} maxLength={500} /></div>}
+        {currentStep === householdStep && <>
+          <div className={styles.formGrid}><SelectField label="Who is moving?" value={profile.household_type} options={['Solo', 'Couple', 'Family', 'Other']} onChange={v => update('household_type', v)} /><NumberField label="Total people, including you" value={profile.family_size} min={1} max={12} onChange={v => update('family_size', v)} /><SelectField label="Is a partner moving with you?" value={profile.spouse === null ? null : profile.spouse ? 'Yes' : 'No'} options={['Yes', 'No']} onChange={v => update('spouse', v === 'Yes')} /><NumberField label="Number of dependants" value={profile.dependents} min={0} max={11} onChange={v => update('dependents', v)} /><SelectField label="When would you like to move?" value={profile.timeline} options={['0-3 months', '3-6 months', '6-12 months', '12+ months', 'Just researching']} onChange={v => update('timeline', v)} /></div>
+          <h2 className={styles.subheading}>Which routes do you want to research?</h2><div className={styles.choices}>{goals.map(goal => <Choice key={goal} active={profile.goals.includes(goal)} onClick={() => update('goals', profile.goals.includes(goal) ? profile.goals.filter(g => g !== goal) : [...profile.goals, goal])}>{goal}</Choice>)}</div>
+          {profile.family_size !== null && profile.family_size < 1 + (profile.spouse ? 1 : 0) + (profile.dependents ?? 0) && <p role="alert" className={styles.error}>Total people must include you, your partner and all dependants.</p>}
+          <details className={styles.details}><summary>Income, work and regional preferences (optional)</summary><p>These improve practical comparisons. A budget is not treated as income.</p><div className={styles.formGrid}><NumberField label="Monthly income (USD)" value={profile.monthly_income} onChange={v => update('monthly_income', v)} max={1_000_000} /><NumberField label="Annual income (USD)" value={profile.annual_income} onChange={v => update('annual_income', v)} max={12_000_000} /><NumberField label="Savings (USD)" value={profile.savings} onChange={v => update('savings', v)} max={100_000_000} /><SelectField label="Income type" value={profile.income_type} options={['Employment', 'Self-employment', 'Pension', 'Investments', 'Mixed', 'Other']} onChange={v => update('income_type', v)} /><SelectField label="Working remotely?" value={profile.remote === null ? null : profile.remote ? 'Yes' : 'No'} options={['Yes', 'No']} onChange={v => update('remote', v === 'Yes')} /><TextField label="Occupation" value={profile.occupation} onChange={v => update('occupation', v)} maxLength={120} /><SelectField label="Education" value={profile.education} options={['Secondary school', 'Associate degree', 'Bachelor’s degree', 'Master’s degree', 'Doctorate', 'Professional credential', 'Other']} onChange={v => update('education', v)} /><TextField label="Credentials" value={profile.credentials} onChange={v => update('credentials', v)} maxLength={500} /></div><h3>Regions to research</h3><div className={styles.choices}>{['North America', 'Latin America', 'Europe', 'Africa', 'Asia', 'Oceania', 'Open to anywhere'].map(region => <Choice key={region} active={profile.preferred_regions.includes(region)} onClick={() => update('preferred_regions', profile.preferred_regions.includes(region) ? profile.preferred_regions.filter(r => r !== region) : [...profile.preferred_regions, region])}>{region}</Choice>)}</div></details>
+        </>}
+        {currentStep === reviewStep && <>
+          <section className={styles.summary}><p className={styles.eyebrow}>YOUR STARTING POINT</p><h2>{profile.display_name}’s Kolmari Plan</h2><p>{profile.current_country} · {profile.family_size} {profile.family_size === 1 ? 'person' : 'people'} · {profile.timeline}</p><p>Passport citizenship(s): {profile.citizenship}</p></section>
+          <div className={styles.reviewGrid}><section className={styles.card}><h2>Your planning rail</h2><p>In the priority order you chose.</p><ol className={styles.priorityList}>{setup.lanes.map((id, i) => <li key={id}><span>{LANE_LINKS[id].label}</span><b>{i === 0 ? 'First' : `Priority ${i + 1}`}</b></li>)}</ol></section><section className={styles.card}><h2>What happens next</h2><p>Your Command Center links to these tools and keeps your priorities visible. Each new destination gets research tasks from your answers.</p><p>Country rankings and eligibility are not recalculated from unverified health or astrology claims.</p></section></div>
+          <section className={styles.card}><h2>First destinations to compare</h2><p>Choose your own shortlist. You can also start with an empty board.</p><div className={styles.choices}>{Array.from(new Set([...destinations, ...setup.destinations])).map(name => <Choice key={name} active={setup.destinations.includes(name)} onClick={() => toggleDestination(name)}>{name}</Choice>)}</div><div className={styles.addDestination}><label>Another destination<input value={destination} maxLength={100} onChange={e => setDestination(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); const name = destination.trim(); if (name && !setup.destinations.some(d => d.toLowerCase() === name.toLowerCase())) toggleDestination(name); setDestination('') } }} placeholder="e.g. Lisbon or Mexico City" /></label><button type="button" disabled={!destination.trim() || setup.destinations.length >= 12} onClick={() => { const name = destination.trim(); if (name && !setup.destinations.some(d => d.toLowerCase() === name.toLowerCase())) toggleDestination(name); setDestination('') }}>Add destination</button></div><small>{setup.destinations.length} of 12 selected</small></section>
+        </>}
+        </fieldset>
+        {error && <p role="alert" className={styles.error}>{error}</p>}
+        <footer className={styles.actions}><button type="button" disabled={currentStep === 0 || saving} onClick={() => navigate(Math.max(0, currentStep - 1))} className={styles.backText}><ArrowLeft size={16} />Back</button><button type="button" onClick={() => saveAndContinue()} disabled={!valid() || saving} className={styles.primary}>{saving ? <LoaderCircle size={18} className="animate-spin" /> : null}{currentStep === reviewStep ? 'Build & open Command Center' : currentStep === energyStep ? 'Continue to household' : 'Continue'}<ArrowRight size={18} /></button></footer>
+        <p className={styles.footnote}>Progress saves when you continue. {currentStep === energyStep ? 'Birth details stay in this session; city lookup uses Mapbox.' : 'Your answers support research, not visa approval or medical advice.'}</p>
+      </section>
+    </div>
+  </main>
 }
 
 function Choice({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
-  return <button type="button" onClick={onClick} aria-pressed={active} className={`flex min-h-14 items-center justify-between rounded-card border px-4 py-3 text-left text-sm font-bold transition ${active ? 'border-gold bg-gold-soft/60' : 'border-line bg-white hover:border-gold/50'}`}>{children}{active ? <Check size={17} /> : null}</button>
+  return <button type="button" aria-pressed={active} onClick={onClick} className={styles.choice}>{children}{active && <Check size={14} aria-hidden="true" />}</button>
 }
-
+function TextField({ label, value, onChange, maxLength, autoComplete }: { label: string; value: string | null; onChange: (value: string) => void; maxLength: number; autoComplete?: string }) {
+  return <label>{label}<input value={value ?? ''} onChange={e => onChange(e.target.value)} maxLength={maxLength} autoComplete={autoComplete} /></label>
+}
+function NumberField({ label, value, onChange, min = 0, max }: { label: string; value: number | null; onChange: (value: number | null) => void; min?: number; max: number }) {
+  return <label>{label}<input type="number" min={min} max={max} step={1} value={value ?? ''} onChange={e => { const n = e.target.valueAsNumber; onChange(Number.isFinite(n) ? Math.min(max, Math.max(min, Math.trunc(n))) : null) }} /></label>
+}
+function SelectField({ label, value, options, onChange }: { label: string; value: string | null; options: readonly string[]; onChange: (value: string) => void }) {
+  return <label>{label}<select value={value ?? ''} onChange={e => onChange(e.target.value)}><option value="" disabled>Select one</option>{options.map(option => <option key={option}>{option}</option>)}</select></label>
+}

@@ -1,4 +1,5 @@
 import 'server-only'
+import type { OnboardingState } from './onboarding'
 
 import { isAdminEmail } from './admin'
 import { isDemoEmail } from './demo-identity'
@@ -30,6 +31,7 @@ export type PathwayGoal = (typeof PATHWAY_GOALS)[number]
 
 export type RelocationProfile = {
   user_id: number
+  onboarding?: OnboardingState | null
   plan: PlanTier
   wizard_status: WizardStatus
   display_name: string | null
@@ -151,6 +153,7 @@ export async function ensureProfilesTable() {
           updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )
       `
+      await sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS onboarding JSONB`
       await sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS plan TEXT NOT NULL DEFAULT 'free'`
       await sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS dashboard_onboarding_completed BOOLEAN NOT NULL DEFAULT FALSE`
       await sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS wizard_status TEXT NOT NULL DEFAULT 'not_started'`
@@ -264,6 +267,7 @@ export async function saveProfile(profile: RelocationProfile) {
   const completedTasks = JSON.stringify(profile.completed_tasks)
   const preferredRegions = JSON.stringify(profile.preferred_regions)
   const goals = JSON.stringify(profile.goals)
+  const onboarding = JSON.stringify(profile.onboarding ?? null)
   const wizardCompleted = profile.wizard_status === 'completed'
   const rows = await getSql()`
     INSERT INTO profiles (
@@ -272,14 +276,14 @@ export async function saveProfile(profile: RelocationProfile) {
       education, savings, household_type, family_size, spouse, dependents,
       ancestry_connections, preferred_regions, preferred_region, timeline, priority,
       goals, climate, onboarding_completed, dashboard_onboarding_completed, wizard_completed, completed_tasks,
-      completed_at, updated_at
+      completed_at, onboarding, updated_at
     ) VALUES (
       ${profile.user_id}, ${profile.plan}, ${profile.wizard_status}, ${profile.display_name}, ${profile.citizenship}, ${profile.current_country},
       ${profile.monthly_income}, ${profile.annual_income}, ${profile.income_type}, ${profile.remote}, ${profile.occupation}, ${profile.credentials},
       ${profile.education}, ${profile.savings}, ${profile.household_type}, ${profile.family_size}, ${profile.spouse}, ${profile.dependents},
       ${profile.ancestry_connections}, ${preferredRegions}::jsonb, ${profile.preferred_region}, ${profile.timeline}, ${profile.priority},
       ${goals}::jsonb, ${profile.climate}, ${profile.onboarding_completed}, ${profile.dashboard_onboarding_completed}, ${wizardCompleted}, ${completedTasks}::jsonb,
-      ${profile.completed_at}, NOW()
+      ${profile.completed_at}, ${onboarding}::jsonb, NOW()
     )
     ON CONFLICT (user_id) DO UPDATE SET
       plan = EXCLUDED.plan,
@@ -311,6 +315,7 @@ export async function saveProfile(profile: RelocationProfile) {
       wizard_completed = EXCLUDED.wizard_completed,
       completed_tasks = EXCLUDED.completed_tasks,
       completed_at = EXCLUDED.completed_at,
+      onboarding = EXCLUDED.onboarding,
       updated_at = NOW()
     RETURNING *
   ` as RelocationProfile[]

@@ -3,7 +3,8 @@ import 'server-only'
 import { getSql } from './db'
 import { CC_CATEGORIES, type CCCategory, type CCBoard } from './command-center-model'
 import { rankNextinations } from './userProfile'
-import type { RelocationProfile } from './profile'
+import { getProfile, type RelocationProfile } from './profile'
+import { onboardingTasks } from './onboarding'
 
 export { CC_CATEGORIES, isCategory, categoryProgress, destinationProgress, householdProgress } from './command-center-model'
 export type { CCCategory, CCBoard, CCDestination, CCItem, CCNote, CCMember, CCMemberNote } from './command-center-model'
@@ -143,21 +144,22 @@ async function ownsMember(userId: number, memberId: string): Promise<boolean> {
   return rows.length > 0
 }
 
-export async function addDestination(userId: number, name: string): Promise<void> {
+export async function addDestination(userId: number, name: string, seedId?: string): Promise<void> {
   await ensureTables()
   const sql = getSql()
-  const id = newId()
-  const posRows = (await sql`SELECT COALESCE(MAX(position), -1) + 1 AS next FROM cc_destination WHERE user_id = ${userId}`) as { next: number }[]
-  const position = Number(posRows[0]?.next ?? 0)
-  await sql`INSERT INTO cc_destination (id, user_id, name, position) VALUES (${id}, ${userId}, ${name}, ${position})`
-  // Seed the default checklist for all five categories.
-  let pos = 0
-  for (const category of CATEGORY_KEYS) {
-    for (const text of DEFAULT_ITEMS[category]) {
-      await sql`INSERT INTO cc_checklist_item (id, destination_id, category, text, is_default, position)
-                VALUES (${newId()}, ${id}, ${category}, ${text}, TRUE, ${pos++})`
-    }
-  }
+  const profile = await getProfile(userId)
+  const id = seedId ?? newId()
+  const tasks = CATEGORY_KEYS.flatMap(category => DEFAULT_ITEMS[category].map(text => ({ category, text })))
+  if (profile.onboarding) tasks.push(...onboardingTasks(profile.onboarding))
+  // Insert the destination and every task atomically: a failed save leaves no partial board.
+  await sql.transaction([
+    sql`INSERT INTO cc_destination (id, user_id, name, position)
+        SELECT ${id}, ${userId}, ${name}, COALESCE(MAX(position), -1) + 1 FROM cc_destination WHERE user_id = ${userId}
+        ON CONFLICT (id) DO NOTHING`,
+    ...tasks.map((task, position) => sql`INSERT INTO cc_checklist_item (id, destination_id, category, text, is_default, position)
+      VALUES (${`${id}:${position}`}, ${id}, ${task.category}, ${task.text}, TRUE, ${position})
+      ON CONFLICT (id) DO NOTHING`),
+  ])
 }
 
 export async function renameDestination(userId: number, id: string, name: string): Promise<void> {
@@ -257,6 +259,20 @@ function householdMemberNames(profile: RelocationProfile): string[] {
  */
 export async function seedCommandCenterFromProfile(userId: number, profile: RelocationProfile): Promise<void> {
   const board = await getBoard(userId)
+  if (profile.onboarding) {
+    // The new flow uses only the user's explicit shortlist. Retakes add missing
+    // selections without removing any existing board or overwriting checked tasks.
+    for (const name of profile.onboarding.destinations) {
+      if (!board.destinations.some(destination => destination.name.toLowerCase() === name.toLowerCase())) {
+        const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${userId}:${name.toLowerCase()}`))
+        const seedId = 'setup-' + Array.from(new Uint8Array(digest)).map(byte => byte.toString(16).padStart(2, '0')).join('').slice(0, 32)
+        await addDestination(userId, name, seedId)
+      }
+    }
+    // Household size is known, but other people's names and ages are not.
+    // Keep those empty for the owner to enter instead of inventing family members.
+    return
+  }
   if (board.destinations.length > 0) return
 
   const ranked = rankNextinations(profile).slice(0, 3)

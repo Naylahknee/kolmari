@@ -2,6 +2,21 @@
 
 Running log of implemented page state. Update this file when application code changes.
 
+## Priority onboarding and mobile navigation — September 2026 (pending release)
+
+Native React flow based on the supplied mobile and onboarding references now supports
+three ordered priorities, lane questions, optional existing Energy Portal, two-part
+household handoff, account-backed resume and explicit destination selection. New board
+destinations receive research prompts from these answers. Mobile workspace navigation
+uses four touch targets and safe-area padding. Existing auth and board progress remain intact.
+
+TypeScript, five focused tests, Next.js production build and Cloudflare bundle pass.
+Lint is blocked by the existing TypeScript 7 / typescript-eslint mismatch. SLD verification
+blocks against the stale `demo-access-code` contract; that contract and the engine were not
+modified. Browser verification and real Neon persistence have not been exercised here.
+See `BUILD-COMPARISON-2026-09.md` for evidence, scope, reference gaps and the recommendation
+to retain the official repository and eventually archive the demo. Not deployed.
+
 ## Your World map resilience — 2026-08-03
 
 The main map on `/your-world` no longer depends on an account-specific Mapbox style or a public
