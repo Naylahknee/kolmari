@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowLeft, Sparkles } from 'lucide-react'
+import { TrialRedeemForm } from '@/components/kolmari/trial-redeem-form'
 
 export const metadata: Metadata = {
   title: 'Coming soon — Kolmari',
@@ -48,6 +49,7 @@ export default async function ComingSoonPage({
           <ArrowLeft size={15} /> Back home
         </Link>
       </div>
+      <TrialRedeemForm />
     </main>
   )
 }

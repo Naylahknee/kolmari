@@ -31,12 +31,7 @@
   --shadow-card:0 1px 3px 0 rgba(16,34,68,.08), 0 1px 2px -1px rgba(16,34,68,.06);
   --shadow-tile:0 1px 3px 0 rgba(16,34,68,.08);
   --shadow-shell:0 10px 30px -18px rgba(13,27,57,.45);
-  /* Rail width, used to compute the full-bleed header/tab bands below. */
-  --ct-rail-width:256px;
 }
-/* Collapsed rail: shrink the computed rail width so the bands expand to fill
-   the remaining viewport, mirroring the body.rail-collapsed rules elsewhere. */
-body.rail-collapsed .country-template-root{--ct-rail-width:64px}
 /* Scoped reset. It deliberately does NOT reach `.rail`: the workspace sidebar is
    shared chrome rendered inside this root, and because this file loads after
    workspace-chrome.css, `*{padding:0}` and the `a`/`button` colour resets below
@@ -69,9 +64,12 @@ body.rail-collapsed .country-template-root{--ct-rail-width:64px}
 
 /* ══ topbar ══ */
 .country-template-root .topbar{position:sticky;top:0;z-index:60;height:56px;display:flex;align-items:center;gap:14px;padding:0 18px;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);
-  /* Span the full viewport minus the rail, so the header reads as a full-bleed
-     band while the sidebar stays intact. */
-  width:calc(100% - var(--ct-rail-width));margin-left:var(--ct-rail-width);box-sizing:border-box}
+/* Full-width header: the "shared two-zone application header" rules below lay
+   out zone-a (256px, above the rail) and zone-b. An earlier mockup-era rule
+   also shifted this header right by the rail width, which combined with the
+   grid into a 256px dead gap at the top-left and pushed the wordmark out of
+   alignment with the sidebar. The offset is removed so the header aligns with
+   the rail exactly like the rest of the app. */}
 .country-template-root .mark{display:inline-flex;align-items:center;gap:9px;font-family:var(--font-sans);
   font-size:23px;font-weight:700;letter-spacing:-.01em;line-height:1}
 .country-template-root .mark-bf{display:none;width:26px;height:26px;object-fit:contain;flex:0 0 auto}
@@ -231,9 +229,7 @@ body.rail-collapsed .country-template-root{--ct-rail-width:64px}
 
 /* ══ tabs ══ */
 .country-template-root .tabbar{position:sticky;top:56px;z-index:30;margin-top:16px;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden;
-  /* The tabbar sits inside .main, so it spans the content column rather than
-     carrying the topbar's rail offset — that offset is only correct for the
-     topbar, which is a root-level sibling of .shell. */
+  /* The tabbar sits inside .main, so it spans the content column. */
   width:100%;box-sizing:border-box}
 .country-template-root .tabs{display:flex;gap:2px;padding:6px;overflow-x:auto;scrollbar-width:none}
 .country-template-root .tabs::-webkit-scrollbar{display:none}
