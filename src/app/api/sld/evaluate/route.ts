@@ -14,7 +14,8 @@ import type { ChangeSet, FileChange, ChangeType, TaskContract } from '@/sld'
  *
  * The runtime governance gate. An admin submits a ChangeSet (already reduced to
  * deterministic signals by the CLI/scanner or a client) and receives the SLD
- * decision: ALLOW | WARN | REVIEW | BLOCK, with per-layer findings.
+ * decision: ALLOW | ALLOW_WITH_WARNING | REVIEW_REQUIRED |
+ * INSUFFICIENT_EVIDENCE | BLOCK, with per-layer findings.
  *
  * This uses the SAME pure evaluation core as the CLI — the decision is identical
  * whether it runs in CI or here on Cloudflare Workers. No LLM, no randomness.
@@ -31,6 +32,16 @@ const CHANGE_TYPES: ChangeType[] = ['add', 'modify', 'delete', 'rename']
 function str(v: unknown, cap = MAX_TEXT): string | undefined {
   if (typeof v !== 'string') return undefined
   return v.length > cap ? v.slice(0, cap) : v
+}
+
+function nonNegativeInt(v: unknown): number | undefined {
+  return typeof v === 'number' && Number.isSafeInteger(v) && v >= 0 ? v : undefined
+}
+
+function stringList(v: unknown, max = 50, cap = 120): string[] | undefined {
+  return Array.isArray(v)
+    ? v.filter((s): s is string => typeof s === 'string').slice(0, max).map((s) => s.slice(0, cap))
+    : undefined
 }
 
 function sanitizeChange(raw: unknown): FileChange | null {
@@ -52,9 +63,12 @@ function sanitizeChange(raw: unknown): FileChange | null {
     removedText: str(r.removedText),
     imports,
     isClientComponent: typeof r.isClientComponent === 'boolean' ? r.isClientComponent : undefined,
-    states: Array.isArray(r.states)
-      ? r.states.filter((s): s is string => typeof s === 'string').slice(0, 50).map((s) => s.slice(0, 120))
-      : undefined,
+    states: stringList(r.states),
+    behaviors: stringList(r.behaviors),
+    uiRegions: stringList(r.uiRegions),
+    baselineLineCount: nonNegativeInt(r.baselineLineCount),
+    addedLineCount: nonNegativeInt(r.addedLineCount),
+    removedLineCount: nonNegativeInt(r.removedLineCount),
   }
 }
 

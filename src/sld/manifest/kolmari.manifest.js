@@ -11,6 +11,7 @@
 /** @type {Manifest} */
 export const KOLMARI_MANIFEST = {
   version: 1,
+  protectedLayers: ['identity', 'design', 'behavior', 'system', 'logic', 'content', 'execution'],
   application: {
     name: 'Kolmari',
     description: 'Relocation decision and planning system (not a travel app).',
@@ -86,6 +87,25 @@ export const KOLMARI_MANIFEST = {
       'Use approved product language; do not reintroduce retired brand terms.',
     ],
   },
+  integrity: {
+    magnitudeReviewThreshold: 0.35,
+    magnitudeBlockThreshold: 0.60,
+    elisionMarkers: [
+      '... rest of file unchanged',
+      'rest of file unchanged',
+      '// unchanged',
+      '/* unchanged */',
+      '[... existing code ...]',
+    ],
+    excludedGlobs: [
+      '**/*.md',
+      '**/*.test.*',
+      '**/*.spec.*',
+      'package-lock.json',
+      '.sld/**',
+      'public/data/**',
+    ],
+  },
   // Entity registry — entity name → the files that implement it. Powers
   // entity-level scope: a TaskContract may authorize "Country Hero" without
   // authorizing the navigation shell beside it.
@@ -104,7 +124,7 @@ export const KOLMARI_MANIFEST = {
     'Command Center': ['src/lib/command-center.ts', 'src/lib/command-center-model.ts', 'src/components/kolmari/command-center/**'],
     'Profile Wizard': ['src/components/kolmari/profile-wizard.tsx', 'src/lib/profile.ts'],
     'Destination Tabs': ['src/components/country-template/tabs/**'],
-    'SLD Engine': ['src/sld/**', 'scripts/sld.mjs', '.sld/**'],
+    'SLD Engine': ['src/sld/**', 'src/app/api/sld/**', 'scripts/sld.mjs', '.sld/**'],
   },
   // Policy defaults — deterministic mapping from finding class → decision.
   //
@@ -113,18 +133,22 @@ export const KOLMARI_MANIFEST = {
   policies: {
     unauthorizedChange: 'BLOCK',
     unknownScope: 'BLOCK',
-    unknownChange: 'REVIEW',
+    unknownChange: 'INSUFFICIENT_EVIDENCE',
     destructiveChange: 'BLOCK',
     architectureViolation: 'BLOCK',
-    dependencyViolation: 'REVIEW',
-    behavioralChange: 'REVIEW',
-    protectedFeatureChange: 'REVIEW',
-    designSystemDrift: 'WARN',
+    dependencyViolation: 'REVIEW_REQUIRED',
+    behavioralChange: 'REVIEW_REQUIRED',
+    protectedFeatureChange: 'REVIEW_REQUIRED',
+    designSystemDrift: 'ALLOW_WITH_WARNING',
     forbiddenTerm: 'BLOCK',
     duplicateAppRoot: 'BLOCK',
     // Risk-only classification. It is NOT authorization: a harmless change the
     // user never asked for is still blocked by the Scope Gate.
     harmlessChange: 'ALLOW',
+    invalidContractApproval: 'INSUFFICIENT_EVIDENCE',
+    missingRequiredChange: 'BLOCK',
+    contentLoss: 'REVIEW_REQUIRED',
+    generationArtifactCorruption: 'REVIEW_REQUIRED',
   },
 }
 

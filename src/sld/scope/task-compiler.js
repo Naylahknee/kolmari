@@ -62,6 +62,8 @@ export function compileTaskContract(contract, manifest) {
     unresolvedEntities,
     actions: [...contract.allowedActions],
     states: [...contract.allowedStates],
+    behaviors: [...contract.allowedBehaviors],
+    uiRegions: [...contract.allowedUIRegions],
     forbidden: [...contract.forbiddenChanges],
     ambiguityPolicy: contract.ambiguityPolicy,
   }

@@ -187,11 +187,17 @@ export function buildBaseline(root, app, manifestVersion, at) {
       continue
     }
     const hash = createHash('sha256').update(buf).digest('hex').slice(0, 16)
-    fileMap[f] = { hash, size: buf.length, tags: tagFile(f) }
+    const textForLines = buf.toString('utf8')
+    fileMap[f] = {
+      hash,
+      size: buf.length,
+      lineCount: textForLines ? textForLines.split('\n').length : 0,
+      tags: tagFile(f),
+    }
 
     const ext = f.slice(f.lastIndexOf('.'))
     if (CODE_EXT.has(ext) && buf.length < 512 * 1024) {
-      const text = buf.toString('utf8')
+      const text = textForLines
       const imports = extractImports(text).filter((s) => s.startsWith('.') || s.startsWith('@/') || s.startsWith('src/'))
       if (imports.length) edges[f] = imports
       for (const n of extractEnvNames(text)) envNames.add(n)
@@ -218,7 +224,12 @@ export function buildBaseline(root, app, manifestVersion, at) {
  */
 function git(root, args) {
   try {
-    return execFileSync('git', args, { cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })
+    return execFileSync('git', args, {
+      cwd: root,
+      encoding: 'utf8',
+      maxBuffer: 64 * 1024 * 1024,
+      stdio: ['ignore', 'pipe', 'ignore'],
+    })
   } catch {
     return ''
   }
@@ -231,7 +242,12 @@ function git(root, args) {
  * @returns {import('../index.js').ChangeSet}
  */
 export function diffToChangeSet(root, baseRef) {
-  const nameStatus = git(root, ['diff', '--name-status', '-M', baseRef, '--']).trim()
+  const trackedStatus = git(root, ['diff', '--name-status', '-M', baseRef, '--']).trim()
+  const untracked = git(root, ['ls-files', '--others', '--exclude-standard']).trim()
+  const nameStatus = [
+    trackedStatus,
+    ...untracked.split('\n').filter(Boolean).map((path) => `A\t${path}`),
+  ].filter(Boolean).join('\n')
   const changes = []
   if (!nameStatus) return { label: `diff ${baseRef}`, changes }
 
@@ -264,11 +280,33 @@ export function diffToChangeSet(root, baseRef) {
         if (l.startsWith('+') && !l.startsWith('+++')) addedText += `${l.slice(1)}\n`
         else if (l.startsWith('-') && !l.startsWith('---')) removedText += `${l.slice(1)}\n`
       }
+      // Untracked files are absent from `git diff`; their complete contents are
+      // the added side of the change and must not be invisible to governance.
+      if (changeType === 'add' && !addedText) {
+        try {
+          addedText = readFileSync(join(root, path), 'utf8')
+        } catch {
+          addedText = ''
+        }
+      }
     }
 
     const imports = addedText ? extractImports(addedText).filter((s) => s.startsWith('.') || s.startsWith('@/') || s.startsWith('src/')) : []
     const isClientComponent = changeType === 'delete' ? undefined : detectClientComponent(root, path)
-    changes.push({ path, changeType, oldPath, addedText, removedText, imports, isClientComponent })
+    const baselinePath = oldPath || path
+    const baselineText = git(root, ['show', `${baseRef}:${baselinePath}`])
+    changes.push({
+      path,
+      changeType,
+      oldPath,
+      addedText,
+      removedText,
+      imports,
+      isClientComponent,
+      baselineLineCount: baselineText ? baselineText.split('\n').length : 0,
+      addedLineCount: addedText ? addedText.split('\n').filter(Boolean).length : 0,
+      removedLineCount: removedText ? removedText.split('\n').filter(Boolean).length : 0,
+    })
   }
 
   return { label: `diff ${baseRef}`, changes }

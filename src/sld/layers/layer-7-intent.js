@@ -35,7 +35,7 @@ export function analyzeIntent(changeSet, manifest) {
     for (const phrase of TRAVEL_FRAMING) {
       if (containsTerm(text, phrase)) {
         findings.push({
-          layer: 'intent',
+          layer: 'identity',
           class: 'behavioralChange',
           decision: manifest.policies.behavioralChange,
           path: change.path,
@@ -54,7 +54,7 @@ export function analyzeIntent(changeSet, manifest) {
     ))
     if (literalScore) {
       findings.push({
-        layer: 'intent',
+        layer: 'logic',
         class: 'behavioralChange',
         decision: manifest.policies.behavioralChange,
         path: change.path,
