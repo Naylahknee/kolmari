@@ -965,10 +965,19 @@ updated in `docs/dashboard-destination-panels.md`.
   `YourMatchesSection` (journey nested when placement = panel). Everyone else
   keeps the Destinations browse panel + standalone Visa Options. The unused
   `DashboardDestinationsCard` was removed from `dashboard-side-cards.tsx`.
-- Country Snapshot now passes `fallback="locator"` to `CountrySnapshotMap`, so
-  the snapshot shows the geographic locator pin (not the flag) when the Mapbox
-  token is missing or the image fails.
+- Country Snapshot passes `fallback="locator"` to `CountrySnapshotMap`, so the
+  snapshot never shows the flag when the Mapbox token is missing or the image
+  fails. The locator now draws the country's own Natural Earth 110m polygon
+  fitted to the viewport with light regional context and the gold city pin
+  (Sep 28: replaced the zoomed-out whole-globe glyph per owner feedback).
+  Countries absent from the 110m set (Malta) get a zoomed regional graticule
+  with the pin. ISO2 -> NE id mapping and feature access live in shared
+  `src/lib/world-geo.ts`, also used by `world-svg-map.tsx` (deduped).
 - Typecheck and production build pass locally; SSR preview of the new section
   verified (cards, badges, stats, visa options, "Explore more destinations"
   link). Temporary preview route removed. Push and deployed verification
   pending.
+- Dashboard match cards (Sep 28): the Your Matches cards grid now uses
+  `content-start` so the cards keep their compact approved height instead of
+  stretching to the Journey tracker's height on desktop, per owner feedback
+  with the reference screenshot.
