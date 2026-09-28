@@ -91,7 +91,7 @@ export function AuthForm({ mode, nextPath = '/command-center' }: { mode: 'login'
       {signup ? (
         <label className="flex cursor-pointer items-start gap-3 text-sm leading-6 text-navy">
           <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} className="mt-1 size-5 shrink-0 accent-[var(--color-gold-deep)]" />
-          <span>I agree to the Terms and Privacy Policy. I can delete my account and stored data at any time.</span>
+          <span>I agree to the <Link href="/terms" className="font-extrabold text-gold-deep underline">Terms</Link> and <Link href="/privacy" className="font-extrabold text-gold-deep underline">Privacy Policy</Link>. I can delete my account and stored data at any time.</span>
         </label>
       ) : null}
       {error ? <p role="alert" className="rounded-xl bg-danger/10 px-4 py-3 text-sm font-semibold text-danger">{error}</p> : null}

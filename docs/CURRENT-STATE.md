@@ -119,9 +119,20 @@ assertions pass against the compiled verification module with an in-memory fake
 DB: enable/disable gating, demo exemption, code format, no plaintext storage,
 correct-code acceptance, attempt counting and 5-strike lockout, resend cooldown,
 resend replacing the code, expiry cleanup, and the verified flag clearing the
-requirement. Not deployed. Still needs: a Resend account + API key stored as a
-Cloudflare Workers secret, and kolmari.com verified in Resend (SPF/DKIM/DMARC).
-Demo redirect/archival still blocked until the official flow is live and tested.
+requirement.
+
+Deployed 2026-09-28: commit `bdfbf4b` ("Ship onboarding spine + email
+verification (Phases 1-3)") pushed to main; GitHub Actions "Deploy to
+Cloudflare" run 36456425537 completed success; live at
+https://kolmari.madincrease.workers.dev/. Owner set RESEND_API_KEY as a Worker
+secret via the Cloudflare dashboard. kolmari.com verified in Resend.
+
+KNOWN ISSUE, RESOLVED: `/api/auth/verify/send` and `/api/auth/verify/confirm`
+briefly returned 404 on the live site right after deploy while the
+`/verify-email` page worked. Local `opennextjs-cloudflare preview` of the same
+commit returned the correct 401s, proving the bundle was fine. Re-testing the
+live site minutes later returned the correct 401s: it was Cloudflare edge
+propagation delay, not a build problem. No code change needed.
 
 ## Onboarding spine repair (Phase 1) — 2026-09-28 (pending release)
 
