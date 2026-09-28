@@ -37,9 +37,37 @@ export default async function YourWorldPage({ searchParams }: { searchParams: Pr
           lat: center.lat,
           lng: center.lng,
           score: paid ? match.score : null,
+          kind: 'match' as const,
         }]
       : []
   })
+
+  // Countries the user picked in the Profile Wizard ("First destinations to
+  // compare") are pinned too, so the map reflects their shortlist — not just
+  // quiz matches. Picks are unscored: no Match Score is shown for them, and
+  // names that do not resolve to a known country are skipped rather than
+  // guessed at.
+  const pinnedSlugs = new Set(pins.map((p) => p.slug))
+  const knownByName = new Map<string, { slug: string; name: string; code: string }>()
+  for (const c of [...COUNTRIES, ...DISCOVERABLE_COUNTRIES]) {
+    if (!knownByName.has(c.name.toLowerCase())) knownByName.set(c.name.toLowerCase(), c)
+  }
+  for (const raw of profile.onboarding?.destinations ?? []) {
+    const country = knownByName.get(raw.trim().toLowerCase())
+    if (!country || pinnedSlugs.has(country.slug)) continue
+    const center = getCountryCenter(country.slug)
+    if (!center) continue
+    pinnedSlugs.add(country.slug)
+    pins.push({
+      slug: country.slug,
+      name: country.name,
+      code: country.code,
+      lat: center.lat,
+      lng: center.lng,
+      score: null,
+      kind: 'selected',
+    })
+  }
 
   // Free tier gets the browse-and-upsell view; scoring/filtering/saving are Pro.
   if (!paid) {

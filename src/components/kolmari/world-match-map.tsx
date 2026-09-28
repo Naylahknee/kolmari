@@ -23,7 +23,11 @@ function buildMapUrl(pins: WorldPin[], token: string): string {
     type: 'FeatureCollection',
     features: pins.map((p) => ({
       type: 'Feature',
-      properties: { 'marker-color': '#f3c516', 'marker-size': 'large', 'marker-symbol': 'star' },
+      properties: {
+        'marker-color': p.kind === 'selected' ? '#ffffff' : '#f3c516',
+        'marker-size': 'large',
+        'marker-symbol': 'star',
+      },
       geometry: { type: 'Point', coordinates: [p.lng, p.lat] },
     })),
   }
@@ -34,10 +38,10 @@ function buildMapUrl(pins: WorldPin[], token: string): string {
   return `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/${overlay}/${camera}/1000x360@2x?${padding}access_token=${encodeURIComponent(token)}`
 }
 
-function MatchPills({ pins }: { pins: WorldPin[] }) {
+function PinPills({ label, pins }: { label: string; pins: WorldPin[] }) {
   return (
-    <div className="mt-4">
-      <p className="text-[10.5px] font-bold uppercase tracking-widest text-white/45">Open a match</p>
+    <div>
+      <p className="text-[10.5px] font-bold uppercase tracking-widest text-white/45">{label}</p>
       <div className="mt-2 flex flex-wrap gap-2">
         {pins.map((pin) => (
           <Link
@@ -59,6 +63,8 @@ export function WorldMatchMap({ pins }: { pins: WorldPin[] }) {
   const [open, setOpen] = useState(true)
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
   const [imgFailed, setImgFailed] = useState(false)
+  const matches = pins.filter((p) => p.kind === 'match')
+  const selected = pins.filter((p) => p.kind === 'selected')
   const count = pins.length
 
   if (count === 0) {
@@ -92,9 +98,12 @@ export function WorldMatchMap({ pins }: { pins: WorldPin[] }) {
       >
         <div className="min-w-0 flex-1">
           <p className="text-[15px] font-bold text-white">Matched destinations</p>
-          <p className="mt-0.5 text-xs text-white/60">Your profile matches are highlighted in gold and pinned automatically.</p>
+          <p className="mt-0.5 text-xs text-white/60">Matches are pinned in gold. Countries you picked are pinned in white.</p>
         </div>
-        <span className="shrink-0 text-xs font-bold text-gold">{count} {count === 1 ? 'match' : 'matches'}</span>
+        <span className="shrink-0 text-xs font-bold text-gold">
+          {matches.length} {matches.length === 1 ? 'match' : 'matches'}
+          {selected.length > 0 && ` · ${selected.length} selected`}
+        </span>
         <ChevronDown size={18} className={`shrink-0 text-white/60 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
       </button>
 
@@ -123,7 +132,10 @@ export function WorldMatchMap({ pins }: { pins: WorldPin[] }) {
               </div>
             </div>
           )}
-          <MatchPills pins={pins} />
+          <div className="mt-4 space-y-4">
+            {matches.length > 0 && <PinPills label="Open a match" pins={matches} />}
+            {selected.length > 0 && <PinPills label="Your picks" pins={selected} />}
+          </div>
         </div>
       )}
     </section>

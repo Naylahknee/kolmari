@@ -11,6 +11,8 @@ export type WorldPin = {
   lat: number
   lng: number
   score: number | null
+  /** 'match' = quiz-ranked match (gold pin); 'selected' = country the user picked in the wizard (white pin). */
+  kind: 'match' | 'selected'
 }
 
 const REGIONS: Array<{ slug: RegionSlug; label: string }> = [
