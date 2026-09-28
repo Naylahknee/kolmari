@@ -54,6 +54,8 @@ export type DashboardLayout = {
   side: WidgetId[]
   disabled: WidgetId[]
   journeyPlacement: JourneyPlacement
+  /** Set once the Sep 2026 ask-hero default migration has run for this layout. */
+  askHeroMigrated?: boolean
 }
 
 export type DashboardTemplate = {
@@ -147,6 +149,21 @@ function completeZones(mainInput: unknown, sideInput: unknown): { main: WidgetId
   return { main, side }
 }
 
+/**
+ * One-time migration (Sep 2026): the Ask Kolmari hero panel flipped from
+ * default-off to default-on. Stored layouts saved while it defaulted off
+ * carry it in `disabled` without the user ever choosing that, so drop it
+ * once. Layouts saved after the change carry the marker and keep the
+ * user's explicit choice untouched.
+ */
+function migrateAskHeroDefault(
+  raw: Record<string, unknown>,
+  disabled: WidgetId[],
+): { disabled: WidgetId[]; askHeroMigrated: true } {
+  if (raw.askHeroMigrated === true) return { disabled, askHeroMigrated: true }
+  return { disabled: disabled.filter((id) => id !== 'askKolmari'), askHeroMigrated: true }
+}
+
 export function parseLayout(value: unknown): DashboardLayout {
   if (!value || typeof value !== 'object') return DEFAULT_LAYOUT
   const raw = value as Record<string, unknown>
@@ -158,24 +175,29 @@ export function parseLayout(value: unknown): DashboardLayout {
     const main = legacy.filter((id) => !BASE_SIDE.includes(id))
     const side = legacy.filter((id) => BASE_SIDE.includes(id))
     if (!side.includes('journeyTracker')) side.push('journeyTracker')
+    const migrated = migrateAskHeroDefault(
+      raw,
+      uniqueWidgets(raw.disabled).length ? uniqueWidgets(raw.disabled) : [...DEFAULT_DISABLED],
+    )
     return {
       v: 2,
       template: 'custom',
       main,
       side,
-      disabled: uniqueWidgets(raw.disabled).length ? uniqueWidgets(raw.disabled) : DEFAULT_DISABLED,
+      disabled: migrated.disabled,
       journeyPlacement: 'header',
+      askHeroMigrated: migrated.askHeroMigrated,
     }
   }
 
   const zones = completeZones(raw.main, raw.side)
-  const disabled = uniqueWidgets(raw.disabled)
+  const migrated = migrateAskHeroDefault(raw, uniqueWidgets(raw.disabled))
   const journeyPlacement: JourneyPlacement = raw.journeyPlacement === 'panel' ? 'panel' : 'header'
   const template = ['focused', 'balanced', 'research', 'execution', 'custom'].includes(String(raw.template))
     ? raw.template as DashboardTemplateId
     : 'custom'
 
-  return { v: 2, template, ...zones, disabled, journeyPlacement }
+  return { v: 2, template, ...zones, disabled: migrated.disabled, journeyPlacement, askHeroMigrated: migrated.askHeroMigrated }
 }
 
 export function visibleWidgets(layout: DashboardLayout, zone?: DashboardZone): WidgetId[] {

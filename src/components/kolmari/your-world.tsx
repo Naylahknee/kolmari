@@ -193,7 +193,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 function RecommendedCard({ card }: { card: RecCard }) {
   const cost = card.cost ? costLabel[card.cost] ?? card.cost : '—'
-  const safetyIcon = card.safety === 'High' ? 'very-safe' : card.safety === 'Good' ? 'generally-safe' : null
+  const safetyIcon = card.safety === 'Very safe' ? 'very-safe' : card.safety === 'Safe' ? 'generally-safe' : null
   return (
     <Link
       href={`/nextinations/${card.slug}/v2/overview`}
