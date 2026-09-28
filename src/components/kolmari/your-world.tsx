@@ -213,7 +213,7 @@ export function YourWorld({ pins, cards, complete, initialQuery = '' }: { pins: 
       </div>
 
       {/* Stories & expert guidance (ported from the demo World page) */}
-      <WorldStories />
+      <WorldStories countries={cards.filter((c) => c.scored).map((c) => ({ slug: c.slug, name: c.name }))} />
     </div>
   )
 }

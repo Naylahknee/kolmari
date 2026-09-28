@@ -307,8 +307,8 @@ body.rail-collapsed .rail .icon-btn svg { transform: scaleX(-1); }
    columns drifted to 1500px/20px and left country pages hugging the rail while
    every other page sat centred. */
 :root {
-  --workspace-column: 1240px;
-  --workspace-gutter: 28px;
+  --workspace-column: 1760px;
+  --workspace-gutter: 24px;
 }
 
 .main.workspace-main {
