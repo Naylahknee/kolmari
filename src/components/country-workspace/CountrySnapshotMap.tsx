@@ -2,8 +2,10 @@
 
 /* eslint-disable @next/next/no-img-element */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { MapPinned } from 'lucide-react'
+import { geoGraticule10, geoMercator, geoPath } from 'd3-geo'
+import { getCountryFeature, getWorldFeatures } from '@/lib/world-geo'
 
 type Fallback = 'flag' | 'locator'
 
@@ -39,31 +41,87 @@ function FlagFallback({ countryName, countryCode, cityName }: Pick<Props, 'count
   )
 }
 
-function LocatorFallback({ countryName, cityName, lat, lng }: Pick<Props, 'countryName' | 'cityName' | 'lat' | 'lng'>) {
-  const x = Math.max(5, Math.min(95, ((lng + 180) / 360) * 100))
-  const y = Math.max(8, Math.min(92, ((90 - lat) / 180) * 100))
+function LocatorFallback({ countryName, countryCode, cityName, lat, lng }: Pick<Props, 'countryName' | 'countryCode' | 'cityName' | 'lat' | 'lng'>) {
+  const clipId = useId()
+  const map = useMemo(() => {
+    const W = 800
+    const H = 450
+    const PAD = 30
+    const target = getCountryFeature(countryCode)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const dOf = (proj: (o: any) => string | null) => (obj: any): string => proj(obj) ?? ''
+
+    if (target?.geometry) {
+      const [[bx0, by0], [bx1, by1]] = geoPath().bounds(target as never)
+      const cx = (bx0 + bx1) / 2
+      const cy = (by0 + by1) / 2
+      const hw = Math.max(((bx1 - bx0) / 2) * 1.5, 7)
+      const hh = Math.max(((by1 - by0) / 2) * 1.5, 7)
+      const x0 = Math.max(-180, cx - hw)
+      const x1 = Math.min(180, cx + hw)
+      const y0 = Math.max(-90, cy - hh)
+      const y1 = Math.min(90, cy + hh)
+      const bbox = {
+        type: 'Polygon',
+        coordinates: [[[x0, y0], [x1, y0], [x1, y1], [x0, y1], [x0, y0]]],
+      } as never
+      const proj = geoMercator().fitExtent([[PAD, PAD], [W - PAD, H - PAD]], bbox)
+      const d = dOf(geoPath(proj))
+      return {
+        land: getWorldFeatures().map((f) => d(f)).filter(Boolean),
+        lines: [] as string[],
+        target: d(target),
+        pin: (proj([lng, lat]) ?? [W / 2, H / 2]) as [number, number],
+      }
+    }
+
+    // No polygon in the dataset (e.g. Malta): zoom to a regional graticule.
+    const x0 = Math.max(-180, lng - 14)
+    const x1 = Math.min(180, lng + 14)
+    const y0 = Math.max(-90, lat - 10)
+    const y1 = Math.min(90, lat + 10)
+    const bbox = {
+      type: 'Polygon',
+      coordinates: [[[x0, y0], [x1, y0], [x1, y1], [x0, y1], [x0, y0]]],
+    } as never
+    const proj = geoMercator().fitExtent([[PAD, PAD], [W - PAD, H - PAD]], bbox)
+    const d = dOf(geoPath(proj))
+    return {
+      land: [] as string[],
+      lines: [d(geoGraticule10())].filter(Boolean),
+      target: '',
+      pin: (proj([lng, lat]) ?? [W / 2, H / 2]) as [number, number],
+    }
+  }, [countryCode, lat, lng])
+
+  const [pinX, pinY] = map.pin
 
   return (
     <div
       role="img"
-      aria-label={`Locator showing ${cityName ?? countryName} in ${countryName}`}
+      aria-label={`Map of ${countryName}${cityName ? `, ${cityName} marked` : ''}`}
       className="relative aspect-[16/9] min-h-40 w-full overflow-hidden bg-[#cfe6f5]"
     >
       <svg viewBox="0 0 800 450" className="absolute inset-0 h-full w-full" aria-hidden="true">
+        <defs>
+          <clipPath id={clipId}>
+            <rect width="800" height="450" />
+          </clipPath>
+        </defs>
         <rect width="800" height="450" fill="#cfe6f5" />
-        {[100, 200, 300, 400, 500, 600, 700].map((line) => (
-          <line key={`v-${line}`} x1={line} y1="0" x2={line} y2="450" stroke="#a8cade" strokeWidth="1" opacity=".5" />
-        ))}
-        {[75, 150, 225, 300, 375].map((line) => (
-          <line key={`h-${line}`} x1="0" y1={line} x2="800" y2={line} stroke="#a8cade" strokeWidth="1" opacity=".5" />
-        ))}
-        <ellipse cx="400" cy="225" rx="330" ry="178" fill="none" stroke="#7ba7c7" strokeWidth="3" />
-        <ellipse cx="400" cy="225" rx="165" ry="178" fill="none" stroke="#9dc1d7" strokeWidth="1.5" />
-        <line x1="70" y1="225" x2="730" y2="225" stroke="#9dc1d7" strokeWidth="1.5" />
+        <g clipPath={`url(#${clipId})`}>
+          {map.land.map((d, i) => (
+            <path key={i} d={d} fill="#e4eef6" stroke="#a8cade" strokeWidth="0.8" />
+          ))}
+          {map.lines.map((d, i) => (
+            <path key={i} d={d} fill="none" stroke="#9dc1d7" strokeWidth="1.2" />
+          ))}
+          {map.target && <path d={map.target} fill="#17456e" stroke="#ffffff" strokeWidth="1.6" />}
+        </g>
       </svg>
       <span
         className="absolute grid size-8 -translate-x-1/2 -translate-y-full place-items-center rounded-full bg-gold text-navy shadow-lg ring-2 ring-white"
-        style={{ left: `${x}%`, top: `${y}%` }}
+        style={{ left: `${(pinX / 800) * 100}%`, top: `${(pinY / 450) * 100}%` }}
         aria-hidden="true"
       >
         <MapPinned size={18} />
@@ -103,7 +161,7 @@ export function CountrySnapshotMap({
     return (
       <div ref={rootRef} className="h-full w-full">
         {resolvedFallback === 'locator' ? (
-          <LocatorFallback countryName={countryName} cityName={cityName} lat={lat} lng={lng} />
+          <LocatorFallback countryName={countryName} countryCode={countryCode} cityName={cityName} lat={lat} lng={lng} />
         ) : (
           <FlagFallback countryName={countryName} countryCode={countryCode} cityName={cityName} />
         )}

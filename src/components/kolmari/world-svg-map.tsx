@@ -3,8 +3,7 @@
 import { useMemo } from 'react'
 import Link from 'next/link'
 import { geoNaturalEarth1, geoPath, geoGraticule10 } from 'd3-geo'
-import { feature } from 'topojson-client'
-import countries110m from 'world-atlas/countries-110m.json'
+import { getWorldFeatures, ISO2_TO_NE_ID } from '@/lib/world-geo'
 import type { WorldPin } from './your-world-map'
 
 /**
@@ -20,25 +19,7 @@ import type { WorldPin } from './your-world-map'
 const W = 1000
 const H = 420
 
-// world-atlas uses ISO 3166 numeric ids on each country feature.
-const ISO2_TO_NE_ID: Record<string, string> = {
-  AL: '008', AU: '036', BG: '100', BZ: '084', CA: '124', CR: '188', DE: '276',
-  EC: '218', EE: '233', ES: '724', FR: '250', GB: '826', GE: '268', GR: '300',
-  IE: '372', IT: '380', JP: '392', KH: '116', KR: '410', MT: '470', MX: '484',
-  NL: '528', NZ: '554', PA: '591', PH: '608', PT: '620', PY: '600', RO: '642',
-  SI: '705', TH: '764', UY: '858',
-}
-
-type CountryFeature = {
-  type: 'Feature'
-  id?: string
-  properties: { name: string }
-  geometry: object | null
-}
-
-const topo = countries110m as { objects: { countries: object } }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ALL_COUNTRIES = (feature as (topology: any, obj: any) => { features: CountryFeature[] })(topo, topo.objects.countries).features
+const ALL_COUNTRIES = getWorldFeatures()
 
 const projection = geoNaturalEarth1().fitExtent(
   [

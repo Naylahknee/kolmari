@@ -62,7 +62,7 @@ export function YourMatchesSection({
       </p>
 
       <div className="mt-4 flex flex-col gap-4 lg:flex-row">
-        <div className="grid min-w-0 flex-1 gap-[14px] sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid min-w-0 flex-1 content-start gap-[14px] sm:grid-cols-2 xl:grid-cols-3">
           {rows.map((row, index) => (
             <DashboardDestinationPanel
               key={row.country.slug}
