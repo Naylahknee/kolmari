@@ -38,8 +38,13 @@ Your World map (`src/components/kolmari/world-svg-map.tsx`, `world-match-map.tsx
 - `WorldMatchMap` keeps its collapse toggle, match/selected pill rows, and the
   incomplete-profile empty state.
 
-Validation: `npx tsc --noEmit` passes. Production build not yet run for this
-batch. Not deployed.
+Validation: `npx tsc --noEmit` passes; `npm run build` passes. Highlight
+wiring verified in Node against the real topology data (30/30 country codes map;
+gold/white fills resolve to real polygons; Malta resolves to a projected star
+pin). Pushed to `main` as `05688ab`; GitHub Actions "Deploy to Cloudflare" run
+`36498831074` completed success on 2026-09-28 ~16:44 PDT. SLD Governance run
+`36498831003` failed on the stale unrelated `sld-031-canonical-governance-repair`
+contract (expected; contract untouched).
 
 ## Quiz carryover (Phase 2, batch A) — 2026-09-28 (pending release)
 

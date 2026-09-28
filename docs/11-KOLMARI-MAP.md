@@ -48,6 +48,16 @@ Do not create duplicate country routes.
 
 ## Map Technology
 
+> Owner directive (2026-09-28, chat): the "Matched destinations" map is a
+> Natural Earth SVG world map (`src/components/kolmari/world-svg-map.tsx`,
+> rendered by `WorldMatchMap`). This supersedes the Mapbox-primary instruction
+> below for that surface. Mapbox may still be used elsewhere (e.g. the country
+> snapshot locator fallback), but the matched-destinations map must render with
+> no token dependency.
+
+Superseded for the matched-destinations surface by the directive above. Kept for
+reference:
+
 Use the existing Mapbox implementation.
 
 Preserve:
