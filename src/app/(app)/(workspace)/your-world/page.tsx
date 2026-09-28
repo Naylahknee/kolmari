@@ -70,8 +70,9 @@ export default async function YourWorldPage({ searchParams }: { searchParams: Pr
   }
 
   // Free tier gets the browse-and-upsell view; scoring/filtering/saving are Pro.
+  // Top 4 matches only, mirroring the paid view.
   if (!paid) {
-    const quizMatches: QuizMatch[] = ranked.map(({ country }) => ({
+    const quizMatches: QuizMatch[] = ranked.slice(0, 4).map(({ country }) => ({
       slug: country.slug,
       name: country.name,
       code: country.code,
@@ -113,5 +114,6 @@ export default async function YourWorldPage({ searchParams }: { searchParams: Pr
     scored: false,
   }))
 
-  return <YourWorld key={initialQuery} pins={pins} cards={[...scoredCards, ...unscoredCards]} complete={complete} initialQuery={initialQuery} />
+  // Top 4 matches only — everything else lives on the Browse-all research page.
+  return <YourWorld key={initialQuery} pins={pins} cards={scoredCards.slice(0, 4)} complete={complete} initialQuery={initialQuery} />
 }
