@@ -1,3 +1,4 @@
+import { isAnswered, LANES } from '@/lib/onboarding'
 import { getRequestUser } from '@/lib/auth'
 import { isAdminUser } from '@/lib/admin'
 import { getProfile, saveProfile } from '@/lib/profile'
@@ -28,16 +29,22 @@ export async function PUT(request: Request) {
     const parsed = profileUpdateSchema.safeParse(await request.json())
     if (!parsed.success) return Response.json({ error: 'Some profile details are invalid.' }, { status: 400 })
     const current = await getProfile(user.id)
+    const setup = parsed.data.onboarding
+    const questions = setup?.lanes.flatMap(lane => LANES[lane].qs) ?? []
+    const reviewStep = questions.length + 3 + (setup?.lanes.includes('energy') ? 1 : 0)
+    const finishingSetup = Boolean(setup && setup.step === reviewStep && parsed.data.wizard_status === 'completed')
+    if (finishingSetup && (!setup?.lanes.length || questions.some(q => !isAnswered(setup.answers[q.id])) ||
+      !parsed.data.citizenship?.trim() || !parsed.data.current_country?.trim() || !parsed.data.display_name?.trim() ||
+      !parsed.data.household_type || !parsed.data.timeline || !parsed.data.goals?.length ||
+      parsed.data.spouse == null || parsed.data.dependents == null || !parsed.data.family_size ||
+      parsed.data.family_size < 1 + (parsed.data.spouse ? 1 : 0) + (parsed.data.dependents ?? 0))) {
+      return Response.json({ error: 'Complete your priorities and household details before opening the Command Center.' }, { status: 400 })
+    }
     const saved = await saveProfile({ ...current, ...parsed.data, user_id: user.id })
 
-    // First time the wizard reaches "completed", seed the Command Center from the
-    // user's real matches. Best-effort: a seed failure must not fail the save.
-    if (current.wizard_status !== 'completed' && saved.wizard_status === 'completed') {
-      try {
-        await seedCommandCenterFromProfile(user.id, saved)
-      } catch (error) {
-        console.error('Command Center seeding failed', error)
-      }
+    // Setup can be retried after a board failure; never claim success prematurely.
+    if (saved.wizard_status === 'completed' && (finishingSetup || (!setup && current.wizard_status !== 'completed'))) {
+      await seedCommandCenterFromProfile(user.id, saved)
     }
 
     return Response.json(saved)

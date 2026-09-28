@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { LANE_IDS, LANES } from './onboarding'
 
 // A small denylist of the most trivially-guessed passwords. Not exhaustive —
 // a durable HIBP/k-anonymity check is the production upgrade path — but it
@@ -30,7 +31,25 @@ export const authSchema = z.object({
   mode: z.enum(['login', 'signup']).default('login'),
 }).strict()
 
+export const onboardingSchema = z.object({
+  version: z.literal(1),
+  lanes: z.array(z.enum(LANE_IDS)).max(3).refine(lanes => new Set(lanes).size === lanes.length),
+  answers: z.record(z.string().max(10), z.union([z.string().max(160), z.array(z.string().max(160)).max(12)])),
+  destinations: z.array(z.string().trim().min(1).max(100)).max(12),
+  step: z.number().int().min(0).max(20),
+}).strict().superRefine((state, ctx) => {
+  const questions = state.lanes.flatMap(lane => LANES[lane].qs)
+  for (const [id, value] of Object.entries(state.answers)) {
+    const q = questions.find(question => question.id === id)
+    const values = Array.isArray(value) ? value : [value]
+    if (!q || Boolean(q.multi) !== Array.isArray(value) || values.some(v => !q.opts.includes(v)) || new Set(values).size !== values.length || (values.length > 1 && values.some(v => q.exclusive?.includes(v)))) {
+      ctx.addIssue({ code: 'custom', path: ['answers', id], message: 'Invalid onboarding answer.' })
+    }
+  }
+})
+
 export const profileUpdateSchema = z.object({
+  onboarding: onboardingSchema.nullable().optional(),
   // Settable manually for testing tier gating until billing exists.
   plan: z.enum(['free', 'plus', 'navigator']).optional(),
   wizard_status: z.enum(['not_started', 'in_progress', 'completed', 'skipped']).optional(),

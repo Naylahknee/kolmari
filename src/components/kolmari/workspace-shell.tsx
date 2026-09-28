@@ -1,5 +1,6 @@
 'use client'
 
+import { MobileNav } from './mobile-nav'
 import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 import type { WizardStatus } from '@/lib/profile'
@@ -35,7 +36,7 @@ export function WorkspaceShell({
     pathname === '/nextinations/portugal' ||
     pathname.startsWith('/nextinations/portugal/')
 
-  if (usesCountryTemplate) return children
+  if (usesCountryTemplate) return <>{children}<MobileNav /></>
 
   return <NewWorkspaceChrome>{children}</NewWorkspaceChrome>
 }
@@ -52,6 +53,7 @@ function NewWorkspaceChrome({ children }: { children: React.ReactNode }) {
           <button type="button" className="rail-backdrop" onClick={toggleRail} aria-label="Close navigation" />
           <Sidebar />
           <main className="main workspace-main">{children}</main>
+          <MobileNav />
         </div>
       </div>
     </UnitsProvider>
