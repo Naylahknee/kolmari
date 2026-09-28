@@ -48,6 +48,8 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
   const [step, setStep] = useState(initial.onboarding?.step ?? 0)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [missing, setMissing] = useState<string[]>([])
+  const errorRef = useRef<HTMLParagraphElement>(null)
   const [destination, setDestination] = useState('')
   const busy = useRef(false)
   const heading = useRef<HTMLHeadingElement>(null)
@@ -74,6 +76,8 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
 
   function update<K extends keyof RelocationProfile>(key: K, value: RelocationProfile[K]) {
     setProfile(previous => ({ ...previous, [key]: value }))
+    setMissing(previous => previous.filter(k => k !== key))
+    setError('')
   }
   function navigate(next: number) {
     setStep(next)
@@ -82,16 +86,43 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
   }
   function toggleLane(lane: LaneId) {
     setSetup(previous => ({ ...previous, lanes: previous.lanes.includes(lane) ? previous.lanes.filter(id => id !== lane) : previous.lanes.length < 3 ? [...previous.lanes, lane] : previous.lanes }))
+    setMissing(previous => previous.filter(k => k !== 'lanes'))
+    setError('')
   }
   function answer(q: Question, option: string) {
     setSetup(previous => ({ ...previous, answers: { ...previous.answers, [q.id]: chooseAnswer(q, previous.answers[q.id], option) } }))
+    setMissing(previous => previous.filter(k => k !== 'question'))
+    setError('')
   }
-  function valid() {
-    if (currentStep === 0) return setup.lanes.length > 0
-    if (question) return isAnswered(setup.answers[question.id])
-    if (currentStep === originStep) return Boolean(profile.display_name?.trim() && profile.current_country?.trim() && profile.citizenship?.trim())
-    if (currentStep === householdStep) return Boolean(profile.household_type && profile.family_size && profile.dependents !== null && profile.spouse !== null && profile.timeline && profile.goals.length && profile.family_size >= 1 + (profile.spouse ? 1 : 0) + (profile.dependents ?? 0))
-    return true
+  /** What is still needed before this step can continue, as field keys and
+   *  human-readable labels. Shown when the user hits Continue with gaps, so a
+   *  blocked Continue is never silent. */
+  function missingForStep(): { keys: string[]; labels: string[] } {
+    if (currentStep === 0)
+      return setup.lanes.length ? { keys: [], labels: [] } : { keys: ['lanes'], labels: ['Choose at least one approach'] }
+    if (question)
+      return isAnswered(setup.answers[question.id]) ? { keys: [], labels: [] } : { keys: ['question'], labels: ['Choose an answer'] }
+    if (currentStep === originStep) {
+      const keys: string[] = []
+      const labels: string[] = []
+      if (!profile.display_name?.trim()) { keys.push('display_name'); labels.push('What should we call you?') }
+      if (!profile.current_country?.trim()) { keys.push('current_country'); labels.push('Country where you live now') }
+      if (!profile.citizenship?.trim()) { keys.push('citizenship'); labels.push('Passport citizenship(s)') }
+      return { keys, labels }
+    }
+    if (currentStep === householdStep) {
+      const keys: string[] = []
+      const labels: string[] = []
+      if (!profile.household_type) { keys.push('household_type'); labels.push('Who is moving?') }
+      if (!profile.family_size) { keys.push('family_size'); labels.push('Total people, including you') }
+      if (profile.spouse === null) { keys.push('spouse'); labels.push('Is a partner moving with you?') }
+      if (profile.dependents === null) { keys.push('dependents'); labels.push('Number of dependants') }
+      if (!profile.timeline) { keys.push('timeline'); labels.push('When would you like to move?') }
+      if (!profile.goals.length) { keys.push('goals'); labels.push('Which routes do you want to research? (pick at least one)') }
+      if (profile.family_size !== null && profile.family_size < 1 + (profile.spouse ? 1 : 0) + (profile.dependents ?? 0)) { keys.push('family_size'); labels.push('Total people must include you, your partner and all dependants') }
+      return { keys, labels }
+    }
+    return { keys: [], labels: [] }
   }
   async function persist(status: WizardStatus, nextStep: number) {
     const response = await fetch('/api/profile', {
@@ -101,7 +132,7 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
         display_name: profile.display_name, citizenship: profile.citizenship, current_country: profile.current_country,
         household_type: profile.household_type, family_size: profile.family_size, spouse: profile.spouse, dependents: profile.dependents,
         timeline: profile.timeline, goals: profile.goals, priority: setup.lanes[0] ? priorities[setup.lanes[0]] : profile.priority,
-        monthly_income: profile.monthly_income, annual_income: profile.annual_income, income_type: profile.income_type,
+        monthly_income: profile.monthly_income, annual_income: profile.monthly_income != null ? profile.monthly_income * 12 : null, income_type: profile.income_type,
         remote: profile.remote, occupation: profile.occupation, credentials: profile.credentials, education: profile.education,
         savings: profile.savings, ancestry_connections: profile.ancestry_connections, preferred_regions: profile.preferred_regions,
         preferred_region: profile.preferred_regions[0] ?? profile.preferred_region,
@@ -113,8 +144,17 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
     if (!response.ok) throw new Error(result.error ?? 'Unable to save your progress. Please try again.')
   }
   async function saveAndContinue(exit = false) {
-    if (busy.current || (!exit && !valid())) return
-    busy.current = true; setSaving(true); setError('')
+    if (busy.current) return
+    if (!exit) {
+      const gaps = missingForStep()
+      if (gaps.keys.length) {
+        setMissing(gaps.keys)
+        setError(gaps.labels.length === 1 ? `Please answer this to continue: ${gaps.labels[0]}.` : `Please complete these to continue: ${gaps.labels.join('; ')}.`)
+        requestAnimationFrame(() => errorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }))
+        return
+      }
+    }
+    busy.current = true; setSaving(true); setError(''); setMissing([])
     try {
       const complete = currentStep === reviewStep && !exit
       const nextStep = exit || complete ? currentStep : currentStep + 1
@@ -146,10 +186,10 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
         <p className={styles.intro}>{currentStep === 0 ? 'Pick up to three, in the order you care about them. The first one becomes your primary: it opens first and leads the country rankings. Each one you add asks its own three questions. Nothing gets hidden either way.' : question ? question.help : currentStep === energyStep ? 'Optional and experimental. Practical visa, budget, health and safety research always stays separate. You can skip this and continue setup.' : currentStep === originStep ? 'Your residence and passport countries help you research the relevant routes. Neither is assumed.' : currentStep === householdStep ? 'Tell us who the plan needs to work for. Leave financial details unknown until you have them.' : 'Your answers and selected destinations will be saved to your account. No sample households, progress or matches.'}</p>
         {showQuizLaneBanner && quiz && <p className={styles.note}>You said {quiz.answers.priority} matters most, so {quizSuggestedLanes.map(id => LANES[id].short).join(' and ')} {quizSuggestedLanes.length > 1 ? 'are' : 'is'} preselected. Change it freely.</p>}
         <fieldset disabled={saving} className={styles.fields}>
-        {currentStep === 0 && <div className={styles.lanes}>{LANE_IDS.map(id => { const lane = LANES[id]; const rank = setup.lanes.indexOf(id); return <button type="button" key={id} aria-pressed={rank >= 0} disabled={rank < 0 && setup.lanes.length >= 3} onClick={() => toggleLane(id)} className={styles.lane}><span className={styles.laneTop}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d={lane.d} /></svg><strong>{lane.title}</strong>{rank >= 0 && <b>{rank + 1}</b>}</span><span>{lane.blurb}</span><small>{rank >= 0 ? ['Primary priority', 'Second priority', 'Third priority'][rank] : lane.tag}</small></button> })}</div>}
-        {question && <><div className={styles.questionMeta}>{question.mode}</div><div className={styles.choices}>{question.opts.map(option => { const value = setup.answers[question.id]; return <Choice key={option} active={Array.isArray(value) ? value.includes(option) : value === option} onClick={() => answer(question, option)}>{option}</Choice> })}</div>{question.lane === 'health' && <p className={styles.note}>Saved for your research checklist. An allergen flag does not remove a destination or certify food safety.</p>}</>}
+        {currentStep === 0 && <div className={`${styles.lanes}${missing.includes('lanes') ? ` ${styles.invalidGroup}` : ''}`}>{LANE_IDS.map(id => { const lane = LANES[id]; const rank = setup.lanes.indexOf(id); return <button type="button" key={id} aria-pressed={rank >= 0} disabled={rank < 0 && setup.lanes.length >= 3} onClick={() => toggleLane(id)} className={styles.lane}><span className={styles.laneTop}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d={lane.d} /></svg><strong>{lane.title}</strong>{rank >= 0 && <b>{rank + 1}</b>}</span><span>{lane.blurb}</span><small>{rank >= 0 ? ['Primary priority', 'Second priority', 'Third priority'][rank] : lane.tag}</small></button> })}</div>}
+        {question && <><div className={styles.questionMeta}>{question.mode}</div><div className={`${styles.choices}${missing.includes('question') ? ` ${styles.invalidGroup}` : ''}`}>{question.opts.map(option => { const value = setup.answers[question.id]; return <Choice key={option} active={Array.isArray(value) ? value.includes(option) : value === option} onClick={() => answer(question, option)}>{option}</Choice> })}</div>{question.lane === 'health' && <p className={styles.note}>Saved for your research checklist. An allergen flag does not remove a destination or certify food safety.</p>}</>}
         {currentStep === energyStep && <EnergyPortal />}
-        {currentStep === originStep && <div className={styles.formGrid}><TextField label="What should we call you?" value={profile.display_name} onChange={v => update('display_name', v)} maxLength={80} autoComplete="given-name" /><TextField label="Country where you live now" value={profile.current_country} onChange={v => update('current_country', v)} maxLength={80} autoComplete="country-name" /><TextField label="Passport citizenship(s)" value={profile.citizenship} onChange={v => update('citizenship', v)} maxLength={80} /><TextField label="Ancestry or family connections abroad (optional)" value={profile.ancestry_connections} onChange={v => update('ancestry_connections', v)} maxLength={500} /></div>}
+        {currentStep === originStep && <div className={styles.formGrid}><TextField label="What should we call you?" required invalid={missing.includes('display_name')} value={profile.display_name} onChange={v => update('display_name', v)} maxLength={80} autoComplete="given-name" /><TextField label="Country where you live now" required invalid={missing.includes('current_country')} value={profile.current_country} onChange={v => update('current_country', v)} maxLength={80} autoComplete="country-name" /><TextField label="Passport citizenship(s)" required invalid={missing.includes('citizenship')} value={profile.citizenship} onChange={v => update('citizenship', v)} maxLength={80} /><TextField label="Ancestry or family connections abroad (optional)" value={profile.ancestry_connections} onChange={v => update('ancestry_connections', v)} maxLength={500} /></div>}
         {currentStep === householdStep && <>
           {quiz && <section className={styles.card} aria-label="From your Match Quiz">
             <h2>From your Match Quiz</h2>
@@ -158,10 +198,10 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
               {QUIZ_CARRYOVER_QUESTIONS.map(({ key, label }) => quiz.answers[key] ? <li key={key}><span>{label}: {quiz.answers[key]}</span><b>FROM YOUR QUIZ</b></li> : null)}
             </ol>
           </section>}
-          <div className={styles.formGrid}><SelectField label="Who is moving?" value={profile.household_type} options={['Solo', 'Couple', 'Family', 'Other']} onChange={v => update('household_type', v)} /><NumberField label="Total people, including you" value={profile.family_size} min={1} max={12} onChange={v => update('family_size', v)} /><SelectField label="Is a partner moving with you?" value={profile.spouse === null ? null : profile.spouse ? 'Yes' : 'No'} options={['Yes', 'No']} onChange={v => update('spouse', v === 'Yes')} /><NumberField label="Number of dependants" value={profile.dependents} min={0} max={11} onChange={v => update('dependents', v)} /><SelectField label="When would you like to move?" value={profile.timeline} options={['0-3 months', '3-6 months', '6-12 months', '12+ months', 'Just researching']} onChange={v => update('timeline', v)} /></div>
-          <h2 className={styles.subheading}>Which routes do you want to research?</h2><div className={styles.choices}>{goals.map(goal => <Choice key={goal} active={profile.goals.includes(goal)} onClick={() => update('goals', profile.goals.includes(goal) ? profile.goals.filter(g => g !== goal) : [...profile.goals, goal])}>{goal}</Choice>)}</div>
+          <div className={styles.formGrid}><SelectField label="Who is moving?" required invalid={missing.includes('household_type')} value={profile.household_type} options={['Solo', 'Couple', 'Family', 'Other']} onChange={v => update('household_type', v)} /><NumberField label="Total people, including you" required invalid={missing.includes('family_size')} value={profile.family_size} min={1} max={12} onChange={v => update('family_size', v)} /><SelectField label="Is a partner moving with you?" required invalid={missing.includes('spouse')} value={profile.spouse === null ? null : profile.spouse ? 'Yes' : 'No'} options={['Yes', 'No']} onChange={v => update('spouse', v === 'Yes')} /><NumberField label="Number of dependants" required invalid={missing.includes('dependents')} value={profile.dependents} min={0} max={11} onChange={v => update('dependents', v)} /><SelectField label="When would you like to move?" required invalid={missing.includes('timeline')} value={profile.timeline} options={['0-3 months', '3-6 months', '6-12 months', '12+ months', 'Just researching']} onChange={v => update('timeline', v)} /></div>
+          <h2 className={styles.subheading}>Which routes do you want to research?<span className={styles.req} aria-hidden="true"> *</span></h2><div className={`${styles.choices}${missing.includes('goals') ? ` ${styles.invalidGroup}` : ''}`}>{goals.map(goal => <Choice key={goal} active={profile.goals.includes(goal)} onClick={() => update('goals', profile.goals.includes(goal) ? profile.goals.filter(g => g !== goal) : [...profile.goals, goal])}>{goal}</Choice>)}</div>
           {profile.family_size !== null && profile.family_size < 1 + (profile.spouse ? 1 : 0) + (profile.dependents ?? 0) && <p role="alert" className={styles.error}>Total people must include you, your partner and all dependants.</p>}
-          <details className={styles.details}><summary>Income, work and regional preferences (optional)</summary><p>These improve practical comparisons. A budget is not treated as income.</p><div className={styles.formGrid}><NumberField label="Monthly income (USD)" value={profile.monthly_income} onChange={v => update('monthly_income', v)} max={1_000_000} /><NumberField label="Annual income (USD)" value={profile.annual_income} onChange={v => update('annual_income', v)} max={12_000_000} /><NumberField label="Savings (USD)" value={profile.savings} onChange={v => update('savings', v)} max={100_000_000} /><SelectField label="Income type" value={profile.income_type} options={['Employment', 'Self-employment', 'Pension', 'Investments', 'Mixed', 'Other']} onChange={v => update('income_type', v)} /><SelectField label="Working remotely?" value={profile.remote === null ? null : profile.remote ? 'Yes' : 'No'} options={['Yes', 'No']} onChange={v => update('remote', v === 'Yes')} /><TextField label="Occupation" value={profile.occupation} onChange={v => update('occupation', v)} maxLength={120} /><SelectField label="Education" value={profile.education} options={['Secondary school', 'Associate degree', 'Bachelor’s degree', 'Master’s degree', 'Doctorate', 'Professional credential', 'Other']} onChange={v => update('education', v)} /><TextField label="Credentials" value={profile.credentials} onChange={v => update('credentials', v)} maxLength={500} /></div><h3>Regions to research</h3><div className={styles.choices}>{['North America', 'Latin America', 'Europe', 'Africa', 'Asia', 'Oceania', 'Open to anywhere'].map(region => <Choice key={region} active={profile.preferred_regions.includes(region)} onClick={() => update('preferred_regions', profile.preferred_regions.includes(region) ? profile.preferred_regions.filter(r => r !== region) : [...profile.preferred_regions, region])}>{region}</Choice>)}</div></details>
+          <details className={styles.details}><summary>Income, work and regional preferences (optional)</summary><p>These improve practical comparisons. A budget is not treated as income.</p><div className={styles.formGrid}><NumberField label="Monthly income (USD)" value={profile.monthly_income} onChange={v => update('monthly_income', v)} max={1_000_000} /><NumberField label="Savings (USD)" value={profile.savings} onChange={v => update('savings', v)} max={100_000_000} /><SelectField label="Income type" value={profile.income_type} options={['Employment', 'Self-employment', 'Pension', 'Investments', 'Mixed', 'Other']} onChange={v => update('income_type', v)} /><SelectField label="Working remotely?" value={profile.remote === null ? null : profile.remote ? 'Yes' : 'No'} options={['Yes', 'No']} onChange={v => update('remote', v === 'Yes')} /><TextField label="Occupation" value={profile.occupation} onChange={v => update('occupation', v)} maxLength={120} /><SelectField label="Education" value={profile.education} options={['Secondary school', 'Associate degree', 'Bachelor’s degree', 'Master’s degree', 'Doctorate', 'Professional credential', 'Other']} onChange={v => update('education', v)} /><TextField label="Credentials" value={profile.credentials} onChange={v => update('credentials', v)} maxLength={500} /></div><h3>Regions to research</h3><div className={styles.choices}>{['North America', 'Latin America', 'Europe', 'Africa', 'Asia', 'Oceania', 'Open to anywhere'].map(region => <Choice key={region} active={profile.preferred_regions.includes(region)} onClick={() => update('preferred_regions', profile.preferred_regions.includes(region) ? profile.preferred_regions.filter(r => r !== region) : [...profile.preferred_regions, region])}>{region}</Choice>)}</div></details>
         </>}
         {currentStep === reviewStep && <>
           <section className={styles.summary}><p className={styles.eyebrow}>YOUR STARTING POINT</p><h2>{profile.display_name}’s Kolmari Plan</h2><p>{profile.current_country} · {profile.family_size} {profile.family_size === 1 ? 'person' : 'people'} · {profile.timeline}</p><p>Passport citizenship(s): {profile.citizenship}</p></section>
@@ -169,8 +209,8 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
           <section className={styles.card}><h2>First destinations to compare</h2>{seededDestinationsFromQuiz ? <p>Suggested from your Match Quiz region. Change them freely.</p> : <p>Choose your own shortlist. You can also start with an empty board.</p>}<div className={styles.choices}>{Array.from(new Set([...destinations, ...setup.destinations])).map(name => <Choice key={name} active={setup.destinations.includes(name)} onClick={() => toggleDestination(name)}>{name}</Choice>)}</div><div className={styles.addDestination}><label>Another destination<input value={destination} maxLength={100} onChange={e => setDestination(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); const name = destination.trim(); if (name && !setup.destinations.some(d => d.toLowerCase() === name.toLowerCase())) toggleDestination(name); setDestination('') } }} placeholder="e.g. Lisbon or Mexico City" /></label><button type="button" disabled={!destination.trim() || setup.destinations.length >= 12} onClick={() => { const name = destination.trim(); if (name && !setup.destinations.some(d => d.toLowerCase() === name.toLowerCase())) toggleDestination(name); setDestination('') }}>Add destination</button></div><small>{setup.destinations.length} of 12 selected</small></section>
         </>}
         </fieldset>
-        {error && <p role="alert" className={styles.error}>{error}</p>}
-        <footer className={styles.actions}><button type="button" disabled={currentStep === 0 || saving} onClick={() => navigate(Math.max(0, currentStep - 1))} className={styles.backText}><ArrowLeft size={16} />Back</button><button type="button" onClick={() => saveAndContinue()} disabled={!valid() || saving} className={styles.primary}>{saving ? <LoaderCircle size={18} className="animate-spin" /> : null}{currentStep === reviewStep ? 'Build & open Command Center' : currentStep === energyStep ? 'Continue to household' : 'Continue'}<ArrowRight size={18} /></button></footer>
+        {error && <p ref={errorRef} role="alert" className={styles.error}>{error}</p>}
+        <footer className={styles.actions}><button type="button" disabled={currentStep === 0 || saving} onClick={() => navigate(Math.max(0, currentStep - 1))} className={styles.backText}><ArrowLeft size={16} />Back</button><button type="button" onClick={() => saveAndContinue()} disabled={saving} className={styles.primary}>{saving ? <LoaderCircle size={18} className="animate-spin" /> : null}{currentStep === reviewStep ? 'Build & open Command Center' : currentStep === energyStep ? 'Continue to household' : 'Continue'}<ArrowRight size={18} /></button></footer>
         <p className={styles.footnote}>Progress saves when you continue. {currentStep === energyStep ? 'Birth details stay in this session; city lookup uses Mapbox.' : 'Your answers support research, not visa approval or medical advice.'}</p>
       </section>
     </div>
@@ -180,12 +220,12 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
 function Choice({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return <button type="button" aria-pressed={active} onClick={onClick} className={styles.choice}>{children}{active && <Check size={14} aria-hidden="true" />}</button>
 }
-function TextField({ label, value, onChange, maxLength, autoComplete }: { label: string; value: string | null; onChange: (value: string) => void; maxLength: number; autoComplete?: string }) {
-  return <label>{label}<input value={value ?? ''} onChange={e => onChange(e.target.value)} maxLength={maxLength} autoComplete={autoComplete} /></label>
+function TextField({ label, value, onChange, maxLength, autoComplete, required, invalid }: { label: string; value: string | null; onChange: (value: string) => void; maxLength: number; autoComplete?: string; required?: boolean; invalid?: boolean }) {
+  return <label className={invalid ? styles.invalid : undefined}>{label}{required && <span className={styles.req} aria-hidden="true"> *</span>}<input value={value ?? ''} onChange={e => onChange(e.target.value)} maxLength={maxLength} autoComplete={autoComplete} aria-required={required || undefined} /></label>
 }
-function NumberField({ label, value, onChange, min = 0, max }: { label: string; value: number | null; onChange: (value: number | null) => void; min?: number; max: number }) {
-  return <label>{label}<input type="number" min={min} max={max} step={1} value={value ?? ''} onChange={e => { const n = e.target.valueAsNumber; onChange(Number.isFinite(n) ? Math.min(max, Math.max(min, Math.trunc(n))) : null) }} /></label>
+function NumberField({ label, value, onChange, min = 0, max, required, invalid }: { label: string; value: number | null; onChange: (value: number | null) => void; min?: number; max: number; required?: boolean; invalid?: boolean }) {
+  return <label className={invalid ? styles.invalid : undefined}>{label}{required && <span className={styles.req} aria-hidden="true"> *</span>}<input type="number" min={min} max={max} step={1} value={value ?? ''} onChange={e => { const n = e.target.valueAsNumber; onChange(Number.isFinite(n) ? Math.min(max, Math.max(min, Math.trunc(n))) : null) }} aria-required={required || undefined} /></label>
 }
-function SelectField({ label, value, options, onChange }: { label: string; value: string | null; options: readonly string[]; onChange: (value: string) => void }) {
-  return <label>{label}<select value={value ?? ''} onChange={e => onChange(e.target.value)}><option value="" disabled>Select one</option>{options.map(option => <option key={option}>{option}</option>)}</select></label>
+function SelectField({ label, value, options, onChange, required, invalid }: { label: string; value: string | null; options: readonly string[]; onChange: (value: string) => void; required?: boolean; invalid?: boolean }) {
+  return <label className={invalid ? styles.invalid : undefined}>{label}{required && <span className={styles.req} aria-hidden="true"> *</span>}<select value={value ?? ''} onChange={e => onChange(e.target.value)} aria-required={required || undefined}><option value="" disabled>Select one</option>{options.map(option => <option key={option}>{option}</option>)}</select></label>
 }

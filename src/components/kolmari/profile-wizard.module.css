@@ -71,6 +71,10 @@
 .page button:disabled { cursor: not-allowed; opacity: .45; }
 .page button:focus-visible, .page a:focus-visible, .page input:focus-visible, .page select:focus-visible { outline: 3px solid var(--color-navy); outline-offset: 3px; }
 .error { background: white; border-left: 3px solid var(--color-danger); padding: 14px; font-size: 13px; margin-top: 20px; }
+.fields label.invalid input, .fields label.invalid select { border-color: var(--color-danger); border-width: 2px; }
+.req { color: var(--color-danger); font-weight: 800; }
+.invalidGroup .choice { border-color: var(--color-danger); }
+.lanes.invalidGroup .lane { border-color: var(--color-danger); }
 .footnote { color: var(--color-muted); font-size: 11px; line-height: 1.6; margin-top: 18px; }
 @media (max-width: 800px) {
   .header { min-height: 70px; padding: 10px 20px; }
