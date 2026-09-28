@@ -184,7 +184,7 @@ export function CountryFoodFitCard({
     <div
       ref={rootRef}
       data-visible={visible}
-      className={`${styles.root} ${animate ? styles.animate : ''} flex h-full flex-col rounded-card border border-neutral-200 bg-white p-5 shadow-card sm:p-6`}
+      className={`${styles.root} ${animate ? styles.animate : ''} flex h-full flex-col rounded-card border border-neutral-200 bg-white p-6 shadow-card sm:p-7`}
     >
       {/* ---------- Header ---------- */}
       <div className={`${styles.reveal} flex items-start justify-between gap-3`} style={delay()}>
@@ -219,7 +219,7 @@ export function CountryFoodFitCard({
       </div>
 
       {/* ---------- Food traits ---------- */}
-      <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-3">
+      <div className="mt-5 flex flex-wrap gap-2.5">
         {country.archetypes.map((a) => {
           const Icon = ARCHETYPE_ICONS[a]
           const on = selected.includes(a)
@@ -227,7 +227,7 @@ export function CountryFoodFitCard({
             <div
               key={a}
               style={delay()}
-              className={`${styles.reveal} ${styles.chip} flex items-center gap-2 rounded-field border px-2.5 py-2 text-xs font-semibold ${
+              className={`${styles.reveal} ${styles.chip} flex items-center gap-2 whitespace-nowrap rounded-field border px-3 py-2 text-xs font-semibold ${
                 on ? 'border-gold-deep bg-gold-soft/70 text-navy-deep' : 'border-gold-soft bg-gold-soft/30 text-navy'
               }`}
             >
@@ -246,7 +246,7 @@ export function CountryFoodFitCard({
             <Info className="h-3.5 w-3.5" /> Tap for details
           </span>
         </div>
-        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <div className="mt-2.5 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
           {TRACKED_ALLERGENS.map((a) => {
             const prev = country.allergenPrevalence[a]
             const meta = PREVALENCE[prev]
