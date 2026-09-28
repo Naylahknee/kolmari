@@ -9,6 +9,7 @@ import {
   getBudgetBenchmark,
   type BudgetBenchmark,
 } from '@/lib/budget-benchmarks'
+import { getCountryContent } from '@/lib/country-workspace/country-content'
 import {
   budgetEffective,
   formatAmount,
@@ -298,6 +299,12 @@ export function CostCalculator({
         </aside>
       </div>
 
+      <CompareDestinations
+        household={household}
+        monthly={monthly}
+        primaryDestination={initialPlan.saved_nextination}
+      />
+
       <p className="text-xs leading-5 text-muted">Local benchmarks are planning references, not quotes or guarantees. Verify costs with current local sources before deciding.</p>
       {message && <p role="status" aria-live="polite" className="text-sm font-semibold text-navy">{message}</p>}
 
@@ -403,4 +410,201 @@ function getVerdict(income: number | null, monthly: number | null): { label: str
   if (remaining < 0) return { label: 'Budget gap', detail: 'The current monthly plan is higher than the income entered.' }
   if (remaining < monthly * 0.1) return { label: 'Limited cushion', detail: 'The plan fits the entered income, but leaves little room for changing costs.' }
   return { label: 'Appears manageable', detail: 'The entered income is above the current monthly plan. Verify the assumptions before deciding.' }
+}
+
+const COMPARE_COUNTRIES = [
+  { slug: 'portugal', label: 'Portugal' },
+  { slug: 'spain', label: 'Spain' },
+  { slug: 'mexico', label: 'Mexico' },
+  { slug: 'greece', label: 'Greece' },
+  { slug: 'estonia', label: 'Estonia' },
+]
+
+// Approximate conversion used only to display side-by-side planning ranges in
+// one currency. The rate is labelled in the UI and is not a quote.
+const EUR_TO_USD = 1.09
+
+// Canonical row labels. All five countries carry the same nine cost-of-living
+// categories in the same order, so rows are matched by index.
+const COMPARE_ROW_LABELS = [
+  'Housing',
+  'Food & groceries',
+  'Dining out',
+  'Transportation',
+  'Healthcare (private)',
+  'Internet & mobile',
+  'Utilities',
+  'Entertainment & recreation',
+  'Emergency buffer',
+]
+
+function CompareDestinations({
+  household,
+  monthly,
+  primaryDestination,
+}: {
+  household: number | null
+  monthly: number | null
+  primaryDestination: string | null
+}) {
+  const slugFor = (name: string | null) => {
+    const key = name?.trim().toLowerCase() ?? ''
+    return COMPARE_COUNTRIES.some((country) => country.slug === key) ? key : 'portugal'
+  }
+  const [first, setFirst] = useState(() => slugFor(primaryDestination))
+  const [second, setSecond] = useState(() => {
+    const fallback = slugFor(primaryDestination)
+    return COMPARE_COUNTRIES.find((country) => country.slug !== fallback)?.slug ?? 'spain'
+  })
+  const [currency, setCurrency] = useState<'USD' | 'EUR'>('USD')
+
+  const contentA = getCountryContent(first)
+  const contentB = getCountryContent(second)
+  if (!contentA || !contentB) return null
+
+  const useFamily = household === null || household >= 3
+  const rangesFor = (slug: string) => {
+    const content = getCountryContent(slug)
+    if (!content) return []
+    return content.costOfLiving.categories.map((category) => useFamily
+      ? { low: category.familyLow ?? category.soloLow, high: category.familyHigh ?? category.soloHigh }
+      : { low: category.soloLow, high: category.soloHigh })
+  }
+  const totalFor = (slug: string) => {
+    const content = getCountryContent(slug)
+    if (!content) return null
+    return useFamily
+      ? content.costOfLiving.familyTotal ?? content.costOfLiving.soloTotal
+      : content.costOfLiving.soloTotal
+  }
+  const convert = (amount: number, from: string) => {
+    if (from === currency) return amount
+    return currency === 'USD' ? amount * EUR_TO_USD : amount / EUR_TO_USD
+  }
+  const formatRange = (low: number, high: number, from: string) => {
+    const symbol = currency === 'USD' ? '$' : '€'
+    return `${symbol}${formatAmount(Math.round(convert(low, from)))} – ${symbol}${formatAmount(Math.round(convert(high, from)))}`
+  }
+
+  const rangesA = rangesFor(first)
+  const rangesB = rangesFor(second)
+  const totalA = totalFor(first)
+  const totalB = totalFor(second)
+  const labelA = COMPARE_COUNTRIES.find((country) => country.slug === first)?.label ?? first
+  const labelB = COMPARE_COUNTRIES.find((country) => country.slug === second)?.label ?? second
+  const sourceNote = (slug: string) => {
+    const content = getCountryContent(slug)
+    const label = COMPARE_COUNTRIES.find((country) => country.slug === slug)?.label ?? slug
+    const source = content?.costOfLiving.disclosure?.sourceNote ?? 'Kolmari country research'
+    const verified = content?.costOfLiving.disclosure?.lastVerified ?? ''
+    return `${label}: ${source}${verified ? ` (verified ${verified})` : ''}`
+  }
+
+  const chip = (slug: string, active: boolean, onSelect: () => void, disabled: boolean) => (
+    <button
+      key={slug}
+      type="button"
+      onClick={onSelect}
+      disabled={disabled}
+      aria-pressed={active}
+      className={`rounded-full border px-4 py-2 text-sm font-bold transition ${
+        active
+          ? 'border-navy bg-navy text-white'
+          : disabled
+            ? 'cursor-not-allowed border-line bg-canvas text-muted/50'
+            : 'border-line bg-white text-navy hover:bg-canvas'
+      }`}
+    >
+      {COMPARE_COUNTRIES.find((country) => country.slug === slug)?.label ?? slug}
+    </button>
+  )
+
+  return (
+    <section className="card-surface p-5 sm:p-6" aria-labelledby="compare-heading">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Compare</p>
+          <h2 id="compare-heading" className="mt-1 text-xl font-extrabold text-navy">Side-by-side monthly costs</h2>
+          <p className="mt-1 text-sm text-muted">
+            Planning ranges for a {useFamily ? 'family' : '1–2 person'} household, from Kolmari country research.
+          </p>
+        </div>
+        <div className="flex rounded-full border border-line bg-canvas p-1" role="group" aria-label="Display currency">
+          {(['USD', 'EUR'] as const).map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => setCurrency(option)}
+              aria-pressed={currency === option}
+              className={`rounded-full px-4 py-1.5 text-sm font-bold transition ${currency === option ? 'bg-navy text-white' : 'text-navy hover:bg-white'}`}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {monthly !== null && primaryDestination && (
+        <p className="mt-3 text-sm font-semibold text-navy">
+          Your {primaryDestination} plan so far: ${formatAmount(monthly)}/mo.
+        </p>
+      )}
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wider text-muted">Destination</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {COMPARE_COUNTRIES.map((country) => chip(country.slug, country.slug === first, () => setFirst(country.slug), country.slug === second))}
+          </div>
+        </div>
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wider text-muted">Compare with</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {COMPARE_COUNTRIES.map((country) => chip(country.slug, country.slug === second, () => setSecond(country.slug), country.slug === first))}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 overflow-x-auto">
+        <table className="w-full min-w-[440px] text-sm">
+          <thead>
+            <tr className="border-b border-line text-left">
+              <th scope="col" className="py-2 pr-3 text-xs font-bold uppercase tracking-wider text-muted">Category</th>
+              <th scope="col" className="py-2 pr-3 text-right text-xs font-bold uppercase tracking-wider text-muted">{labelA}</th>
+              <th scope="col" className="py-2 text-right text-xs font-bold uppercase tracking-wider text-muted">{labelB}</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-line">
+            {COMPARE_ROW_LABELS.map((label, index) => (
+              <tr key={label}>
+                <td className="py-2.5 pr-3 font-semibold text-navy">{label}</td>
+                <td className="py-2.5 pr-3 text-right font-semibold text-navy">
+                  {rangesA[index] ? formatRange(rangesA[index].low, rangesA[index].high, contentA.costOfLiving.currency) : '–'}
+                </td>
+                <td className="py-2.5 text-right font-semibold text-navy">
+                  {rangesB[index] ? formatRange(rangesB[index].low, rangesB[index].high, contentB.costOfLiving.currency) : '–'}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr className="border-t-2 border-navy/20">
+              <td className="py-3 pr-3 font-extrabold text-navy">Estimated monthly total</td>
+              <td className="py-3 pr-3 text-right font-extrabold text-navy">
+                {totalA ? formatRange(totalA.low, totalA.high, contentA.costOfLiving.currency) : '–'}
+              </td>
+              <td className="py-3 text-right font-extrabold text-navy">
+                {totalB ? formatRange(totalB.low, totalB.high, contentB.costOfLiving.currency) : '–'}
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <p className="mt-4 text-xs leading-5 text-muted">
+        {sourceNote(first)} · {sourceNote(second)}. Shown in {currency} using an approximate conversion (€1 ≈ $1.09).
+        Ranges are planning references, not quotes or guarantees.
+      </p>
+    </section>
+  )
 }
