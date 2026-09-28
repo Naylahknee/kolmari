@@ -42,9 +42,19 @@ function initialProfile(profile: RelocationProfile): RelocationProfile {
 
 export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
   const router = useRouter()
+  const seededSetup = initialSetup(initial)
   const [profile, setProfile] = useState(() => initialProfile(initial))
-  const [setup, setSetup] = useState<OnboardingState>(() => initialSetup(initial))
-  const [step, setStep] = useState(initial.onboarding?.step ?? 0)
+  const [setup, setSetup] = useState<OnboardingState>(seededSetup)
+  // Saves from the old one-question-per-screen layout used a step per question;
+  // land those users on the grouped lane screen unless every lane question is
+  // already answered.
+  const [step, setStep] = useState(() => {
+    const saved = initial.onboarding?.step ?? 0
+    if (saved <= 1) return saved
+    const allQs = seededSetup.lanes.flatMap(id => LANES[id].qs)
+    const done = allQs.length > 0 && allQs.every(q => isAnswered(seededSetup.answers[q.id]))
+    return done ? saved : 1
+  })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [missing, setMissing] = useState<string[]>([])
@@ -54,12 +64,14 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
   const heading = useRef<HTMLHeadingElement>(null)
   const retake = initial.wizard_status === 'completed'
   const questions = setup.lanes.flatMap(lane => LANES[lane].qs.map(q => ({ ...q, lane })))
-  const energyStep = setup.lanes.includes('energy') ? questions.length + 1 : -1
-  const originStep = questions.length + 1 + (energyStep > 0 ? 1 : 0)
+  // Grouped layout (demo step 2): every selected lane's questions live on one
+  // screen, in priority order. Energy keeps its own portal screen after that.
+  const lanesStep = 1
+  const energyStep = setup.lanes.includes('energy') ? 2 : -1
+  const originStep = energyStep > 0 ? 3 : 2
   const householdStep = originStep + 1
   const reviewStep = householdStep + 1
   const currentStep = Math.min(step, reviewStep)
-  const question = currentStep > 0 && currentStep <= questions.length ? questions[currentStep - 1] : null
   const phase = currentStep === 0 ? 0 : currentStep < originStep ? 1 : currentStep < reviewStep ? 2 : 3
   const selectedLanes = setup.lanes.map(id => LANES[id].short).join(', ')
   const quiz = setup.quiz
@@ -90,7 +102,7 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
   }
   function answer(q: Question, option: string) {
     setSetup(previous => ({ ...previous, answers: { ...previous.answers, [q.id]: chooseAnswer(q, previous.answers[q.id], option) } }))
-    setMissing(previous => previous.filter(k => k !== 'question'))
+    setMissing(previous => previous.filter(k => k !== `q:${q.id}`))
     setError('')
   }
   /** What is still needed before this step can continue, as field keys and
@@ -99,8 +111,10 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
   function missingForStep(): { keys: string[]; labels: string[] } {
     if (currentStep === 0)
       return setup.lanes.length ? { keys: [], labels: [] } : { keys: ['lanes'], labels: ['Choose at least one approach'] }
-    if (question)
-      return isAnswered(setup.answers[question.id]) ? { keys: [], labels: [] } : { keys: ['question'], labels: ['Choose an answer'] }
+    if (currentStep === lanesStep) {
+      const open = questions.filter(q => !isAnswered(setup.answers[q.id]))
+      return { keys: open.map(q => `q:${q.id}`), labels: open.map(q => q.q) }
+    }
     if (currentStep === originStep) {
       const keys: string[] = []
       const labels: string[] = []
@@ -149,7 +163,11 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
       if (gaps.keys.length) {
         setMissing(gaps.keys)
         setError(gaps.labels.length === 1 ? `Please answer this to continue: ${gaps.labels[0]}.` : `Please complete these to continue: ${gaps.labels.join('; ')}.`)
-        requestAnimationFrame(() => errorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }))
+        requestAnimationFrame(() => {
+          const firstOpen = document.querySelector('[data-unanswered="true"]')
+          if (firstOpen) firstOpen.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          else errorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        })
         return
       }
     }
@@ -168,15 +186,20 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
     setSetup(previous => ({ ...previous, destinations: previous.destinations.includes(name) ? previous.destinations.filter(value => value !== name) : previous.destinations.length < 12 ? [...previous.destinations, name] : previous.destinations }))
   }
   const laneShort = setup.lanes.length ? setup.lanes.map(id => LANES[id].short).join(' and ') : 'your priorities'
-  // Demo structure: the page heading is the lane's framing; each question is
-  // its own card below it.
+  // Grouped layout (demo step 2): the page heading frames the lane set; each
+  // question is its own card below it.
+  const multiLane = setup.lanes.length > 1
   const title = currentStep === 0 ? 'How do you want to approach this move?'
-    : question ? LANES[question.lane].h1 : currentStep === energyStep ? 'Explore your Energy focus'
+    : currentStep === lanesStep ? (multiLane ? 'What each of your lanes needs to know' : LANES[setup.lanes[0]].h1)
+    : currentStep === energyStep ? 'Explore your Energy focus'
     : currentStep === originStep ? 'Where are you starting from?'
     : currentStep === householdStep ? 'Who is moving, and when?'
     : 'Your Command Center is built around ' + laneShort
   const intro = currentStep === 0 ? 'Pick up to three, in the order you care about them. The first one becomes your primary: it opens first and leads the country rankings. Each one you add asks its own three questions. Nothing gets hidden either way.'
-    : question ? LANES[question.lane].note : currentStep === energyStep ? 'Optional and experimental. Practical visa, budget, health and safety research always stays separate. You can skip this and continue setup.' : currentStep === originStep ? 'Your residence and passport countries help you research the relevant routes. Neither is assumed.' : currentStep === householdStep ? 'Tell us who the plan needs to work for. Leave financial details unknown until you have them.' : 'Your answers and selected destinations will be saved to your account. No sample households, progress or matches.'
+    : currentStep === lanesStep ? (multiLane
+        ? 'One set of questions per lane, in your priority order. Later lanes break ties rather than override the first.'
+        : LANES[setup.lanes[0]].note)
+    : currentStep === energyStep ? 'Optional and experimental. Practical visa, budget, health and safety research always stays separate. You can skip this and continue setup.' : currentStep === originStep ? 'Your residence and passport countries help you research the relevant routes. Neither is assumed.' : currentStep === householdStep ? 'Tell us who the plan needs to work for. Leave financial details unknown until you have them.' : 'Your answers and selected destinations will be saved to your account. No sample households, progress or matches.'
   // Demo-style progress: 1 approach pick + lane questions + 6 household fields.
   const laneQsDone = questions.filter(q => isAnswered(setup.answers[q.id])).length
   const householdDone = [
@@ -221,18 +244,39 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
         <p className={styles.railNote}>Your answers set up the Command Center, then keep the country rankings honest. Everything saves automatically.</p>
       </aside>
       <section className={styles.content}>
-        <p className={styles.eyebrow}>{question ? `${LANES[question.lane].short} · priority ${setup.lanes.indexOf(question.lane) + 1}` : ['QUESTION 1 — IT SETS THE REST', 'YOUR PRIORITIES', 'EVERY APPROACH ASKS THIS', 'READY TO BUILD'][phase]}</p>
+        <p className={styles.eyebrow}>{currentStep === lanesStep
+          ? (multiLane ? `YOUR ${setup.lanes.length} LANES · QUESTIONS 2 TO ${1 + questions.length}` : LANES[setup.lanes[0]].eyebrow)
+          : ['QUESTION 1 — IT SETS THE REST', 'YOUR PRIORITIES', 'EVERY APPROACH ASKS THIS', 'READY TO BUILD'][phase]}</p>
         <h1 ref={heading} tabIndex={-1}>{title}</h1>
         <p className={styles.intro}>{intro}</p>
         {showQuizLaneBanner && quiz && <p className={styles.note}>You said {quiz.answers.priority} matters most, so {quizSuggestedLanes.map(id => LANES[id].short).join(' and ')} {quizSuggestedLanes.length > 1 ? 'are' : 'is'} preselected. Change it freely.</p>}
         <fieldset disabled={saving} className={styles.fields}>
         {currentStep === 0 && <div className={`${styles.lanes}${missing.includes('lanes') ? ` ${styles.invalidGroup}` : ''}`}>{LANE_IDS.map(id => { const lane = LANES[id]; const rank = setup.lanes.indexOf(id); const on = rank >= 0; const full = !on && setup.lanes.length >= 3; return <button type="button" key={id} aria-pressed={on} disabled={full} onClick={() => toggleLane(id)} className={styles.lane}><span className={styles.laneTop}><span className={styles.laneIcon}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={lane.d} /></svg></span><strong>{lane.title}</strong></span><span className={styles.laneBlurb}>{lane.blurb}</span><small className={styles.laneTag}>{on ? `${['Primary', '2nd priority', '3rd priority'][rank]} · ${lane.tag}` : full ? 'Three is the maximum' : lane.tag}</small></button> })}</div>}
-        {question && <section className={styles.qcard} aria-label={question.q}>
-          <div className={styles.qhead}><h2>{question.q}</h2><span className={styles.qmode}>{question.mode}</span></div>
-          {question.help && <p className={styles.qhelp}>{question.help}</p>}
-          <div className={`${styles.choices}${missing.includes('question') ? ` ${styles.invalidGroup}` : ''}`}>{question.opts.map(option => { const value = setup.answers[question.id]; return <Choice key={option} active={Array.isArray(value) ? value.includes(option) : value === option} onClick={() => answer(question, option)}>{option}</Choice> })}</div>
-          {question.lane === 'health' && <p className={styles.note}>Saved for your research checklist. An allergen flag does not remove a destination or certify food safety.</p>}
-        </section>}
+        {currentStep === lanesStep && <div className={styles.laneBlocks}>
+          {setup.lanes.map((laneId, i) => {
+            const lane = LANES[laneId]
+            return <section key={laneId} className={styles.laneBlock} aria-label={lane.title}>
+              <div className={styles.laneBlockHead}>
+                <span className={styles.laneBlockIcon}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={lane.d} /></svg></span>
+                <span className={styles.laneBlockTitle}>{lane.title}</span>
+                <span className={styles.laneOrder}>{['Primary', '2nd priority', '3rd priority'][i]}</span>
+              </div>
+              <p className={styles.laneBlockNote}>{lane.note}</p>
+              <div className={styles.laneBlockQs}>
+                {lane.qs.map(q => {
+                  const value = setup.answers[q.id]
+                  const unanswered = missing.includes(`q:${q.id}`)
+                  return <section key={q.id} className={styles.qcard} data-unanswered={unanswered || undefined} aria-label={q.q}>
+                    <div className={styles.qhead}><h2>{q.q}</h2><span className={styles.qmode}>{q.mode}</span></div>
+                    {q.help && <p className={styles.qhelp}>{q.help}</p>}
+                    <div className={`${styles.choices}${unanswered ? ` ${styles.invalidGroup}` : ''}`}>{q.opts.map(option => <Choice key={option} active={Array.isArray(value) ? value.includes(option) : value === option} onClick={() => answer(q, option)}>{option}</Choice>)}</div>
+                    {laneId === 'health' && <p className={styles.note}>Saved for your research checklist. An allergen flag does not remove a destination or certify food safety.</p>}
+                  </section>
+                })}
+              </div>
+            </section>
+          })}
+        </div>}
         {currentStep === energyStep && <EnergyPortal />}
         {currentStep === originStep && <div className={styles.formGrid}><TextField label="What should we call you?" required invalid={missing.includes('display_name')} value={profile.display_name} onChange={v => update('display_name', v)} maxLength={80} autoComplete="given-name" /><TextField label="Country where you live now" required invalid={missing.includes('current_country')} value={profile.current_country} onChange={v => update('current_country', v)} maxLength={80} autoComplete="country-name" /><TextField label="Passport citizenship(s)" required invalid={missing.includes('citizenship')} value={profile.citizenship} onChange={v => update('citizenship', v)} maxLength={80} /><TextField label="Ancestry or family connections abroad (optional)" value={profile.ancestry_connections} onChange={v => update('ancestry_connections', v)} maxLength={500} /></div>}
         {currentStep === householdStep && <>

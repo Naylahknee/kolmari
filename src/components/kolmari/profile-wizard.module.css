@@ -50,6 +50,16 @@
 .laneTag { display: inline-block; margin-top: 14px; font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 5px 10px; border-radius: 999px; background: #f1f4f9; color: var(--color-muted-soft); }
 .lane[aria-pressed=true] .laneTag { background: var(--color-navy); color: var(--color-gold); }
 
+/* Grouped lane questions: one screen, a block per lane in priority order. */
+.laneBlocks { display: flex; flex-direction: column; gap: 26px; }
+.laneBlockHead { display: flex; align-items: center; gap: 11px; flex-wrap: wrap; }
+.laneBlockIcon { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; flex: none; background: var(--color-navy); color: var(--color-gold); }
+.laneBlockIcon svg { width: 17px; height: 17px; }
+.laneBlockTitle { font-size: 16px; font-weight: 700; letter-spacing: -.015em; }
+.laneOrder { font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; padding: 4px 9px; border-radius: 999px; background: var(--color-gold-soft); color: var(--color-gold-deep); }
+.laneBlockNote { font-size: 12.5px; line-height: 1.6; color: var(--color-muted); margin-top: 8px; max-width: 70ch; }
+.laneBlockQs { display: flex; flex-direction: column; gap: 13px; margin-top: 14px; }
+
 /* Question card: title + mode, help, chips. */
 .qcard { background: #fff; border: 1px solid var(--color-line); border-radius: 14px; padding: 20px 22px 22px; }
 .qhead { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
