@@ -8,8 +8,8 @@ import { getDashboardLayout } from '@/lib/dashboard-layout-store'
 import { visibleWidgets, type WidgetId } from '@/lib/dashboard-layout'
 import { getGeneratedDashboardDestinationVersion } from '@/lib/country-assets'
 import { getApprovedDashboardDestination } from '@/lib/country-visuals/data'
-import { buildNextActions, buildShortlist, buildSuggestions, type DashboardInput } from '@/lib/dashboard-model'
-import { DecisionWorkspaceStarter } from '@/components/kolmari/decision-workspace-starter'
+import { buildNextActions, buildShortlist, type DashboardInput } from '@/lib/dashboard-model'
+import { DashboardAskHero } from '@/components/kolmari/dashboard-ask-hero'
 import { DashboardWelcome } from '@/components/kolmari/dashboard-onboarding'
 import { DashboardCommandCenterCard } from '@/components/kolmari/dashboard-command-center'
 import { DashboardDeadlinesCard, DashboardPlanningAreasCard } from '@/components/kolmari/dashboard-planning'
@@ -59,7 +59,6 @@ export default async function DashboardPage() {
   }
   const shortlist = buildShortlist(input)
   const tasks = buildNextActions(input, shortlist)
-  const suggestions = buildSuggestions(input, shortlist)
   const destinationRows: DestinationRow[] = complete ? await Promise.all(rankedList.slice(0, 3).map((item) => destinationRow(item.country, item.match.score))) : []
   const savedCountry = plan?.saved_nextination ? COUNTRIES.find((country) => country.name === plan.saved_nextination || country.slug === plan.saved_nextination) ?? null : null
   const pathwayDetail = plan?.selected_pathway ? 'Official requirements still control eligibility. Review the route before you file.' : complete ? 'No pathway saved to your plan yet. Compare the routes that fit your profile.' : 'Finish the Profile Wizard before Pathway signals are calculated.'
@@ -71,7 +70,7 @@ export default async function DashboardPage() {
     deadlines: () => <DashboardDeadlinesCard plan={plan} today={today} />,
     destinations: () => <DashboardDestinationsCard rows={destinationRows} profileComplete={complete} />,
     activePathway: () => <DashboardActivePathwayCard pathway={plan?.selected_pathway ?? null} detail={pathwayDetail} countryName={savedCountry?.name ?? null} countrySlug={savedCountry?.slug ?? null} />,
-    askKolmari: () => <DecisionWorkspaceStarter suggestions={suggestions} />,
+    askKolmari: () => <DashboardAskHero continueHref={tasks[0]?.href ?? null} />,
     shortlist: () => <ShortlistPanel items={shortlist} ranked={complete && shortlist.some((item) => item.score !== null)} />,
     foodHealth: () => <DashboardFoodHealthCard countrySlug={savedCountry?.slug ?? null} countryName={savedCountry?.name ?? null} />,
     commandCenter: () => <DashboardCommandCenterCard board={board} />,
@@ -87,6 +86,13 @@ export default async function DashboardPage() {
     <div className="flex flex-col gap-4">
       {headerJourney && <JourneyTracker {...journeyProps} mode="header" />}
       <DashboardWelcome firstName={firstName} firstVisitCandidate={firstVisitCandidate} profileComplete={complete} planTier={profile.plan} />
+      {complete && destinationRows.length > 0 && (
+        <div>
+          <p className="text-[10.5px] font-bold uppercase tracking-[0.13em] text-gold-deep">Your relocation journey</p>
+          <h1 className="mt-1.5 text-[26px] font-bold tracking-[-0.02em] text-navy">Your matches</h1>
+          <p className="mt-1.5 max-w-[56ch] text-[13.5px] text-muted">Based on what you told us, these are the three destinations worth exploring first.</p>
+        </div>
+      )}
       {main.length === 0 && side.length === 0 ? (
         <p className="rounded-[var(--radius-card)] border border-dashed border-line-strong bg-white px-4 py-8 text-center text-sm text-muted">Every dashboard panel is hidden. Turn them back on in Account → Dashboard.</p>
       ) : (

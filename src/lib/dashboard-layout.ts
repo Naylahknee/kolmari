@@ -37,7 +37,7 @@ export const DASHBOARD_WIDGETS: WidgetDef[] = [
   { id: 'deadlines', label: 'Deadlines and blockers', description: 'Dated items from your plan, blockers first.', defaultOn: true, full: false },
   { id: 'destinations', label: 'Destinations', description: 'Your top matched destinations with a visa-options preview for the #1 match.', defaultOn: true, full: true },
   { id: 'activePathway', label: 'Active pathway', description: 'The visa or residency route saved to your Kolmari Plan.', defaultOn: true, full: false },
-  { id: 'askKolmari', label: 'Ask Kolmari', description: 'Ask a relocation question and get a researched answer.', defaultOn: false, full: true },
+  { id: 'askKolmari', label: 'Ask Kolmari', description: 'Ask a relocation question and get a researched answer.', defaultOn: true, full: true },
   { id: 'shortlist', label: 'Your shortlist', description: 'Destination cards with imagery, Match Score, and key signals.', defaultOn: false, full: true },
   { id: 'foodHealth', label: 'Food & health fit', description: 'Cuisine archetypes and allergen prevalence for your destination.', defaultOn: false, full: true },
   { id: 'commandCenter', label: 'Command Center summary', description: 'Research progress across the destinations you are comparing.', defaultOn: false, full: true },
@@ -63,7 +63,7 @@ export type DashboardTemplate = {
   layout: Omit<DashboardLayout, 'template'>
 }
 
-const BASE_MAIN: WidgetId[] = ['nextAction', 'destinations', 'askKolmari', 'shortlist', 'foodHealth', 'commandCenter']
+const BASE_MAIN: WidgetId[] = ['askKolmari', 'nextAction', 'destinations', 'shortlist', 'foodHealth', 'commandCenter']
 const BASE_SIDE: WidgetId[] = ['planningAreas', 'activePathway', 'deadlines', 'journeyTracker']
 
 export const DASHBOARD_TEMPLATES: DashboardTemplate[] = [
