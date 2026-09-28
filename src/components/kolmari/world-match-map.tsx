@@ -1,42 +1,23 @@
 'use client'
 
-/* eslint-disable @next/next/no-img-element */
-
 import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, ChevronDown, MapPinned } from 'lucide-react'
 import type { WorldPin } from './your-world-map'
+import { WorldSvgMap } from './world-svg-map'
 
 // Re-exported so callers that already import WorldMatchMap can take the pin type
 // from the same module (your-world-gated.tsx does).
 export type { WorldPin }
 
 /**
- * "Matched destinations" map — a static Mapbox image ported from the demo's
- * World page. Each matched country is dropped as a gold star pin on a dark map,
- * with an "Open a match" pill row beneath it. Uses the Mapbox Static Images API
- * so there is no client GL bundle to load; falls back to a dark placeholder when
- * no token is configured or the image fails.
+ * "Matched destinations" map. Renders the Natural Earth SVG world map, which is
+ * always visible, highlights each matched country, and lets users click a
+ * highlighted country to open its country page. Gold highlights are
+ * quiz-ranked matches; white highlights are countries the user picked in the
+ * Profile Wizard. Clickable country pills appear beneath the map, and the map
+ * itself needs no Mapbox token.
  */
-function buildMapUrl(pins: WorldPin[], token: string): string {
-  const geo = {
-    type: 'FeatureCollection',
-    features: pins.map((p) => ({
-      type: 'Feature',
-      properties: {
-        'marker-color': p.kind === 'selected' ? '#ffffff' : '#f3c516',
-        'marker-size': 'large',
-        'marker-symbol': 'star',
-      },
-      geometry: { type: 'Point', coordinates: [p.lng, p.lat] },
-    })),
-  }
-  const overlay = `geojson(${encodeURIComponent(JSON.stringify(geo))})`
-  // A single point makes /auto/ zoom in too far, so frame it at a fixed low zoom.
-  const camera = pins.length === 1 ? `${pins[0].lng},${pins[0].lat},3.1,0` : 'auto'
-  const padding = pins.length === 1 ? '' : 'padding=70&'
-  return `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/${overlay}/${camera}/1000x360@2x?${padding}access_token=${encodeURIComponent(token)}`
-}
 
 function PinPills({ label, pins }: { label: string; pins: WorldPin[] }) {
   return (
@@ -61,8 +42,6 @@ function PinPills({ label, pins }: { label: string; pins: WorldPin[] }) {
 
 export function WorldMatchMap({ pins }: { pins: WorldPin[] }) {
   const [open, setOpen] = useState(true)
-  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
-  const [imgFailed, setImgFailed] = useState(false)
   const matches = pins.filter((p) => p.kind === 'match')
   const selected = pins.filter((p) => p.kind === 'selected')
   const count = pins.length
@@ -86,8 +65,6 @@ export function WorldMatchMap({ pins }: { pins: WorldPin[] }) {
     )
   }
 
-  const mapUrl = token ? buildMapUrl(pins, token) : null
-
   return (
     <section className="overflow-hidden rounded-card" style={{ background: '#0d1b39' }}>
       <button
@@ -98,7 +75,7 @@ export function WorldMatchMap({ pins }: { pins: WorldPin[] }) {
       >
         <div className="min-w-0 flex-1">
           <p className="text-[15px] font-bold text-white">Matched destinations</p>
-          <p className="mt-0.5 text-xs text-white/60">Matches are pinned in gold. Countries you picked are pinned in white.</p>
+          <p className="mt-0.5 text-xs text-white/60">Matches are highlighted in gold. Countries you picked are highlighted in white.</p>
         </div>
         <span className="shrink-0 text-xs font-bold text-gold">
           {matches.length} {matches.length === 1 ? 'match' : 'matches'}
@@ -109,29 +86,7 @@ export function WorldMatchMap({ pins }: { pins: WorldPin[] }) {
 
       {open && (
         <div className="px-5 pb-5">
-          {mapUrl && !imgFailed ? (
-            <img
-              src={mapUrl}
-              alt={`Map highlighting ${pins.map((p) => p.name).join(', ')} with location pins`}
-              loading="lazy"
-              onError={() => setImgFailed(true)}
-              className="block w-full rounded-[12px] object-cover"
-              style={{ aspectRatio: '1000 / 360', minHeight: 220, background: '#102142' }}
-            />
-          ) : (
-            <div
-              role="img"
-              aria-label={`Matched destinations: ${pins.map((p) => p.name).join(', ')}`}
-              className="grid w-full place-items-center rounded-[12px] text-center"
-              style={{ aspectRatio: '1000 / 360', minHeight: 220, background: '#102142' }}
-            >
-              <div className="px-6">
-                <MapPinned size={22} className="mx-auto text-gold" aria-hidden="true" />
-                <p className="mt-2 text-sm font-semibold text-white">{count} matched {count === 1 ? 'destination' : 'destinations'}</p>
-                <p className="mt-1 text-xs text-white/55">Open a match below to explore it.</p>
-              </div>
-            </div>
-          )}
+          <WorldSvgMap pins={pins} />
           <div className="mt-4 space-y-4">
             {matches.length > 0 && <PinPills label="Open a match" pins={matches} />}
             {selected.length > 0 && <PinPills label="Your picks" pins={selected} />}

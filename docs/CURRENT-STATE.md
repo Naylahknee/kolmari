@@ -2,6 +2,45 @@
 
 Running log of implemented page state. Update this file when application code changes.
 
+## Dashboard layout designer restore, Journey default, Your World map — 2026-09-28 (pending release)
+
+Owner-directed (chat, 2026-09-28): restore the full dashboard layout designer that
+was restricted in `f0084d7`, make the Journey tracker default to the right-side
+panel, and fix the invisible Your World map by simplifying the implementation.
+No SLD contract covers this work; the stale `sld-031-canonical-governance-repair`
+contract was not modified.
+
+Dashboard layout designer (`src/components/kolmari/dashboard/customize.tsx`):
+- Restored the pre-`f0084d7` designer adapted to the fixed top sections: four
+  templates (Focused move plan, Balanced overview, Research mode, Execution mode),
+  drag panels between the main and second columns, up/down and move-column buttons,
+  show/hide switches, and a desktop/mobile live preview.
+- The top sections (question hero, Your Matches / Browse Destinations, Visa Options)
+  stay fixed; Ask Kolmari and the Journey tracker are excluded from the draggable
+  lists and managed separately.
+- New dependencies: `d3-geo`, `topojson-client`, `world-atlas` (+ types) in
+  package.json.
+
+Journey tracker default (`src/lib/dashboard-layout.ts`, customizer):
+- Defaults to the right-side panel; the header menu appears only when the user
+  explicitly picks it. New `journeyPlacementChosen` marker: stored layouts from
+  before this marker carry the old automatic `header` value, which now migrates
+  to `panel`. All four templates use `panel`.
+
+Your World map (`src/components/kolmari/world-svg-map.tsx`, `world-match-map.tsx`):
+- The "Matched destinations" map is now a Natural Earth SVG world map (from the
+  owner's supplied fallback design) instead of the Mapbox Static Images API, so it
+  renders on every load with no token dependency.
+- Matched countries highlight in gold; wizard-picked countries highlight in white;
+  star pins mark each centroid. Every highlighted country is clickable and routes
+  to `/nextinations/{slug}/v2/overview`. Countries too small for the 110m dataset
+  (Malta) get a projected star pin from their stored coordinates.
+- `WorldMatchMap` keeps its collapse toggle, match/selected pill rows, and the
+  incomplete-profile empty state.
+
+Validation: `npx tsc --noEmit` passes. Production build not yet run for this
+batch. Not deployed.
+
 ## Quiz carryover (Phase 2, batch A) — 2026-09-28 (pending release)
 
 Owner-approved Phase 2 batch A: make the Match Quiz answers visibly shape setup and

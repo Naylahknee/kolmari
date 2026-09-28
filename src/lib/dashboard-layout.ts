@@ -3,8 +3,8 @@
  *
  * Account → Dashboard is the canonical place to arrange the Dashboard. Users
  * can show/hide panels, drag panels between the primary and secondary columns,
- * or apply an optimized template. The Journey tracker participates in this
- * layout contract while preserving the default header-dropdown presentation.
+ * or apply an optimized template. The Journey tracker defaults to the
+ * right-side panel; users can move it to the header menu if they prefer.
  */
 
 export type WidgetId =
@@ -55,6 +55,10 @@ export type DashboardLayout = {
   disabled: WidgetId[]
   journeyPlacement: JourneyPlacement
   journeyCollapse: JourneyCollapse
+  /** True once the user has explicitly picked a Journey placement (right-side
+   * panel or header menu). Stored layouts from before this marker default to
+   * the right-side panel even if they carry the old automatic 'header' value. */
+  journeyPlacementChosen?: boolean
   /** Set once the Sep 2026 ask-hero default migration has run for this layout. */
   askHeroMigrated?: boolean
 }
@@ -66,8 +70,12 @@ export type DashboardTemplate = {
   layout: Omit<DashboardLayout, 'template'>
 }
 
-const BASE_MAIN: WidgetId[] = ['askKolmari', 'nextAction', 'shortlist', 'foodHealth', 'commandCenter']
+const BASE_MAIN: WidgetId[] = ['nextAction', 'shortlist', 'foodHealth', 'commandCenter']
 const BASE_SIDE: WidgetId[] = ['planningAreas', 'activePathway', 'deadlines']
+
+/** Widgets rendered in fixed dashboard positions (ask hero up top, Journey via
+ * its placement control) rather than inside the draggable widget grid. */
+export const FIXED_WIDGETS: ReadonlySet<WidgetId> = new Set(['askKolmari', 'journeyTracker'])
 
 export const DASHBOARD_TEMPLATES: DashboardTemplate[] = [
   {
@@ -83,7 +91,7 @@ export const DASHBOARD_TEMPLATES: DashboardTemplate[] = [
     layout: {
       v: 2,
       main: ['nextAction', 'planningAreas', 'shortlist', 'commandCenter'],
-      side: ['activePathway', 'deadlines', 'foodHealth', 'askKolmari'],
+      side: ['activePathway', 'deadlines', 'foodHealth'],
       disabled: [],
       journeyPlacement: 'panel',
       journeyCollapse: 'horizontal',
@@ -95,7 +103,7 @@ export const DASHBOARD_TEMPLATES: DashboardTemplate[] = [
     description: 'Prioritizes matched countries, comparison, food/health fit, and research while keeping planning status nearby.',
     layout: {
       v: 2,
-      main: ['shortlist', 'commandCenter', 'foodHealth', 'askKolmari'],
+      main: ['shortlist', 'commandCenter', 'foodHealth'],
       side: ['planningAreas', 'activePathway', 'deadlines', 'nextAction'],
       disabled: [],
       journeyPlacement: 'panel',
@@ -109,7 +117,7 @@ export const DASHBOARD_TEMPLATES: DashboardTemplate[] = [
     layout: {
       v: 2,
       main: ['nextAction', 'planningAreas', 'deadlines', 'activePathway'],
-      side: ['commandCenter', 'shortlist', 'foodHealth', 'askKolmari'],
+      side: ['commandCenter', 'shortlist', 'foodHealth'],
       disabled: [],
       journeyPlacement: 'panel',
       journeyCollapse: 'horizontal',
@@ -145,6 +153,7 @@ function completeZones(mainInput: unknown, sideInput: unknown): { main: WidgetId
   const main = uniqueWidgets(mainInput)
   const side = uniqueWidgets(sideInput).filter((id) => !main.includes(id))
   for (const id of DASHBOARD_WIDGETS.map((widget) => widget.id)) {
+    if (FIXED_WIDGETS.has(id)) continue
     if (!main.includes(id) && !side.includes(id)) {
       if (BASE_SIDE.includes(id)) side.push(id)
       else main.push(id)
@@ -191,26 +200,37 @@ export function parseLayout(value: unknown): DashboardLayout {
       main: legacyZones.main,
       side: legacyZones.side,
       disabled: migrated.disabled,
-      journeyPlacement: 'header',
+      journeyPlacement: 'panel',
       journeyCollapse: 'horizontal',
+      journeyPlacementChosen: true,
       askHeroMigrated: migrated.askHeroMigrated,
     }
   }
 
   const zones = completeZones(raw.main, raw.side)
   const migrated = migrateAskHeroDefault(raw, uniqueWidgets(raw.disabled))
-  const journeyPlacement: JourneyPlacement = raw.journeyPlacement === 'panel' ? 'panel' : 'header'
+  // The Journey tracker defaults to the right-side panel. It only appears in
+  // the header menu when the user explicitly chose that placement: a stored
+  // 'header' without the chosen marker is the old automatic default, so it
+  // migrates to the panel.
+  const journeyChosen = raw.journeyPlacementChosen === true
+  const journeyPlacement: JourneyPlacement = journeyChosen && raw.journeyPlacement === 'header' ? 'header' : 'panel'
   const journeyCollapse: JourneyCollapse = raw.journeyCollapse === 'vertical' ? 'vertical' : 'horizontal'
   const template = ['focused', 'balanced', 'research', 'execution', 'custom'].includes(String(raw.template))
     ? raw.template as DashboardTemplateId
     : 'custom'
 
-  return { v: 2, template, ...zones, disabled: migrated.disabled, journeyPlacement, journeyCollapse, askHeroMigrated: migrated.askHeroMigrated }
+  return {
+    v: 2,
+    template,
+    ...zones,
+    disabled: migrated.disabled,
+    journeyPlacement,
+    journeyCollapse,
+    ...(journeyChosen ? { journeyPlacementChosen: true as const } : {}),
+    askHeroMigrated: migrated.askHeroMigrated,
+  }
 }
-
-/** Widgets rendered in fixed dashboard positions (ask hero up top, Journey in the
- * header or nested beside the matches) rather than inside the widget grid. */
-const FIXED_WIDGETS: ReadonlySet<WidgetId> = new Set(['askKolmari', 'journeyTracker'])
 
 export function visibleWidgets(layout: DashboardLayout, zone?: DashboardZone): WidgetId[] {
   const off = new Set(layout.disabled)
@@ -221,7 +241,10 @@ export function visibleWidgets(layout: DashboardLayout, zone?: DashboardZone): W
 }
 
 export function isDefaultLayout(layout: DashboardLayout): boolean {
-  return JSON.stringify(layout) === JSON.stringify(DEFAULT_LAYOUT)
+  // The chosen-marker is a choice record, not a layout value: a user who
+  // explicitly picked the default panel placement still has the default layout.
+  const { journeyPlacementChosen: _ignored, ...rest } = layout
+  return JSON.stringify(rest) === JSON.stringify(DEFAULT_LAYOUT)
 }
 
 export function layoutFromTemplate(id: Exclude<DashboardTemplateId, 'custom'>): DashboardLayout {
@@ -232,5 +255,6 @@ export function layoutFromTemplate(id: Exclude<DashboardTemplateId, 'custom'>): 
     side: [...template.layout.side],
     disabled: [...template.layout.disabled],
     template: template.id,
+    journeyPlacementChosen: true,
   }
 }
