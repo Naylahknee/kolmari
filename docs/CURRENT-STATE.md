@@ -861,3 +861,34 @@ limit, 404 with `DEMO_ACCESS_CODE` unset, login link present, `?code=` prefills.
 populated dashboard, and the Pro treatment on country pages. The app uses the
 Neon HTTP client, which cannot target a local Postgres instance. These need a
 check against the deployed site once `DEMO_ACCESS_CODE` is set.
+
+## Dashboard restructure — 2026-09-28 (pending release)
+
+Owner-directed dashboard restructure, authorized in chat on 2026-09-28. No SLD
+contract covers this work; the stale `sld-031-canonical-governance-repair`
+contract was not modified. Typecheck and production build pass locally; push and
+deployed verification pending.
+
+- Dashboard order is now fixed: greeting, then "What do you need to figure out?"
+  (Ask Kolmari hero) spanning the full content width, then the destinations
+  section, then visa options, then the customizable main/third-column panel grid.
+- Paid tiers see "Your matches" (three matched country panels, "Based on what
+  you told us, these are the three destinations worth exploring first.") with the
+  Journey tracker nested beside them. Free tier sees the Destinations browse
+  panel in the same position.
+- Visa options stay visible for every tier. Free accounts see researched route
+  names and categories only, with an upgrade path for details; paid accounts see
+  category, income bar, timeline, and verification date from `PATHWAYS`.
+- Journey tracker gained panel-mode collapse controls: horizontal (collapses to a
+  slim vertical rail) and vertical (collapses to a compact header bar). Header
+  dropdown mode is unchanged.
+- Customizer restricted: users may only organize the third column (reorder +
+  show/hide), choose Journey placement (header menu or below the question hero),
+  and choose the collapse direction. Unrestricted templates and drag-between-
+  columns were removed. Journey no longer appears in the movable widget grid.
+- Plus Plan marketing moved off the dashboard header into the sidebar: a
+  plan-aware upsell card below all menu items, above the account row, hidden when
+  the rail is collapsed. Free sees "Unlock your full move plan"; Plus sees the
+  Navigator comparison; Navigator sees plan management.
+- `src/lib/dashboard-layout.ts`: removed the movable `destinations` widget,
+  added `journeyCollapse` to the layout model with migration to `horizontal`.

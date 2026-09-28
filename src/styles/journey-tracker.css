@@ -13,3 +13,17 @@
 
 @media(max-width:540px){.jt-dropdown{right:10px;width:calc(100vw - 20px);max-width:none;max-height:calc(100vh - 76px)}.jt-toggle-label{font-size:10.5px}}
 @media(prefers-reduced-motion:reduce){.jt-dropdown{animation:none}.jt-toggle-chevron,.jt-chev{transition:none}}
+
+/* Collapsed states for the nested panel mode. */
+.jt-rail{display:flex;flex-direction:column;align-items:center;gap:10px;align-self:flex-start;width:56px;flex:0 0 auto;padding:12px 0;border:1px solid #e7ebf1;border-radius:12px;background:#fff}
+@media(min-width:1024px){.jt-rail{align-self:stretch}}
+.jt-rail-expand{display:grid;width:30px;height:30px;place-items:center;border:none;border-radius:50%;background:#f3c516;color:#17305b;cursor:pointer}
+.jt-rail-expand:hover{background:#e0b40c}
+.jt-rail-label{writing-mode:vertical-rl;font-size:10px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:#17305b}
+.jt-rail-dots{display:flex;flex-direction:column;gap:5px}
+.jt-rail-dots i{display:block;width:7px;height:7px;border-radius:50%;background:#e2e8f0}
+.jt-rail-dots i.done{background:#1f9d94}
+.jt-rail-dots i.current{background:#f3c516}
+.jt-rail-count{font-size:10px;font-weight:700;color:#8090a8}
+.jt-rail-pct{font-size:10px;font-weight:700;color:#c99a00}
+.jt-collapsed-bar{display:flex;align-items:center;gap:10px;padding:10px 12px 10px 14px;border:1px solid #e7ebf1;border-radius:12px;background:#fff}

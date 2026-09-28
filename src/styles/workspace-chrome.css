@@ -548,3 +548,13 @@ body.rail-collapsed .sb-flyout-toggle { display: none; }
   .rail { padding-bottom: calc(90px + env(safe-area-inset-bottom)); }
 }
 @media print { .kolmari-mobile-nav { display: none; } }
+
+/* ── Sidebar plan upsell card: below menu items, above the account row ── */
+.sb-plan { margin: 14px 4px 10px; padding: 13px 13px 12px; border: 1px solid rgba(255,255,255,.1); border-radius: 12px; background: rgba(255,255,255,.045); }
+.sb-plan-eyebrow { display: flex; align-items: center; gap: 6px; font-size: 9.5px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--color-gold); }
+.sb-plan-title { margin-top: 6px; font-size: 13px; font-weight: 700; line-height: 1.35; color: #fff; }
+.sb-plan-detail { margin-top: 4px; font-size: 11px; line-height: 1.55; color: #9fb0cc; }
+.sb-plan-cta { display: inline-flex; align-items: center; gap: 6px; margin-top: 9px; padding: 8px 12px; border-radius: 8px; background: var(--color-gold); color: var(--color-navy-deep); font-size: 11.5px; font-weight: 700; transition: .14s; }
+.sb-plan-cta:hover { background: #ffd83d; color: var(--color-navy-deep); }
+.sb-plan-cta svg { width: 13px; height: 13px; stroke-width: 2.2; }
+body.rail-collapsed .sb-plan { display: none; }

@@ -3,8 +3,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
-import { Calendar, Check, ChevronDown, ChevronUp, ClipboardCheck, Compass, FileText, MapPin, Plane, Scale, type LucideIcon } from 'lucide-react'
+import { Calendar, Check, ChevronDown, ChevronLeft, ChevronUp, ChevronsLeft, ClipboardCheck, Compass, FileText, MapPin, Plane, Scale, type LucideIcon } from 'lucide-react'
 import type { JourneyStageRow, PlanStage } from '@/lib/plan-types'
+import type { JourneyCollapse } from '@/lib/dashboard-layout'
 import { ButterflyMark } from '@/components/kolmari/butterfly-mark'
 
 const STAGE_ICON: Record<Exclude<PlanStage, 'Settle In'>, LucideIcon> = {
@@ -36,16 +37,33 @@ type JourneyTrackerProps = {
   totalStages: number
   savedAt: string | null
   mode?: 'header' | 'panel'
+  /** Panel mode only: which direction the collapse toggle shrinks the panel. */
+  collapseDirection?: JourneyCollapse
+  /** Panel mode only: extra classes for the expanded panel (sizing in its parent). */
+  className?: string
 }
 
-function TrackerContents({ rows, currentStage, currentStageName, percent, totalStages, savedAt, onClose }: JourneyTrackerProps & { onClose?: () => void }) {
+function TrackerContents({ rows, currentStage, currentStageName, percent, totalStages, savedAt, onClose, onCollapse, collapseDirection = 'horizontal' }: JourneyTrackerProps & { onClose?: () => void; onCollapse?: () => void }) {
   const [expanded, setExpanded] = useState<number | null>(currentStage)
   return (
     <>
       <div className="jt-head">
         <div className="jt-head-top">
           <div className="min-w-0"><p className="jt-eyebrow">Progress tracker</p><h2 className="jt-title">Journey</h2></div>
-          {onClose && <button type="button" className="jt-collapse" onClick={onClose} aria-label="Close journey tracker"><ChevronUp size={15} strokeWidth={2.3} /></button>}
+          <div className="flex flex-none items-center gap-1.5">
+            {onCollapse && (
+              <button
+                type="button"
+                className="jt-collapse"
+                onClick={onCollapse}
+                aria-label={collapseDirection === 'horizontal' ? 'Collapse journey tracker sideways' : 'Collapse journey tracker'}
+                title={collapseDirection === 'horizontal' ? 'Collapse sideways' : 'Collapse'}
+              >
+                {collapseDirection === 'horizontal' ? <ChevronsLeft size={15} strokeWidth={2.3} /> : <ChevronUp size={15} strokeWidth={2.3} />}
+              </button>
+            )}
+            {onClose && <button type="button" className="jt-collapse" onClick={onClose} aria-label="Close journey tracker"><ChevronUp size={15} strokeWidth={2.3} /></button>}
+          </div>
         </div>
         <div className="jt-summary"><span>Stage <b>{currentStage}</b> of {totalStages} · {currentStageName}</span><span className="jt-pct">{percent}%</span></div>
         <div className="jt-bar" role="progressbar" aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100} aria-label="Journey completion"><i style={{ width: `${percent}%` }} /></div>
@@ -74,6 +92,51 @@ function TrackerContents({ rows, currentStage, currentStageName, percent, totalS
   )
 }
 
+/** Panel mode with a collapse toggle. Horizontal collapse shrinks the panel into
+ * a slim vertical rail; vertical collapse folds it up into its header bar. */
+function CollapsiblePanel(props: JourneyTrackerProps) {
+  const { rows, currentStage, currentStageName, percent, totalStages, collapseDirection = 'horizontal', className } = props
+  const [collapsed, setCollapsed] = useState(false)
+
+  if (collapsed && collapseDirection === 'horizontal') {
+    return (
+      <section className="jt-rail" aria-label={`Journey tracker collapsed, stage ${currentStage} of ${totalStages}`}>
+        <button type="button" className="jt-rail-expand" onClick={() => setCollapsed(false)} aria-label="Expand journey tracker">
+          <ChevronLeft size={16} strokeWidth={2.4} />
+        </button>
+        <span className="jt-rail-label" aria-hidden="true">Journey</span>
+        <span className="jt-rail-dots" aria-hidden="true">
+          {rows.map((row) => (
+            <i key={row.index} className={row.state === 'done' ? 'done' : row.state === 'current' ? 'current' : ''} />
+          ))}
+        </span>
+        <span className="jt-rail-count">{currentStage}/{totalStages}</span>
+        <span className="jt-rail-pct">{percent}%</span>
+      </section>
+    )
+  }
+
+  if (collapsed) {
+    return (
+      <section className={`jt-collapsed-bar${className ? ` ${className}` : ''}`} aria-label={`Journey tracker collapsed, stage ${currentStage} of ${totalStages}`}>
+        <span className="min-w-0 flex-1 truncate text-[12.5px] font-bold text-navy">
+          Journey · Stage {currentStage} of {totalStages} · {currentStageName}
+        </span>
+        <span className="jt-pct flex-none">{percent}%</span>
+        <button type="button" className="jt-collapse flex-none" onClick={() => setCollapsed(false)} aria-label="Expand journey tracker">
+          <ChevronDown size={15} strokeWidth={2.3} />
+        </button>
+      </section>
+    )
+  }
+
+  return (
+    <section className={`jt-inline card-surface${className ? ` ${className}` : ''}`} aria-label="Journey tracker">
+      <TrackerContents {...props} onCollapse={() => setCollapsed(true)} />
+    </section>
+  )
+}
+
 export function JourneyTracker(props: JourneyTrackerProps) {
   const { currentStage, totalStages, mode = 'header' } = props
   const [open, setOpen] = useState(false)
@@ -91,7 +154,7 @@ export function JourneyTracker(props: JourneyTrackerProps) {
   }, [mode, open])
 
   if (mode === 'panel') {
-    return <section className="jt-inline card-surface" aria-label="Journey tracker"><TrackerContents {...props} /></section>
+    return <CollapsiblePanel {...props} />
   }
 
   const toggle = <button ref={toggleRef} type="button" className="jt-toggle" data-open={open ? 'true' : 'false'} onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-controls="journey-tracker-dropdown" aria-label={`Journey, stage ${currentStage} of ${totalStages}`}><span className="jt-toggle-check"><Check size={9} strokeWidth={3.1} /></span><span className="jt-toggle-label">Journey · {currentStage}/{totalStages}</span><ChevronDown size={13} strokeWidth={2.2} className="jt-toggle-chevron" /></button>

@@ -11,7 +11,6 @@ export type WidgetId =
   | 'nextAction'
   | 'planningAreas'
   | 'deadlines'
-  | 'destinations'
   | 'activePathway'
   | 'askKolmari'
   | 'shortlist'
@@ -21,6 +20,8 @@ export type WidgetId =
 
 export type DashboardZone = 'main' | 'side'
 export type JourneyPlacement = 'header' | 'panel'
+/** How the nested Journey tracker collapses: into a slim vertical rail ('horizontal') or up into its header bar ('vertical'). */
+export type JourneyCollapse = 'vertical' | 'horizontal'
 export type DashboardTemplateId = 'focused' | 'balanced' | 'research' | 'execution' | 'custom'
 
 export type WidgetDef = {
@@ -35,7 +36,6 @@ export const DASHBOARD_WIDGETS: WidgetDef[] = [
   { id: 'nextAction', label: 'Recommended next action', description: 'The single most important thing to do next, with its deadline.', defaultOn: true, full: true },
   { id: 'planningAreas', label: 'Progress by planning area', description: 'Coverage across eligibility, documents, budget, housing, healthcare, and schools.', defaultOn: true, full: false },
   { id: 'deadlines', label: 'Deadlines and blockers', description: 'Dated items from your plan, blockers first.', defaultOn: true, full: false },
-  { id: 'destinations', label: 'Destinations', description: 'Your top matched destinations with a visa-options preview for the #1 match.', defaultOn: true, full: true },
   { id: 'activePathway', label: 'Active pathway', description: 'The visa or residency route saved to your Kolmari Plan.', defaultOn: true, full: false },
   { id: 'askKolmari', label: 'Ask Kolmari', description: 'Ask a relocation question and get a researched answer.', defaultOn: true, full: true },
   { id: 'shortlist', label: 'Your shortlist', description: 'Destination cards with imagery, Match Score, and key signals.', defaultOn: false, full: true },
@@ -54,6 +54,7 @@ export type DashboardLayout = {
   side: WidgetId[]
   disabled: WidgetId[]
   journeyPlacement: JourneyPlacement
+  journeyCollapse: JourneyCollapse
   /** Set once the Sep 2026 ask-hero default migration has run for this layout. */
   askHeroMigrated?: boolean
 }
@@ -65,15 +66,15 @@ export type DashboardTemplate = {
   layout: Omit<DashboardLayout, 'template'>
 }
 
-const BASE_MAIN: WidgetId[] = ['askKolmari', 'nextAction', 'destinations', 'shortlist', 'foodHealth', 'commandCenter']
-const BASE_SIDE: WidgetId[] = ['planningAreas', 'activePathway', 'deadlines', 'journeyTracker']
+const BASE_MAIN: WidgetId[] = ['askKolmari', 'nextAction', 'shortlist', 'foodHealth', 'commandCenter']
+const BASE_SIDE: WidgetId[] = ['planningAreas', 'activePathway', 'deadlines']
 
 export const DASHBOARD_TEMPLATES: DashboardTemplate[] = [
   {
     id: 'focused',
     label: 'Focused move plan',
     description: 'Destinations and the next action stay primary; planning progress, pathway, and blockers form the second column.',
-    layout: { v: 2, main: BASE_MAIN, side: BASE_SIDE, disabled: DEFAULT_DISABLED, journeyPlacement: 'header' },
+    layout: { v: 2, main: BASE_MAIN, side: BASE_SIDE, disabled: DEFAULT_DISABLED, journeyPlacement: 'panel', journeyCollapse: 'horizontal' },
   },
   {
     id: 'balanced',
@@ -81,10 +82,11 @@ export const DASHBOARD_TEMPLATES: DashboardTemplate[] = [
     description: 'A broad planning view with destinations and execution panels split across two columns.',
     layout: {
       v: 2,
-      main: ['nextAction', 'destinations', 'planningAreas', 'shortlist', 'commandCenter'],
-      side: ['activePathway', 'deadlines', 'journeyTracker', 'foodHealth', 'askKolmari'],
+      main: ['nextAction', 'planningAreas', 'shortlist', 'commandCenter'],
+      side: ['activePathway', 'deadlines', 'foodHealth', 'askKolmari'],
       disabled: [],
       journeyPlacement: 'panel',
+      journeyCollapse: 'horizontal',
     },
   },
   {
@@ -93,10 +95,11 @@ export const DASHBOARD_TEMPLATES: DashboardTemplate[] = [
     description: 'Prioritizes matched countries, comparison, food/health fit, and research while keeping planning status nearby.',
     layout: {
       v: 2,
-      main: ['destinations', 'shortlist', 'commandCenter', 'foodHealth', 'askKolmari'],
-      side: ['planningAreas', 'activePathway', 'deadlines', 'journeyTracker', 'nextAction'],
+      main: ['shortlist', 'commandCenter', 'foodHealth', 'askKolmari'],
+      side: ['planningAreas', 'activePathway', 'deadlines', 'nextAction'],
       disabled: [],
-      journeyPlacement: 'header',
+      journeyPlacement: 'panel',
+      journeyCollapse: 'horizontal',
     },
   },
   {
@@ -105,10 +108,11 @@ export const DASHBOARD_TEMPLATES: DashboardTemplate[] = [
     description: 'Puts the move plan, blockers, pathway, and Journey tracker up front after you have chosen a destination.',
     layout: {
       v: 2,
-      main: ['nextAction', 'planningAreas', 'journeyTracker', 'deadlines', 'activePathway'],
-      side: ['destinations', 'commandCenter', 'shortlist', 'foodHealth', 'askKolmari'],
+      main: ['nextAction', 'planningAreas', 'deadlines', 'activePathway'],
+      side: ['commandCenter', 'shortlist', 'foodHealth', 'askKolmari'],
       disabled: [],
       journeyPlacement: 'panel',
+      journeyCollapse: 'horizontal',
     },
   },
 ]
@@ -188,6 +192,7 @@ export function parseLayout(value: unknown): DashboardLayout {
       side: legacyZones.side,
       disabled: migrated.disabled,
       journeyPlacement: 'header',
+      journeyCollapse: 'horizontal',
       askHeroMigrated: migrated.askHeroMigrated,
     }
   }
@@ -195,16 +200,21 @@ export function parseLayout(value: unknown): DashboardLayout {
   const zones = completeZones(raw.main, raw.side)
   const migrated = migrateAskHeroDefault(raw, uniqueWidgets(raw.disabled))
   const journeyPlacement: JourneyPlacement = raw.journeyPlacement === 'panel' ? 'panel' : 'header'
+  const journeyCollapse: JourneyCollapse = raw.journeyCollapse === 'vertical' ? 'vertical' : 'horizontal'
   const template = ['focused', 'balanced', 'research', 'execution', 'custom'].includes(String(raw.template))
     ? raw.template as DashboardTemplateId
     : 'custom'
 
-  return { v: 2, template, ...zones, disabled: migrated.disabled, journeyPlacement, askHeroMigrated: migrated.askHeroMigrated }
+  return { v: 2, template, ...zones, disabled: migrated.disabled, journeyPlacement, journeyCollapse, askHeroMigrated: migrated.askHeroMigrated }
 }
+
+/** Widgets rendered in fixed dashboard positions (ask hero up top, Journey in the
+ * header or nested beside the matches) rather than inside the widget grid. */
+const FIXED_WIDGETS: ReadonlySet<WidgetId> = new Set(['askKolmari', 'journeyTracker'])
 
 export function visibleWidgets(layout: DashboardLayout, zone?: DashboardZone): WidgetId[] {
   const off = new Set(layout.disabled)
-  const filter = (ids: WidgetId[]) => ids.filter((id) => !off.has(id) && !(id === 'journeyTracker' && layout.journeyPlacement === 'header'))
+  const filter = (ids: WidgetId[]) => ids.filter((id) => !off.has(id) && !FIXED_WIDGETS.has(id))
   if (zone === 'main') return filter(layout.main)
   if (zone === 'side') return filter(layout.side)
   return [...filter(layout.main), ...filter(layout.side)]

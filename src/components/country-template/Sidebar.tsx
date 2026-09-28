@@ -33,6 +33,42 @@ const ICONS: Record<string, React.ReactNode> = {
 type Item = { href: string; label: string; icon: keyof typeof ICONS; flutter?: boolean; world?: boolean }
 type Section = { key: string; label: string; primary: string; icon: keyof typeof ICONS; items: Item[] }
 
+/** Plan upsell card: sits below every menu item, above the account row. */
+function SidebarPlanPanel({ plan }: { plan: string }) {
+  const copy =
+    plan === 'free'
+      ? {
+          eyebrow: 'Explorer plan',
+          title: 'Unlock your full move plan',
+          detail: 'Personalized Pathway eligibility, full Documents and Readiness Tracker, plus the full Cost Calculator.',
+          cta: 'View upgrade options',
+        }
+      : plan === 'plus'
+        ? {
+            eyebrow: 'Plus plan',
+            title: 'Need multi-destination planning?',
+            detail: 'Navigator adds side-by-side comparison, household modeling, and multiple active Move Plans.',
+            cta: 'Compare with Navigator',
+          }
+        : {
+            eyebrow: 'Navigator plan',
+            title: 'Your full planning workspace is active',
+            detail: 'Manage your plan and review the features included with your current Kolmari tier.',
+            cta: 'Manage plan',
+          }
+  return (
+    <div className="sb-plan" aria-label="Kolmari plan options">
+      <p className="sb-plan-eyebrow">{copy.eyebrow}</p>
+      <p className="sb-plan-title">{copy.title}</p>
+      <p className="sb-plan-detail">{copy.detail}</p>
+      <Link href="/settings?tab=billing" className="sb-plan-cta">
+        {copy.cta}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
+      </Link>
+    </div>
+  )
+}
+
 export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
@@ -49,11 +85,16 @@ export function Sidebar() {
   }, [])
 
   const [planReady, setPlanReady] = useState(0)
+  const [planTier, setPlanTier] = useState('free')
   useEffect(() => {
     let cancelled = false
     fetch('/api/profile')
       .then((res) => (res.ok ? res.json() : null))
-      .then((data) => { if (!cancelled && Array.isArray(data?.completed_tasks)) setPlanReady(flutterReadiness(data.completed_tasks)) })
+      .then((data) => {
+        if (cancelled) return
+        if (Array.isArray(data?.completed_tasks)) setPlanReady(flutterReadiness(data.completed_tasks))
+        if (typeof data?.plan === 'string') setPlanTier(data.plan)
+      })
       .catch(() => {})
     return () => { cancelled = true }
   }, [])
@@ -203,6 +244,8 @@ export function Sidebar() {
             </div>
           ))}
         </div>
+
+        <SidebarPlanPanel plan={planTier} />
 
         {/* Account avatar pinned to the bottom */}
         <Link className={`sb-user${active('/settings') ? ' active' : ''}`} href="/settings" title="Account" aria-label="Account">
