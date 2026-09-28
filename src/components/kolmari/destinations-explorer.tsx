@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { ChevronDown, Heart, Lock, Search, X } from 'lucide-react'
+import { PanelIcon, safetyLabelForLevel, safetyScoreColor } from '@/components/kolmari/panel-icons'
+import { attributeIconsFor, getCountryAttributes } from '@/lib/country-attributes'
 
 export type ExplorerRegion = 'Europe' | 'Asia' | 'North America' | 'Latin America' | 'Oceania'
 
@@ -237,6 +239,8 @@ export function DestinationsExplorer({ countries, imageSrcs, matchScores, paid, 
           {filtered.map((country) => {
             const isSaved = saved.includes(country.slug)
             const score = matchScores[country.slug]
+            const attrs = getCountryAttributes(country.slug)
+            const attrIcons = attributeIconsFor(country.slug, country.cost)
             return (
               <article
                 key={country.slug}
@@ -267,17 +271,44 @@ export function DestinationsExplorer({ countries, imageSrcs, matchScores, paid, 
                     )}
                   </div>
                 </div>
-                <div className="flex items-center justify-between gap-2 px-4 py-3.5">
-                  <p className="text-sm font-bold text-navy">
-                    {country.researched && country.cost ? (
-                      <><span className="text-gold-deep">{country.cost}</span> <span className="text-muted">·</span> <span className="text-muted">{costLabel[country.cost]}</span></>
-                    ) : (
-                      <span className="text-muted">Research in progress</span>
-                    )}
-                  </p>
-                  <p className="text-sm font-semibold text-muted">
-                    {country.researched && country.safetyLabel ? country.safetyLabel : '—'}
-                  </p>
+                <div className="px-4 py-3.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-bold text-navy">
+                      {country.cost ? (
+                        <>
+                          <span className="text-gold-deep">{country.cost}</span>
+                          <span className="text-muted"> · </span>
+                        </>
+                      ) : null}
+                      {attrs && attrs.safetyScore !== null ? (
+                        <>
+                          <strong className="font-extrabold" style={{ color: safetyScoreColor(attrs.safetyScore) }}>
+                            {attrs.safetyScore}/100
+                          </strong>{' '}
+                          <span className="font-semibold text-muted">safety</span>
+                        </>
+                      ) : attrs ? (
+                        <span className="font-semibold text-muted">{safetyLabelForLevel(attrs.advisoryLevel)}</span>
+                      ) : country.researched && country.safetyLabel ? (
+                        <span className="font-semibold text-muted">{country.safetyLabel}</span>
+                      ) : (
+                        <span className="font-semibold text-muted">Research in progress</span>
+                      )}
+                    </p>
+                  </div>
+                  {attrIcons.length > 0 && (
+                    <div
+                      className="mt-2.5 flex items-center justify-between border-t border-line px-1 pt-2.5"
+                      role="list"
+                      aria-label={`${country.name} highlights`}
+                    >
+                      {attrIcons.map((icon) => (
+                        <span key={icon.name} role="listitem">
+                          <PanelIcon name={icon.name} label={icon.label} className="size-6" />
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </article>
             )

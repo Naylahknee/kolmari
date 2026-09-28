@@ -43,7 +43,6 @@ const FACTS: Record<string, CountryFacts> = {
   albania: { eu: false, schengen: false, nato: true },
   georgia: { eu: false, schengen: false, nato: false },
   cambodia: { eu: false, schengen: false, nato: false },
-  israel: { eu: false, schengen: false, nato: false },
 }
 
 /** Membership facts for a country slug, or null when not known. */

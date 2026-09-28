@@ -65,7 +65,6 @@ export const DISCOVERABLE_COUNTRIES: DiscoverableCountry[] = [
   { slug: 'japan', name: 'Japan', code: 'JP', city: 'Tokyo', region: 'Asia' },
   { slug: 'spain', name: 'Spain', code: 'ES', city: 'Barcelona', region: 'Europe' },
   { slug: 'costa-rica', name: 'Costa Rica', code: 'CR', city: 'San José', region: 'Latin America' },
-  { slug: 'israel', name: 'Israel', code: 'IL', city: 'Tel Aviv', region: 'Asia' },
   { slug: 'netherlands', name: 'Netherlands', code: 'NL', city: 'Amsterdam', region: 'Europe' },
   { slug: 'ireland', name: 'Ireland', code: 'IE', city: 'Dublin', region: 'Europe' },
   { slug: 'italy', name: 'Italy', code: 'IT', city: 'Rome', region: 'Europe' },

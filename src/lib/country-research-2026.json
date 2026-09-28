@@ -1,0 +1,191 @@
+{
+  "sources": {
+    "advisory": "US State Department travel advisories (travel.state.gov), country-level advisories, verified 2026-09-28. Malta Level 1 inferred from official page language; Ghana Level 2 from a secondary news source.",
+    "gpi": "Institute for Economics and Peace, Global Peace Index 2026 scores via Wikipedia's Global Peace Index table. Malta and Belize have no 2026 GPI score (absent from the 163-country table) and are null.",
+    "speedtest": "Speedtest Global Index fixed broadband median download speed (speedtest.net/global-index), live table values as of 2026-09-28; the page did not label the edition month.",
+    "climate": "Wikipedia country and climate-of-country articles; dominant climate label per country."
+  },
+  "verifiedDate": "2026-09-28",
+  "countries": {
+    "Mexico": {
+      "advisoryLevel": 2,
+      "gpi2026": 2.65,
+      "broadbandMbps": 186.3,
+      "climate": "Temperate to dry"
+    },
+    "Canada": {
+      "advisoryLevel": 1,
+      "gpi2026": 1.525,
+      "broadbandMbps": 373.23,
+      "climate": "Continental"
+    },
+    "United Kingdom": {
+      "advisoryLevel": 2,
+      "gpi2026": 1.73,
+      "broadbandMbps": 295.85,
+      "climate": "Temperate"
+    },
+    "Germany": {
+      "advisoryLevel": 2,
+      "gpi2026": 1.657,
+      "broadbandMbps": 204.18,
+      "climate": "Temperate oceanic-continental"
+    },
+    "Australia": {
+      "advisoryLevel": 1,
+      "gpi2026": 1.602,
+      "broadbandMbps": 259.32,
+      "climate": "Arid to temperate"
+    },
+    "South Korea": {
+      "advisoryLevel": 1,
+      "gpi2026": 1.839,
+      "broadbandMbps": 317.89,
+      "climate": "Humid continental"
+    },
+    "France": {
+      "advisoryLevel": 2,
+      "gpi2026": 2.083,
+      "broadbandMbps": 524.45,
+      "climate": "Temperate"
+    },
+    "Japan": {
+      "advisoryLevel": 1,
+      "gpi2026": 1.489,
+      "broadbandMbps": 401.69,
+      "climate": "Predominantly temperate"
+    },
+    "Spain": {
+      "advisoryLevel": 2,
+      "gpi2026": 1.654,
+      "broadbandMbps": 357.92,
+      "climate": "Mediterranean"
+    },
+    "Costa Rica": {
+      "advisoryLevel": 2,
+      "gpi2026": 1.86,
+      "broadbandMbps": 223.25,
+      "climate": "Tropical"
+    },
+    "Netherlands": {
+      "advisoryLevel": 2,
+      "gpi2026": 1.566,
+      "broadbandMbps": 342.14,
+      "climate": "Temperate oceanic"
+    },
+    "Ireland": {
+      "advisoryLevel": 1,
+      "gpi2026": 1.371,
+      "broadbandMbps": 293.55,
+      "climate": "Temperate oceanic"
+    },
+    "Italy": {
+      "advisoryLevel": 2,
+      "gpi2026": 1.712,
+      "broadbandMbps": 281.08,
+      "climate": "Mediterranean"
+    },
+    "New Zealand": {
+      "advisoryLevel": 1,
+      "gpi2026": 1.343,
+      "broadbandMbps": 304.17,
+      "climate": "Temperate maritime"
+    },
+    "Philippines": {
+      "advisoryLevel": 2,
+      "gpi2026": 2.092,
+      "broadbandMbps": 188.56,
+      "climate": "Tropical monsoon"
+    },
+    "Portugal": {
+      "advisoryLevel": 1,
+      "gpi2026": 1.427,
+      "broadbandMbps": 360.09,
+      "climate": "Mediterranean"
+    },
+    "Thailand": {
+      "advisoryLevel": 2,
+      "gpi2026": 2.089,
+      "broadbandMbps": 368.89,
+      "climate": "Tropical savanna"
+    },
+    "Panama": {
+      "advisoryLevel": 2,
+      "gpi2026": 1.976,
+      "broadbandMbps": 287.2,
+      "climate": "Tropical monsoon"
+    },
+    "Albania": {
+      "advisoryLevel": 2,
+      "gpi2026": 1.725,
+      "broadbandMbps": 169.88,
+      "climate": "Mediterranean continental"
+    },
+    "Bulgaria": {
+      "advisoryLevel": 1,
+      "gpi2026": 1.628,
+      "broadbandMbps": 190.56,
+      "climate": "Temperate continental"
+    },
+    "Romania": {
+      "advisoryLevel": 1,
+      "gpi2026": 1.788,
+      "broadbandMbps": 359.65,
+      "climate": "Temperate continental"
+    },
+    "Slovenia": {
+      "advisoryLevel": 1,
+      "gpi2026": 1.369,
+      "broadbandMbps": 363.05,
+      "climate": "Temperate continental"
+    },
+    "Malta": {
+      "advisoryLevel": 1,
+      "gpi2026": null,
+      "broadbandMbps": 301.12,
+      "climate": "Mediterranean"
+    },
+    "Uruguay": {
+      "advisoryLevel": 2,
+      "gpi2026": 1.754,
+      "broadbandMbps": 263.27,
+      "climate": "Humid subtropical"
+    },
+    "Paraguay": {
+      "advisoryLevel": 1,
+      "gpi2026": 1.882,
+      "broadbandMbps": 220.44,
+      "climate": "Subtropical and semi-arid"
+    },
+    "Belize": {
+      "advisoryLevel": 2,
+      "gpi2026": null,
+      "broadbandMbps": 86.47,
+      "climate": "Tropical wet and dry"
+    },
+    "Ecuador": {
+      "advisoryLevel": 2,
+      "gpi2026": 2.539,
+      "broadbandMbps": 315.06,
+      "climate": "Varies by altitude"
+    },
+    "Georgia": {
+      "advisoryLevel": 1,
+      "gpi2026": 2.066,
+      "broadbandMbps": 55.07,
+      "climate": "Subtropical to continental"
+    },
+    "Cambodia": {
+      "advisoryLevel": 2,
+      "gpi2026": 2.075,
+      "broadbandMbps": 81.84,
+      "climate": "Tropical wet and dry"
+    },
+    "Ghana": {
+      "advisoryLevel": 2,
+      "gpi2026": 1.943,
+      "broadbandMbps": 90.42,
+      "climate": "Tropical wet and dry"
+    }
+  }
+}

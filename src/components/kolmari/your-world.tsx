@@ -1,12 +1,14 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Search, SlidersHorizontal } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { ArrowRight, Heart, Lock, Search, SlidersHorizontal } from 'lucide-react'
 import type { WorldPin } from './your-world-map'
 import { WorldMatchMap } from './world-match-map'
 import { WorldStories } from './world-stories'
-import { KolmariIcon } from '@/components/kolmari/icons'
+import { PanelIcon, safetyLabelForLevel, safetyScoreColor } from '@/components/kolmari/panel-icons'
+import { attributeIconsFor, getCountryAttributes } from '@/lib/country-attributes'
 
 export type RecCard = {
   slug: string
@@ -29,7 +31,26 @@ const BUDGET_BANDS = [
   { id: 'high', label: 'Over $3,500', test: (n: number) => n > 3500 },
 ]
 
-const costLabel: Record<string, string> = { $: 'Lower cost', $$: 'Moderate cost' }
+// Saved-destination hearts share the browse page's storage so a save in one
+// place shows up in the other.
+const SAVED_KEY = 'kolmari:saved-nextinations'
+const SAVED_EVENT = 'kolmari:saved-nextinations-changed'
+
+function readSavedSlugs(): string[] {
+  try {
+    const raw = JSON.parse(window.localStorage.getItem(SAVED_KEY) ?? '[]')
+    return Array.isArray(raw) ? raw.filter((s): s is string => typeof s === 'string') : []
+  } catch {
+    return []
+  }
+}
+
+function toggleSavedSlug(slug: string, currentlySaved: boolean) {
+  const current = readSavedSlugs()
+  const next = currentlySaved ? current.filter((s) => s !== slug) : [...new Set([...current, slug])]
+  window.localStorage.setItem(SAVED_KEY, JSON.stringify(next))
+  window.dispatchEvent(new Event(SAVED_EVENT))
+}
 
 // Pill-styled control matching the approved toolbar spec.
 const pillClass =
@@ -73,6 +94,18 @@ export function YourWorld({ pins, cards, complete, initialQuery = '' }: { pins: 
   const [budget, setBudget] = useState('')
   const [visa, setVisa] = useState('')
   const [open, setOpen] = useState(false)
+  const [savedSlugs, setSavedSlugs] = useState<string[]>([])
+
+  useEffect(() => {
+    const sync = () => setSavedSlugs(readSavedSlugs())
+    sync()
+    window.addEventListener('storage', sync)
+    window.addEventListener(SAVED_EVENT, sync)
+    return () => {
+      window.removeEventListener('storage', sync)
+      window.removeEventListener(SAVED_EVENT, sync)
+    }
+  }, [])
 
   const regions = useMemo(() => [...new Set(cards.map((c) => c.region))].sort(), [cards])
   const visas = useMemo(() => [...new Set(cards.map((c) => c.route).filter((v): v is string => Boolean(v)))].sort(), [cards])
@@ -162,7 +195,17 @@ export function YourWorld({ pins, cards, complete, initialQuery = '' }: { pins: 
 
         {filtered.length > 0 ? (
           <div className="mt-4 grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(258px, 1fr))' }}>
-            {filtered.map((c) => <RecommendedCard key={c.slug} card={c} />)}
+            {filtered.map((c) => {
+              const isSaved = savedSlugs.includes(c.slug)
+              return (
+                <RecommendedCard
+                  key={c.slug}
+                  card={c}
+                  isSaved={isSaved}
+                  onToggleSave={() => toggleSavedSlug(c.slug, isSaved)}
+                />
+              )
+            })}
           </div>
         ) : (
           <p className="mt-6 p-8 text-center text-sm text-muted">No destinations match your filters.</p>
@@ -175,32 +218,30 @@ export function YourWorld({ pins, cards, complete, initialQuery = '' }: { pins: 
   )
 }
 
-/** Match-percentage color, mirroring the demo's thresholds. */
-function matchColor(score: number): string {
-  if (score >= 80) return '#1f7a4d'
-  if (score >= 70) return '#b8890a'
-  return '#8090a8'
-}
+function RecommendedCard({
+  card,
+  isSaved,
+  onToggleSave,
+}: {
+  card: RecCard
+  isSaved: boolean
+  onToggleSave: () => void
+}) {
+  const router = useRouter()
+  const attrs = getCountryAttributes(card.slug)
+  const safetyScore = attrs?.safetyScore ?? null
+  const attrIcons = attributeIconsFor(card.slug, card.cost)
 
-function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-0">
-      <p className="truncate text-[9.5px] font-bold uppercase tracking-wider text-muted">{label}</p>
-      <p className="mt-0.5 truncate text-[12.5px] font-bold text-navy">{value}</p>
-    </div>
-  )
-}
-
-function RecommendedCard({ card }: { card: RecCard }) {
-  const cost = card.cost ? costLabel[card.cost] ?? card.cost : '—'
-  const safetyIcon = card.safety === 'Very safe' ? 'very-safe' : card.safety === 'Safe' ? 'generally-safe' : null
-  return (
-    <Link
-      href={`/nextinations/${card.slug}/v2/overview`}
-      className="group flex flex-col rounded-card border border-line bg-white p-4 shadow-tile transition hover:-translate-y-0.5 hover:border-gold/40 hover:shadow-card"
+    <article
+      onClick={() => router.push(`/nextinations/${card.slug}/v2/overview`)}
+      className="group flex cursor-pointer flex-col rounded-[16px] border border-line bg-white p-4 shadow-tile transition hover:-translate-y-0.5 hover:border-gold/40 hover:shadow-card"
     >
-      <div className="flex items-start justify-between gap-2">
-        <span className="relative grid size-9 flex-none place-items-center overflow-hidden rounded-[10px] bg-navy text-[11px] font-extrabold tracking-wide text-gold" aria-hidden="true">
+      <div className="flex items-start gap-3">
+        <span
+          className="relative grid size-12 flex-none place-items-center overflow-hidden rounded-[12px] bg-navy text-[12px] font-extrabold tracking-wide text-gold"
+          aria-hidden="true"
+        >
           {card.code}
           <img
             src={`/flags-png/${card.code.toLowerCase()}.png`}
@@ -210,43 +251,61 @@ function RecommendedCard({ card }: { card: RecCard }) {
             onError={(event) => { event.currentTarget.style.display = 'none' }}
           />
         </span>
-        {card.score !== null ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-canvas px-2.5 py-1 text-[12px] font-extrabold" style={{ color: matchColor(card.score) }}>
-            {card.score}% match
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[17px] font-extrabold text-navy">{card.name}</p>
+          <p className="text-[12px] font-semibold text-muted">{card.region}</p>
+        </div>
+        <button
+          type="button"
+          aria-label={isSaved ? `Remove ${card.name} from saved` : `Save ${card.name}`}
+          aria-pressed={isSaved}
+          onClick={(event) => { event.stopPropagation(); onToggleSave() }}
+          className="grid size-9 flex-none place-items-center rounded-full transition hover:bg-canvas"
+        >
+          <Heart size={18} className={isSaved ? 'fill-[#e11d48] text-[#e11d48]' : 'text-muted'} aria-hidden="true" />
+        </button>
+      </div>
+
+      <div className="mt-3 flex items-center gap-2">
+        {card.cost && <span className="text-[15px] font-extrabold text-gold-deep">{card.cost}</span>}
+        {card.cost && <span className="text-muted" aria-hidden="true">·</span>}
+        {safetyScore !== null ? (
+          <span className="text-[13px] font-semibold text-muted">
+            <strong className="font-extrabold" style={{ color: safetyScoreColor(safetyScore) }}>
+              {safetyScore}/100
+            </strong>{' '}
+            safety
           </span>
+        ) : attrs ? (
+          <span className="text-[13px] font-semibold text-muted">{safetyLabelForLevel(attrs.advisoryLevel)}</span>
         ) : (
-          <span className="rounded-full bg-[#f1f4f8] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted">Explore</span>
+          <span className="text-[13px] font-semibold text-muted">Safety data coming soon</span>
         )}
+        <span className="ml-auto">
+          {card.score !== null ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#e6f4f1] px-3 py-1 text-[12px] font-extrabold text-[#147a74]">
+              <Lock size={11} aria-hidden="true" /> {card.score}% match
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#eef1f5] px-3 py-1 text-[12px] font-extrabold text-muted">
+              <Lock size={11} aria-hidden="true" /> Locked
+            </span>
+          )}
+        </span>
       </div>
 
-      <p className="mt-2.5 text-[15px] font-bold text-navy">{card.name}</p>
-      <p className="text-[11.5px] font-semibold text-muted">{card.city} · {card.region}</p>
-
-      {card.blurb && <p className="mt-2 line-clamp-3 text-[12px] leading-relaxed text-[#5a6a83]">{card.blurb}</p>}
-
-      <div className="mt-3 grid grid-cols-3 gap-2 border-t border-line pt-3">
-        <div className="min-w-0">
-          <p className="truncate text-[9.5px] font-bold uppercase tracking-wider text-muted">Cost</p>
-          <p className="mt-0.5 truncate text-[12.5px] font-bold text-navy">
-            {card.cost && <span className="mr-1 text-gold-deep">{card.cost}</span>}{cost}
-          </p>
-        </div>
-        <div className="min-w-0">
-          <p className="truncate text-[9.5px] font-bold uppercase tracking-wider text-muted">Safety</p>
-          <p className="mt-0.5 flex items-center gap-1 truncate text-[12.5px] font-bold text-navy">
-            {safetyIcon && <KolmariIcon name={safetyIcon} className="size-3.5 flex-none text-teal-deep" aria-hidden="true" />}
-            {card.safety ?? '—'}
-          </p>
-        </div>
-        <Stat label="Route" value={card.route ?? '—'} />
-      </div>
-
-      <p
-        className="mt-3 text-[10.5px] font-bold uppercase tracking-wider"
-        style={{ color: card.scored ? '#147a74' : '#8090a8' }}
-      >
-        {card.scored ? 'Ranked for your profile' : 'Preview · not yet scored'}
-      </p>
-    </Link>
+      {attrIcons.length > 0 && (
+        <>
+          <div className="my-3 border-t border-line" aria-hidden="true" />
+          <div className="flex items-center justify-between px-1" role="list" aria-label={`${card.name} highlights`}>
+            {attrIcons.map((icon) => (
+              <span key={icon.name} role="listitem">
+                <PanelIcon name={icon.name} label={icon.label} className="size-6" />
+              </span>
+            ))}
+          </div>
+        </>
+      )}
+    </article>
   )
 }

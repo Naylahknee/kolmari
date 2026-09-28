@@ -7,7 +7,6 @@ import { WORLD_PLACES } from './world-places'
 const EXTRA_CENTERS: Record<string, { lat: number; lng: number }> = {
   'united-kingdom': { lat: 54.0, lng: -2.4 },
   'south-korea': { lat: 36.5, lng: 127.8 },
-  israel: { lat: 31.4, lng: 35.0 },
   netherlands: { lat: 52.2, lng: 5.3 },
   philippines: { lat: 12.9, lng: 121.8 },
   panama: { lat: 8.5, lng: -80.1 },
