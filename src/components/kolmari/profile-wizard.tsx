@@ -1,10 +1,9 @@
 'use client'
 
-import { Wordmark } from './wordmark'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
-import { ArrowLeft, ArrowRight, Check, LoaderCircle } from 'lucide-react'
+import { ArrowRight, Check, LoaderCircle } from 'lucide-react'
 import type { PathwayGoal, RelocationProfile, WizardStatus } from '@/lib/profile'
 import { activeAnswers, chooseAnswer, emptyOnboarding, isAnswered, LANE_IDS, LANE_LINKS, LANES, QUIZ_CARRYOVER_QUESTIONS, QUIZ_SITUATION_GOAL, QUIZ_WHO_HOUSEHOLD, quizLaneSuggestion, quizRegionDestinations, type LaneId, type OnboardingState, type Question } from '@/lib/onboarding'
 const EnergyPortal = dynamic(() => import('@/components/kolmari/energy/energy-portal').then(module => module.EnergyPortal))
@@ -169,25 +168,71 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
     setSetup(previous => ({ ...previous, destinations: previous.destinations.includes(name) ? previous.destinations.filter(value => value !== name) : previous.destinations.length < 12 ? [...previous.destinations, name] : previous.destinations }))
   }
   const laneShort = setup.lanes.length ? setup.lanes.map(id => LANES[id].short).join(' and ') : 'your priorities'
+  // Demo structure: the page heading is the lane's framing; each question is
+  // its own card below it.
   const title = currentStep === 0 ? 'How do you want to approach this move?'
-    : question ? question.q : currentStep === energyStep ? 'Explore your Energy focus'
+    : question ? LANES[question.lane].h1 : currentStep === energyStep ? 'Explore your Energy focus'
     : currentStep === originStep ? 'Where are you starting from?'
     : currentStep === householdStep ? 'Who is moving, and when?'
     : 'Your Command Center is built around ' + laneShort
+  const intro = currentStep === 0 ? 'Pick up to three, in the order you care about them. The first one becomes your primary: it opens first and leads the country rankings. Each one you add asks its own three questions. Nothing gets hidden either way.'
+    : question ? LANES[question.lane].note : currentStep === energyStep ? 'Optional and experimental. Practical visa, budget, health and safety research always stays separate. You can skip this and continue setup.' : currentStep === originStep ? 'Your residence and passport countries help you research the relevant routes. Neither is assumed.' : currentStep === householdStep ? 'Tell us who the plan needs to work for. Leave financial details unknown until you have them.' : 'Your answers and selected destinations will be saved to your account. No sample households, progress or matches.'
+  // Demo-style progress: 1 approach pick + lane questions + 6 household fields.
+  const laneQsDone = questions.filter(q => isAnswered(setup.answers[q.id])).length
+  const householdDone = [
+    Boolean(profile.household_type),
+    profile.family_size !== null,
+    profile.spouse !== null,
+    profile.dependents !== null,
+    Boolean(profile.timeline),
+    profile.goals.length > 0,
+  ].filter(Boolean).length
+  const totalQs = 1 + questions.length + 6
+  const totalDone = (setup.lanes.length ? 1 : 0) + laneQsDone + householdDone
+  const firstName = profile.display_name?.trim().split(/\s+/)[0] || ''
+  const railItems = [
+    { label: 'Your approach', note: setup.lanes.length ? selectedLanes : 'Not chosen yet' },
+    { label: setup.lanes.length > 1 ? `Your ${setup.lanes.length} lanes` : 'Your lane', note: setup.lanes.length ? `${laneQsDone} of ${questions.length} answered` : 'Unlocks after question 1' },
+    { label: 'Household', note: `${householdDone} of 6 answered` },
+    { label: 'Command Center', note: 'Built from your answers' },
+  ]
+  const continueLabel = currentStep === 0
+    ? (setup.lanes.length > 1 ? `Continue with ${setup.lanes.length} lanes` : 'Continue')
+    : currentStep === reviewStep ? 'Build & open Command Center'
+    : currentStep === energyStep ? 'Continue to household' : 'Continue'
 
   return <main className={styles.page}>
-    <header className={styles.header}><Wordmark /><button onClick={() => saveAndContinue(true)} disabled={saving} className={styles.exit}>Save & exit</button></header>
+    <header className={styles.header}>
+      <span className={styles.brand}><img src="/brand/favicon-48.png" alt="" width="28" height="28" />Kolmari</span>
+      <span className={styles.headerTitle}>{firstName ? `Setting up ${firstName}’s Command Center` : 'Setting up your Command Center'}</span>
+      <button onClick={() => saveAndContinue(true)} disabled={saving} className={styles.exit}>Save and finish later</button>
+    </header>
     <div className={styles.layout}>
-      <aside className={styles.rail} aria-label="Setup progress"><p className={styles.eyebrow}>YOUR KOLMARI PROFILE</p><h2>A plan that starts<br />with your life.</h2><p>Your priorities set the order. Every path leads to your Command Center.</p><ol>{['Your approach', 'Your priorities', 'Your household', 'Command Center'].map((label, i) => <li key={label} aria-current={phase === i ? 'step' : undefined}><span>{phase > i ? <Check size={15} /> : i + 1}</span><div><strong>{label}</strong><small>{i === 0 && setup.lanes.length ? selectedLanes : ['Choose up to three', 'Questions that fit you', 'Starting point and timing', 'Research and next steps'][i]}</small></div></li>)}</ol><p className={styles.railNote}>You can revise your answers later. Your other profile details stay with your account.</p></aside>
+      <aside className={styles.rail} aria-label="Setup progress">
+        <p className={styles.eyebrow}>SETUP</p>
+        <ol>{railItems.map((item, i) => {
+          const on = phase === i
+          const past = phase > i
+          return <li key={item.label} className={on ? styles.on : past ? styles.past : undefined} aria-current={on ? 'step' : undefined}>
+            <span className={styles.railDot}>{past ? <Check size={13} /> : i + 1}</span>
+            <div><strong>{item.label}</strong><small>{item.note}</small></div>
+          </li>
+        })}</ol>
+        <p className={styles.railNote}>Your answers set up the Command Center, then keep the country rankings honest. Everything saves automatically.</p>
+      </aside>
       <section className={styles.content}>
-        <div className={styles.progressRow}><button type="button" aria-label="Previous step" onClick={() => navigate(Math.max(0, currentStep - 1))} disabled={currentStep === 0 || saving} className={styles.back}><ArrowLeft size={18} /></button><progress max={reviewStep} value={currentStep} aria-label="Onboarding progress" /><span>{currentStep + 1} / {reviewStep + 1}</span></div>
         <p className={styles.eyebrow}>{question ? `${LANES[question.lane].short} · priority ${setup.lanes.indexOf(question.lane) + 1}` : ['QUESTION 1 — IT SETS THE REST', 'YOUR PRIORITIES', 'EVERY APPROACH ASKS THIS', 'READY TO BUILD'][phase]}</p>
         <h1 ref={heading} tabIndex={-1}>{title}</h1>
-        <p className={styles.intro}>{currentStep === 0 ? 'Pick up to three, in the order you care about them. The first one becomes your primary: it opens first and leads the country rankings. Each one you add asks its own three questions. Nothing gets hidden either way.' : question ? question.help : currentStep === energyStep ? 'Optional and experimental. Practical visa, budget, health and safety research always stays separate. You can skip this and continue setup.' : currentStep === originStep ? 'Your residence and passport countries help you research the relevant routes. Neither is assumed.' : currentStep === householdStep ? 'Tell us who the plan needs to work for. Leave financial details unknown until you have them.' : 'Your answers and selected destinations will be saved to your account. No sample households, progress or matches.'}</p>
+        <p className={styles.intro}>{intro}</p>
         {showQuizLaneBanner && quiz && <p className={styles.note}>You said {quiz.answers.priority} matters most, so {quizSuggestedLanes.map(id => LANES[id].short).join(' and ')} {quizSuggestedLanes.length > 1 ? 'are' : 'is'} preselected. Change it freely.</p>}
         <fieldset disabled={saving} className={styles.fields}>
-        {currentStep === 0 && <div className={`${styles.lanes}${missing.includes('lanes') ? ` ${styles.invalidGroup}` : ''}`}>{LANE_IDS.map(id => { const lane = LANES[id]; const rank = setup.lanes.indexOf(id); return <button type="button" key={id} aria-pressed={rank >= 0} disabled={rank < 0 && setup.lanes.length >= 3} onClick={() => toggleLane(id)} className={styles.lane}><span className={styles.laneTop}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d={lane.d} /></svg><strong>{lane.title}</strong>{rank >= 0 && <b>{rank + 1}</b>}</span><span>{lane.blurb}</span><small>{rank >= 0 ? ['Primary priority', 'Second priority', 'Third priority'][rank] : lane.tag}</small></button> })}</div>}
-        {question && <><div className={styles.questionMeta}>{question.mode}</div><div className={`${styles.choices}${missing.includes('question') ? ` ${styles.invalidGroup}` : ''}`}>{question.opts.map(option => { const value = setup.answers[question.id]; return <Choice key={option} active={Array.isArray(value) ? value.includes(option) : value === option} onClick={() => answer(question, option)}>{option}</Choice> })}</div>{question.lane === 'health' && <p className={styles.note}>Saved for your research checklist. An allergen flag does not remove a destination or certify food safety.</p>}</>}
+        {currentStep === 0 && <div className={`${styles.lanes}${missing.includes('lanes') ? ` ${styles.invalidGroup}` : ''}`}>{LANE_IDS.map(id => { const lane = LANES[id]; const rank = setup.lanes.indexOf(id); const on = rank >= 0; const full = !on && setup.lanes.length >= 3; return <button type="button" key={id} aria-pressed={on} disabled={full} onClick={() => toggleLane(id)} className={styles.lane}><span className={styles.laneTop}><span className={styles.laneIcon}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={lane.d} /></svg></span><strong>{lane.title}</strong></span><span className={styles.laneBlurb}>{lane.blurb}</span><small className={styles.laneTag}>{on ? `${['Primary', '2nd priority', '3rd priority'][rank]} · ${lane.tag}` : full ? 'Three is the maximum' : lane.tag}</small></button> })}</div>}
+        {question && <section className={styles.qcard} aria-label={question.q}>
+          <div className={styles.qhead}><h2>{question.q}</h2><span className={styles.qmode}>{question.mode}</span></div>
+          {question.help && <p className={styles.qhelp}>{question.help}</p>}
+          <div className={`${styles.choices}${missing.includes('question') ? ` ${styles.invalidGroup}` : ''}`}>{question.opts.map(option => { const value = setup.answers[question.id]; return <Choice key={option} active={Array.isArray(value) ? value.includes(option) : value === option} onClick={() => answer(question, option)}>{option}</Choice> })}</div>
+          {question.lane === 'health' && <p className={styles.note}>Saved for your research checklist. An allergen flag does not remove a destination or certify food safety.</p>}
+        </section>}
         {currentStep === energyStep && <EnergyPortal />}
         {currentStep === originStep && <div className={styles.formGrid}><TextField label="What should we call you?" required invalid={missing.includes('display_name')} value={profile.display_name} onChange={v => update('display_name', v)} maxLength={80} autoComplete="given-name" /><TextField label="Country where you live now" required invalid={missing.includes('current_country')} value={profile.current_country} onChange={v => update('current_country', v)} maxLength={80} autoComplete="country-name" /><TextField label="Passport citizenship(s)" required invalid={missing.includes('citizenship')} value={profile.citizenship} onChange={v => update('citizenship', v)} maxLength={80} /><TextField label="Ancestry or family connections abroad (optional)" value={profile.ancestry_connections} onChange={v => update('ancestry_connections', v)} maxLength={500} /></div>}
         {currentStep === householdStep && <>
@@ -210,7 +255,12 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
         </>}
         </fieldset>
         {error && <p ref={errorRef} role="alert" className={styles.error}>{error}</p>}
-        <footer className={styles.actions}><button type="button" disabled={currentStep === 0 || saving} onClick={() => navigate(Math.max(0, currentStep - 1))} className={styles.backText}><ArrowLeft size={16} />Back</button><button type="button" onClick={() => saveAndContinue()} disabled={saving} className={styles.primary}>{saving ? <LoaderCircle size={18} className="animate-spin" /> : null}{currentStep === reviewStep ? 'Build & open Command Center' : currentStep === energyStep ? 'Continue to household' : 'Continue'}<ArrowRight size={18} /></button></footer>
+        <footer className={styles.actions}>
+          {currentStep > 0 && <button type="button" disabled={saving} onClick={() => navigate(Math.max(0, currentStep - 1))} className={styles.backText}>Back</button>}
+          <button type="button" onClick={() => saveAndContinue()} disabled={saving} className={styles.primary}>{saving ? <LoaderCircle size={18} className="animate-spin" /> : null}{continueLabel}<ArrowRight size={18} /></button>
+          <span className={styles.progressLabel}>{currentStep === reviewStep ? `All ${totalQs} answered` : `${totalDone} of ${totalQs} answered`}</span>
+          {saving && <span className={styles.savingLabel}>Building your Command Center…</span>}
+        </footer>
         <p className={styles.footnote}>Progress saves when you continue. {currentStep === energyStep ? 'Birth details stay in this session; city lookup uses Mapbox.' : 'Your answers support research, not visa approval or medical advice.'}</p>
       </section>
     </div>
