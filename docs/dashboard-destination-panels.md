@@ -2,29 +2,30 @@
 
 **Status:** Canonical Dashboard design and behavior specification  
 **Applies to:** `/dashboard`  
-**Parent widget:** `DashboardDestinationsCard`  
+**Parent section:** `YourMatchesSection` (`Your matches`)
 **Nested matched-country card:** `DashboardDestinationPanel`
 
 ## 1. Scope
 
-This feature extends the existing Dashboard `Destinations` panel. It does **not** rebuild or replace the Dashboard shell.
+Paid tiers with a complete profile see one **Your matches** section on the Dashboard. It does **not** rebuild or replace the Dashboard shell.
 
 ```text
 DASHBOARD
-└── DESTINATIONS PANEL
+└── YOUR MATCHES SECTION
     ├── #1 matched-country selector
     ├── #2 matched-country selector
     ├── #3 matched-country selector
-    └── Visa Options for selected matched country
+    ├── Journey tracker (nested beside the cards)
+    └── Visa Options for selected matched country (same section, below the cards)
 ```
 
-The three country cards are nested selectors inside the parent panel. They are not Dashboard widgets and they do not navigate to country pages.
+The three country cards are nested selectors inside the section. They are not Dashboard widgets and they do not navigate to country pages. Selecting a card opens that country's researched visa options inside the same section.
 
 ## 2. Header
 
 Preserve:
 
-- title: `Destinations`
+- title: `Your matches` (paid + complete profile)
 - helper copy: `Select a match to preview its visa pathways below.` when matches exist
 - right-side link: `Explore more destinations`
 - link route: `/your-world`
@@ -45,15 +46,17 @@ The card does not calculate ranking.
 
 ## 4. Nested country selector
 
-Visible content:
+Visible content (owner direction 2026-09-28; supersedes the earlier minimal-card rule):
 
-- rank marker: `#1`, `#2`, `#3`
-- country name
+- country name + region
+- fit badge: `Strong Fit` (match >= 80) or `Worth Exploring`
+- one-line hook: the top personalized match reason, falling back to the country summary
+- three-stat row built only from researched fields: Income guide (`incomeRequired`/mo), Route (`visaType`), Safety (`Very safe`/`Safe`)
 - `Viewing` state indicator only for the currently selected card
 
-Do not visibly show region, city, description, visa type, cost, Match Score, cost tier, ranking explanation, eligibility metrics, or pathway detail inside the image card.
+Do not visibly show city, cost tier, ranking explanation, eligibility metrics, or pathway detail inside the image card. Citizenship timelines and cost-of-living figures are not shown because no verified production source exists for them; do not invent them.
 
-Match Score remains available in the card's accessible label.
+Rank (`#1`/`#2`/`#3`) and the numeric Match Score remain available in the card's accessible label.
 
 ### Interaction rule
 
@@ -83,7 +86,7 @@ Preferred card height:
 - tablet: ~180px
 - mobile: ~160px
 
-The Destinations panel may occupy the primary Dashboard column so its internal matched-country grid has sufficient width.
+The Your Matches section may occupy the primary Dashboard column so its internal matched-country grid has sufficient width.
 
 ## 6. Dashboard destination image asset
 
@@ -118,7 +121,7 @@ Do not automatically substitute the country-page hero, city imagery, or Mapbox s
 
 ## 8. Visa Options preview
 
-Visa Options are part of the parent Destinations panel and appear beneath the nested matched-country grid.
+Visa Options are part of the Your Matches section and appear beneath the matched-country grid (and the nested Journey tracker), inside the same section.
 
 Heading:
 

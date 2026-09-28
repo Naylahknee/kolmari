@@ -892,3 +892,39 @@ deployed verification pending.
   Navigator comparison; Navigator sees plan management.
 - `src/lib/dashboard-layout.ts`: removed the movable `destinations` widget,
   added `journeyCollapse` to the layout model with migration to `horizontal`.
+
+## Your Matches consolidation — 2026-09-28 (pending release)
+
+Owner-directed consolidation of the Dashboard matches experience, authorized in
+chat on 2026-09-28 (supersedes the earlier "Your matches" panel rules where
+they conflict). No SLD contract covers this work; the stale
+`sld-031-canonical-governance-repair` contract was not modified. Canonical spec
+updated in `docs/dashboard-destination-panels.md`.
+
+- New `YourMatchesSection` (`src/components/kolmari/dashboard/your-matches.tsx`):
+  one section containing the three match selector cards, the Journey tracker
+  nested beside them, and Visa Options for the selected country inside the same
+  section below the cards. Selecting a card swaps the visa preview in place; it
+  never navigates away and never changes saved destination state.
+- Match cards restyled to the owner-approved reference (third screenshot):
+  country name + region, `Strong Fit` (match >= 80) / `Worth Exploring` badge,
+  one-line personalized hook (top `rankNextinations` reason, else country
+  summary), and a three-stat row built only from researched fields: Income
+  guide, Route, Safety. `Viewing` pill marks the selected card. Stats are not
+  fabricated: no citizenship timelines or cost-of-living figures are shown
+  because no verified production source exists for them.
+- `VisaOptionsList` extracted in `visa-info.tsx` and shared between the
+  standalone `VisaInfoSection` and the nested section. Free sees route names
+  only + upgrade path; paid sees category, income bar, timeline, verified date.
+  Legal caution copy preserved.
+- Dashboard wiring: paid tiers with a complete profile render
+  `YourMatchesSection` (journey nested when placement = panel). Everyone else
+  keeps the Destinations browse panel + standalone Visa Options. The unused
+  `DashboardDestinationsCard` was removed from `dashboard-side-cards.tsx`.
+- Country Snapshot now passes `fallback="locator"` to `CountrySnapshotMap`, so
+  the snapshot shows the geographic locator pin (not the flag) when the Mapbox
+  token is missing or the image fails.
+- Typecheck and production build pass locally; SSR preview of the new section
+  verified (cards, badges, stats, visa options, "Explore more destinations"
+  link). Temporary preview route removed. Push and deployed verification
+  pending.

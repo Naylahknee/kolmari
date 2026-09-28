@@ -18,7 +18,8 @@ import { DashboardFoodHealthCard } from '@/components/kolmari/dashboard-food-hea
 import { DashboardActivePathwayCard, type DestinationRow } from '@/components/kolmari/dashboard-side-cards'
 import { JourneyTracker } from '@/components/kolmari/dashboard/journey-tracker'
 import { NextActionCard, ShortlistPanel } from '@/components/kolmari/dashboard/panels'
-import { MatchedDestinationsSection, DestinationsPanel } from '@/components/kolmari/dashboard/matched-destinations'
+import { DestinationsPanel } from '@/components/kolmari/dashboard/matched-destinations'
+import { YourMatchesSection } from '@/components/kolmari/dashboard/your-matches'
 import { VisaInfoSection, type VisaGroup } from '@/components/kolmari/dashboard/visa-info'
 import '@/styles/journey-tracker.css'
 
@@ -29,12 +30,17 @@ function savedAtLabel(updatedAt: string | null): string | null {
   return `${parsed.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'UTC' })} UTC`
 }
 
-async function destinationRow(country: ReturnType<typeof rankNextinations>[number]['country'], match: number): Promise<DestinationRow> {
+async function destinationRow(
+  country: ReturnType<typeof rankNextinations>[number]['country'],
+  match: number,
+  hook: string,
+): Promise<DestinationRow> {
   const generatedVersion = await getGeneratedDashboardDestinationVersion(country.slug)
   const approved = generatedVersion ? null : getApprovedDashboardDestination(country.slug)
   return {
     country,
     match,
+    hook,
     imageSrc: generatedVersion ? `/api/country-asset?slug=${country.slug}&type=dashboard_destination&v=${generatedVersion}` : approved?.src ?? `/flags-png/${country.code.toLowerCase()}.png`,
     focalPoint: approved?.focalPoint ?? { x: 50, y: 50 },
   }
@@ -43,10 +49,11 @@ async function destinationRow(country: ReturnType<typeof rankNextinations>[numbe
 /**
  * Dashboard layout (Sep 2026):
  * 1. Ask Kolmari hero ("What do you need to figure out?") — full width, locked at top.
- * 2. Destinations: paid tiers see "Your matches" with the Journey tracker nested
- *    beside the three country cards; free tier sees the Destinations browse panel.
- * 3. Visa options — always visible; free accounts see route names only.
- * 4. Remaining panels in the main + third-column grid. Only the third column is
+ * 2. Destinations: paid tiers with a complete profile see "Your matches" — the
+ *    three match cards with the Journey tracker nested beside them, and the
+ *    visa options for the selected match inside the same section. Free tier
+ *    sees the Destinations browse panel plus the standalone visa options.
+ * 3. Remaining panels in the main + third-column grid. Only the third column is
  *    user-customizable (order + visibility), plus Journey placement and collapse.
  */
 export default async function DashboardPage() {
@@ -72,7 +79,13 @@ export default async function DashboardPage() {
   }
   const shortlist = buildShortlist(input)
   const tasks = buildNextActions(input, shortlist)
-  const destinationRows: DestinationRow[] = complete ? await Promise.all(rankedList.slice(0, 3).map((item) => destinationRow(item.country, item.match.score))) : []
+  const destinationRows: DestinationRow[] = complete
+    ? await Promise.all(
+        rankedList.slice(0, 3).map((item) =>
+          destinationRow(item.country, item.match.score, item.match.reasons[0] ?? item.country.summary),
+        ),
+      )
+    : []
   const savedCountry = plan?.saved_nextination ? COUNTRIES.find((country) => country.name === plan.saved_nextination || country.slug === plan.saved_nextination) ?? null : null
   const pathwayDetail = plan?.selected_pathway ? 'Official requirements still control eligibility. Review the route before you file.' : complete ? 'No pathway saved to your plan yet. Compare the routes that fit your profile.' : 'Finish the Profile Wizard before Pathway signals are calculated.'
   const journeyProps = { rows: stageRows, currentStage, currentStageName: stageName, percent, totalStages: PLAN_STAGES.length, savedAt: savedAtLabel(plan?.updated_at ?? null) }
@@ -113,15 +126,19 @@ export default async function DashboardPage() {
       <DashboardWelcome firstName={firstName} firstVisitCandidate={firstVisitCandidate} profileComplete={complete} />
       <DashboardAskHero continueHref={tasks[0]?.href ?? null} />
       {showMatches ? (
-        <MatchedDestinationsSection
+        <YourMatchesSection
           rows={destinationRows}
           journey={journeyInMatches ? journeyProps : null}
           collapseDirection={layout.journeyCollapse}
+          visaGroups={visaGroups}
+          detailed
         />
       ) : (
-        <DestinationsPanel profileComplete={complete} />
+        <>
+          <DestinationsPanel profileComplete={complete} />
+          <VisaInfoSection groups={visaGroups} detailed={paidTier} />
+        </>
       )}
-      <VisaInfoSection groups={visaGroups} detailed={paidTier} />
       {gridEmpty ? (
         <p className="rounded-[var(--radius-card)] border border-dashed border-line-strong bg-white px-4 py-8 text-center text-sm text-muted">Every dashboard panel is hidden. Turn them back on in Account → Dashboard.</p>
       ) : (

@@ -12,6 +12,54 @@ export type VisaGroup = {
 }
 
 /**
+ * The researched pathway rows for one country. Shared by the standalone
+ * VisaInfoSection and the Your Matches section (where selecting a match card
+ * swaps the country in place).
+ */
+export function VisaOptionsList({ group, detailed }: { group: VisaGroup; detailed: boolean }) {
+  return (
+    <>
+      {group.pathways.length > 0 ? (
+        <ul className="mt-3 divide-y divide-line rounded-[10px] border border-line">
+          {group.pathways.map((pathway) => (
+            <li key={pathway.id} className="px-4 py-3.5">
+              <p className="text-[13px] font-bold text-navy">{pathway.name}</p>
+              {detailed ? (
+                <dl className="mt-1.5 grid gap-x-6 gap-y-1 text-[12px] text-muted sm:grid-cols-2">
+                  <div><dt className="inline font-semibold text-muted-soft">Route: </dt><dd className="inline">{pathway.category}</dd></div>
+                  <div><dt className="inline font-semibold text-muted-soft">Income bar: </dt><dd className="inline">{pathway.incomeThreshold}</dd></div>
+                  <div><dt className="inline font-semibold text-muted-soft">Timeline: </dt><dd className="inline">{pathway.estimatedProcessingTime}</dd></div>
+                  <div><dt className="inline font-semibold text-muted-soft">Verified: </dt><dd className="inline">{pathway.lastVerified}</dd></div>
+                </dl>
+              ) : (
+                <p className="mt-0.5 text-[12px] text-muted-soft">{pathway.category}</p>
+              )}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-3 rounded-[10px] border border-dashed border-line-strong bg-canvas px-4 py-3 text-[12px] leading-5 text-muted">
+          No researched visa pathways are available for this country yet.
+        </p>
+      )}
+
+      {!detailed && (
+        <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-muted">
+          <Lock size={13} className="text-gold-deep" aria-hidden="true" />
+          <span>Showing route names only.</span>
+          <Link href="/settings?tab=billing" className="inline-flex items-center gap-1 font-bold text-info hover:text-navy">
+            Upgrade for requirements, timelines, and fees <ArrowRight size={12} aria-hidden="true" />
+          </Link>
+        </p>
+      )}
+      <p className="mt-2 text-[10.5px] text-muted-soft">
+        Research preview. Official requirements still control eligibility. Confirm material requirements with the responsible authority.
+      </p>
+    </>
+  )
+}
+
+/**
  * Visa info stays visible on the dashboard no matter which destinations section
  * renders above it. Free accounts see a basic list of researched route names;
  * paid accounts see the detailed preview (category, income bar, timeline).
@@ -65,42 +113,7 @@ export function VisaInfoSection({ groups, detailed }: { groups: VisaGroup[]; det
             </div>
           )}
 
-          {group.pathways.length > 0 ? (
-            <ul className="mt-3 divide-y divide-line rounded-[10px] border border-line">
-              {group.pathways.map((pathway) => (
-                <li key={pathway.id} className="px-4 py-3.5">
-                  <p className="text-[13px] font-bold text-navy">{pathway.name}</p>
-                  {detailed ? (
-                    <dl className="mt-1.5 grid gap-x-6 gap-y-1 text-[12px] text-muted sm:grid-cols-2">
-                      <div><dt className="inline font-semibold text-muted-soft">Route: </dt><dd className="inline">{pathway.category}</dd></div>
-                      <div><dt className="inline font-semibold text-muted-soft">Income bar: </dt><dd className="inline">{pathway.incomeThreshold}</dd></div>
-                      <div><dt className="inline font-semibold text-muted-soft">Timeline: </dt><dd className="inline">{pathway.estimatedProcessingTime}</dd></div>
-                      <div><dt className="inline font-semibold text-muted-soft">Verified: </dt><dd className="inline">{pathway.lastVerified}</dd></div>
-                    </dl>
-                  ) : (
-                    <p className="mt-0.5 text-[12px] text-muted-soft">{pathway.category}</p>
-                  )}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-3 rounded-[10px] border border-dashed border-line-strong bg-canvas px-4 py-3 text-[12px] leading-5 text-muted">
-              No researched visa pathways are available for this country yet.
-            </p>
-          )}
-
-          {!detailed && (
-            <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-muted">
-              <Lock size={13} className="text-gold-deep" aria-hidden="true" />
-              <span>Showing route names only.</span>
-              <Link href="/settings?tab=billing" className="inline-flex items-center gap-1 font-bold text-info hover:text-navy">
-                Upgrade for requirements, timelines, and fees <ArrowRight size={12} aria-hidden="true" />
-              </Link>
-            </p>
-          )}
-          <p className="mt-2 text-[10.5px] text-muted-soft">
-            Research preview. Official requirements still control eligibility. Confirm material requirements with the responsible authority.
-          </p>
+          <VisaOptionsList group={group} detailed={detailed} />
         </>
       ) : (
         <div className="mt-3 rounded-[14px] border border-dashed border-line-strong bg-canvas px-5 py-8 text-center">
