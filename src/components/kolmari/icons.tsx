@@ -248,7 +248,7 @@ const ICONS: Record<KolmariIconName, ReactNode> = {
   'stage-settle': (
     <>
       <path d="M4 11l8-7 8 7v9a1 1 0 01-1 1H5a1 1 0 01-1-1z" />
-      <image href="assets/kolmari-butterfly-t.png" x="8" y="12" width="8" height="5.8" />
+      <image href="/assets/kolmari-butterfly-t.png" x="8" y="12" width="8" height="5.8" />
     </>
   ),
   'search': (

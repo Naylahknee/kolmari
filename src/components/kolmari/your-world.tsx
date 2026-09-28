@@ -6,6 +6,7 @@ import { ArrowRight, Search, SlidersHorizontal } from 'lucide-react'
 import type { WorldPin } from './your-world-map'
 import { WorldMatchMap } from './world-match-map'
 import { WorldStories } from './world-stories'
+import { KolmariIcon } from '@/components/kolmari/icons'
 
 export type RecCard = {
   slug: string
@@ -192,15 +193,27 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 function RecommendedCard({ card }: { card: RecCard }) {
   const cost = card.cost ? costLabel[card.cost] ?? card.cost : '—'
+  const safetyIcon = card.safety === 'High' ? 'very-safe' : card.safety === 'Good' ? 'generally-safe' : null
   return (
     <Link
       href={`/nextinations/${card.slug}/v2/overview`}
       className="group flex flex-col rounded-card border border-line bg-white p-4 shadow-tile transition hover:-translate-y-0.5 hover:border-gold/40 hover:shadow-card"
     >
       <div className="flex items-start justify-between gap-2">
-        <span className="grid size-9 place-items-center rounded-[10px] bg-navy text-[11px] font-extrabold tracking-wide text-gold">{card.code}</span>
+        <span className="relative grid size-9 flex-none place-items-center overflow-hidden rounded-[10px] bg-navy text-[11px] font-extrabold tracking-wide text-gold" aria-hidden="true">
+          {card.code}
+          <img
+            src={`/flags-png/${card.code.toLowerCase()}.png`}
+            alt=""
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover"
+            onError={(event) => { event.currentTarget.style.display = 'none' }}
+          />
+        </span>
         {card.score !== null ? (
-          <span className="text-sm font-bold" style={{ color: matchColor(card.score) }}>{card.score}%</span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-canvas px-2.5 py-1 text-[12px] font-extrabold" style={{ color: matchColor(card.score) }}>
+            {card.score}% match
+          </span>
         ) : (
           <span className="rounded-full bg-[#f1f4f8] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted">Explore</span>
         )}
@@ -212,9 +225,20 @@ function RecommendedCard({ card }: { card: RecCard }) {
       {card.blurb && <p className="mt-2 line-clamp-3 text-[12px] leading-relaxed text-[#5a6a83]">{card.blurb}</p>}
 
       <div className="mt-3 grid grid-cols-3 gap-2 border-t border-line pt-3">
-        <Stat label="Cost" value={cost} />
+        <div className="min-w-0">
+          <p className="truncate text-[9.5px] font-bold uppercase tracking-wider text-muted">Cost</p>
+          <p className="mt-0.5 truncate text-[12.5px] font-bold text-navy">
+            {card.cost && <span className="mr-1 text-gold-deep">{card.cost}</span>}{cost}
+          </p>
+        </div>
+        <div className="min-w-0">
+          <p className="truncate text-[9.5px] font-bold uppercase tracking-wider text-muted">Safety</p>
+          <p className="mt-0.5 flex items-center gap-1 truncate text-[12.5px] font-bold text-navy">
+            {safetyIcon && <KolmariIcon name={safetyIcon} className="size-3.5 flex-none text-teal-deep" aria-hidden="true" />}
+            {card.safety ?? '—'}
+          </p>
+        </div>
         <Stat label="Route" value={card.route ?? '—'} />
-        <Stat label="Safety" value={card.safety ?? '—'} />
       </div>
 
       <p
