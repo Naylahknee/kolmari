@@ -172,9 +172,11 @@ export function parseLayout(value: unknown): DashboardLayout {
   if (raw.v !== 2) {
     const order = uniqueWidgets(raw.order)
     const legacy = order.length ? order : [...BASE_MAIN, ...BASE_SIDE.filter((id) => id !== 'journeyTracker')]
-    const main = legacy.filter((id) => !BASE_SIDE.includes(id))
-    const side = legacy.filter((id) => BASE_SIDE.includes(id))
-    if (!side.includes('journeyTracker')) side.push('journeyTracker')
+    const legacyZones = completeZones(
+      legacy.filter((id) => !BASE_SIDE.includes(id)),
+      legacy.filter((id) => BASE_SIDE.includes(id)),
+    )
+    if (!legacyZones.side.includes('journeyTracker')) legacyZones.side.push('journeyTracker')
     const migrated = migrateAskHeroDefault(
       raw,
       uniqueWidgets(raw.disabled).length ? uniqueWidgets(raw.disabled) : [...DEFAULT_DISABLED],
@@ -182,8 +184,8 @@ export function parseLayout(value: unknown): DashboardLayout {
     return {
       v: 2,
       template: 'custom',
-      main,
-      side,
+      main: legacyZones.main,
+      side: legacyZones.side,
       disabled: migrated.disabled,
       journeyPlacement: 'header',
       askHeroMigrated: migrated.askHeroMigrated,
