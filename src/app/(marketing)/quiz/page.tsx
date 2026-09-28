@@ -19,44 +19,50 @@ const questions = [
 type Answers = Record<string, string>
 
 function buildResult(answers: Answers) {
+  const who = answers.who ?? ''
   const timeline = answers.timeline ?? 'Someday'
   const obstacle = answers.obstacle ?? 'I do not know where to begin'
   const region = answers.region ?? 'I am open to anywhere'
   const situation = answers.situation ?? ''
   const ties = answers.ties ?? 'No'
 
+  // Stage derivation is verbatim from the Kolmari Flow design.
   const stage =
-    timeline === 'Within 12 months' && !['Choosing a country', 'I do not know where to begin'].includes(obstacle)
-      ? 'Planning Stage'
-      : timeline === 'Someday' || obstacle === 'I do not know where to begin'
-        ? 'Discovery Stage'
-        : 'Research Stage'
+    timeline === 'Someday' || timeline === 'More than 3 years' || who === 'I am only exploring'
+      ? 'Exploring'
+      : timeline === 'Within 12 months' && obstacle === 'Documents and logistics'
+        ? 'Preparing'
+        : 'Planning'
 
-  const pathways: string[] = []
-  if (situation === 'I work remotely') pathways.push('remote-work and digital nomad pathways')
-  if (situation === 'I may work abroad') pathways.push('employment and skilled-worker pathways')
-  if (situation === 'I want to study') pathways.push('student pathways')
-  if (situation === 'I am retired or planning retirement') pathways.push('retirement and passive-income pathways')
-  if (situation === 'I run or want to start a business') pathways.push('entrepreneur and business pathways')
-  if (ties === 'Yes' || ties === 'I am not sure') pathways.push('ancestry or family-based pathways')
+  // Recommendations are verbatim from the Kolmari Flow design (up to 3):
+  // region anchor, situation line, then the ancestry line when it applies,
+  // otherwise the obstacle line.
+  const regionLine =
+    region === 'I am open to anywhere' ? 'Compare destinations across every region.' : `Start with ${region}.`
 
-  return {
-    stage,
-    region: region === 'I am open to anywhere' ? 'a broad regional comparison' : region,
-    pathway: pathways.slice(0, 2).join(' and ') || 'several possible pathway categories',
-    firstStep:
-      obstacle === 'Choosing a country'
-        ? 'Build a shortlist of three to five Destinations.'
-        : obstacle === 'Understanding visas'
-          ? 'Compare the pathway categories connected to your situation.'
-          : obstacle === 'Money and budgeting'
-            ? 'Create a realistic relocation budget and savings target.'
-            : obstacle === 'Employment'
-              ? 'Map your work, remote-income, or study options.'
-              : obstacle === 'Documents and logistics'
-                ? 'Organize your documents, timeline, and moving checklist.'
-                : 'Start by narrowing your priorities and strongest regions.',
+  const situationLines: Record<string, string> = {
+    'I work remotely': 'Explore digital-nomad and remote-work visas.',
+    'I may work abroad': 'Explore employment and skilled-worker pathways.',
+    'I want to study': 'Explore student visas and study-abroad routes.',
+    'I am retired or planning retirement': 'Explore retirement and passive-income visas.',
+    'I run or want to start a business': 'Explore entrepreneur and investor pathways.',
   }
+  const situationLine = situationLines[situation] ?? 'Explore the pathways connected to your situation.'
+
+  const obstacleLines: Record<string, string> = {
+    'Choosing a country': 'Shortlist three destinations and compare them side by side.',
+    'Understanding visas': 'Review the routes you already qualify for.',
+    'Money and budgeting': 'Create a realistic relocation budget and savings target.',
+    'Employment': 'Map your income options before you apply for anything.',
+    'Documents and logistics': 'Start your document checklist, beginning with apostilles.',
+    'I do not know where to begin': 'Create a realistic relocation budget and savings target.',
+  }
+  const thirdLine =
+    ties === 'Yes'
+      ? 'Check citizenship-by-descent and family routes first.'
+      : (obstacleLines[obstacle] ?? obstacleLines['I do not know where to begin'])
+
+  return { stage, recs: [regionLine, situationLine, thirdLine] }
 }
 
 export default function KolmariQuizPage() {
@@ -80,11 +86,17 @@ export default function KolmariQuizPage() {
     }
 
     try {
-      window.localStorage.setItem('kolmari-quiz-result', JSON.stringify({ answers, completedAt: new Date().toISOString() }))
+      window.localStorage.setItem('kolmari-quiz-result', JSON.stringify({ answers, stage: result.stage, completedAt: new Date().toISOString() }))
     } catch {
       // The result remains visible even when browser storage is unavailable.
     }
     setComplete(true)
+  }
+
+  function retake() {
+    setAnswers({})
+    setStep(0)
+    setComplete(false)
   }
 
   if (complete) {
@@ -94,12 +106,12 @@ export default function KolmariQuizPage() {
           <div className="hero-grid bg-navy-deep px-6 py-8 text-center text-white sm:px-10">
             <div className="flex justify-center"><MarketingLogo compact tone="light" /></div>
             <p className="mt-5 text-xs font-extrabold uppercase tracking-[0.22em] text-gold">Your starting point</p>
-            <h1 className="mt-3 font-display text-3xl font-extrabold sm:text-4xl">You are in the {result.stage}.</h1>
+            <h1 className="mt-3 font-display text-3xl font-extrabold sm:text-4xl">You are in the {result.stage} Stage.</h1>
           </div>
 
           <div className="space-y-6 p-6 sm:p-10">
             <div className="grid gap-3">
-              {[`Start with ${result.region}.`, `Explore ${result.pathway}.`, result.firstStep].map((item) => (
+              {result.recs.map((item) => (
                 <div key={item} className="flex items-start gap-3 rounded-xl border border-line bg-canvas p-4 text-sm leading-6 text-navy">
                   <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-gold-soft text-gold-deep"><Check size={11} strokeWidth={3} /></span>
                   <span>{item}</span>
@@ -111,12 +123,15 @@ export default function KolmariQuizPage() {
               Create a free account to save these results and build your full Move Plan. You may delete your account and stored data at any time.
             </div>
 
-            <Link href="/signup?next=%2Fdestinations&source=kolmari-quiz" className="gold-button w-full justify-center text-center">
+            <Link href="/signup?next=%2Fprofile-wizard&source=kolmari-quiz" className="gold-button w-full justify-center text-center">
               Create My Free Account <ArrowRight size={17} />
             </Link>
 
             <p className="text-center text-xs text-muted">
-              Already have an account? <Link href="/login?next=%2Fdestinations" className="font-bold text-navy underline underline-offset-2">Sign in</Link>
+              Already have an account? <Link href="/login?next=%2Fprofile-wizard" className="font-bold text-navy underline underline-offset-2">Sign in</Link>
+            </p>
+            <p className="text-center text-xs text-muted">
+              <button type="button" onClick={retake} className="font-bold text-navy underline underline-offset-2">Retake the quiz</button>
             </p>
           </div>
         </section>

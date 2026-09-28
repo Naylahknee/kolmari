@@ -2,6 +2,157 @@
 
 Running log of implemented page state. Update this file when application code changes.
 
+## Quiz carryover (Phase 2, batch A) — 2026-09-28 (pending release)
+
+Owner-approved Phase 2 batch A: make the Match Quiz answers visibly shape setup and
+the Command Center, per the Kolmari Flow design. Authorized in chat on 2026-09-28
+("let's take a page from Zuck and follow your suggestion"). No SLD contract covers
+this work; the stale `sld-engine-hardening` contract was not modified.
+
+- `src/lib/onboarding.ts`: new verbatim-from-design mappings — `QUIZ_PRIORITY_LANES`
+  (mq2 priority → lane preselects, e.g. Affordability → money, Healthcare and schools
+  → health+family), `QUIZ_REGION_DESTINATIONS` (mq3 region → starter destinations,
+  e.g. Europe → Portugal, Spain, Albania), `QUIZ_START_HERE` (mq8 obstacle → Command
+  Center guidance text), `QUIZ_CARRYOVER_QUESTIONS` (the six household-carryover
+  questions), `QUIZ_WHO_HOUSEHOLD` / `QUIZ_SITUATION_GOAL` (unambiguous prefill maps
+  only — "I am only exploring" and ambiguous timeline/budget answers are never forced
+  into profile fields).
+- `src/components/kolmari/profile-wizard.tsx`:
+  - Lane picker (step 0): preselects lanes from the quiz priority answer on a fresh
+    setup and shows "You said {priority} matters most, so {lanes} is/are preselected.
+    Change it freely." The banner shows only while the current lanes match the quiz
+    suggestion. Never overrides lanes the user already chose.
+  - Household step: shows a "From your Match Quiz" card listing the six carried
+    answers, each tagged FROM YOUR QUIZ. Unambiguous answers also prefill the form
+    ("Just me" → Solo, "Me and a partner" → Couple, "My family" → Family; situation →
+    the matching pathway goal) without overwriting values the user already set.
+  - Review step: seeds starter destinations from the quiz region (e.g. Latin America
+    and the Caribbean → Mexico, Costa Rica, Uruguay) with a "Suggested from your
+    Match Quiz region. Change them freely." note.
+- `src/app/(app)/(workspace)/command-center/page.tsx`: new START HERE panel above
+  the board, keyed on the quiz obstacle answer (e.g. "Choosing a country" →
+  "Compare your destinations side by side. Tick off Neighborhood and safety first.").
+
+Validation: production `next build` passes (exit 0, all routes). 20 focused
+assertions pass against compiled lib output covering all five design mappings,
+unknown/missing answers (no crash, no preselect), and the unambiguous-only prefill
+maps. Not deployed.
+
+## Signup screen, copy pass, sign-in landing (Phase 2, batches B, C, D) — 2026-09-28 (pending release)
+
+Owner-approved Phase 2 batches B, C, D, continuing the batch-A authorization
+("go ahead and continue until finished", 2026-09-28). No SLD contract covers this
+work; the stale `sld-engine-hardening` contract was not modified.
+
+Batch B — signup screen (`src/components/kolmari/auth-form.tsx`,
+`src/components/kolmari/auth-shell.tsx`, `src/app/(auth)/signup/page.tsx`):
+- Full-name field (signup only), saved to the profile via the same post-auth PUT
+  as the quiz sync (`syncQuizResultToProfile({ displayName })` in
+  `src/lib/quiz-sync.ts`); never overwrites an already-set name.
+- Quiz reassurance chip when an anonymous quiz result is waiting: "{N} answers
+  saved · {Stage} stage. They prefill your setup."
+- Terms/privacy checkbox; the Create account button stays disabled until the name
+  is non-empty, the email is valid, the password meets length, and the box is
+  ticked. (Checkbox text is unlinked: no /terms or /privacy routes exist yet.)
+- Screen-4 copy: eyebrow "SAVE YOUR STARTING POINT", title "Create account",
+  subtitle "Free. Your quiz answers, destinations and checklist live here.", brand
+  panel "NEXT: SET UP YOUR COMMAND CENTER — A few questions about how you want to
+  approach the move, then your checklist is built for you."
+
+Batch C — copy pass (`src/app/(marketing)/quiz/page.tsx`,
+`src/components/kolmari/profile-wizard.tsx`, `src/lib/onboarding.ts`):
+- Quiz result recommendations now verbatim from the design (region anchor,
+  situation line, ancestry line when mq5 = Yes, otherwise the obstacle line), up
+  to 3.
+- Stages renamed to the design's Exploring / Planning / Preparing with the
+  design's derivation rules; result H1 is "You are in the {Stage} Stage."
+- "Retake the quiz" link on the result screen (clears answers and restarts).
+- Energy lane tag now "Opens Energy focus · Experimental" (was "Opens Energy
+  focus").
+- Wizard lane picker: eyebrow "QUESTION 1 — IT SETS THE REST", title "How do you
+  want to approach this move?", intro verbatim from the design. Review title now
+  "Your Command Center is built around {lane shorts}" (e.g. "health and food and
+  family and schools").
+- Login screen copy: title "Welcome back", subtitle "Pick up where your move
+  left off."
+
+Batch D — sign-in landing (`src/app/(auth)/login/page.tsx`,
+`src/components/kolmari/auth-form.tsx`):
+- Login now defaults to /command-center (was /dashboard); explicit `next`
+  params are still honored.
+- Login page gains "Just exploring? Take the Match Quiz" linking to /quiz.
+
+Validation: production `next build` passes (exit 0, all routes). 14 focused
+assertions pass against the compiled `buildResult` covering the new stage rules
+and all verbatim recommendation lines. Not deployed. Still not started: real
+email verification (needs an email provider decision), demo redirect/archival
+(blocked until the official flow is live and tested).
+
+## Real email verification (Phase 3) — 2026-09-28 (pending release)
+
+Owner-authorized as part of the original onboarding sequence; provider decided in
+chat on 2026-09-28 (Resend free tier: 100/day, 3,000/month, $0). No SLD contract
+covers this work; the stale `sld-engine-hardening` contract was not modified.
+
+- `src/lib/verification.ts`: 6-digit crypto-random codes, SHA-256 hash stored
+  (never the code), single active code per user, 15-minute expiry, dead after 5
+  wrong guesses (constant-time compare), 60-second resend cooldown. The whole
+  flow is inert until `RESEND_API_KEY` is set, so nothing can lock users out
+  before the email service is configured. Demo account (`demo@kolmari.app`) is
+  always exempt.
+- `src/app/api/auth/verify/send/route.ts` and `.../verify/confirm/route.ts`:
+  authed-only, same-origin checks, per-IP rate limits (10 sends / 20 confirms
+  per 15 min), generic error messages.
+- `src/app/api/login/route.ts` now returns `verificationRequired`; the auth form
+  routes those sessions to `/verify-email?next=...` instead of the app.
+- `src/app/(auth)/verify-email/page.tsx` + `src/components/kolmari/verify-email-form.tsx`:
+  the verify screen (design Screen 5 copy). Sends the code on mount, 6-digit
+  input, resend with 60s cooldown, "wrong email? start over" sign-out.
+- `src/app/(app)/layout.tsx` gates every app page: unverified sessions redirect
+  to `/verify-email`. `users` table gains `email_verified` (idempotent ALTER).
+- Sending goes through the Resend API (`api.resend.com`); from-address defaults
+  to `Kolmari <noreply@kolmari.com>` and is overridable with `RESEND_FROM_EMAIL`.
+  The domain must be verified in Resend for production delivery.
+
+Validation: production `next build` passes (exit 0, all routes). 20 focused
+assertions pass against the compiled verification module with an in-memory fake
+DB: enable/disable gating, demo exemption, code format, no plaintext storage,
+correct-code acceptance, attempt counting and 5-strike lockout, resend cooldown,
+resend replacing the code, expiry cleanup, and the verified flag clearing the
+requirement. Not deployed. Still needs: a Resend account + API key stored as a
+Cloudflare Workers secret, and kolmari.com verified in Resend (SPF/DKIM/DMARC).
+Demo redirect/archival still blocked until the official flow is live and tested.
+
+## Onboarding spine repair (Phase 1) — 2026-09-28 (pending release)
+
+Owner-approved Phase 1: connect the Match Quiz -> account -> profile-wizard spine. No SLD
+contract covers this work; the owner authorized it explicitly in chat on 2026-09-28
+("Yes, start with Phase 1"). The stale `sld-engine-hardening` contract was not modified.
+
+- `src/lib/schemas.ts`: `onboardingSchema` gains an optional `quiz` snapshot
+  (`answers`, `stage`, `completedAt`). Schema stays `.strict()`; malformed quiz data
+  and unknown keys are still rejected.
+- `src/lib/onboarding.ts`: `OnboardingState` gains optional `quiz?: QuizSnapshot`, so the
+  profile wizard's existing `{ ...setup }` saves preserve the snapshot automatically.
+- `src/lib/quiz-sync.ts` (new): after signup/login, a stored `kolmari-quiz-result`
+  localStorage entry is merged into the profile's `onboarding` JSONB via
+  GET+PUT `/api/profile` (existing onboarding is preserved; a newer stored snapshot
+  wins; the entry is cleared only after a successful PUT). Never throws and never
+  blocks navigation; failures keep the entry for a later retry.
+- `src/components/kolmari/auth-form.tsx`: runs the quiz sync after successful auth and
+  honors the `next` param for signup too (previously hardcoded to `/welcome`).
+- `src/app/(auth)/signup/page.tsx`: new accounts without an explicit `next` land in
+  `/profile-wizard` (the lane picker) instead of the `/welcome` interstitial.
+  `/welcome` remains a working route.
+- `src/app/(marketing)/quiz/page.tsx`: completion stores the computed stage alongside
+  answers; both CTAs now carry `next=/profile-wizard` (was `/destinations`, a dead end).
+
+Validation: `next build --webpack` passes (routes render). New schema assertions
+(5/5) pass against compiled lib output: quiz accepted, strictness preserved,
+malformed quiz rejected, pre-existing onboarding still validates. `tests/onboarding.test.ts`
+fails identically before and after this change (pre-existing extensionless-import
+resolution under `node --test`; no test runner is wired in package.json). Not deployed.
+
 ## Priority onboarding and mobile navigation — September 2026 (pending release)
 
 Native React flow based on the supplied mobile and onboarding references now supports

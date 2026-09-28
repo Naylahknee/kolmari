@@ -2,7 +2,77 @@
 export const LANE_IDS = ['health', 'community', 'energy', 'work', 'family', 'money'] as const
 export type LaneId = (typeof LANE_IDS)[number]
 export type Answer = string | string[]
-export type OnboardingState = { version: 1; lanes: LaneId[]; answers: Record<string, Answer>; destinations: string[]; step: number }
+export type QuizSnapshot = { answers: Record<string, string>; stage: string; completedAt: string }
+export type OnboardingState = { version: 1; lanes: LaneId[]; answers: Record<string, Answer>; destinations: string[]; step: number; quiz?: QuizSnapshot }
+
+/**
+ * Match Quiz → setup carryover (Batch A). Mappings are verbatim from the
+ * Kolmari Flow design: mq2 (priority) preselects approach lanes, mq3 (region)
+ * seeds the first destination shortlist, six answers (mq1, mq4–mq8) carry into
+ * the household step, and mq8 (obstacle) keys the Command Center START HERE panel.
+ */
+export const QUIZ_PRIORITY_LANES: Record<string, LaneId[]> = {
+  'Affordability': ['money'],
+  'Safety and belonging': ['community'],
+  'Career opportunities': ['work'],
+  'Healthcare and schools': ['health', 'family'],
+  'Quality of life': ['health', 'community'],
+}
+
+export const QUIZ_REGION_DESTINATIONS: Record<string, string[]> = {
+  'Europe': ['Portugal', 'Spain', 'Albania'],
+  'Latin America and the Caribbean': ['Mexico', 'Costa Rica', 'Uruguay'],
+  'Africa': ['Ghana'],
+  'Asia and the Pacific': ['Malaysia'],
+  'I am open to anywhere': ['Portugal', 'Mexico', 'Ghana'],
+}
+
+export const QUIZ_START_HERE: Record<string, string> = {
+  'Choosing a country': 'Compare your destinations side by side. Tick off Neighborhood and safety first.',
+  'Understanding visas': 'Open Visa and immigration for each destination and identify the route that fits.',
+  'Money and budgeting': 'Start with Work and income: confirm the income each visa route asks for.',
+  'Employment': 'Start with Work and income: confirm remote-work eligibility or local job leads.',
+  'Documents and logistics': 'List the documents, apostilles and translations under Visa and immigration.',
+  'I do not know where to begin': 'Pick one destination and finish three items in your first lane this week.',
+}
+
+/** The six quiz answers carried into the household step, with display labels. */
+export const QUIZ_CARRYOVER_QUESTIONS: Array<{ key: string; label: string }> = [
+  { key: 'who', label: 'Who is this move for?' },
+  { key: 'situation', label: 'Current situation' },
+  { key: 'ties', label: 'Citizenship, ancestry, or family ties abroad' },
+  { key: 'budget', label: 'Monthly housing budget' },
+  { key: 'timeline', label: 'Ideal timeline' },
+  { key: 'obstacle', label: 'Biggest obstacle' },
+]
+
+/** Quiz "who" answer → household_type. Only unambiguous mappings; no guessing. */
+export const QUIZ_WHO_HOUSEHOLD: Record<string, string> = {
+  'Just me': 'Solo',
+  'Me and a partner': 'Couple',
+  'My family': 'Family',
+}
+
+/** Quiz "situation" answer → pathway goal. Only unambiguous mappings. */
+export const QUIZ_SITUATION_GOAL: Record<string, string> = {
+  'I work remotely': 'Remote Work',
+  'I may work abroad': 'Employment',
+  'I want to study': 'Education',
+  'I am retired or planning retirement': 'Passive Income / Retirement',
+  'I run or want to start a business': 'Entrepreneurship',
+}
+
+export function quizLaneSuggestion(priority: string | undefined): LaneId[] {
+  return (priority != null && QUIZ_PRIORITY_LANES[priority]) || []
+}
+
+export function quizRegionDestinations(region: string | undefined): string[] {
+  return (region != null && QUIZ_REGION_DESTINATIONS[region]) || []
+}
+
+export function quizStartHere(obstacle: string | undefined): string | null {
+  return (obstacle != null && QUIZ_START_HERE[obstacle]) || null
+}
 export type Question = { id: string; q: string; mode: string; help: string; opts: string[]; multi?: boolean; exclusive?: string[]; implies?: Record<string, string[]>; impliedFoot?: string }
 export type Lane = { title: string; short: string; tag: string; d: string; blurb: string; eyebrow: string; h1: string; note: string; qs: Question[] }
 export const LANES: Record<LaneId, Lane> = {health: { title: 'Health and food first', short: 'health and food', tag: 'Opens Food & Health fit',
@@ -38,7 +108,7 @@ export const LANES: Record<LaneId, Lane> = {health: { title: 'Health and food fi
           { id: 'c3', q: 'How much time have you spent there?', mode: 'Pick one', help: '',
             opts: ['Lived there before', 'Visited more than once', 'Visited once', 'Never been'] },
         ] },
-      energy: { title: 'Astrological alignment', short: 'astrological alignment', tag: 'Opens Energy focus',
+      energy: { title: 'Astrological alignment', short: 'astrological alignment', tag: 'Opens Energy focus · Experimental',
         d: 'M12 3l2.4 6.2L21 11l-6.6 1.8L12 19l-2.4-6.2L3 11l6.6-1.8zM18.5 4.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8L16 6.9l1.8-.7z',
         blurb: 'Timing and placement read from your chart, held next to the practical filters rather than instead of them.',
         eyebrow: 'ENERGY LANE · QUESTIONS 2 TO 4',

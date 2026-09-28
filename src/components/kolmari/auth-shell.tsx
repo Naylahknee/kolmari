@@ -18,11 +18,16 @@ export function AuthShell({
   title,
   subtitle,
   children,
+  panelKicker,
+  panelCopy,
 }: {
   eyebrow: string
   title: string
   subtitle: string
   children: React.ReactNode
+  /** Optional override for the brand panel (Kolmari Flow design, Screen 4). */
+  panelKicker?: string
+  panelCopy?: string
 }) {
   return (
     <main className="min-h-screen bg-canvas lg:grid lg:grid-cols-2">
@@ -30,20 +35,29 @@ export function AuthShell({
       <aside className="hero-grid relative hidden overflow-hidden bg-navy-deep p-12 text-white lg:flex lg:flex-col lg:justify-between">
         <Wordmark href="/" dark />
         <div>
-          <h2 className="font-display text-4xl font-extrabold leading-[1.1]">Your move, made clearer.</h2>
-          <p className="mt-4 max-w-sm text-base leading-7 text-white/75">
-            One place to compare destinations, review visa pathways, and build a realistic move plan.
-          </p>
-          <ul className="mt-8 space-y-3">
-            {BULLETS.map((b) => (
-              <li key={b} className="flex items-center gap-3 text-sm text-white/85">
-                <span className="grid size-6 shrink-0 place-items-center rounded-full bg-gold text-navy-deep">
-                  <Check size={14} aria-hidden="true" />
-                </span>
-                {b}
-              </li>
-            ))}
-          </ul>
+          {panelKicker ? (
+            <>
+              <p className="text-sm font-bold uppercase tracking-[0.18em] text-gold">{panelKicker}</p>
+              <p className="mt-4 max-w-sm text-base leading-7 text-white/75">{panelCopy}</p>
+            </>
+          ) : (
+            <>
+              <h2 className="font-display text-4xl font-extrabold leading-[1.1]">Your move, made clearer.</h2>
+              <p className="mt-4 max-w-sm text-base leading-7 text-white/75">
+                One place to compare destinations, review visa pathways, and build a realistic move plan.
+              </p>
+              <ul className="mt-8 space-y-3">
+                {BULLETS.map((b) => (
+                  <li key={b} className="flex items-center gap-3 text-sm text-white/85">
+                    <span className="grid size-6 shrink-0 place-items-center rounded-full bg-gold text-navy-deep">
+                      <Check size={14} aria-hidden="true" />
+                    </span>
+                    {b}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </div>
         <p className="text-xs text-white/50">Visa recommendations are planning guidance, not legal advice.</p>
       </aside>

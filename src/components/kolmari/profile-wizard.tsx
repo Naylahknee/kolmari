@@ -5,8 +5,8 @@ import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, Check, LoaderCircle } from 'lucide-react'
-import type { RelocationProfile, WizardStatus } from '@/lib/profile'
-import { activeAnswers, chooseAnswer, emptyOnboarding, isAnswered, LANE_IDS, LANE_LINKS, LANES, type LaneId, type OnboardingState, type Question } from '@/lib/onboarding'
+import type { PathwayGoal, RelocationProfile, WizardStatus } from '@/lib/profile'
+import { activeAnswers, chooseAnswer, emptyOnboarding, isAnswered, LANE_IDS, LANE_LINKS, LANES, QUIZ_CARRYOVER_QUESTIONS, QUIZ_SITUATION_GOAL, QUIZ_WHO_HOUSEHOLD, quizLaneSuggestion, quizRegionDestinations, type LaneId, type OnboardingState, type Question } from '@/lib/onboarding'
 const EnergyPortal = dynamic(() => import('@/components/kolmari/energy/energy-portal').then(module => module.EnergyPortal))
 import styles from './profile-wizard.module.css'
 
@@ -14,10 +14,37 @@ const destinations = ['Portugal', 'Spain', 'Uruguay', 'Mexico', 'Costa Rica', 'G
 const priorities: Record<LaneId, string> = { health: 'Healthcare & schools', community: 'Safety', energy: 'Quality of life', work: 'Career', family: 'Healthcare & schools', money: 'Affordability' }
 const goals = ['Remote Work', 'Employment', 'Entrepreneurship', 'Passive Income / Retirement', 'Education', 'Family Reunification', 'Ancestry', 'Investment'] as const
 
+/** Seed a fresh setup from the Match Quiz snapshot: preselect approach lanes from
+ *  the priority answer and starter destinations from the region answer.
+ *  Never overrides lanes or destinations the user already chose. */
+function initialSetup(profile: RelocationProfile): OnboardingState {
+  const existing = profile.onboarding ?? emptyOnboarding()
+  const quiz = existing.quiz
+  if (!quiz) return existing
+  const lanes = existing.lanes.length ? existing.lanes : quizLaneSuggestion(quiz.answers.priority)
+  const seeded = existing.destinations.length ? existing.destinations : quizRegionDestinations(quiz.answers.region)
+  if (lanes === existing.lanes && seeded === existing.destinations) return existing
+  return { ...existing, lanes, destinations: seeded }
+}
+
+/** Prefill unambiguous household fields from the quiz snapshot.
+ *  Only fills fields the user has not set; never overwrites existing values. */
+function initialProfile(profile: RelocationProfile): RelocationProfile {
+  const quiz = profile.onboarding?.quiz
+  if (!quiz) return profile
+  const household = QUIZ_WHO_HOUSEHOLD[quiz.answers.who ?? '']
+  const goal = QUIZ_SITUATION_GOAL[quiz.answers.situation ?? ''] as PathwayGoal | undefined
+  if ((!household || profile.household_type) && (!goal || (profile.goals as string[]).includes(goal))) return profile
+  const next = { ...profile }
+  if (household && !next.household_type) next.household_type = household
+  if (goal && !(next.goals as string[]).includes(goal)) next.goals = [...next.goals, goal]
+  return next
+}
+
 export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
   const router = useRouter()
-  const [profile, setProfile] = useState(initial)
-  const [setup, setSetup] = useState<OnboardingState>(initial.onboarding ?? emptyOnboarding())
+  const [profile, setProfile] = useState(() => initialProfile(initial))
+  const [setup, setSetup] = useState<OnboardingState>(() => initialSetup(initial))
   const [step, setStep] = useState(initial.onboarding?.step ?? 0)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -34,6 +61,16 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
   const question = currentStep > 0 && currentStep <= questions.length ? questions[currentStep - 1] : null
   const phase = currentStep === 0 ? 0 : currentStep < originStep ? 1 : currentStep < reviewStep ? 2 : 3
   const selectedLanes = setup.lanes.map(id => LANES[id].short).join(', ')
+  const quiz = setup.quiz
+  const quizSuggestedLanes = quiz ? quizLaneSuggestion(quiz.answers.priority) : []
+  const showQuizLaneBanner = currentStep === 0 && quizSuggestedLanes.length > 0
+    && quizSuggestedLanes.length === setup.lanes.length
+    && quizSuggestedLanes.every(id => setup.lanes.includes(id))
+  const seededDestinationsFromQuiz = Boolean(
+    quiz && (initial.onboarding?.destinations?.length ?? 0) === 0
+    && quizRegionDestinations(quiz.answers.region).length > 0
+    && setup.destinations.length > 0,
+  )
 
   function update<K extends keyof RelocationProfile>(key: K, value: RelocationProfile[K]) {
     setProfile(previous => ({ ...previous, [key]: value }))
@@ -91,11 +128,12 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
   function toggleDestination(name: string) {
     setSetup(previous => ({ ...previous, destinations: previous.destinations.includes(name) ? previous.destinations.filter(value => value !== name) : previous.destinations.length < 12 ? [...previous.destinations, name] : previous.destinations }))
   }
-  const title = currentStep === 0 ? 'How do you want to approach your move?'
+  const laneShort = setup.lanes.length ? setup.lanes.map(id => LANES[id].short).join(' and ') : 'your priorities'
+  const title = currentStep === 0 ? 'How do you want to approach this move?'
     : question ? question.q : currentStep === energyStep ? 'Explore your Energy focus'
     : currentStep === originStep ? 'Where are you starting from?'
     : currentStep === householdStep ? 'Who is moving, and when?'
-    : 'Your Command Center, around your priorities'
+    : 'Your Command Center is built around ' + laneShort
 
   return <main className={styles.page}>
     <header className={styles.header}><Wordmark /><button onClick={() => saveAndContinue(true)} disabled={saving} className={styles.exit}>Save & exit</button></header>
@@ -103,15 +141,23 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
       <aside className={styles.rail} aria-label="Setup progress"><p className={styles.eyebrow}>YOUR KOLMARI PROFILE</p><h2>A plan that starts<br />with your life.</h2><p>Your priorities set the order. Every path leads to your Command Center.</p><ol>{['Your approach', 'Your priorities', 'Your household', 'Command Center'].map((label, i) => <li key={label} aria-current={phase === i ? 'step' : undefined}><span>{phase > i ? <Check size={15} /> : i + 1}</span><div><strong>{label}</strong><small>{i === 0 && setup.lanes.length ? selectedLanes : ['Choose up to three', 'Questions that fit you', 'Starting point and timing', 'Research and next steps'][i]}</small></div></li>)}</ol><p className={styles.railNote}>You can revise your answers later. Your other profile details stay with your account.</p></aside>
       <section className={styles.content}>
         <div className={styles.progressRow}><button type="button" aria-label="Previous step" onClick={() => navigate(Math.max(0, currentStep - 1))} disabled={currentStep === 0 || saving} className={styles.back}><ArrowLeft size={18} /></button><progress max={reviewStep} value={currentStep} aria-label="Onboarding progress" /><span>{currentStep + 1} / {reviewStep + 1}</span></div>
-        <p className={styles.eyebrow}>{question ? `${LANES[question.lane].short} · priority ${setup.lanes.indexOf(question.lane) + 1}` : ['QUESTION ONE — IT SETS THE REST', 'YOUR PRIORITIES', 'EVERY APPROACH ASKS THIS', 'READY TO BUILD'][phase]}</p>
+        <p className={styles.eyebrow}>{question ? `${LANES[question.lane].short} · priority ${setup.lanes.indexOf(question.lane) + 1}` : ['QUESTION 1 — IT SETS THE REST', 'YOUR PRIORITIES', 'EVERY APPROACH ASKS THIS', 'READY TO BUILD'][phase]}</p>
         <h1 ref={heading} tabIndex={-1}>{title}</h1>
-        <p className={styles.intro}>{currentStep === 0 ? 'Choose up to three, in priority order. Your first choice leads; the others add context.' : question ? question.help : currentStep === energyStep ? 'Optional and experimental. Practical visa, budget, health and safety research always stays separate. You can skip this and continue setup.' : currentStep === originStep ? 'Your residence and passport countries help you research the relevant routes. Neither is assumed.' : currentStep === householdStep ? 'Tell us who the plan needs to work for. Leave financial details unknown until you have them.' : 'Your answers and selected destinations will be saved to your account. No sample households, progress or matches.'}</p>
+        <p className={styles.intro}>{currentStep === 0 ? 'Pick up to three, in the order you care about them. The first one becomes your primary: it opens first and leads the country rankings. Each one you add asks its own three questions. Nothing gets hidden either way.' : question ? question.help : currentStep === energyStep ? 'Optional and experimental. Practical visa, budget, health and safety research always stays separate. You can skip this and continue setup.' : currentStep === originStep ? 'Your residence and passport countries help you research the relevant routes. Neither is assumed.' : currentStep === householdStep ? 'Tell us who the plan needs to work for. Leave financial details unknown until you have them.' : 'Your answers and selected destinations will be saved to your account. No sample households, progress or matches.'}</p>
+        {showQuizLaneBanner && quiz && <p className={styles.note}>You said {quiz.answers.priority} matters most, so {quizSuggestedLanes.map(id => LANES[id].short).join(' and ')} {quizSuggestedLanes.length > 1 ? 'are' : 'is'} preselected. Change it freely.</p>}
         <fieldset disabled={saving} className={styles.fields}>
         {currentStep === 0 && <div className={styles.lanes}>{LANE_IDS.map(id => { const lane = LANES[id]; const rank = setup.lanes.indexOf(id); return <button type="button" key={id} aria-pressed={rank >= 0} disabled={rank < 0 && setup.lanes.length >= 3} onClick={() => toggleLane(id)} className={styles.lane}><span className={styles.laneTop}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d={lane.d} /></svg><strong>{lane.title}</strong>{rank >= 0 && <b>{rank + 1}</b>}</span><span>{lane.blurb}</span><small>{rank >= 0 ? ['Primary priority', 'Second priority', 'Third priority'][rank] : lane.tag}</small></button> })}</div>}
         {question && <><div className={styles.questionMeta}>{question.mode}</div><div className={styles.choices}>{question.opts.map(option => { const value = setup.answers[question.id]; return <Choice key={option} active={Array.isArray(value) ? value.includes(option) : value === option} onClick={() => answer(question, option)}>{option}</Choice> })}</div>{question.lane === 'health' && <p className={styles.note}>Saved for your research checklist. An allergen flag does not remove a destination or certify food safety.</p>}</>}
         {currentStep === energyStep && <EnergyPortal />}
         {currentStep === originStep && <div className={styles.formGrid}><TextField label="What should we call you?" value={profile.display_name} onChange={v => update('display_name', v)} maxLength={80} autoComplete="given-name" /><TextField label="Country where you live now" value={profile.current_country} onChange={v => update('current_country', v)} maxLength={80} autoComplete="country-name" /><TextField label="Passport citizenship(s)" value={profile.citizenship} onChange={v => update('citizenship', v)} maxLength={80} /><TextField label="Ancestry or family connections abroad (optional)" value={profile.ancestry_connections} onChange={v => update('ancestry_connections', v)} maxLength={500} /></div>}
         {currentStep === householdStep && <>
+          {quiz && <section className={styles.card} aria-label="From your Match Quiz">
+            <h2>From your Match Quiz</h2>
+            <p>Six of these came from your Match Quiz and are already filled in. Check them, then complete your household details below.</p>
+            <ol className={styles.priorityList}>
+              {QUIZ_CARRYOVER_QUESTIONS.map(({ key, label }) => quiz.answers[key] ? <li key={key}><span>{label}: {quiz.answers[key]}</span><b>FROM YOUR QUIZ</b></li> : null)}
+            </ol>
+          </section>}
           <div className={styles.formGrid}><SelectField label="Who is moving?" value={profile.household_type} options={['Solo', 'Couple', 'Family', 'Other']} onChange={v => update('household_type', v)} /><NumberField label="Total people, including you" value={profile.family_size} min={1} max={12} onChange={v => update('family_size', v)} /><SelectField label="Is a partner moving with you?" value={profile.spouse === null ? null : profile.spouse ? 'Yes' : 'No'} options={['Yes', 'No']} onChange={v => update('spouse', v === 'Yes')} /><NumberField label="Number of dependants" value={profile.dependents} min={0} max={11} onChange={v => update('dependents', v)} /><SelectField label="When would you like to move?" value={profile.timeline} options={['0-3 months', '3-6 months', '6-12 months', '12+ months', 'Just researching']} onChange={v => update('timeline', v)} /></div>
           <h2 className={styles.subheading}>Which routes do you want to research?</h2><div className={styles.choices}>{goals.map(goal => <Choice key={goal} active={profile.goals.includes(goal)} onClick={() => update('goals', profile.goals.includes(goal) ? profile.goals.filter(g => g !== goal) : [...profile.goals, goal])}>{goal}</Choice>)}</div>
           {profile.family_size !== null && profile.family_size < 1 + (profile.spouse ? 1 : 0) + (profile.dependents ?? 0) && <p role="alert" className={styles.error}>Total people must include you, your partner and all dependants.</p>}
@@ -120,7 +166,7 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
         {currentStep === reviewStep && <>
           <section className={styles.summary}><p className={styles.eyebrow}>YOUR STARTING POINT</p><h2>{profile.display_name}’s Kolmari Plan</h2><p>{profile.current_country} · {profile.family_size} {profile.family_size === 1 ? 'person' : 'people'} · {profile.timeline}</p><p>Passport citizenship(s): {profile.citizenship}</p></section>
           <div className={styles.reviewGrid}><section className={styles.card}><h2>Your planning rail</h2><p>In the priority order you chose.</p><ol className={styles.priorityList}>{setup.lanes.map((id, i) => <li key={id}><span>{LANE_LINKS[id].label}</span><b>{i === 0 ? 'First' : `Priority ${i + 1}`}</b></li>)}</ol></section><section className={styles.card}><h2>What happens next</h2><p>Your Command Center links to these tools and keeps your priorities visible. Each new destination gets research tasks from your answers.</p><p>Country rankings and eligibility are not recalculated from unverified health or astrology claims.</p></section></div>
-          <section className={styles.card}><h2>First destinations to compare</h2><p>Choose your own shortlist. You can also start with an empty board.</p><div className={styles.choices}>{Array.from(new Set([...destinations, ...setup.destinations])).map(name => <Choice key={name} active={setup.destinations.includes(name)} onClick={() => toggleDestination(name)}>{name}</Choice>)}</div><div className={styles.addDestination}><label>Another destination<input value={destination} maxLength={100} onChange={e => setDestination(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); const name = destination.trim(); if (name && !setup.destinations.some(d => d.toLowerCase() === name.toLowerCase())) toggleDestination(name); setDestination('') } }} placeholder="e.g. Lisbon or Mexico City" /></label><button type="button" disabled={!destination.trim() || setup.destinations.length >= 12} onClick={() => { const name = destination.trim(); if (name && !setup.destinations.some(d => d.toLowerCase() === name.toLowerCase())) toggleDestination(name); setDestination('') }}>Add destination</button></div><small>{setup.destinations.length} of 12 selected</small></section>
+          <section className={styles.card}><h2>First destinations to compare</h2>{seededDestinationsFromQuiz ? <p>Suggested from your Match Quiz region. Change them freely.</p> : <p>Choose your own shortlist. You can also start with an empty board.</p>}<div className={styles.choices}>{Array.from(new Set([...destinations, ...setup.destinations])).map(name => <Choice key={name} active={setup.destinations.includes(name)} onClick={() => toggleDestination(name)}>{name}</Choice>)}</div><div className={styles.addDestination}><label>Another destination<input value={destination} maxLength={100} onChange={e => setDestination(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); const name = destination.trim(); if (name && !setup.destinations.some(d => d.toLowerCase() === name.toLowerCase())) toggleDestination(name); setDestination('') } }} placeholder="e.g. Lisbon or Mexico City" /></label><button type="button" disabled={!destination.trim() || setup.destinations.length >= 12} onClick={() => { const name = destination.trim(); if (name && !setup.destinations.some(d => d.toLowerCase() === name.toLowerCase())) toggleDestination(name); setDestination('') }}>Add destination</button></div><small>{setup.destinations.length} of 12 selected</small></section>
         </>}
         </fieldset>
         {error && <p role="alert" className={styles.error}>{error}</p>}

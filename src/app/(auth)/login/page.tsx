@@ -4,16 +4,21 @@ import { AuthShell } from '@/components/kolmari/auth-shell'
 import { safeNextPath } from '@/lib/navigation'
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string | string[] }> }) {
-  const nextPath = safeNextPath((await searchParams).next)
+  // Returning users land in the Command Center, per the Kolmari Flow design
+  // (Screen 11: sign in skips straight to the Command Center).
+  const nextPath = safeNextPath((await searchParams).next, '/command-center')
   return (
     <AuthShell
       eyebrow="Welcome back"
-      title="Continue My Move Plan."
-      subtitle="Sign in to return to your saved Pathways, budget, and Progress Tracker."
+      title="Welcome back"
+      subtitle="Pick up where your move left off."
     >
       <AuthForm mode="login" nextPath={nextPath} />
       <p className="mt-4 text-center text-sm text-muted">
         Have a demo code? <Link href="/demo" className="font-extrabold text-gold-deep">Explore the demo</Link>
+      </p>
+      <p className="mt-2 text-center text-sm text-muted">
+        Just exploring? <Link href="/quiz" className="font-extrabold text-gold-deep">Take the Match Quiz</Link>
       </p>
     </AuthShell>
   )

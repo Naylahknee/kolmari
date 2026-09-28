@@ -37,6 +37,13 @@ export const onboardingSchema = z.object({
   answers: z.record(z.string().max(10), z.union([z.string().max(160), z.array(z.string().max(160)).max(12)])),
   destinations: z.array(z.string().trim().min(1).max(100)).max(12),
   step: z.number().int().min(0).max(20),
+  // Anonymous Match Quiz snapshot, synced after signup/login so the
+  // quiz -> account -> profile-wizard spine stays connected.
+  quiz: z.object({
+    answers: z.record(z.string().max(24), z.string().max(160)),
+    stage: z.string().max(40),
+    completedAt: z.string().datetime(),
+  }).optional(),
 }).strict().superRefine((state, ctx) => {
   const questions = state.lanes.flatMap(lane => LANES[lane].qs)
   for (const [id, value] of Object.entries(state.answers)) {

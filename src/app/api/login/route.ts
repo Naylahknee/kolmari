@@ -4,6 +4,7 @@ import { createToken, SESSION_COOKIE } from '@/lib/auth'
 import { getSql } from '@/lib/db'
 import { authSchema, strongPasswordSchema } from '@/lib/schemas'
 import { clientIp, isSameOrigin, rateLimit } from '@/lib/security'
+import { verificationRequiredFor } from '@/lib/verification'
 
 type UserRow = { id: number; email: string; password: string }
 
@@ -87,10 +88,13 @@ export async function POST(request: Request) {
     }
 
     const token = await createToken({ sub: String(user.id), email: user.email })
+    // Tell the client whether this session must pass email verification first.
+    // Inert until RESEND_API_KEY is set; the demo account is always exempt.
+    const verificationRequired = await verificationRequiredFor(user.id, user.email)
     // Do not echo the token in the response body — the httpOnly cookie is the
     // only place the browser should hold it, so XSS cannot read it from a
     // captured response.
-    const response = NextResponse.json({ ok: true })
+    const response = NextResponse.json({ ok: true, verificationRequired })
     response.cookies.set(SESSION_COOKIE, token, {
       httpOnly: true,
       sameSite: 'lax',
