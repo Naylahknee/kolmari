@@ -8,7 +8,7 @@ import { CheckCircle2, Ticket } from 'lucide-react'
  * "Have a trial code?" form. Lives on the coming-soon page where every Upgrade
  * CTA lands, so first users with a code can unlock Plus immediately.
  */
-export function TrialRedeemForm() {
+export function TrialRedeemForm({ tight = false }: { tight?: boolean }) {
   const [code, setCode] = useState('')
   const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
   const [message, setMessage] = useState('')
@@ -39,8 +39,7 @@ export function TrialRedeemForm() {
 
   if (status === 'done') {
     return (
-      <div className="mt-10 w-full max-w-md rounded-[var(--radius-card)] border border-line bg-white p-6 text-center">
-        <CheckCircle2 className="mx-auto text-teal-deep" size={28} aria-hidden="true" />
+      <div className={`${tight ? "mt-4" : "mt-10"} w-full max-w-md rounded-[var(--radius-card)] border border-line bg-white p-6 text-center`}>        <CheckCircle2 className="mx-auto text-teal-deep" size={28} aria-hidden="true" />
         <h2 className="mt-2 text-lg font-extrabold text-navy">Your trial is active</h2>
         <p className="mt-1 text-sm leading-6 text-muted">
           Kolmari Plus is unlocked on your account. Enjoy being one of our first users.
@@ -53,8 +52,7 @@ export function TrialRedeemForm() {
   }
 
   return (
-    <div className="mt-10 w-full max-w-md rounded-[var(--radius-card)] border border-line bg-white p-6 text-center">
-      <p className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-gold-deep">
+    <div className={`${tight ? "mt-4" : "mt-10"} w-full max-w-md rounded-[var(--radius-card)] border border-line bg-white p-6 text-center`}>      <p className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-gold-deep">
         <Ticket size={13} aria-hidden="true" /> Have a trial code?
       </p>
       <p className="mt-2 text-sm leading-6 text-muted">
