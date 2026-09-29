@@ -1,20 +1,21 @@
 {
-  "taskId": "sld-034-chat-empty-reply",
+  "taskId": "sld-035-chat-web-search",
   "draftedBy": "Penelope",
   "implementingActor": "Penelope",
   "status": "approved",
   "approvedBy": "Naylahknee",
-  "approvedAt": "2026-09-29T04:16:00.000Z",
-  "instruction": "NaLonni's standing request from 2026-09-29: make the Kolmari Guide chatbot answer user questions in production. After she fixed billing on dev.meta.ai ('sorted'), the live retest showed Meta now responds but with an empty answer body, so the widget shows 'did not return a usable answer'. This contract covers the response-handling fix: parse message content robustly (string or multipart array), raise max_tokens to 4000 for the reasoning model's headroom, use the trimmed API key in the auth header, and include a short diagnostic summary when the reply is empty.",
+  "approvedAt": "2026-09-29T04:45:00.000Z",
+  "instruction": "NaLonni's request from 2026-09-29: the Kolmari Guide chatbot should have data from the internet about relocating to new countries, visas, and country information, not just the user's profile and the model's training knowledge. Implementation path, verified against Meta's Model API docs: the built-in web_search tool exists only on the Responses API (POST /v1/responses), not on Chat Completions, so /api/chat switches to the Responses API with tools=[{type:web_search}] and the model deciding when a search is needed. Parse output items for text plus url_citation annotations, surfaced as a plain-text Sources footer. Add the documented safety_identifier (sha256 of the internal user id). Update the system prompt for search behavior and add one privacy-page line disclosing web search.",
   "createdFrom": "current-user-request",
-  "supersedes": "sld-033-chat-provider-errors",
-  "supersedeNote": "sld-033 added provider error surfacing and the developer role. It is archived at .sld/archive/sld-033-chat-provider-errors.json. This contract covers only the empty-reply handling fix.",
-  "objective": "Fix the /api/chat empty-reply failure without touching anything outside the listed files or the SLD engine itself. The maintenance grant is declared solely to archive superseded sld-033 under .sld/.",
+  "supersedes": "sld-034-chat-empty-reply",
+  "supersedeNote": "sld-034 fixed empty replies on Chat Completions. It is archived at .sld/archive/sld-034-chat-empty-reply.json. This contract covers only the Responses API + web search switch.",
+  "objective": "Give the Kolmari Guide live web data for relocation, visa and country questions without touching anything outside the listed files or the SLD engine itself. The maintenance grant is declared solely to archive superseded sld-034 under .sld/.",
   "allowedEntities": [],
   "allowedFiles": [
     "src/app/api/chat/route.ts",
+    "src/app/(marketing)/privacy/page.tsx",
     ".sld/task-contract.json",
-    ".sld/archive/sld-033-chat-provider-errors.json"
+    ".sld/archive/sld-034-chat-empty-reply.json"
   ],
   "allowedActions": [
     "CREATE",
