@@ -2,6 +2,25 @@
 
 Running log of implemented page state. Update this file when application code changes.
 
+## Passport buttons on regions page, Destinations reverted — 2026-09-28 (pending release)
+
+Owner correction (chat, 2026-09-28): the passport buttons belong on the
+regions page panels, not the Destinations browse page. The Destinations page
+was reverted to its original card design (photo or flag top, no passport
+button). No SLD contract covers this work; the stale
+`sld-031-canonical-governance-repair` contract was not modified.
+
+Regions page (`destinations/regions/[region]/page.tsx`): the "Destinations in
+{region}" country panels are restored below the hero (country-shape art, flag +
+city, pathway/community-fit/cost rows, "View Destination" gold button), each
+carrying the "Passport power and visa-free access" button, which now opens the
+research lightbox instead of a new tab. The "Visa routes in {region}" and
+"Other relocation alternatives" research sections remain below the panels.
+
+Destinations browse (`src/components/kolmari/destinations-explorer.tsx`):
+restored byte-for-byte to the pre-change version (photo if available, else
+flagcdn w160 flag with letter fallback; slide-over detail unchanged).
+
 ## Your World even cards, Destinations passport lightbox — 2026-09-28 (pending release)
 
 Owner-directed (chat, 2026-09-28): (1) the Your World "Recommended for you"
