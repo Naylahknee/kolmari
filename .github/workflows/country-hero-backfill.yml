@@ -1,0 +1,38 @@
+name: Country hero backfill
+
+# Nightly image backfill: pre-generates missing country hero images via the
+# /api/internal/country-hero/backfill endpoint so country pages do not wait on
+# a first visit to trigger the on-demand self-heal. Each call generates at
+# most one hero (stays inside the Worker request time limit); the loop repeats
+# until the endpoint reports no-missing, capped at 10 calls per night.
+#
+# Required repository secret (Settings -> Secrets and variables -> Actions):
+#   CRON_SECRET - must be identical to the CRON_SECRET worker secret on the
+#   kolmari Worker (set with `npx wrangler secret put CRON_SECRET`).
+
+on:
+  schedule:
+    # 04:30 UTC nightly - off-peak for US visitors.
+    - cron: '30 4 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Backfill missing country hero images
+        run: |
+          for i in $(seq 1 10); do
+            body=$(curl --fail --silent --show-error --max-time 90 \
+              -X POST https://kolmari.com/api/internal/country-hero/backfill \
+              -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+              -H 'Content-Type: application/json' \
+              -d '{}') || { echo "Backfill call $i failed."; exit 1; }
+            echo "Call $i response: $body"
+            status=$(echo "$body" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("status",""))')
+            if [ "$status" = "no-missing" ]; then
+              echo "No missing heroes left. Stopping early."
+              break
+            fi
+            sleep 5
+          done
