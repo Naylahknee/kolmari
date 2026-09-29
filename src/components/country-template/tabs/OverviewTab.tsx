@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { CountrySnapshotMap } from '@/components/country-workspace/CountrySnapshotMap'
+import { CountryVectorMap } from '@/components/kolmari/CountryVectorMap'
 import { CityCardImage } from '@/components/country-template/CityCardImage'
 import { getCountryVisualAssets } from '@/lib/country-visuals/data'
 
@@ -37,7 +37,7 @@ export function OverviewTab({ slug, freeTier = false }: { slug: string; freeTier
                     <Link className="map-card" href="/destinations/regions/europe?focus=portugal" aria-label="Open the interactive map of Portugal">
                       <span className="cmap">
                         {snap
-                          ? <CountrySnapshotMap countryName="Portugal" countryCode="PT" lat={snap.center[1]} lng={snap.center[0]} cityName={snap.capital?.name} alt="Locator map of Portugal" fallback="locator" />
+                          ? <CountryVectorMap countryName="Portugal" countryCode="PT" lat={snap.center[1]} lng={snap.center[0]} cityName={snap.capital?.name} alt="Interactive map of Portugal" />
                           : <span className="map-fallback">Map of Portugal</span>}
                       </span>
                       <span className="map-expand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 3H3v6M21 15v6h-6M3 3l7 7M21 21l-7-7" /></svg></span>

@@ -55,26 +55,37 @@ function formatIncome(monthly: number) {
 
 const costLabel: Record<string, string> = { $: 'Lower cost', $$: 'Moderate cost' }
 
+import { COUNTRY_SHAPES } from '@/lib/country-shapes'
+
+function CountryShapeArt({ country, className }: { country: ExplorerCountry; className: string }) {
+  const shape = COUNTRY_SHAPES[country.code]
+  return (
+    <div className={`relative flex items-center justify-center overflow-hidden bg-navy-deep ${className}`}>
+      <svg viewBox="0 0 240 120" className="h-full w-full" role="img" aria-label={`Outline map of ${country.name}`}>
+        <defs>
+          <pattern id={`explorer-grid-${country.code}`} width="18" height="18" patternUnits="userSpaceOnUse">
+            <path d="M18 0H0V18" fill="none" stroke="#F3C516" strokeOpacity=".08" strokeWidth=".6" />
+          </pattern>
+        </defs>
+        <rect width="240" height="120" fill={`url(#explorer-grid-${country.code})`} />
+        {shape ? (
+          <path d={shape} fill="#F3C516" stroke="#FBEA91" strokeWidth="1.2" strokeLinejoin="round" />
+        ) : (
+          <text x="120" y="72" textAnchor="middle" fill="#F3C516" fillOpacity="0.85" fontSize="34" fontWeight="800" letterSpacing="2">
+            {country.code}
+          </text>
+        )}
+      </svg>
+      <span className="absolute bottom-3 left-3 rounded-[var(--radius-pill)] bg-navy-deep/85 px-3 py-1 text-[10px] font-bold text-white">{country.city} · {country.code}</span>
+    </div>
+  )
+}
+
 function CountryPhoto({ country, imageSrc, className }: { country: ExplorerCountry; imageSrc: string | null; className: string }) {
-  const [flagFailed, setFlagFailed] = useState(false)
+  if (!imageSrc) return <CountryShapeArt country={country} className={className} />
   return (
     <div className={`relative overflow-hidden bg-gradient-to-br from-navy via-[#1d3a5f] to-[#0e1c33] ${className}`}>
-      {imageSrc ? (
-        <img src={imageSrc} alt={`${country.name} photo`} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
-      ) : (
-        <div className="absolute inset-0 flex items-center justify-center">
-          {!flagFailed && (
-            <img
-              src={`https://flagcdn.com/w160/${country.code.toLowerCase()}.png`}
-              alt=""
-              loading="lazy"
-              className="h-16 w-24 rounded-md object-cover shadow-lg"
-              onError={() => setFlagFailed(true)}
-            />
-          )}
-          {flagFailed && <span className="text-4xl font-extrabold tracking-wide text-gold/80">{country.code}</span>}
-        </div>
-      )}
+      <img src={imageSrc} alt={`${country.name} photo`} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
     </div>
   )
 }

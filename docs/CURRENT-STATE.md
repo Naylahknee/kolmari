@@ -2,6 +2,54 @@
 
 Running log of implemented page state. Update this file when application code changes.
 
+## Visa panel, regions research page, card art, OpenFreeMap — 2026-09-28 (pending release)
+
+Owner-directed (chat, 2026-09-28): (1) the dashboard visa options panel should
+sit right below the country cards and widen/narrow with the Journey panel;
+(2) the regions page becomes a visa + relocation-alternatives research page;
+(3) destination card art should be consistent; (4) decide the map tool for Your
+World and the Country Snapshot mini maps. No SLD contract covers this work; the
+stale `sld-031-canonical-governance-repair` contract was not modified.
+
+Map decision (`src/lib/kolmari-map.ts`): OpenFreeMap vector tiles rendered with
+MapLibre GL are the primary interactive map (free, no API key; the same code
+runs against self-hosted Protomaps by changing `KOLMARI_MAP_STYLE`). The D3 +
+Natural Earth SVG renderers are the automatic fallback when WebGL or the tile
+endpoint is unavailable. The Mapbox-token-gated path (MapboxMap.tsx) is retired.
+New dependency: `maplibre-gl` in package.json.
+
+Country Snapshot mini map (`src/components/kolmari/CountryVectorMap.tsx`):
+vector map centered on the country with the country's own Natural Earth polygon
+drawn as a dashed red highlight over a soft gold fill, plus a gold pin with a
+city label pill. Swapped into the country overview Country Snapshot
+(`OverviewTab.tsx`); falls back to the SVG locator on any error. Your World
+keeps its SVG world map; migrating it to the vector stack is the next step.
+
+Dashboard visa options (`src/components/kolmari/dashboard/visa-route-table.tsx`):
+new expandable comparison table (visa route / financial requirement / processing)
+matching the approved mockup: flag + "Visa options for {country}", category
+icons, first route expanded with Income requirement and Processing details cards,
+record review date, "Explore this route", footer research note + gold "Explore
+{country} pathways" button. Free tiers keep route-names-only + upgrade CTA.
+`YourMatchesSection` now renders the panel inside the left column under the
+country cards, so it expands when the Journey panel is collapsed/absent and
+narrows when the Journey panel is expanded. `VisaInfoSection` uses the same
+table for consistency.
+
+Regions page (`destinations/regions/[region]/page.tsx`): no longer a second
+destinations catalog. It is now the region's visa + relocation-alternatives
+research page: "Visa routes in {region}" (per-country researched pathway blocks
+with key facts, linking to Pathways and the country guide; honest "research in
+progress" note for uncovered countries) and "Other relocation alternatives"
+(lesser-known routes relevant to the region: ancestry, fast-tracks, special
+agreements). Hero, community-context card, Passport Index banner, and plan CTA
+are preserved.
+
+Card art consistency (`src/components/kolmari/destinations-explorer.tsx`):
+the browse-all cards no longer show flag images or letter tiles; countries
+without a generated photo now render the gold country-shape panel (same art as
+the dashboard and regions pages), with letter fallback only when no shape exists.
+
 ## Dashboard layout designer restore, Journey default, Your World map — 2026-09-28 (pending release)
 
 Owner-directed (chat, 2026-09-28): restore the full dashboard layout designer that

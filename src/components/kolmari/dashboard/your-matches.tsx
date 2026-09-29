@@ -8,7 +8,7 @@ import type { JourneyPanelData } from '@/components/kolmari/dashboard/matched-de
 import type { DestinationRow } from '@/components/kolmari/dashboard-side-cards'
 import { JourneyTracker } from '@/components/kolmari/dashboard/journey-tracker'
 import { DashboardDestinationPanel } from '@/components/kolmari/dashboard/destination-panel'
-import { VisaOptionsList, type VisaGroup } from '@/components/kolmari/dashboard/visa-info'
+import { VisaRouteTable, type VisaGroup } from '@/components/kolmari/dashboard/visa-route-table'
 
 const EYEBROW = 'text-[10.5px] font-bold uppercase tracking-[0.13em] text-gold-deep'
 
@@ -62,16 +62,27 @@ export function YourMatchesSection({
       </p>
 
       <div className="mt-4 flex flex-col gap-4 lg:flex-row">
-        <div className="grid min-w-0 flex-1 content-start gap-[14px] sm:grid-cols-2 xl:grid-cols-3">
-          {rows.map((row, index) => (
-            <DashboardDestinationPanel
-              key={row.country.slug}
-              data={row}
-              rank={index + 1}
-              selected={selectedRow?.country.slug === row.country.slug}
-              onSelect={() => setSelectedSlug(row.country.slug)}
-            />
-          ))}
+        <div className="min-w-0 flex-1">
+          <div className="grid min-w-0 content-start gap-[14px] sm:grid-cols-2 xl:grid-cols-3">
+            {rows.map((row, index) => (
+              <DashboardDestinationPanel
+                key={row.country.slug}
+                data={row}
+                rank={index + 1}
+                selected={selectedRow?.country.slug === row.country.slug}
+                onSelect={() => setSelectedSlug(row.country.slug)}
+              />
+            ))}
+          </div>
+          {group && (
+            <div
+              id="dashboard-visa-options"
+              aria-live="polite"
+              className="mt-4 rounded-[var(--radius-card)] border border-line bg-white px-5 py-5 shadow-tile sm:px-6"
+            >
+              <VisaRouteTable group={group} detailed={detailed} />
+            </div>
+          )}
         </div>
         {journey && (
           <JourneyTracker
@@ -82,32 +93,6 @@ export function YourMatchesSection({
           />
         )}
       </div>
-
-      {group && (
-        <div
-          id="dashboard-visa-options"
-          aria-live="polite"
-          className="mt-4 rounded-[var(--radius-card)] border border-line bg-white px-5 py-5 shadow-tile sm:px-6"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h3 className="text-[18px] font-bold text-navy">
-              Visa options for {group.country.name}
-            </h3>
-            <div className="flex flex-wrap items-center gap-4">
-              <Link
-                href={`/nextinations/${group.country.slug}/v2/overview`}
-                className="inline-flex items-center gap-1 text-xs font-bold text-info hover:text-navy"
-              >
-                Open {group.country.name} guide <ArrowRight size={12} aria-hidden="true" />
-              </Link>
-              <Link href="/pathways" className="text-xs font-bold text-info hover:text-navy">
-                Open Pathways
-              </Link>
-            </div>
-          </div>
-          <VisaOptionsList group={group} detailed={detailed} />
-        </div>
-      )}
     </section>
   )
 }
