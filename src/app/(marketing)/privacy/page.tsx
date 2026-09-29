@@ -35,7 +35,7 @@ const sections = [
   {
     heading: 'AI assistant (Kolmari Guide)',
     body: [
-      'If you use the Kolmari Guide chat, your chat messages and basic profile context (like your preferred regions, timeline, and goals) are sent to the Meta Model API, our AI provider, so it can generate answers.',
+      'If you use the Kolmari Guide chat, your chat messages and basic profile context (like your preferred regions, timeline, and goals) are sent to the Meta Model API, our AI provider, so it can generate answers. The Guide can also search the web for current relocation, visa, and country information when your question needs up-to-date facts.',
       'We never send your password, full account details, or financial account numbers to the AI provider. Do not type SSNs, bank details, or card numbers into the chat yourself.',
     ],
   },
