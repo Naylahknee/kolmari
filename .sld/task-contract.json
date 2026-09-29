@@ -1,53 +1,41 @@
 {
-  "taskId": "sld-031-canonical-governance-repair",
-  "instruction": "Correct and repair the SLD governance and engine against the approved SLD Engine 0.3.1 PRD without redesigning the SLD framework.",
-  "objective": "Restore the canonical operational preservation ontology, enforce contract approval separation and structured content requirements, detect silent AI-generated content loss, and add regression tests that prevent the engine from drifting away from SLD again.",
-  "allowedEntities": [
-    "SLD Engine"
-  ],
-  "allowedFiles": [
-    ".github/workflows/sld.yml",
-    ".sld/task-contract.json",
-    "docs/14-SLD-GOVERNANCE.md",
-    "src/app/api/sld/evaluate/route.ts"
-  ],
   "allowedActions": [
     "CREATE",
-    "MODIFY",
-    "REWIRE",
-    "REWRITE_COPY"
+    "MODIFY"
   ],
-  "requiredChanges": [
-    {
-      "artifact": "src/sld/layers/canonical.js",
-      "mustContain": "SLD_LAYER_IDS"
-    },
-    {
-      "artifact": "src/sld/scope/task-contract.js",
-      "mustContain": "approveTaskContract"
-    },
-    {
-      "artifact": "src/sld/scope/scope-gate.js",
-      "mustContain": "missingRequiredChange"
-    },
-    {
-      "artifact": "src/sld/layers/layer-7-execution.js",
-      "mustContain": "generationArtifactCorruption"
-    }
+  "allowedEntities": [
+    "Kolmari app"
   ],
-  "forbiddenChanges": [
-    "src/components/",
-    "src/lib/",
-    "db/",
-    "public/"
+  "allowedFiles": [
+    ".github/workflows/country-hero-backfill.yml",
+    ".sld/archive/sld-031-canonical-governance-repair.json",
+    ".sld/task-contract.json",
+    "docs/CURRENT-STATE.md",
+    "src/app/(app)/(workspace)/layout.tsx",
+    "src/app/(app)/(workspace)/nextinations/[countrySlug]/v2/[section]/page.tsx",
+    "src/app/(marketing)/privacy/page.tsx",
+    "src/app/api/chat/route.ts",
+    "src/app/api/internal/country-hero/backfill/route.ts",
+    "src/components/country-template/SimpleCountryView.tsx",
+    "src/components/kolmari/AskKolmariWidget.tsx"
   ],
-  "grants": [
-    "SLD_ENGINE_MAINTENANCE"
-  ],
-  "status": "approved",
-  "draftedBy": "Codex",
+  "approvedAt": "2026-09-29T03:30:00.000Z",
   "approvedBy": "Naylahknee",
-  "implementingActor": "Codex",
-  "approvedAt": "2026-09-11T21:00:00.000Z",
-  "createdFrom": "current-user-request"
+  "createdFrom": "current-user-request",
+  "draftedBy": "Penelope",
+  "forbiddenChanges": [
+    "src/sld/",
+    "src/app/api/sld/",
+    ".sld/baseline.json",
+    "scripts/sld.mjs"
+  ],
+  "grants": [],
+  "implementingActor": "Penelope",
+  "instruction": "Ship the user-requested Kolmari Guide chatbot, country hero image backfill agent, and free country page map. Authorized by NaLonni on 2026-09-29: implement the chatbot per the provided kit (Meta Model API, 30 messages per user per day), add the real interactive map to the free country page view that lacked one, and build the nightly image backfill agent reusing the approved National Flag Shadow Hero engine.",
+  "objective": "Deliver the three requested features without changing anything outside the listed files and without touching the SLD engine itself.",
+  "requiredChanges": [],
+  "status": "approved",
+  "supersedeNote": "sld-031 authorized unfinished SLD engine self-repair work. It is archived at .sld/archive/sld-031-canonical-governance-repair.json and its required engine changes are shelved as a future task, not dropped silently.",
+  "supersedes": "sld-031-canonical-governance-repair",
+  "taskId": "sld-032-chatbot-map-image-agent"
 }
