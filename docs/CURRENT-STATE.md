@@ -1143,3 +1143,17 @@ Rebuilt: CountryVectorMap now statically imports maplibre-gl (JS + CSS), so no
 separate chunk fetch can fail in production; the dynamic import() was the
 likely cause of the persistent fallback. Kept: Your World SVG maps,
 PlanHeaderLocator, CityMapImage placeholder.
+
+## Country Snapshot map: production diagnostic (2026-09-28)
+
+Vector map still falls back to the SVG locator in production after the
+rebuild. Live-browser QA on the Portugal overview page confirmed the fallback
+SVG is the only thing rendered (no MapLibre container/canvas in the DOM), so
+`failed` is being set in production; the MapLibre error details were being
+discarded by the old handler. Temporary diagnostic added to CountryVectorMap:
+the first fatal error (map 'error' event message, or constructor exception) is
+captured and exposed as an invisible `data-map-error` attribute on the
+fallback, plus a console.error. Next step: read the attribute from the live
+page, fix the real root cause, then remove the diagnostic. CSP already
+verified clean (worker-src blob:, tile host allowlisted); tile/style endpoints
+return HTTP 200; WebGL available in the test browser.

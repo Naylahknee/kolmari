@@ -33,6 +33,11 @@ type Props = {
 export function CountryVectorMap({ countryName, countryCode, lat, lng, alt, cityName, pinLabel, className }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [failed, setFailed] = useState(false)
+  // Temporary production diagnostic (Sep 2026): capture the first fatal map
+  // error and expose it as data-map-error on the fallback, so the real
+  // production failure can be read from the rendered DOM. Remove after the
+  // root cause is fixed.
+  const [mapError, setMapError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!containerRef.current || failed) return
@@ -53,8 +58,12 @@ export function CountryVectorMap({ countryName, countryCode, lat, lng, alt, city
 
       // Only errors before the style finishes loading are fatal. After load,
       // tile errors are non-fatal and MapLibre retries them on its own.
-      map.on('error', () => {
-        if (!cancelled && !loaded) setFailed(true)
+      map.on('error', (e: maplibregl.ErrorEvent) => {
+        if (cancelled || loaded) return
+        const message = e?.error?.message || 'maplibre error event (no message)'
+        setMapError(`event: ${message}`)
+        console.error('[CountryVectorMap] map error before load:', message)
+        setFailed(true)
       })
 
       // Zoom controls, per the approved 1a mockup (no compass).
@@ -110,7 +119,10 @@ export function CountryVectorMap({ countryName, countryCode, lat, lng, alt, city
         }
         new maplibregl.Marker({ element: pin, anchor: 'center' }).setLngLat([lng, lat]).addTo(live)
       })
-    } catch {
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      setMapError(`constructor: ${message}`)
+      console.error('[CountryVectorMap] constructor failed:', message)
       setFailed(true)
     }
 
@@ -123,15 +135,17 @@ export function CountryVectorMap({ countryName, countryCode, lat, lng, alt, city
 
   if (failed) {
     return (
-      <CountrySnapshotMap
-        countryName={countryName}
-        countryCode={countryCode}
-        lat={lat}
-        lng={lng}
-        alt={alt}
-        cityName={cityName}
-        fallback="locator"
-      />
+      <span data-map-error={mapError ?? 'failed with no captured error'} style={{ display: 'contents' }}>
+        <CountrySnapshotMap
+          countryName={countryName}
+          countryCode={countryCode}
+          lat={lat}
+          lng={lng}
+          alt={alt}
+          cityName={cityName}
+          fallback="locator"
+        />
+      </span>
     )
   }
 
