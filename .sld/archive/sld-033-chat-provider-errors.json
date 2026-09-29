@@ -1,0 +1,36 @@
+{
+  "taskId": "sld-033-chat-provider-errors",
+  "draftedBy": "Penelope",
+  "implementingActor": "Penelope",
+  "status": "approved",
+  "approvedBy": "Naylahknee",
+  "approvedAt": "2026-09-29T03:57:00.000Z",
+  "objective": "Diagnose and fix the /api/chat 502 failures observed in production browser testing. Surface the Meta Model API's actual status and error message in the 502 response and server log (no secrets exposed), and switch the system prompt role from 'system' to 'developer' to match Meta's own chat-completions docs example, eliminating the risk of a 400 on message validation. NaLonni directed Penelope to dig into the provider response and fix it during the 2026-09-29 debug session.",
+  "grants": [
+    "SLD_ENGINE_MAINTENANCE"
+  ],
+  "requiredChanges": [],
+  "notes": "Maintenance grant declared solely to archive superseded sld-032 under .sld/. The SLD engine itself stays untouched.",
+  "instruction": "NaLonni's request from 2026-09-29: implement the Kolmari Guide chatbot per the provided kit so it answers user questions in production (approved as sld-032, shipped, then observed failing with a provider error in live browser testing). Follow-up direction in the same session: after the API key fix, retest live; if it still errors, dig into the provider's exact response and fix it. This contract covers that diagnostic fix: surface the Meta Model API status and error message in the 502 response and server log, and send instructions with the developer role per Meta's chat-completions docs.",
+  "createdFrom": "current-user-request",
+  "supersedes": "sld-032-chatbot-map-image-agent",
+  "supersedeNote": "sld-032 authorized the chatbot, map, and image-agent build. It is archived at .sld/archive/sld-032-chatbot-map-image-agent.json. This contract covers only the follow-up provider-error diagnosis and fix.",
+  "allowedEntities": [],
+  "allowedFiles": [
+    "src/app/api/chat/route.ts",
+    ".sld/task-contract.json",
+    ".sld/archive/sld-032-chatbot-map-image-agent.json"
+  ],
+  "allowedActions": [
+    "CREATE",
+    "MODIFY",
+    "REWIRE",
+    "REWRITE_COPY"
+  ],
+  "forbiddenChanges": [
+    "src/sld/",
+    "src/app/api/sld/",
+    ".sld/baseline.json",
+    "scripts/sld.mjs"
+  ]
+}
