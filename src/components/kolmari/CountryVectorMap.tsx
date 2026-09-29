@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { geoMercator, geoPath } from 'd3-geo'
+import 'maplibre-gl/dist/maplibre-gl.css'
 import { getCountryFeature } from '@/lib/world-geo'
 import { KOLMARI_MAP_STYLE } from '@/lib/kolmari-map'
 import { CountrySnapshotMap } from '@/components/country-workspace/CountrySnapshotMap'
@@ -39,7 +40,6 @@ export function CountryVectorMap({ countryName, countryCode, lat, lng, alt, city
           import('maplibre-gl'),
           Promise.resolve(getCountryFeature(countryCode)),
         ])
-        await import('maplibre-gl/dist/maplibre-gl.css')
         if (cancelled || !containerRef.current) return
 
         const instance = new maplibregl.Map({
@@ -52,8 +52,12 @@ export function CountryVectorMap({ countryName, countryCode, lat, lng, alt, city
           touchPitch: false,
         })
 
+        // A single bad tile must not kill the map: only errors before the
+        // style finishes loading are fatal. After load, tile errors are
+        // non-fatal and MapLibre retries them on its own.
+        let loaded = false
         instance.on('error', () => {
-          if (!cancelled) setFailed(true)
+          if (!cancelled && !loaded) setFailed(true)
         })
 
         // Zoom controls, per the approved 1a mockup (no compass).
@@ -61,6 +65,7 @@ export function CountryVectorMap({ countryName, countryCode, lat, lng, alt, city
 
         instance.on('load', () => {
           if (cancelled) return
+          loaded = true
           if (feature?.geometry) {
             const mercator = geoMercator()
             const bounds = geoPath(mercator).bounds(feature as never)
