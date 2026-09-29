@@ -46,6 +46,7 @@ type ResponsesApiResponse = {
   status?: string
   output?: ResponsesOutputItem[]
   error?: { message?: string; code?: string }
+  incomplete_details?: { reason?: string }
 }
 
 // Privacy-preserving user attribution for the AI provider (its documented
@@ -117,7 +118,9 @@ async function callMetaModelApi(
         content: [{ type: m.role === 'assistant' ? 'output_text' : 'input_text', text: m.content }],
       })),
       tools: [{ type: 'web_search' }], // the model decides when a search is needed
-      max_output_tokens: 4000, // reasoning plus visible output share this budget
+      // Reasoning, web-search steps and the visible answer share this budget;
+      // a search question needs far more headroom than a plain one.
+      max_output_tokens: 16000,
       store: false, // stateless: no conversation retained server-side
       safety_identifier: await sha256Hex(`kolmari:${userId}`),
     }),
@@ -135,7 +138,9 @@ async function callMetaModelApi(
     throw new Error(`AI provider ${res.status}${providerMessage ? `: ${providerMessage}` : ''}`)
   }
   if (data.status && data.status !== 'completed') {
-    const providerMessage = data.error?.message || `status ${data.status}`
+    const providerMessage =
+      data.error?.message ||
+      (data.incomplete_details?.reason ? `incomplete: ${data.incomplete_details.reason}` : `status ${data.status}`)
     throw new Error(`AI provider: ${providerMessage}`)
   }
   const texts: string[] = []
