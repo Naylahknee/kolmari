@@ -2,10 +2,11 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { Check, ChevronDown, ExternalLink, Info, CheckCircle2, Minus, Plus } from 'lucide-react'
+import { Check, CheckCircle2, Minus, Plus } from 'lucide-react'
 import type { RelocationProfile } from '@/lib/profile'
 import { evaluatePathways, RESEARCH_DISCLAIMER, type PathwayEvaluation, type PathwayMatchStatus } from '@/lib/pathways'
 import { INCOME_TYPES, LESSER_KNOWN_ROUTES, VISA_JOURNEYS } from '@/lib/pathway-extras'
+import { PathwaysExplorer } from '@/components/kolmari/pathways-explorer'
 
 // ─── Status presentation ────────────────────────────────────────────────
 //
@@ -56,7 +57,6 @@ export function PathwaysResults({ profile, savedDestination, selectedPathway, do
   const [children, setChildren] = useState(profile.dependents ?? 0)
   const [incomeType, setIncomeType] = useState<string | null>(profile.income_type)
   const [activeSection, setActiveSection] = useState<string>('journey')
-  const [category, setCategory] = useState('All')
 
   const touched =
     income !== profile.monthly_income || savings !== profile.savings ||
@@ -81,11 +81,6 @@ export function PathwaysResults({ profile, savedDestination, selectedPathway, do
     () => [...evaluated].sort((a, b) => fitOrder(a.status) - fitOrder(b.status)).slice(0, 3),
     [evaluated],
   )
-  const categories = ['All', ...Array.from(new Set(evaluated.map((p) => p.category)))]
-  const routes = useMemo(() => {
-    const list = category === 'All' ? evaluated : evaluated.filter((p) => p.category === category)
-    return [...list].sort((a, b) => fitOrder(a.status) - fitOrder(b.status))
-  }, [evaluated, category])
 
   const journey = savedDestination ? VISA_JOURNEYS[savedDestination] ?? null : null
   const currentStep = journey ? journey.findIndex((s) => s.state === 'current') + 1 : 0
@@ -274,43 +269,10 @@ export function PathwaysResults({ profile, savedDestination, selectedPathway, do
         )}
       </section>
 
-      {/* 6 — All routes */}
+      {/* 6 — All routes: master-detail explorer */}
       <section id="pw-routes" className="scroll-mt-4" aria-labelledby="pw-routes-heading">
-        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          <h2 id="pw-routes-heading" className="text-[16px] font-bold tracking-[-0.01em] text-navy">Explore all Pathways</h2>
-          <span className="text-[11.5px] text-muted-soft">{evaluated.length} researched routes</span>
-        </div>
-
-        <div className="-mx-1 mt-3 overflow-x-auto px-1 pb-2 [scrollbar-width:thin]">
-          <div className="flex w-max min-w-full gap-2">
-            {categories.map((item) => {
-              const active = category === item
-              return (
-                <button
-                  key={item}
-                  type="button"
-                  aria-pressed={active}
-                  onClick={() => setCategory(item)}
-                  className={[
-                    'shrink-0 rounded-pill border px-3 py-1.5 text-[12px] font-semibold transition-colors',
-                    active ? 'border-navy bg-navy text-white' : 'border-line bg-white text-muted hover:border-navy/30 hover:text-navy',
-                  ].join(' ')}
-                >
-                  {item}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
-        <div className="mt-3 grid gap-3.5 [grid-template-columns:repeat(auto-fill,minmax(330px,1fr))]">
-          {routes.map((pathway, i) => (
-            <RouteCard key={pathway.id} pathway={pathway} best={i === 0 && pathway.status === 'Strong Match'} />
-          ))}
-        </div>
-        {routes.length === 0 && (
-          <div className="card-surface mt-3 p-8 text-sm text-muted">No Pathways found for this category.</div>
-        )}
+        <h2 id="pw-routes-heading" className="sr-only">Explore all Pathways</h2>
+        <PathwaysExplorer pathways={evaluated} planPathway={selectedPathway} />
       </section>
 
       {/* 7 — Lesser-known routes */}
@@ -377,95 +339,3 @@ function Stepper({ label, value, min, onChange }: { label: string; value: number
   )
 }
 
-function RouteCard({ pathway, best }: { pathway: PathwayEvaluation; best: boolean }) {
-  const [open, setOpen] = useState(false)
-  const facts: [string, string][] = [
-    ['Income needed', pathway.incomeThreshold],
-    ['Processing', pathway.estimatedProcessingTime],
-    ['Dependents', pathway.dependentsAllowed],
-    ['Estimated fees', pathway.estimatedFees],
-  ].filter((fact): fact is [string, string] => Boolean(fact[1]))
-
-  return (
-    <article
-      className="flex flex-col rounded-[var(--radius-card)] bg-white px-4 pb-4 pt-3.5 shadow-tile"
-      style={{ border: `1px solid ${best ? 'var(--color-gold)' : 'var(--color-line)'}` }}
-    >
-      <div className="flex items-start gap-3">
-        <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold uppercase tracking-[0.11em] text-muted-soft">{pathway.country}</p>
-          <h3 className="mt-0.5 text-[15.5px] font-bold tracking-[-0.01em] text-navy">{pathway.name}</h3>
-        </div>
-        {best && <span className="shrink-0 rounded-pill bg-gold-soft px-2.5 py-[3px] text-[10px] font-bold text-[#7a5c05]">Best match</span>}
-      </div>
-
-      <div className="mt-2 flex flex-wrap items-center gap-2">
-        <FitBadge status={pathway.status} />
-        <span className="text-[10px] font-bold uppercase tracking-[0.11em] text-muted-soft">{pathway.category}</span>
-      </div>
-
-      <p className="mt-2.5 text-[12.8px] leading-[1.6] text-muted">
-        {pathway.requirementsMet.length} signal{pathway.requirementsMet.length === 1 ? '' : 's'} met,{' '}
-        {pathway.missingRequirements.length} to confirm from your Kolmari Profile.
-      </p>
-
-      <dl className="mt-3 grid grid-cols-2 gap-2.5 border-t border-[#f0f3f7] pt-3">
-        {facts.slice(0, 4).map(([label, value]) => (
-          <div key={label}>
-            <dt className="text-[9.5px] uppercase tracking-[0.08em] text-muted-soft">{label}</dt>
-            <dd className="mt-0.5 line-clamp-2 text-[12.5px] font-bold text-navy">{value}</dd>
-          </div>
-        ))}
-      </dl>
-
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        className="mt-3 flex items-center gap-1.5 text-[11.5px] font-bold text-gold-deep"
-      >
-        {open ? 'Hide requirements' : 'View requirements'}
-        <ChevronDown size={13} aria-hidden="true" className={`transition-transform duration-[var(--duration-standard)] ${open ? 'rotate-180' : ''}`} />
-      </button>
-
-      {open && (
-        <div className="mt-3 border-t border-[#f0f3f7] pt-3">
-          <h4 className="text-[10px] font-bold uppercase tracking-wide text-teal-deep">Requirements met</h4>
-          {pathway.requirementsMet.length ? (
-            <ul className="mt-2 space-y-1.5">
-              {pathway.requirementsMet.map((item) => (
-                <li key={item} className="flex gap-2 text-[12px] leading-5 text-navy">
-                  <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-teal-deep" aria-hidden="true" /><span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          ) : <p className="mt-2 text-[12px] text-muted">No profile requirements confirmed yet.</p>}
-
-          <h4 className="mt-3 text-[10px] font-bold uppercase tracking-wide text-warn">Missing or unconfirmed</h4>
-          {pathway.missingRequirements.length ? (
-            <ul className="mt-2 space-y-1.5">
-              {pathway.missingRequirements.map((item) => (
-                <li key={item} className="flex gap-2 text-[12px] leading-5 text-navy">
-                  <Info size={14} className="mt-0.5 shrink-0 text-warn" aria-hidden="true" /><span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          ) : <p className="mt-2 text-[12px] text-muted">No profile gaps identified.</p>}
-
-          <div className="mt-3 flex flex-wrap items-center gap-3">
-            {pathway.officialSource && (
-              <a
-                href={pathway.officialSource} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-[11.5px] font-bold text-gold-deep underline-offset-4 hover:underline"
-              >
-                <ExternalLink size={13} aria-hidden="true" />
-                {pathway.sourceLabel ?? 'Official source'}
-              </a>
-            )}
-            <span className="text-[10.5px] text-muted-soft">Verified {pathway.lastVerified}</span>
-          </div>
-        </div>
-      )}
-    </article>
-  )
-}
