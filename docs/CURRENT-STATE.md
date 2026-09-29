@@ -2,6 +2,21 @@
 
 Running log of implemented page state. Update this file when application code changes.
 
+## Region card art + region switcher — 2026-09-28 (pending release)
+
+Owner direction (chat, 2026-09-28): replace the gold country-outline artwork.
+Regions page country cards now use `RegionCountryArt`: the country's own photo
+when one exists (Europe's Portugal/Spain/Greece/Estonia), otherwise a large
+centered flag on navy with a letter fallback. The region hero already used
+photography and was left alone.
+
+All six region pages (Europe, Africa, Asia, North America, Latin America,
+Oceania) render from the same dynamic route; a new region switcher tab bar
+below the breadcrumb links them all, so none is Europe-only in practice.
+Regions with no researched pathway data (Africa, Asia, Latin America) show the
+honest research-in-progress note; North America shows Canada routes, Oceania
+shows New Zealand routes.
+
 ## Passport buttons on regions page, Destinations reverted — 2026-09-28 (pending release)
 
 Owner correction (chat, 2026-09-28): the passport buttons belong on the
