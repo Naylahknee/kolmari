@@ -25,27 +25,7 @@ const requestSchema = z.object({
 type ChatMessage = z.infer<typeof chatMessageSchema>
 
 type MetaModelResponse = {
-  choices?: { finish_reason?: string; message?: { content?: unknown } }[]
-}
-
-// The provider sometimes returns message content as a multipart array.
-// Normalize both shapes to plain text.
-function extractContent(content: unknown): string {
-  if (typeof content === 'string') return content.trim()
-  if (Array.isArray(content)) {
-    return content
-      .map((part) => {
-        if (typeof part === 'string') return part
-        if (part && typeof part === 'object' && 'text' in part) {
-          const text = (part as { text?: unknown }).text
-          return typeof text === 'string' ? text : ''
-        }
-        return ''
-      })
-      .join('')
-      .trim()
-  }
-  return ''
+  choices?: { message?: { content?: string } }[]
 }
 
 let usageTableReady: Promise<void> | null = null
@@ -81,21 +61,17 @@ const SYSTEM_PROMPT =
 // The only provider-specific code. To switch to Claude or another provider
 // later, change just this function.
 async function callMetaModelApi(system: string, messages: ChatMessage[], signal: AbortSignal) {
-  // Trim: pasted secrets often carry a trailing newline that would invalidate the header.
-  const apiKey = (process.env.MODEL_API_KEY || '').trim()
   const res = await fetch('https://api.meta.ai/v1/chat/completions', {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${process.env.MODEL_API_KEY}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
       model: process.env.AI_MODEL?.trim() || 'muse-spark-1.3', // standard tier: not used to improve Meta's products
       // Meta's chat-completions docs use the "developer" role for instructions.
       messages: [{ role: 'developer', content: system }, ...messages],
-      // Muse Spark always reasons; reasoning tokens count against this budget,
-      // so leave headroom beyond the visible answer.
-      max_tokens: 4000,
+      max_tokens: 800,
     }),
     signal,
   })
@@ -111,16 +87,7 @@ async function callMetaModelApi(system: string, messages: ChatMessage[], signal:
       (data as { error?: { message?: string } }).error?.message || raw.slice(0, 300)
     throw new Error(`AI provider ${res.status}${providerMessage ? `: ${providerMessage}` : ''}`)
   }
-  const choice = data.choices?.[0]
-  const reply = extractContent(choice?.message?.content)
-  if (!reply) {
-    const contentValue = choice?.message?.content
-    const contentType = Array.isArray(contentValue) ? 'array' : typeof contentValue
-    throw new Error(
-      `empty reply (choices: ${data.choices?.length ?? 0}, finish: ${choice?.finish_reason ?? 'n/a'}, content-type: ${contentType})`,
-    )
-  }
-  return reply
+  return data.choices?.[0]?.message?.content?.trim() || ''
 }
 
 export async function POST(request: Request) {
@@ -211,6 +178,10 @@ export async function POST(request: Request) {
     )
   } finally {
     clearTimeout(timeout)
+  }
+
+  if (!reply) {
+    return NextResponse.json({ error: 'The Kolmari Guide did not return a usable answer.' }, { status: 502 })
   }
 
   // Count the message only after a successful AI reply
