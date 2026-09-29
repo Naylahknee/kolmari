@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { ChevronDown, Heart, Lock, Search, X } from 'lucide-react'
 import { PanelIcon, safetyLabelForLevel, safetyScoreColor } from '@/components/kolmari/panel-icons'
-import { PassportIndexLink } from '@/components/kolmari/PassportIndexLink'
 import { attributeIconsFor, getCountryAttributes } from '@/lib/country-attributes'
 
 export type ExplorerRegion = 'Europe' | 'Asia' | 'North America' | 'Latin America' | 'Oceania'
@@ -56,30 +55,26 @@ function formatIncome(monthly: number) {
 
 const costLabel: Record<string, string> = { $: 'Lower cost', $$: 'Moderate cost' }
 
-function CountryFlagArt({ country, className }: { country: ExplorerCountry; className: string }) {
+function CountryPhoto({ country, imageSrc, className }: { country: ExplorerCountry; imageSrc: string | null; className: string }) {
   const [flagFailed, setFlagFailed] = useState(false)
   return (
-    <div className={`relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-navy via-[#1d3a5f] to-[#0e1c33] ${className}`}>
-      {!flagFailed ? (
-        <img
-          src={`https://flagcdn.com/w320/${country.code.toLowerCase()}.png`}
-          alt={`${country.name} flag`}
-          loading="lazy"
-          className="h-20 w-32 rounded-lg object-cover shadow-xl"
-          onError={() => setFlagFailed(true)}
-        />
-      ) : (
-        <span className="text-5xl font-extrabold tracking-wide text-gold/80">{country.code}</span>
-      )}
-    </div>
-  )
-}
-
-function CountryPhoto({ country, imageSrc, className }: { country: ExplorerCountry; imageSrc: string | null; className: string }) {
-  if (!imageSrc) return <CountryFlagArt country={country} className={className} />
-  return (
     <div className={`relative overflow-hidden bg-gradient-to-br from-navy via-[#1d3a5f] to-[#0e1c33] ${className}`}>
-      <img src={imageSrc} alt={`${country.name} photo`} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+      {imageSrc ? (
+        <img src={imageSrc} alt={`${country.name} photo`} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center">
+          {!flagFailed && (
+            <img
+              src={`https://flagcdn.com/w160/${country.code.toLowerCase()}.png`}
+              alt=""
+              loading="lazy"
+              className="h-16 w-24 rounded-md object-cover shadow-lg"
+              onError={() => setFlagFailed(true)}
+            />
+          )}
+          {flagFailed && <span className="text-4xl font-extrabold tracking-wide text-gold/80">{country.code}</span>}
+        </div>
+      )}
     </div>
   )
 }
@@ -276,7 +271,7 @@ export function DestinationsExplorer({ countries, imageSrcs, matchScores, paid, 
                     )}
                   </div>
                 </div>
-                <div className="px-4 pt-3.5">
+                <div className="px-4 py-3.5">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-sm font-bold text-navy">
                       {country.cost ? (
@@ -314,9 +309,6 @@ export function DestinationsExplorer({ countries, imageSrcs, matchScores, paid, 
                       ))}
                     </div>
                   )}
-                </div>
-                <div className="px-4 pb-4 pt-3">
-                  <PassportIndexLink countrySlug={country.slug} countryName={country.name} lightbox />
                 </div>
               </article>
             )

@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowRight, ChevronRight, FlaskConical } from 'lucide-react'
+import { CountryShapePanel } from '@/components/kolmari/CountryShapePanel'
 import { PassportIndexLink } from '@/components/kolmari/PassportIndexLink'
 import { requireCurrentUser } from '@/lib/auth'
 import { getProfile } from '@/lib/profile'
@@ -44,6 +45,7 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
   const profile = await getProfile(user.id)
   const matches = calculateRegionMatches(profile)
   const region = regions[slug]
+  const profileComplete = profile.wizard_status === 'completed'
 
   const countriesWithPathways = region.countries
     .map((country) => ({
@@ -89,6 +91,57 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
             ))}
           </div>
         </div>
+      </section>
+
+      <section className="py-10">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">{matches ? 'Connected to your Profile' : 'Popular places to research'}</p>
+            <h2 className="mt-1 text-3xl font-bold text-navy">Destinations in {region.name}</h2>
+            {!profileComplete && <p className="mt-2 max-w-2xl text-sm text-muted">These are editorial starting points, not personalized rankings. Complete your Profile to compare regions against your facts.</p>}
+          </div>
+          <Link href="/destinations" className="text-sm font-semibold text-navy transition hover:text-gold-deep">View all Destinations</Link>
+        </div>
+
+        {region.countries.length > 0 ? (
+          <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+            {region.countries.map((country) => (
+              <article key={`${country.slug}-${country.city}`} className="overflow-hidden rounded-card border border-line bg-white shadow-card">
+                <CountryShapePanel code={country.code} country={country.name} city={country.city} />
+                <div className="p-5">
+                  <h3 className="text-lg font-extrabold text-navy">{country.name}</h3>
+                  <p className="mt-1 flex items-center gap-2 text-sm text-muted">
+                    <Image src={flagSrc(country.code)} alt="" width={24} height={16} className="h-4 w-6 rounded-[2px] object-cover" />
+                    <span>{country.city}</span>
+                  </p>
+                  {profileComplete && (country.pathway || country.communityFit || country.monthlyCost) ? (
+                    <dl className="mt-4 space-y-2 text-sm">
+                      {country.pathway && <div><dt className="text-muted">{KOLMARI_LEXICON.pathways}</dt><dd className="font-semibold text-navy">{country.pathway}</dd></div>}
+                      {country.communityFit && <div className="flex justify-between gap-3"><dt className="text-muted">{KOLMARI_LEXICON.communityFit}</dt><dd className="font-semibold text-navy">{country.communityFit}</dd></div>}
+                      {country.monthlyCost !== undefined && <div className="flex justify-between gap-3"><dt className="text-muted">Estimated cost</dt><dd className="font-semibold text-navy">${country.monthlyCost.toLocaleString()}/mo</dd></div>}
+                    </dl>
+                  ) : (
+                    <div className="mt-4 rounded-[var(--radius-field)] bg-canvas p-3 text-xs leading-5 text-muted">
+                      {profileComplete ? 'Country research is being verified.' : 'Popular research starting point. Personalized comparison is not available until your profile is complete.'}
+                    </div>
+                  )}
+                  {country.guideAvailable ? (
+                    <Link href={`/nextinations/${country.slug}/v2/overview`} className="gold-button mt-5 w-full">View Destination <ArrowRight size={15} /></Link>
+                  ) : (
+                    <span className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-[var(--radius-btn)] bg-canvas px-4 text-sm font-bold text-muted">Country guide in progress</span>
+                  )}
+                  <div className="mt-3">
+                    <PassportIndexLink countrySlug={country.slug} countryName={country.name} lightbox />
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-6 rounded-card border border-line bg-white p-8 text-muted shadow-card">
+            Country recommendations for this region are being added. You can still review the region and refine your Pathways now.
+          </div>
+        )}
       </section>
 
       <section className="py-10">
