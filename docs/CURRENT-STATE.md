@@ -981,3 +981,9 @@ updated in `docs/dashboard-destination-panels.md`.
   `content-start` so the cards keep their compact approved height instead of
   stretching to the Journey tracker's height on desktop, per owner feedback
   with the reference screenshot.
+
+## Your World round 3 (2026-09-28, ~17:10 PDT, commit f046b63)
+- Your World "Recommended for you" and the free gated teaser now list the top 3 quiz matches instead of 4, matching the dashboard's 3-match set.
+- Stories & expert guidance is now country-driven: country pills for the user's matched destinations; the video grid shows videos for the selected country only (demo stories tagged per country + the verified Greenbook per-country YouTube library, deduped). Countries with no coverage show an honest "being verified" note, never placeholders.
+- Workspace content column widened to 1760px with a 24px gutter to match the demo site's near-full-bleed margins (was 1240px / 28px). Country pages inherit the same vars.
+- Deploy to Cloudflare run 36500824461 completed success. SLD Governance fails on the stale sld-031 contract as expected (untouched).
