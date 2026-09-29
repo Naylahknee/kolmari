@@ -987,3 +987,13 @@ updated in `docs/dashboard-destination-panels.md`.
 - Stories & expert guidance is now country-driven: country pills for the user's matched destinations; the video grid shows videos for the selected country only (demo stories tagged per country + the verified Greenbook per-country YouTube library, deduped). Countries with no coverage show an honest "being verified" note, never placeholders.
 - Workspace content column widened to 1760px with a 24px gutter to match the demo site's near-full-bleed margins (was 1240px / 28px). Country pages inherit the same vars.
 - Deploy to Cloudflare run 36500824461 completed success. SLD Governance fails on the stale sld-031 contract as expected (untouched).
+
+## Pathways explorer (2026-09-28, ~17:45 PDT, commit 805d9c1)
+- /pathways "Explore all Pathways" card grid replaced with a master-detail layout: scannable route list left (~64%), detail panel right (~36%), thin vertical divider, panel never covers the list.
+- Header above the list: "EXPLORE YOUR OPTIONS" / "Your potential visa routes" / "See what fits your profile and what to confirm next." Search + category pills kept.
+- Tabs with live counts and navy underline: All routes, Potential fits, Needs information, Saved.
+- Status semantics: green "Potential fit" (matching evidence), amber "Needs confirmation" (missing/unverified info), red "Requirement not met" (only when a requirement is documented as unmet, e.g. income below the planning guide). Unknown info is never treated as failed.
+- Detail panel: ROUTE OVERVIEW + close, flag + country, full route title + status, "Why this appeared for you" (actual profile signals), "What to review next" (gaps), accordions for Money and fees / Bringing your family / Processing information / Official requirements (source link + verified date inside), full-width navy Save route, Add to comparison secondary.
+- Save route writes selected_pathway ("Country — Name") via PUT /api/plan (existing plan functionality). Add to comparison bookmarks the route into the saved set; 2+ saved routes enable a side-by-side compare table.
+- Responsive: below lg the list is full width and selecting a route opens a full-screen detail with a back button; filters persist; focus returns to the row on close. Keyboard: arrow keys move between rows, Enter selects, accordions use button semantics.
+- No SLD contract files touched.
