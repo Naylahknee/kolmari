@@ -6,10 +6,12 @@ import { z } from 'zod'
 import { getRequestUser } from '@/lib/auth'
 import { getSql } from '@/lib/db'
 import { getProfile, hasCompletedProfile } from '@/lib/profile'
+import { clientIp, rateLimit } from '@/lib/security'
 
 export const runtime = 'nodejs'
 
 const DAILY_LIMIT = 30 // chat messages per user per day
+const CHAT_IP_LIMIT = 60 // requests per minute per IP (the chat endpoint calls a paid API)
 const MAX_HISTORY = 10 // how many past messages to send the AI
 const MAX_MESSAGE_CHARS = 1000
 
@@ -177,6 +179,16 @@ async function callMetaModelApi(
 export async function POST(request: Request) {
   const user = await getRequestUser(request)
   if (!user) return NextResponse.json({ error: 'Please sign in to use the Kolmari Guide.' }, { status: 401 })
+
+  // Per-IP flood protection on top of the per-user daily cap below. The chat
+  // endpoint calls a paid AI API, so a burst of requests gets throttled fast.
+  const ipLimit = rateLimit(`chat:${clientIp(request)}`, CHAT_IP_LIMIT, 60_000)
+  if (!ipLimit.ok) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please wait a moment and try again.' },
+      { status: 429, headers: { 'Retry-After': String(ipLimit.retryAfterSeconds) } },
+    )
+  }
 
   const parsed = requestSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) {

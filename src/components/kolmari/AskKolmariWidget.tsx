@@ -82,7 +82,7 @@ export function AskKolmariWidget() {
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-label={open ? 'Close the Kolmari Guide chat' : 'Open the Kolmari Guide chat'}
-        className="fixed bottom-6 right-6 z-[9999] rounded-full bg-navy-deep px-5 py-3 text-[15px] font-bold text-white shadow-[0_4px_14px_rgba(0,0,0,0.25)] ring-2 ring-gold hover:bg-navy-card focus-visible:outline-2 focus-visible:outline-gold"
+        className="fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] right-[max(1.5rem,env(safe-area-inset-right))] z-[9999] rounded-full bg-navy-deep px-5 py-3 text-[15px] font-bold text-white shadow-[0_4px_14px_rgba(0,0,0,0.25)] ring-2 ring-gold hover:bg-navy-card focus-visible:outline-2 focus-visible:outline-gold"
       >
         Ask Kolmari
       </button>
@@ -90,7 +90,7 @@ export function AskKolmariWidget() {
         <div
           role="dialog"
           aria-label="Kolmari Guide chat"
-          className="fixed bottom-[92px] right-6 z-[9999] flex h-[min(520px,calc(100vh-110px))] w-[min(370px,calc(100vw-48px))] flex-col overflow-hidden rounded-2xl bg-white shadow-[0_10px_30px_rgba(0,0,0,0.25)]"
+          className="fixed bottom-[max(5.75rem,calc(env(safe-area-inset-bottom)+4.25rem))] right-[max(1.5rem,env(safe-area-inset-right))] z-[9999] flex h-[min(520px,calc(100vh-110px))] w-[min(370px,calc(100vw-48px))] flex-col overflow-hidden rounded-2xl bg-white shadow-[0_10px_30px_rgba(0,0,0,0.25)]"
         >
           <div className="bg-navy-deep px-4 py-3 text-white">
             <p className="text-[15px] font-bold text-gold">Kolmari Guide (AI)</p>
@@ -119,7 +119,7 @@ export function AskKolmariWidget() {
               autoComplete="off"
               disabled={sending}
               aria-label="Type your message"
-              className="flex-1 rounded-xl border border-line-strong bg-white px-3 py-2 text-sm text-ink placeholder:text-muted-soft focus-visible:outline-2 focus-visible:outline-gold disabled:opacity-60"
+              className="flex-1 rounded-xl border border-line-strong bg-white px-3 py-2 text-base text-ink placeholder:text-muted-soft focus-visible:outline-2 focus-visible:outline-gold disabled:opacity-60"
             />
             <button
               type="submit"

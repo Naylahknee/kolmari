@@ -85,6 +85,28 @@ const PAID_TIERS = [
 ]
 
 function TierCard({ tier }: { tier: (typeof PAID_TIERS)[number] }) {
+  const [busy, setBusy] = useState<'month' | 'year' | null>(null)
+  const [error, setError] = useState('')
+
+  async function startCheckout(interval: 'month' | 'year') {
+    setBusy(interval)
+    setError('')
+    try {
+      const response = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tier: tier.id, interval }),
+      })
+      const data = (await response.json().catch(() => ({}))) as { url?: unknown; error?: unknown }
+      if (!response.ok) throw new Error(typeof data.error === 'string' ? data.error : 'Could not start checkout.')
+      if (typeof data.url !== 'string') throw new Error('Could not start checkout.')
+      window.location.href = data.url
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Could not start checkout.')
+      setBusy(null)
+    }
+  }
+
   return (
     <div className={`flex flex-col rounded-[var(--radius-card)] p-6 ${tier.featured ? 'bg-navy-deep text-white shadow-card' : 'border border-line bg-white'}`}>
       <div className="flex items-center justify-between gap-3">
@@ -97,14 +119,26 @@ function TierCard({ tier }: { tier: (typeof PAID_TIERS)[number] }) {
       </div>
       <p className={`mt-1 text-xs font-semibold ${tier.featured ? 'text-gold' : 'text-gold-deep'}`}>{tier.annual}</p>
       <p className={`mt-3 text-sm leading-6 ${tier.featured ? 'text-white/75' : 'text-muted'}`}>{tier.tagline}</p>
-      <Link
-        href={tier.href}
+      <button
+        type="button"
+        onClick={() => startCheckout('month')}
+        disabled={busy !== null}
         className={tier.featured
-          ? 'gold-button mt-5 w-full justify-center'
-          : 'mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[var(--radius-btn)] border border-line px-5 font-bold text-navy transition hover:border-gold'}
+          ? 'gold-button mt-5 w-full justify-center disabled:opacity-60'
+          : 'mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[var(--radius-btn)] border border-line px-5 font-bold text-navy transition hover:border-gold disabled:opacity-60'}
       >
+        {busy === 'month' ? <LoaderCircle size={16} className="animate-spin" /> : null}
         {tier.cta} <ArrowRight size={16} />
-      </Link>
+      </button>
+      <button
+        type="button"
+        onClick={() => startCheckout('year')}
+        disabled={busy !== null}
+        className={`mt-2 text-xs font-bold underline underline-offset-2 disabled:opacity-60 ${tier.featured ? 'text-gold hover:text-white' : 'text-gold-deep hover:text-navy'}`}
+      >
+        {busy === 'year' ? 'Starting checkout…' : `Prefer annual? ${tier.annual.replace(/^or /, '').split(' — ')[0]}/yr`}
+      </button>
+      {error && <p role="alert" className="mt-2 text-xs font-semibold text-danger">{error}</p>}
       <ul className="mt-6 space-y-3">
         {tier.features.map((feature, index) => (
           <li key={feature} className={`flex items-start gap-2.5 text-sm leading-6 ${tier.featured ? 'text-white/85' : 'text-navy'} ${index === 0 ? 'font-semibold' : ''}`}>
@@ -128,6 +162,7 @@ function BillingPanel({ plan }: { plan: PlanTier }) {
       </div>
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-field)] border border-line bg-canvas p-4">
         <div className="flex items-center gap-2">{plan === 'free' ? <Sparkles size={18} className="text-gold-deep"/> : <CheckCircle2 size={18} className="text-ok"/>}<span className="font-semibold text-navy">{planLabel}</span></div>
+        {plan !== 'free' && <ManageSubscriptionButton />}
       </div>
       {upgradeTiers.length > 0 && (
         <div className="mt-6 border-t border-line pt-6">
@@ -145,8 +180,43 @@ function BillingPanel({ plan }: { plan: PlanTier }) {
           <TrialRedeemForm tight />
         </div>
       )}
-      <p className="mt-4 text-sm leading-6 text-muted">Prices in USD. Kolmari is launching free — paid checkout is coming soon, so nothing is charged today. Trial codes redeem Plus immediately.</p>
+      <p className="mt-4 text-sm leading-6 text-muted">Prices in USD. Checkout is powered by Stripe — manage or cancel anytime from this tab. Trial codes redeem Plus immediately.</p>
     </div>
+  )
+}
+
+function ManageSubscriptionButton() {
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+
+  async function openPortal() {
+    setBusy(true)
+    setError('')
+    try {
+      const response = await fetch('/api/billing/portal', { method: 'POST' })
+      const data = (await response.json().catch(() => ({}))) as { url?: unknown; error?: unknown }
+      if (!response.ok) throw new Error(typeof data.error === 'string' ? data.error : 'Could not open billing settings.')
+      if (typeof data.url !== 'string') throw new Error('Could not open billing settings.')
+      window.location.href = data.url
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Could not open billing settings.')
+      setBusy(false)
+    }
+  }
+
+  return (
+    <span className="flex flex-col items-end gap-1">
+      <button
+        type="button"
+        onClick={openPortal}
+        disabled={busy}
+        className="inline-flex min-h-9 items-center gap-2 rounded-[var(--radius-btn)] border border-line bg-white px-4 text-sm font-bold text-navy transition hover:border-gold disabled:opacity-60"
+      >
+        {busy ? <LoaderCircle size={14} className="animate-spin" /> : <CreditCard size={14} />}
+        Manage subscription
+      </button>
+      {error && <span role="alert" className="text-xs font-semibold text-danger">{error}</span>}
+    </span>
   )
 }
 

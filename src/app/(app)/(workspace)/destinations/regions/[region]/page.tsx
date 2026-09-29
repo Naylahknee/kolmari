@@ -1,4 +1,5 @@
 import { flagSrc } from '@/lib/flags'
+import { absoluteUrl } from '@/lib/site'
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -35,6 +36,7 @@ export async function generateMetadata({ params }: RegionPageProps): Promise<Met
   return {
     title: `${region.name} Destination Guide | Kolmari`,
     description: region.description,
+    alternates: { canonical: absoluteUrl(`/destinations/regions/${slug}`) },
   }
 }
 

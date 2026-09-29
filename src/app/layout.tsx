@@ -1,14 +1,22 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import './sidebar-scroll.css'
 import { absoluteUrl, getSiteUrl } from '@/lib/site'
+import { JsonLd } from '@/components/kolmari/json-ld'
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] })
 
 const title = 'Kolmari | Build Your Relocation Plan'
 const description = 'Compare destinations, review pathways, build your budget, and turn relocation research into a practical plan.'
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: '#0D1B39',
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
@@ -36,9 +44,30 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const siteUrl = getSiteUrl()
   return (
     <html lang="en" data-scroll-behavior="smooth" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full">
+        <JsonLd
+          data={{
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            name: 'Kolmari',
+            url: siteUrl,
+            logo: absoluteUrl('/brand/favicon-512.png'),
+            description,
+          }}
+        />
+        <JsonLd
+          data={{
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            name: 'Kolmari',
+            url: siteUrl,
+          }}
+        />
+        {children}
+      </body>
     </html>
   )
 }

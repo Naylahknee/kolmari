@@ -1,0 +1,46 @@
+# Kolmari
+
+> Kolmari is a relocation decision and planning platform. It helps people compare
+> countries, review visa pathways, build a budget, and turn relocation research
+> into a practical, tracked plan. It is not a travel-booking site.
+
+## What Kolmari does
+
+- Match Score: compares destinations against a user's Kolmari Profile (citizenship,
+  household, timeline, priorities, budget).
+- Kolmari Pathways: researched visa and immigration routes per country, each with
+  official source links and a last-reviewed date.
+- Move Plan: a step-by-step relocation plan with a documents checklist and
+  readiness tracker.
+- Cost Calculator: cost-of-living and housing estimates per destination.
+- Greenbook Insights: curated, verified country guidance.
+- Passport Index: Kolmari's own passport-mobility tool at /passportindex, built
+  from the February 2026 imorte/passport-index-data dataset.
+- Kolmari Guide (AI): an in-app chatbot that answers relocation questions and can
+  search the web for current visa rules, rents, and prices. Answers are general
+  information only, not legal or financial advice.
+
+## Key public pages
+
+- / : product overview
+- /passportindex : passport power and visa-free access rankings
+- /terms : terms of service
+- /privacy : privacy policy (includes how the Kolmari Guide uses data)
+
+Most planning features (/dashboard, /destinations, /pathways, /my-plan,
+/cost-calculator, /greenbook) require a free account.
+
+## Data and freshness
+
+- Country safety data: US State Department travel advisories and the 2026 Global
+  Peace Index, shown with source dates. Countries without a published score show
+  the advisory label instead of a number; nothing is invented.
+- Visa pathway content is researched per route with official sources and review
+  dates. Pages without completed research say so explicitly.
+- AI answers may be wrong; users are told to confirm visa details with the
+  relevant consulate or immigration authority.
+
+## Plans
+
+- Explorer (free), Plus, and Navigator (paid). Prices are listed in-app on the
+  Billing tab under account settings.

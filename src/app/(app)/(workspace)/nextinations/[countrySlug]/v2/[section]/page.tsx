@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { COUNTRIES, getDiscoverableCountry, type CountryDetail } from '@/lib/countries'
+import { absoluteUrl } from '@/lib/site'
 import { requireCurrentUser } from '@/lib/auth'
 import { getProfile, isPaid } from '@/lib/profile'
 import { rankNextinations } from '@/lib/userProfile'
@@ -43,7 +44,11 @@ export async function generateMetadata({ params }: Props) {
   const country = COUNTRIES.find((c) => c.slug === countrySlug) ?? getDiscoverableCountry(countrySlug)
   if (!country) return { title: 'Destination Not Found | Kolmari' }
   const label = section.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
-  return { title: `${country.name} — ${label} | Kolmari` }
+  return {
+    title: `${country.name} — ${label} | Kolmari`,
+    description: `Plan a move to ${country.name}: visa pathways, cost of living, housing, healthcare, schools, and taxes, researched and verified by Kolmari.`,
+    alternates: { canonical: absoluteUrl(`/nextinations/${country.slug}/v2/${section}`) },
+  }
 }
 
 /**
