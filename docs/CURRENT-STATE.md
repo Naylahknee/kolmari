@@ -1157,3 +1157,19 @@ fallback, plus a console.error. Next step: read the attribute from the live
 page, fix the real root cause, then remove the diagnostic. CSP already
 verified clean (worker-src blob:, tile host allowlisted); tile/style endpoints
 return HTTP 200; WebGL available in the test browser.
+
+## Country Snapshot map: ROOT CAUSE FOUND and fixed (2026-09-28)
+
+The temporary data-map-error diagnostic reported the exact production
+failure: "event: Worker failed to load. Check that the worker URL is
+correct." Root cause: MapLibre GL v6 (6.11.2) loads its Web Worker from a
+separate file whose URL defaults to import.meta.url of the bundled module.
+In the Next.js bundle that URL is bogus, so the worker 404s and every map
+falls back to the SVG locator. The map could never have worked in
+production with this version. Fix: serve the real worker files from
+public/ (maplibre-gl-worker.mjs + maplibre-gl-shared.mjs, kept side by
+side so the worker's relative import resolves) and call
+maplibregl.setWorkerUrl('/maplibre-gl-worker.mjs') before creating the
+map. The temporary data-map-error diagnostic was removed. CSP already
+allows worker-src 'self' blob:, so the same-origin module worker is
+permitted.

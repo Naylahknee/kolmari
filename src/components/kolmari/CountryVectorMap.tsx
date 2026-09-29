@@ -33,11 +33,6 @@ type Props = {
 export function CountryVectorMap({ countryName, countryCode, lat, lng, alt, cityName, pinLabel, className }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [failed, setFailed] = useState(false)
-  // Temporary production diagnostic (Sep 2026): capture the first fatal map
-  // error and expose it as data-map-error on the fallback, so the real
-  // production failure can be read from the rendered DOM. Remove after the
-  // root cause is fixed.
-  const [mapError, setMapError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!containerRef.current || failed) return
@@ -46,6 +41,14 @@ export function CountryVectorMap({ countryName, countryCode, lat, lng, alt, city
     let loaded = false
 
     try {
+      // MapLibre GL v6 loads its Web Worker from a separate file derived from
+      // import.meta.url. In the Next.js bundle that URL is bogus, so the
+      // worker 404s and the map falls back ("Worker failed to load"). Point
+      // it at the worker files served from /public instead. The worker is a
+      // same-origin module script, so its relative import of
+      // ./maplibre-gl-shared.mjs resolves correctly.
+      maplibregl.setWorkerUrl('/maplibre-gl-worker.mjs')
+
       map = new maplibregl.Map({
         container: containerRef.current,
         style: KOLMARI_MAP_STYLE,
@@ -60,9 +63,7 @@ export function CountryVectorMap({ countryName, countryCode, lat, lng, alt, city
       // tile errors are non-fatal and MapLibre retries them on its own.
       map.on('error', (e: maplibregl.ErrorEvent) => {
         if (cancelled || loaded) return
-        const message = e?.error?.message || 'maplibre error event (no message)'
-        setMapError(`event: ${message}`)
-        console.error('[CountryVectorMap] map error before load:', message)
+        console.error('[CountryVectorMap] map error before load:', e?.error?.message)
         setFailed(true)
       })
 
@@ -120,9 +121,7 @@ export function CountryVectorMap({ countryName, countryCode, lat, lng, alt, city
         new maplibregl.Marker({ element: pin, anchor: 'center' }).setLngLat([lng, lat]).addTo(live)
       })
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err)
-      setMapError(`constructor: ${message}`)
-      console.error('[CountryVectorMap] constructor failed:', message)
+      console.error('[CountryVectorMap] constructor failed:', err instanceof Error ? err.message : err)
       setFailed(true)
     }
 
@@ -135,17 +134,15 @@ export function CountryVectorMap({ countryName, countryCode, lat, lng, alt, city
 
   if (failed) {
     return (
-      <span data-map-error={mapError ?? 'failed with no captured error'} style={{ display: 'contents' }}>
-        <CountrySnapshotMap
-          countryName={countryName}
-          countryCode={countryCode}
-          lat={lat}
-          lng={lng}
-          alt={alt}
-          cityName={cityName}
-          fallback="locator"
-        />
-      </span>
+      <CountrySnapshotMap
+        countryName={countryName}
+        countryCode={countryCode}
+        lat={lat}
+        lng={lng}
+        alt={alt}
+        cityName={cityName}
+        fallback="locator"
+      />
     )
   }
 
