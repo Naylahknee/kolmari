@@ -1112,3 +1112,11 @@ updated in `docs/dashboard-destination-panels.md`.
 - Save route writes selected_pathway ("Country — Name") via PUT /api/plan (existing plan functionality). Add to comparison bookmarks the route into the saved set; 2+ saved routes enable a side-by-side compare table.
 - Responsive: below lg the list is full width and selecting a route opens a full-screen detail with a back button; filters persist; focus returns to the row on close. Keyboard: arrow keys move between rows, Enter selects, accordions use button semantics.
 - No SLD contract files touched.
+
+## Region card art: generated media (not map graphics) — 2026-09-28
+
+Owner reported "I don't see images": the /images/countries/*.webp files are
+stylized gold-on-navy map graphics, not photos. Region cards now use the
+approved generated `dashboard_destination` asset via /api/country-asset (the
+same source as the Destinations browse page), falling back to a large centered
+flag on navy when no media exists for a country.
