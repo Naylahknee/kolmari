@@ -1,7 +1,10 @@
 {
   "allowedActions": [
     "CREATE",
-    "MODIFY"
+    "MODIFY",
+    "REWIRE",
+    "RESTYLE",
+    "REWRITE_COPY"
   ],
   "allowedEntities": [],
   "allowedFiles": [
