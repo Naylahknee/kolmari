@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowRight, ChevronRight, FlaskConical } from 'lucide-react'
-import { CountryShapePanel } from '@/components/kolmari/CountryShapePanel'
+import { RegionCountryArt } from '@/components/kolmari/RegionCountryArt'
 import { PassportIndexLink } from '@/components/kolmari/PassportIndexLink'
 import { requireCurrentUser } from '@/lib/auth'
 import { getProfile } from '@/lib/profile'
@@ -63,10 +63,27 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
 
   return (
     <div>
-      <nav aria-label="Breadcrumb" className="mb-5 flex items-center gap-2 text-sm text-muted">
+      <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-2 text-sm text-muted">
         <Link href="/destinations" className="font-semibold transition hover:text-navy">Destinations</Link>
         <ChevronRight size={14} aria-hidden="true" />
         <span className="font-semibold text-navy">{region.name}</span>
+      </nav>
+
+      <nav aria-label="Regions" className="mb-5 flex flex-wrap gap-2">
+        {regionList.map((item) => (
+          <Link
+            key={item.slug}
+            href={`/destinations/regions/${item.slug}`}
+            aria-current={item.slug === slug ? 'page' : undefined}
+            className={
+              item.slug === slug
+                ? 'rounded-pill bg-navy px-4 py-2 text-xs font-bold text-white'
+                : 'rounded-pill border border-line bg-white px-4 py-2 text-xs font-bold text-navy transition hover:border-navy'
+            }
+          >
+            {item.name}
+          </Link>
+        ))}
       </nav>
 
       <section className="relative min-h-[360px] overflow-hidden rounded-card bg-navy-deep">
@@ -107,7 +124,7 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
           <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
             {region.countries.map((country) => (
               <article key={`${country.slug}-${country.city}`} className="overflow-hidden rounded-card border border-line bg-white shadow-card">
-                <CountryShapePanel code={country.code} country={country.name} city={country.city} />
+                <RegionCountryArt country={country} regionImage={region.image} />
                 <div className="p-5">
                   <h3 className="text-lg font-extrabold text-navy">{country.name}</h3>
                   <p className="mt-1 flex items-center gap-2 text-sm text-muted">
