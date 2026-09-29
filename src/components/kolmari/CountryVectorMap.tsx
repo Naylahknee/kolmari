@@ -56,6 +56,9 @@ export function CountryVectorMap({ countryName, countryCode, lat, lng, alt, city
           if (!cancelled) setFailed(true)
         })
 
+        // Zoom controls, per the approved 1a mockup (no compass).
+        instance.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right')
+
         instance.on('load', () => {
           if (cancelled) return
           if (feature?.geometry) {

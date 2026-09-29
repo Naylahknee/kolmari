@@ -1120,3 +1120,13 @@ stylized gold-on-navy map graphics, not photos. Region cards now use the
 approved generated `dashboard_destination` asset via /api/country-asset (the
 same source as the Destinations browse page), falling back to a large centered
 flag on navy when no media exists for a country.
+
+## Country Snapshot maps: vector map per country (2026-09-28)
+
+Owner: the Country Snapshot map must show the map of the country in question,
+per the approved 1a/1b mockups (MapLibre + OpenFreeMap vector tiles primary,
+D3 + Natural Earth SVG fallback). CountryWorkspace and DataOverviewTab now
+render CountryVectorMap (dashed country highlight, gold city pin, zoom
+controls) with the actual country code; the SVG locator remains the automatic
+failure fallback. OverviewTab's literal Portugal copy is a known content gap,
+unchanged.

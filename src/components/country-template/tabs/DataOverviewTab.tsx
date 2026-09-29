@@ -4,7 +4,7 @@ import {
   ArrowRight, CarFront, Clock3, Coins, Globe2, Landmark, Languages,
   ShieldCheck, Stamp, SunMedium, Users,
 } from 'lucide-react'
-import { CountrySnapshotMap } from '@/components/country-workspace/CountrySnapshotMap'
+import { CountryVectorMap } from '@/components/kolmari/CountryVectorMap'
 import { CityCardImage } from '@/components/country-template/CityCardImage'
 import { getCountryCenter } from '@/lib/country-geo'
 import { getCountryFacts } from '@/lib/country-workspace/country-facts'
@@ -72,7 +72,7 @@ export function DataOverviewTab({
             <Link className="map-card" href="/your-world" aria-label={`Open the map of ${country.name}`}>
               <span className="cmap">
                 {center
-                  ? <CountrySnapshotMap countryName={country.name} countryCode={country.code} lat={center.lat} lng={center.lng} cityName={country.city} alt={`Locator map of ${country.name}`} fallback="locator" />
+                  ? <CountryVectorMap countryName={country.name} countryCode={country.code} lat={center.lat} lng={center.lng} cityName={country.city} alt={`Map of ${country.name}`} />
                   : <span className="map-fallback">Map of {country.name}</span>}
               </span>
               <span className="map-expand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 3H3v6M21 15v6h-6M3 3l7 7M21 21l-7-7" /></svg></span>

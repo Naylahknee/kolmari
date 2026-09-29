@@ -18,7 +18,7 @@ import { getCountryFacts } from '@/lib/country-workspace/country-facts'
 import { IMPLEMENTED_TABS, type CountryTabId, type TabMeta } from '@/lib/country-workspace/tabs'
 import type { CountryContent } from '@/lib/country-workspace/country-content'
 import { CityMapImage } from './CityMapImage'
-import { CountrySnapshotMap } from './CountrySnapshotMap'
+import { CountryVectorMap } from '@/components/kolmari/CountryVectorMap'
 import { CompareTab } from './tabs/CompareTab'
 import { CostOfLivingTab } from './tabs/CostOfLivingTab'
 import { HousingTab } from './tabs/HousingTab'
@@ -252,7 +252,7 @@ function TabPanel({ id, country, match, pathways, content, compareData, hasChild
             </dl>
             <div>
               <div className="overflow-hidden rounded-[var(--radius-card)] border border-line bg-canvas">
-                {snapshotCenter ? <CountrySnapshotMap countryName={country.name} lat={snapshotCenter.lat} lng={snapshotCenter.lng} alt={`Country map showing ${country.name}`} fallback="locator" /> : <div className="grid min-h-56 place-items-center text-muted">Country map unavailable</div>}
+                {snapshotCenter ? <CountryVectorMap countryName={country.name} countryCode={country.code} lat={snapshotCenter.lat} lng={snapshotCenter.lng} cityName={snapshotCenter.cityName} alt={`Country map showing ${country.name}`} className="aspect-[16/9] min-h-56 w-full" /> : <div className="grid min-h-56 place-items-center text-muted">Country map unavailable</div>}
               </div>
               <div className="mt-3 grid grid-cols-3 divide-x divide-line overflow-hidden rounded-[var(--radius-field)] border border-line bg-white">
                 {[['Average winter temperature', winterTemp, 'Winter avg', Snowflake], ['Average summer temperature', summerTemp, 'Summer avg', Sun], ['Time difference', timeDiff, 'Editorial estimate', Clock3]].map(([label, value, detail, Icon]) => <div key={String(label)} className="flex min-h-24 items-center gap-3 px-3 py-3 text-left"><Icon size={20} strokeWidth={2.25} className="shrink-0 text-gold-deep" /><div><p className="text-[10px] leading-4 text-muted">{String(label)}</p><p className="text-base font-bold text-navy">{String(value)}</p><p className="text-[10px] leading-4 text-muted">{String(detail)}</p></div></div>)}
