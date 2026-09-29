@@ -1130,3 +1130,16 @@ render CountryVectorMap (dashed country highlight, gold city pin, zoom
 controls) with the actual country code; the SVG locator remains the automatic
 failure fallback. OverviewTab's literal Portugal copy is a known content gap,
 unchanged.
+
+## Map stack review: removed dead features, rebuilt vector map (2026-09-28)
+
+Owner asked for a review of all map features; remove what should go, re-add what should stay.
+Removed: MapboxMap.tsx (retired component, zero importers, deleted); the
+Mapbox-token static-image branches in CountrySnapshotMap and CityMapImage (no
+token was ever configured; the map decision retired Mapbox); the `.hero-map`
+detection hack in CountrySnapshotMap. CountrySnapshotMap is now a pure
+dependency-free D3 + Natural Earth SVG locator (approved 1b fallback).
+Rebuilt: CountryVectorMap now statically imports maplibre-gl (JS + CSS), so no
+separate chunk fetch can fail in production; the dynamic import() was the
+likely cause of the persistent fallback. Kept: Your World SVG maps,
+PlanHeaderLocator, CityMapImage placeholder.

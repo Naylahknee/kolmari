@@ -1,11 +1,17 @@
 'use client'
 
-/* eslint-disable @next/next/no-img-element */
-
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useId, useMemo } from 'react'
 import { MapPinned } from 'lucide-react'
 import { geoGraticule10, geoMercator, geoPath } from 'd3-geo'
 import { getCountryFeature, getWorldFeatures } from '@/lib/world-geo'
+
+/**
+ * Country Snapshot fallback map: a dependency-free D3 + Natural Earth SVG
+ * locator. This is the approved 1b fallback surface. It deliberately has no
+ * tile, token, or network dependency, so it renders whenever the vector map
+ * cannot. The retired Mapbox-token static-image branch was removed (Sep 2026):
+ * no token was ever configured and the map decision retired it.
+ */
 
 type Fallback = 'flag' | 'locator'
 
@@ -28,6 +34,7 @@ function FlagFallback({ countryName, countryCode, cityName }: Pick<Props, 'count
       className="flex aspect-[16/9] min-h-40 w-full flex-col items-center justify-center gap-3 bg-navy-deep px-6 text-center"
     >
       {countryCode ? (
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={`/flags/${countryCode.toLowerCase()}.svg`}
           alt=""
@@ -143,48 +150,14 @@ export function CountrySnapshotMap({
   cityName,
   fallback = 'flag',
 }: Props) {
-  const [failed, setFailed] = useState(false)
-  const [heroSurface, setHeroSurface] = useState(false)
-  const rootRef = useRef<HTMLDivElement>(null)
-  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
-
-  // The existing country hero owns the `.hero-map` wrapper. Detecting it here
-  // keeps that surface on the locator contract without changing its verified
-  // content layout. All other callers retain the safer flag default.
-  useEffect(() => {
-    setHeroSurface(Boolean(rootRef.current?.closest('.hero-map')))
-  }, [])
-
-  const resolvedFallback: Fallback = heroSurface ? 'locator' : fallback
-
-  if (!token || failed) {
-    return (
-      <div ref={rootRef} className="h-full w-full">
-        {resolvedFallback === 'locator' ? (
-          <LocatorFallback countryName={countryName} countryCode={countryCode} cityName={cityName} lat={lat} lng={lng} />
-        ) : (
-          <FlagFallback countryName={countryName} countryCode={countryCode} cityName={cityName} />
-        )}
-      </div>
-    )
-  }
-
-  const marker = `pin-s+F8C21A(${lng},${lat})`
-  const camera = `${lng},${lat},5,0`
-  const src = `https://api.mapbox.com/styles/v1/mapbox/light-v11/static/${marker}/${camera}/900x520@2x?access_token=${encodeURIComponent(token)}`
-
+  void alt
   return (
-    <div ref={rootRef} className="relative aspect-[16/9] min-h-56 overflow-hidden bg-canvas">
-      <img
-        src={src}
-        alt={alt}
-        loading="lazy"
-        onError={() => setFailed(true)}
-        className="h-full w-full object-cover"
-      />
-      <p className="absolute bottom-1 right-1 rounded bg-white/90 px-1.5 py-0.5 text-[9px] text-navy">
-        © Mapbox © OpenStreetMap
-      </p>
+    <div className="h-full w-full">
+      {fallback === 'locator' ? (
+        <LocatorFallback countryName={countryName} countryCode={countryCode} cityName={cityName} lat={lat} lng={lng} />
+      ) : (
+        <FlagFallback countryName={countryName} countryCode={countryCode} cityName={cityName} />
+      )}
     </div>
   )
 }
