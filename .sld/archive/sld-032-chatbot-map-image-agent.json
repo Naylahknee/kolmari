@@ -1,0 +1,44 @@
+{
+  "allowedActions": [
+    "CREATE",
+    "MODIFY",
+    "REWIRE",
+    "RESTYLE",
+    "REWRITE_COPY"
+  ],
+  "allowedEntities": [],
+  "allowedFiles": [
+    ".github/workflows/country-hero-backfill.yml",
+    ".sld/archive/sld-031-canonical-governance-repair.json",
+    ".sld/task-contract.json",
+    "docs/CURRENT-STATE.md",
+    "src/app/(app)/(workspace)/layout.tsx",
+    "src/app/(app)/(workspace)/nextinations/[countrySlug]/v2/[section]/page.tsx",
+    "src/app/(marketing)/privacy/page.tsx",
+    "src/app/api/chat/route.ts",
+    "src/app/api/internal/country-hero/backfill/route.ts",
+    "src/components/country-template/SimpleCountryView.tsx",
+    "src/components/kolmari/AskKolmariWidget.tsx"
+  ],
+  "approvedAt": "2026-09-29T03:30:00.000Z",
+  "approvedBy": "Naylahknee",
+  "createdFrom": "current-user-request",
+  "draftedBy": "Penelope",
+  "forbiddenChanges": [
+    "src/sld/",
+    "src/app/api/sld/",
+    ".sld/baseline.json",
+    "scripts/sld.mjs"
+  ],
+  "grants": [
+    "SLD_ENGINE_MAINTENANCE"
+  ],
+  "implementingActor": "Penelope",
+  "instruction": "Ship the user-requested Kolmari Guide chatbot, country hero image backfill agent, and free country page map. Authorized by NaLonni on 2026-09-29: implement the chatbot per the provided kit (Meta Model API, 30 messages per user per day), add the real interactive map to the free country page view that lacked one, and build the nightly image backfill agent reusing the approved National Flag Shadow Hero engine.",
+  "objective": "Deliver the three requested features without changing anything outside the listed files and without touching the SLD engine itself. The maintenance grant is declared solely to archive the superseded sld-031 contract; src/sld/, the API routes, scripts, and baseline remain forbidden.",
+  "requiredChanges": [],
+  "status": "approved",
+  "supersedeNote": "sld-031 authorized unfinished SLD engine self-repair work. It is archived at .sld/archive/sld-031-canonical-governance-repair.json and its required engine changes are shelved as a future task, not dropped silently.",
+  "supersedes": "sld-031-canonical-governance-repair",
+  "taskId": "sld-032-chatbot-map-image-agent"
+}

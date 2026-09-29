@@ -69,13 +69,24 @@ async function callMetaModelApi(system: string, messages: ChatMessage[], signal:
     },
     body: JSON.stringify({
       model: process.env.AI_MODEL?.trim() || 'muse-spark-1.3', // standard tier: not used to improve Meta's products
-      messages: [{ role: 'system', content: system }, ...messages],
+      // Meta's chat-completions docs use the "developer" role for instructions.
+      messages: [{ role: 'developer', content: system }, ...messages],
       max_tokens: 800,
     }),
     signal,
   })
-  const data = (await res.json().catch(() => ({}))) as MetaModelResponse
-  if (!res.ok) throw new Error(`AI provider ${res.status}`)
+  const raw = await res.text().catch(() => '')
+  let data: MetaModelResponse = {}
+  try {
+    data = JSON.parse(raw) as MetaModelResponse
+  } catch {
+    // Non-JSON error body; keep the raw text for the message below.
+  }
+  if (!res.ok) {
+    const providerMessage =
+      (data as { error?: { message?: string } }).error?.message || raw.slice(0, 300)
+    throw new Error(`AI provider ${res.status}${providerMessage ? `: ${providerMessage}` : ''}`)
+  }
   return data.choices?.[0]?.message?.content?.trim() || ''
 }
 
@@ -155,9 +166,14 @@ export async function POST(request: Request) {
     reply = await callMetaModelApi(system, messages, controller.signal)
   } catch (error) {
     const timedOut = error instanceof Error && error.name === 'AbortError'
-    console.error('Kolmari Guide request failed', timedOut ? 'timeout' : 'request_error')
+    const detail = error instanceof Error ? error.message : 'request_error'
+    // Log the provider detail server-side; surface a short version so failures
+    // are diagnosable without leaking anything sensitive.
+    console.error('Kolmari Guide request failed', timedOut ? 'timeout' : detail)
     return NextResponse.json(
-      { error: 'The Kolmari Guide could not answer right now. Please try again in a minute.' },
+      {
+        error: `The Kolmari Guide could not answer right now. Please try again in a minute. (provider: ${timedOut ? 'timeout' : detail})`,
+      },
       { status: 502 },
     )
   } finally {
