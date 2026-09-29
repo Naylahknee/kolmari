@@ -24,28 +24,38 @@ const requestSchema = z.object({
 
 type ChatMessage = z.infer<typeof chatMessageSchema>
 
-type MetaModelResponse = {
-  choices?: { finish_reason?: string; message?: { content?: unknown } }[]
+type ResponsesAnnotation = {
+  type: string
+  url?: string
+  title?: string
 }
 
-// The provider sometimes returns message content as a multipart array.
-// Normalize both shapes to plain text.
-function extractContent(content: unknown): string {
-  if (typeof content === 'string') return content.trim()
-  if (Array.isArray(content)) {
-    return content
-      .map((part) => {
-        if (typeof part === 'string') return part
-        if (part && typeof part === 'object' && 'text' in part) {
-          const text = (part as { text?: unknown }).text
-          return typeof text === 'string' ? text : ''
-        }
-        return ''
-      })
-      .join('')
-      .trim()
-  }
-  return ''
+type ResponsesContentBlock = {
+  type: string
+  text?: string
+  annotations?: ResponsesAnnotation[]
+}
+
+type ResponsesOutputItem = {
+  type: string
+  role?: string
+  content?: ResponsesContentBlock[]
+}
+
+type ResponsesApiResponse = {
+  status?: string
+  output?: ResponsesOutputItem[]
+  error?: { message?: string; code?: string }
+}
+
+// Privacy-preserving user attribution for the AI provider (its documented
+// recommendation for user-facing apps): a sha256 of the internal user id,
+// never the email or name.
+async function sha256Hex(value: string): Promise<string> {
+  const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))
+  return Array.from(new Uint8Array(bytes))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
 }
 
 let usageTableReady: Promise<void> | null = null
@@ -73,17 +83,27 @@ async function ensureChatUsageTable() {
 const SYSTEM_PROMPT =
   'You are the Kolmari Guide, an AI assistant inside Kolmari, a relocation-decision app. ' +
   'Help the user think through where to move: cost of living, neighborhoods, jobs, schools, ' +
-  'climate and tradeoffs between their options. Be warm, clear and concise. ' +
-  'If you are not sure about a current fact (prices, rents, laws), say so and suggest checking a ' +
-  'current source. Never ask for sensitive info like SSNs, bank or card numbers. ' +
+  'visas and immigration routes, climate and tradeoffs between their options. Be warm, clear and concise. ' +
+  'You can search the web for current facts (visa rules, prices, rents, laws). Use the search when the ' +
+  'user asks about something time-sensitive or country-specific, and mention which facts came from the web. ' +
+  'Never ask for sensitive info like SSNs, bank or card numbers. ' +
   'Do not give legal or financial advice; give information that helps them decide.'
 
 // The only provider-specific code. To switch to Claude or another provider
 // later, change just this function.
-async function callMetaModelApi(system: string, messages: ChatMessage[], signal: AbortSignal) {
+//
+// Uses Meta's Responses API rather than Chat Completions: it is the only
+// endpoint with the built-in web_search tool, so the Guide can ground answers
+// about visas, costs and country facts in current web sources with citations.
+async function callMetaModelApi(
+  system: string,
+  messages: ChatMessage[],
+  signal: AbortSignal,
+  userId: string | number,
+) {
   // Trim: pasted secrets often carry a trailing newline that would invalidate the header.
   const apiKey = (process.env.MODEL_API_KEY || '').trim()
-  const res = await fetch('https://api.meta.ai/v1/chat/completions', {
+  const res = await fetch('https://api.meta.ai/v1/responses', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -91,34 +111,60 @@ async function callMetaModelApi(system: string, messages: ChatMessage[], signal:
     },
     body: JSON.stringify({
       model: process.env.AI_MODEL?.trim() || 'muse-spark-1.3', // standard tier: not used to improve Meta's products
-      // Meta's chat-completions docs use the "developer" role for instructions.
-      messages: [{ role: 'developer', content: system }, ...messages],
-      // Muse Spark always reasons; reasoning tokens count against this budget,
-      // so leave headroom beyond the visible answer.
-      max_tokens: 4000,
+      instructions: system, // developer-level prompt for the Responses API
+      input: messages.map((m) => ({
+        role: m.role,
+        content: [{ type: m.role === 'assistant' ? 'output_text' : 'input_text', text: m.content }],
+      })),
+      tools: [{ type: 'web_search' }], // the model decides when a search is needed
+      max_output_tokens: 4000, // reasoning plus visible output share this budget
+      store: false, // stateless: no conversation retained server-side
+      safety_identifier: await sha256Hex(`kolmari:${userId}`),
     }),
     signal,
   })
   const raw = await res.text().catch(() => '')
-  let data: MetaModelResponse = {}
+  let data: ResponsesApiResponse = {}
   try {
-    data = JSON.parse(raw) as MetaModelResponse
+    data = JSON.parse(raw) as ResponsesApiResponse
   } catch {
     // Non-JSON error body; keep the raw text for the message below.
   }
   if (!res.ok) {
-    const providerMessage =
-      (data as { error?: { message?: string } }).error?.message || raw.slice(0, 300)
+    const providerMessage = data.error?.message || raw.slice(0, 300)
     throw new Error(`AI provider ${res.status}${providerMessage ? `: ${providerMessage}` : ''}`)
   }
-  const choice = data.choices?.[0]
-  const reply = extractContent(choice?.message?.content)
+  if (data.status && data.status !== 'completed') {
+    const providerMessage = data.error?.message || `status ${data.status}`
+    throw new Error(`AI provider: ${providerMessage}`)
+  }
+  const texts: string[] = []
+  const sources: { url: string; title: string }[] = []
+  for (const item of data.output ?? []) {
+    if (item.type !== 'message' || item.role !== 'assistant') continue
+    for (const block of item.content ?? []) {
+      if (block.type !== 'output_text' || !block.text) continue
+      texts.push(block.text)
+      for (const annotation of block.annotations ?? []) {
+        if (
+          annotation.type === 'url_citation' &&
+          annotation.url &&
+          !sources.some((s) => s.url === annotation.url)
+        ) {
+          sources.push({ url: annotation.url, title: annotation.title || annotation.url })
+        }
+      }
+    }
+  }
+  const reply = texts.join('').trim()
   if (!reply) {
-    const contentValue = choice?.message?.content
-    const contentType = Array.isArray(contentValue) ? 'array' : typeof contentValue
     throw new Error(
-      `empty reply (choices: ${data.choices?.length ?? 0}, finish: ${choice?.finish_reason ?? 'n/a'}, content-type: ${contentType})`,
+      `empty reply (output items: ${data.output?.length ?? 0}, status: ${data.status ?? 'n/a'})`,
     )
+  }
+  // The widget renders plain text, so citations become a Sources footer.
+  if (sources.length > 0) {
+    return `${reply}\n\nSources:\n${sources.map((s) => `- ${s.title}: ${s.url}`).join('\n')}`
   }
   return reply
 }
@@ -196,7 +242,7 @@ export async function POST(request: Request) {
 
   let reply: string
   try {
-    reply = await callMetaModelApi(system, messages, controller.signal)
+    reply = await callMetaModelApi(system, messages, controller.signal, user.id)
   } catch (error) {
     const timedOut = error instanceof Error && error.name === 'AbortError'
     const detail = error instanceof Error ? error.message : 'request_error'
