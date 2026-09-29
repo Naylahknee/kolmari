@@ -11,7 +11,7 @@ import { getProfile } from '@/lib/profile'
 import { calculateRegionMatches } from '@/lib/userProfile'
 import { KOLMARI_LEXICON } from '@/lib/lexicon'
 import { isKolmariRegion, regionList, regions } from '@/lib/destinations-data'
-import { getGeneratedDashboardDestinationVersion } from '@/lib/country-assets'
+import { getGeneratedHeroVersion } from '@/lib/country-assets'
 import { PATHWAYS, type PathwayDefinition } from '@/lib/pathways'
 import { summaryFor } from '@/lib/pathway-summary'
 import { LESSER_KNOWN_ROUTES } from '@/lib/pathway-extras'
@@ -65,9 +65,9 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
   const imageSrcs: Record<string, string> = {}
   await Promise.all(
     region.countries.map(async (country) => {
-      const version = await getGeneratedDashboardDestinationVersion(country.slug)
+      const version = await getGeneratedHeroVersion(country.slug)
       if (version) {
-        imageSrcs[country.slug] = `/api/country-asset?slug=${country.slug}&type=dashboard_destination&v=${version}`
+        imageSrcs[country.slug] = `/api/country-asset?slug=${country.slug}&type=hero&v=${version}`
       }
     }),
   )
