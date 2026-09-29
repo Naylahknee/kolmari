@@ -5,19 +5,18 @@ import Image from 'next/image'
 import type { CountryPreview } from '@/lib/destinations-data'
 
 /**
- * Card-top artwork for region pages: the country's own photo when one exists,
+ * Card-top artwork for region pages: generated country media when it exists,
  * otherwise a large centered flag on navy. Replaces the gold country-outline
  * artwork per owner direction (2026-09-28).
  */
-export function RegionCountryArt({ country, regionImage }: { country: CountryPreview; regionImage: string }) {
+export function RegionCountryArt({ country, imageSrc }: { country: CountryPreview; imageSrc: string | null }) {
   const [flagFailed, setFlagFailed] = useState(false)
-  const hasPhoto = country.image !== regionImage
 
   return (
     <div className="relative flex h-40 items-center justify-center overflow-hidden bg-navy-deep">
-      {hasPhoto ? (
+      {imageSrc ? (
         <Image
-          src={country.image}
+          src={imageSrc}
           alt={`${country.name} photography`}
           fill
           sizes="(min-width: 1280px) 320px, (min-width: 640px) 50vw, 100vw"

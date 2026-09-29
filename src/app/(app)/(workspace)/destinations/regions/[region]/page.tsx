@@ -11,6 +11,7 @@ import { getProfile } from '@/lib/profile'
 import { calculateRegionMatches } from '@/lib/userProfile'
 import { KOLMARI_LEXICON } from '@/lib/lexicon'
 import { isKolmariRegion, regionList, regions } from '@/lib/destinations-data'
+import { getGeneratedDashboardDestinationVersion } from '@/lib/country-assets'
 import { PATHWAYS, type PathwayDefinition } from '@/lib/pathways'
 import { summaryFor } from '@/lib/pathway-summary'
 import { LESSER_KNOWN_ROUTES } from '@/lib/pathway-extras'
@@ -59,6 +60,16 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
   const regionCountryNames = new Set(region.countries.map((country) => country.name))
   const regionAlternatives = LESSER_KNOWN_ROUTES.filter(
     (route) => regionCountryNames.has(route.country) || (route.country === 'EU-wide' && slug === 'europe'),
+  )
+
+  const imageSrcs: Record<string, string> = {}
+  await Promise.all(
+    region.countries.map(async (country) => {
+      const version = await getGeneratedDashboardDestinationVersion(country.slug)
+      if (version) {
+        imageSrcs[country.slug] = `/api/country-asset?slug=${country.slug}&type=dashboard_destination&v=${version}`
+      }
+    }),
   )
 
   return (
@@ -124,7 +135,7 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
           <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
             {region.countries.map((country) => (
               <article key={`${country.slug}-${country.city}`} className="overflow-hidden rounded-card border border-line bg-white shadow-card">
-                <RegionCountryArt country={country} regionImage={region.image} />
+                <RegionCountryArt country={country} imageSrc={imageSrcs[country.slug] ?? null} />
                 <div className="p-5">
                   <h3 className="text-lg font-extrabold text-navy">{country.name}</h3>
                   <p className="mt-1 flex items-center gap-2 text-sm text-muted">
