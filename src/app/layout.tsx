@@ -25,7 +25,6 @@ export const metadata: Metadata = {
   description,
   icons: {
     icon: [
-      { url: '/brand/faviconKolmari.svg', type: 'image/svg+xml' },
       { url: '/brand/favicon-32.png', type: 'image/png', sizes: '32x32' },
       { url: '/brand/favicon-16.png', type: 'image/png', sizes: '16x16' },
       { url: '/brand/favicon.ico' },

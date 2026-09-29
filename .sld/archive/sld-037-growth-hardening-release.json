@@ -1,0 +1,53 @@
+{
+  "allowedActions": [
+    "CREATE",
+    "MODIFY",
+    "REWIRE",
+    "REWRITE_COPY",
+    "RESTYLE"
+  ],
+  "allowedEntities": [],
+  "allowedFiles": [
+    "src/app/layout.tsx",
+    "src/components/kolmari/AskKolmariWidget.tsx",
+    "public/llms.txt",
+    "public/.well-known/security.txt",
+    "src/components/kolmari/json-ld.tsx",
+    "src/app/(app)/(workspace)/destinations/regions/[region]/page.tsx",
+    "src/app/api/chat/route.ts",
+    "src/lib/billing.ts",
+    "src/app/api/billing/checkout/route.ts",
+    "src/app/api/billing/webhook/route.ts",
+    "src/app/api/billing/portal/route.ts",
+    "src/components/kolmari/account-tabs.tsx",
+    ".sld/task-contract.json",
+    ".sld/archive/sld-036-chat-search-token-budget.json",
+    "src/app/(app)/(workspace)/nextinations/[countrySlug]/v2/[section]/page.tsx"
+  ],
+  "approvedAt": "2026-09-29T13:56:30.000Z",
+  "approvedBy": "Naylahknee",
+  "createdFrom": "current-user-request",
+  "draftedBy": "Penelope",
+  "forbiddenChanges": [
+    "src/sld/",
+    "src/app/api/sld/",
+    ".sld/baseline.json",
+    "scripts/sld.mjs"
+  ],
+  "grants": [
+    "SLD_ENGINE_MAINTENANCE"
+  ],
+  "implementingActor": "Penelope",
+  "instruction": "NaLonni's 2026-09-29 growth + hardening request, five workstreams in one release. (1) Mobile: add the viewport export (theme-color, viewport-fit=cover, width=device-width) to the root layout; fix small-screen sizing and safe-area handling in the Ask Kolmari widget. (2) AI SEO: add public/llms.txt describing Kolmari for LLM crawlers; emit JSON-LD (Organization + WebSite) from the root layout via a small helper component. (3) Google SEO: enhance generateMetadata on the real country page at /nextinations/[countrySlug]/v2/[section] (the /countries/[slug] route is a legacy redirect with no renderable metadata) and on the region page, adding description and canonical URLs. robots.txt, sitemap.xml, manifest, and OG tags already exist and stay untouched. (4) Security: add IP-based rate limiting to POST /api/chat using the existing rateLimit helper in src/lib/security.ts (complements the per-user daily Neon cap; the chat endpoint calls a paid API); add a static public/.well-known/security.txt. Cookie flags, CSP, and HSTS already verified good. (5) Payments: add Stripe. Add src/lib/billing.ts calling Stripe's REST API directly via fetch with Web Crypto signature verification (Worker-compatible; the Node Stripe SDK is not used); POST /api/billing/checkout creates a Checkout Session for the chosen tier; POST /api/billing/webhook verifies the Stripe signature and updates the user's plan via getProfile/saveProfile (same pattern as trial redeem); POST /api/billing/portal creates a Customer Portal session for paid users; wire the Billing tab TierCard CTAs to checkout and show a manage-subscription entry for paid plans. Price IDs and keys come from worker env (STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_PLUS, STRIPE_PRICE_NAVIGATOR); NaLonni creates the Stripe products/prices and sets the secrets. Nothing outside the listed files. Archive superseded sld-036 under .sld/.",
+  "objective": "Ship mobile optimization, AI SEO, Google SEO metadata, security hardening, and Stripe payments in one release without touching anything outside the listed files or the SLD engine itself. The maintenance grant is declared solely to archive superseded sld-036 under .sld/.",
+  "requiredChanges": [],
+  "status": "approved",
+  "supersedeNote": "sld-036 raised the Responses output budget for web-search questions. It is archived at .sld/archive/sld-036-chat-search-token-budget.json. This contract covers only the growth + hardening release described above.",
+  "supersedes": "sld-036-chat-search-token-budget",
+  "taskId": "sld-037-growth-hardening-release",
+  "contractAmendments": [
+    "2026-09-29: swapped the legacy /countries/[slug] redirect page for the real country page (nextinations v2 section page) in allowedFiles, since the redirect renders no metadata; generateMetadata already exists there and is enhanced with description + canonical.",
+    "2026-09-29: replaced 'install the stripe package' with direct Stripe REST calls via fetch + Web Crypto (Cloudflare Workers compatibility); package.json removed from scope.",
+    "2026-09-29: added RESTYLE to allowedActions (verifier-driven, same as sld-032). The approved instruction requires class changes: widget safe-area/small-screen classes, and converting the TierCard Link CTA into a checkout button."
+  ]
+}
