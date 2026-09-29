@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { PRODUCT_COPY } from '@/config/product-copy'
 import { ButterflyMark } from '@/components/kolmari/butterfly-mark'
 import { flutterReadiness } from '@/lib/flutter-plan'
@@ -140,55 +140,45 @@ export function Sidebar() {
   const toggle = (s: Section) =>
     setOpenSecs((prev) => ({ ...prev, [s.key]: !(prev[s.key] ?? (sectionActive(s) || s.key === 'explore' || s.key === 'plan')) }))
 
-  // Your World countries → floating menu (fixed-positioned so the rail's overflow
-  // doesn't clip it).
-  const [worldOpen, setWorldOpen] = useState(false)
-  const [worldPos, setWorldPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 })
-  const worldRowRef = useRef<HTMLDivElement>(null)
-  const worldFlyRef = useRef<HTMLDivElement>(null)
-  const openWorld = () => {
-    const r = worldRowRef.current?.getBoundingClientRect()
-    if (r) setWorldPos({ top: r.top, left: r.right + 10 })
-    setWorldOpen(true)
-  }
-  useEffect(() => {
-    if (!worldOpen) return
-    const onDown = (e: MouseEvent) => {
-      const t = e.target as Node
-      if (worldFlyRef.current?.contains(t) || worldRowRef.current?.contains(t)) return
-      setWorldOpen(false)
-    }
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setWorldOpen(false) }
-    const onScroll = () => setWorldOpen(false)
-    document.addEventListener('mousedown', onDown)
-    document.addEventListener('keydown', onKey)
-    window.addEventListener('scroll', onScroll, true)
-    return () => {
-      document.removeEventListener('mousedown', onDown)
-      document.removeEventListener('keydown', onKey)
-      window.removeEventListener('scroll', onScroll, true)
-    }
-  }, [worldOpen])
+  // Your World countries → nested collapsible submenu under the Your World item.
+  const [worldOpen, setWorldOpen] = useState(onCountry)
 
   const renderItem = (it: Item) => {
     const isActive = active(it.href)
     if (it.world) {
       return (
-        <div className="sb-flyout-anchor" ref={worldRowRef} key={it.href}>
-          <Link className={`sb-link${isActive || onCountry ? ' active' : ''}`} href={it.href} title={it.label}>
-            <Icon>{ICONS[it.icon]}</Icon>
-            <span className="lbl">{it.label}</span>
-          </Link>
-          {matches.length > 0 && (
-            <button
-              type="button"
-              className="sb-flyout-toggle"
-              aria-label="Your destinations"
-              aria-expanded={worldOpen}
-              onClick={() => (worldOpen ? setWorldOpen(false) : openWorld())}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6" /></svg>
-            </button>
+        <div key={it.href}>
+          <div className="sb-flyout-anchor">
+            <Link className={`sb-link${isActive || onCountry ? ' active' : ''}`} href={it.href} title={it.label}>
+              <Icon>{ICONS[it.icon]}</Icon>
+              <span className="lbl">{it.label}</span>
+            </Link>
+            {matches.length > 0 && (
+              <button
+                type="button"
+                className="sb-flyout-toggle"
+                aria-label="Your destinations"
+                aria-expanded={worldOpen}
+                onClick={() => setWorldOpen((v) => !v)}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6" /></svg>
+              </button>
+            )}
+          </div>
+          {worldOpen && matches.length > 0 && (
+            <div className="sb-sub">
+              {matches.map((m) => (
+                <Link
+                  key={m.slug}
+                  className={`sb-link sb-country${pathname.startsWith(`/nextinations/${m.slug}`) ? ' active' : ''}`}
+                  href={`/nextinations/${m.slug}/v2/overview`}
+                  title={m.name}
+                >
+                  <span className="sb-cc">{m.code}</span>
+                  <span className="lbl">{m.name}</span>
+                </Link>
+              ))}
+            </div>
           )}
         </div>
       )
@@ -255,29 +245,6 @@ export function Sidebar() {
           <span className="lbl">Account</span>
         </Link>
       </nav>
-
-      {/* Floating Your World country menu */}
-      {worldOpen && (
-        <div ref={worldFlyRef} className="sb-flyout" style={{ position: 'fixed', top: worldPos.top, left: worldPos.left }} role="menu">
-          <p className="sb-flyout-title">Your destinations</p>
-          {matches.map((m) => (
-            <Link
-              key={m.slug}
-              role="menuitem"
-              className={`sb-fly-item${pathname.startsWith(`/nextinations/${m.slug}`) ? ' active' : ''}`}
-              href={`/nextinations/${m.slug}/v2/overview`}
-              onClick={() => setWorldOpen(false)}
-            >
-              <span className="sb-cc">{m.code}</span>
-              <span className="nm">{m.name}</span>
-            </Link>
-          ))}
-          <Link role="menuitem" className="sb-fly-item sb-fly-all" href="/your-world" onClick={() => setWorldOpen(false)}>
-            <span className="sb-cc" aria-hidden="true">＋</span>
-            <span className="nm">Browse all destinations</span>
-          </Link>
-        </div>
-      )}
     </aside>
   )
 }

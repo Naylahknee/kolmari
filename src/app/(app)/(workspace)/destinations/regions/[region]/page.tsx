@@ -159,7 +159,7 @@ export default async function NextinationRegionPage({ params }: RegionPageProps)
                     <span className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-[var(--radius-btn)] bg-canvas px-4 text-sm font-bold text-muted">Country guide in progress</span>
                   )}
                   <div className="mt-3">
-                    <PassportIndexLink countrySlug={country.slug} countryName={country.name} lightbox />
+                    <PassportIndexLink countrySlug={country.slug} countryName={country.name} countryCode={country.code} lightbox />
                   </div>
                 </div>
               </article>

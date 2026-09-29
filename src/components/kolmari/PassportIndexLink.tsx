@@ -1,14 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { ExternalLink, X } from 'lucide-react'
-
-const PASSPORT_INDEX_BASE = 'https://www.passportindex.org/'
-
-function passportIndexUrl(countrySlug?: string) {
-  if (!countrySlug) return PASSPORT_INDEX_BASE
-  return `${PASSPORT_INDEX_BASE}passport/${encodeURIComponent(countrySlug)}/`
-}
+import { ChevronRight, X } from 'lucide-react'
 
 function PassportGlyph({ className }: { className?: string }) {
   return (
@@ -23,13 +16,13 @@ function PassportGlyph({ className }: { className?: string }) {
 function PassportLightbox({
   open,
   onClose,
-  url,
   countryName,
+  countryCode,
 }: {
   open: boolean
   onClose: () => void
-  url: string
   countryName?: string
+  countryCode?: string
 }) {
   useEffect(() => {
     if (!open) return
@@ -80,14 +73,12 @@ function PassportLightbox({
             <li className="flex gap-2.5"><span className="mt-2 size-1.5 flex-none rounded-full bg-gold-deep" aria-hidden="true" />Which of your target countries require a visa in advance.</li>
           </ul>
           <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={countryCode ? `/passportindex?focus=${countryCode}` : '/passportindex'}
             className="gold-button mt-6 w-full"
           >
-            Open Passport Index <ExternalLink size={15} aria-hidden="true" />
+            Open Kolmari Passport Index
           </a>
-          <p className="mt-3 text-center text-[11px] text-muted-soft">External service · Kolmari is not affiliated with Passport Index.</p>
+          <p className="mt-3 text-center text-[11px] text-muted-soft">Built on open passport-index data (updated Feb 2026). Verify with official sources before you travel.</p>
         </div>
       </div>
     </div>
@@ -97,38 +88,38 @@ function PassportLightbox({
 export function PassportIndexLink({
   countrySlug,
   countryName,
+  countryCode,
   variant = 'compact',
   lightbox = false,
 }: {
   countrySlug?: string
   countryName?: string
+  /** ISO-2 code (e.g. "PT") used to deep-link into Kolmari's Passport Index tool. */
+  countryCode?: string
   variant?: 'compact' | 'banner'
-  /** When true, opens a Kolmari lightbox instead of a new tab. */
+  /** When true, opens a Kolmari lightbox instead of navigating. */
   lightbox?: boolean
 }) {
   const [lightboxOpen, setLightboxOpen] = useState(false)
-  const href = passportIndexUrl(countrySlug)
+  const href = countryCode ? `/passportindex?focus=${countryCode}` : '/passportindex'
   const label = countryName ? `${countryName} passport data` : 'Passport Index research'
 
   if (variant === 'banner') {
     return (
       <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={`${label} on Passport Index (opens in a new tab)`}
+        href="/passportindex"
+        aria-label="Open Kolmari's Passport Index tool"
         className="group flex flex-col gap-5 rounded-card border border-white/10 bg-gradient-to-r from-navy-deep to-[#1c3a6e] p-6 text-white shadow-card transition hover:border-gold/45 sm:flex-row sm:items-center"
       >
         <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-gold/15 text-gold"><PassportGlyph className="size-6" /></span>
         <span className="flex-1">
-          <span className="block text-sm font-extrabold">Passport Index — external research</span>
+          <span className="block text-sm font-extrabold">Passport Index — Kolmari's own tool</span>
           <span className="mt-1 block text-sm leading-6 text-white/70">
-            Review passport strength, mobility rankings, and visa-free access directly on Passport Index.
+            Review passport strength, mobility rankings, and visa-free access for 199 passports — right inside Kolmari.
           </span>
-          <span className="mt-2 block text-[11px] text-white/45">External service · Kolmari is not affiliated with Passport Index.</span>
         </span>
         <span className="inline-flex min-h-11 items-center justify-center gap-2 rounded-field bg-gold px-4 text-sm font-extrabold text-navy transition group-hover:bg-[#ffd83d]">
-          Open Passport Index <ExternalLink size={15} />
+          Open Passport Index
         </span>
       </a>
     )
@@ -142,9 +133,9 @@ export function PassportIndexLink({
       <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-gold/15 text-gold"><PassportGlyph className="size-[18px]" /></span>
       <span className="min-w-0 flex-1">
         <span className="block text-xs font-extrabold">Passport power and visa-free access</span>
-        <span className="mt-0.5 block text-[10px] text-white/55">Research on Passport Index</span>
+        <span className="mt-0.5 block text-[10px] text-white/55">Kolmari's passport power tool</span>
       </span>
-      <ExternalLink size={15} className="shrink-0 text-gold" />
+      <ChevronRight size={15} className="shrink-0 text-gold" />
     </>
   )
 
@@ -163,7 +154,7 @@ export function PassportIndexLink({
         >
           {buttonInner}
         </button>
-        <PassportLightbox open={lightboxOpen} onClose={() => setLightboxOpen(false)} url={href} countryName={countryName} />
+        <PassportLightbox open={lightboxOpen} onClose={() => setLightboxOpen(false)} countryName={countryName} countryCode={countryCode} />
       </>
     )
   }
@@ -171,9 +162,7 @@ export function PassportIndexLink({
   return (
     <a
       href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={`${label} on Passport Index (opens in a new tab)`}
+      aria-label={`${label} (opens Kolmari's Passport Index tool)`}
       className={buttonClassName}
     >
       {buttonInner}
