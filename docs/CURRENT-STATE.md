@@ -2,6 +2,27 @@
 
 Running log of implemented page state. Update this file when application code changes.
 
+## Kolmari Guide chat — 2026-09-28 (pending release)
+
+Owner direction (chat, 2026-09-28): add a basic AI chat bot ("Kolmari Guide")
+to logged-in pages. New `POST /api/chat` route: requires login (401
+otherwise), validates the last 10 messages (1,000 chars each, last message
+must be from the user), enforces 30 messages per user per day in a Neon
+`chat_usage` table (auto-created on first use, no manual migration), and
+calls the Meta Model API (`muse-spark-1.3`) with a compact profile context
+(preferred regions, timeline, goals, etc.) when the user has a completed
+quiz. Usage is counted only after a successful AI reply. New
+`AskKolmariWidget` floating chat panel (navy/gold Kolmari branding, Enter to
+send, 401 sign-in message, AI disclaimer line) mounted in the workspace
+layout so it appears on all logged-in pages. Privacy policy names the Meta
+Model API as the AI provider and what is sent to it. No SLD contract covers
+this work; the stale `sld-031-canonical-governance-repair` contract was not
+modified.
+
+Manual steps required before the chat works in production:
+(a) create a Meta Model API key at dev.meta.ai
+(b) run `npx wrangler secret put MODEL_API_KEY`
+
 ## Region card art + region switcher — 2026-09-28 (pending release)
 
 Owner direction (chat, 2026-09-28): replace the gold country-outline artwork.
@@ -1173,3 +1194,56 @@ maplibregl.setWorkerUrl('/maplibre-gl-worker.mjs') before creating the
 map. The temporary data-map-error diagnostic was removed. CSP already
 allows worker-src 'self' blob:, so the same-origin module worker is
 permitted.
+
+## Country Snapshot map: VERIFIED FIXED in production (2026-09-28)
+
+The worker-URL fix is deployed and live. The Portugal overview page now
+renders the interactive MapLibre vector map in the Country Snapshot card:
+real vector tiles, dashed red Portugal boundary, gold Lisbon pin with
+label callout, and working +/- zoom controls (drag-pan confirmed). Root
+cause recap: maplibre-gl v6 derives its worker URL from import.meta.url,
+which is invalid inside the Next.js bundle, so the worker 404d and every
+map silently fell back to the SVG locator. The worker files now ship in
+public/ with an explicit setWorkerUrl call. Lesson: when upgrading or
+reinstalling maplibre-gl, confirm the installed major version still
+inlines its worker; if it uses a separate worker file, the public/
+copies and setWorkerUrl must stay in place.
+
+## Country hero image backfill agent — 2026-09-28 (pending release)
+
+New autonomous nightly job that pre-generates missing country hero images via
+the approved National Flag Shadow Hero engine (gpt-image-2), so country pages
+never wait on a first visit to trigger the on-demand self-heal.
+
+New route `src/app/api/internal/country-hero/backfill/route.ts` (POST, nodejs
+runtime, maxDuration 120): accepts EITHER an admin session from
+`getRequestUser` on the `KOLMARI_ADMIN_EMAILS` allowlist (same pattern as the
+admin country-asset route) OR `Authorization: Bearer <CRON_SECRET>` matching
+`process.env.CRON_SECRET` (compared in constant time). With no `slug` in the
+JSON body it finds the first country in `COUNTRIES` with no saved hero (one
+DB query via `listSavedHeroSlugs`) and generates exactly ONE hero, then saves
+it and finishes the job. With a `slug` it processes just that country. Safety
+mirrors the self-heal route: COUNTRIES allowlist, existing-asset no-op, DB
+claim/finish locking, the API key is never logged. Returns JSON
+`{status: 'generated'|'ready'|'no-missing'|'failed'|'unknown-country'|'unauthorized', slug?}`
+(the scheduler stops its loop on `no-missing`; `unconfigured` is returned if
+OPENAI_API_KEY is not set). It only creates the decorative hero image, never
+page content or figures.
+
+New workflow `.github/workflows/country-hero-backfill.yml`: runs at 04:30 UTC
+nightly plus manual `workflow_dispatch`. It loops up to 10 times calling
+`https://kolmari.com/api/internal/country-hero/backfill` with the bearer
+secret, stopping early on `no-missing`. One image per call keeps each
+invocation inside the Worker time limit.
+
+Setup required before the first run (two secrets, same value):
+1. Cloudflare worker secret: run `npx wrangler secret put CRON_SECRET` and
+   paste a strong random value (from the repo root).
+2. GitHub repo secret: Settings -> Secrets and variables -> Actions, add a
+   secret named `CRON_SECRET` with the exact same value.
+3. Confirm `OPENAI_API_KEY` is configured on the worker (it already is, per
+   the self-heal ensure route).
+
+Note: no SLD contract covers this work; the active
+`sld-031-canonical-governance-repair` contract authorizes only SLD engine
+maintenance files and was left untouched.

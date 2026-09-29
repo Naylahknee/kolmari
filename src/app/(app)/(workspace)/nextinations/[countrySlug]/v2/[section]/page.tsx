@@ -143,6 +143,7 @@ export default async function CountryV2Page({ params, searchParams }: Props) {
     return (
       <SimpleCountryView
         country={templateCountry}
+        center={center}
         visaType={detail?.visaType}
         incomeRequired={detail?.incomeRequired}
         summary={detail?.summary}

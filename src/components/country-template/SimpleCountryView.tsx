@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { BarChart3, Building2, Check, Stamp } from 'lucide-react'
 import { UnitsProvider } from './client/UnitsControl'
 import { CountryOutline } from './CountryOutline'
+import { CountryVectorMap } from '@/components/kolmari/CountryVectorMap'
 import { getApprovedHero } from '@/lib/country-visuals/data'
 import { focalToObjectPosition } from '@/lib/country-visuals/schema'
 import { TopBar } from './TopBar'
@@ -68,11 +69,13 @@ function SkeletonCard({ title, rows }: { title: string; rows: number }) {
 
 export function SimpleCountryView({
   country,
+  center = null,
   visaType,
   incomeRequired,
   summary,
 }: {
   country: SimpleCountry
+  center?: { lat: number; lng: number } | null
   visaType?: string
   incomeRequired?: number
   summary?: string
@@ -140,6 +143,21 @@ export function SimpleCountryView({
                   </div>
                 )}
               </section>
+
+              {/* Small real map: every generated country page gets a map. */}
+              {center && (
+                <section aria-label={`Map of ${country.name}`} className="overflow-hidden rounded-card border border-line bg-white shadow-card">
+                  <CountryVectorMap
+                    countryName={country.name}
+                    countryCode={country.code}
+                    lat={center.lat}
+                    lng={center.lng}
+                    cityName={country.city}
+                    alt={`Interactive map of ${country.name}`}
+                    className="h-64 w-full sm:h-72"
+                  />
+                </section>
+              )}
 
               {/* Basic visa info */}
               <section className="card-surface p-6">
