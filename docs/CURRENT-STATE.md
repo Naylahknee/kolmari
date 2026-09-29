@@ -2,6 +2,39 @@
 
 Running log of implemented page state. Update this file when application code changes.
 
+## Your World even cards, Destinations passport lightbox — 2026-09-28 (pending release)
+
+Owner-directed (chat, 2026-09-28): (1) the Your World "Recommended for you"
+country panels should be even height with no trailing white space; (2) the
+Destinations page keeps its panels with the passport research button, but the
+card tops show flags or country media images instead of country outlines;
+(3) the passport button opens a lightbox instead of a new tab. No SLD contract
+covers this work; the stale `sld-031-canonical-governance-repair` contract was
+not modified.
+
+Your World cards (`src/components/kolmari/your-world.tsx`): the "Recommended
+for you" grid uses `items-stretch`, the cost/safety/match row has a fixed
+minimum height so two-line safety text cannot shift the layout, and the
+highlights icon row is pinned to the card bottom with `mt-auto`. All cards in a
+row now render at the same height.
+
+Destinations cards (`src/components/kolmari/destinations-explorer.tsx`):
+- Card tops show the generated country photo when available, otherwise a large
+  centered flag on the navy gradient (the country-outline art from the earlier
+  change was removed per owner direction).
+- Every card now carries the dark "Passport power and visa-free access" button
+  at the bottom of the panel.
+
+Passport lightbox (`src/components/kolmari/PassportIndexLink.tsx`): new
+optional `lightbox` mode renders the compact passport button so it opens a
+Kolmari-styled research lightbox (what to check: mobility score/rank,
+visa-free count, advance-visa targets) with a gold "Open Passport Index" CTA to
+the country's Passport Index page. Passport Index sends
+`X-Frame-Options: SAMEORIGIN`, so the content cannot be iframed; the lightbox
+links out instead of rendering a blocked frame. Escape, backdrop click, and
+scroll-lock are handled. The banner variant (regions page) keeps the new-tab
+behavior.
+
 ## Visa panel, regions research page, card art, OpenFreeMap — 2026-09-28 (pending release)
 
 Owner-directed (chat, 2026-09-28): (1) the dashboard visa options panel should

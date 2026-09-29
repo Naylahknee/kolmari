@@ -194,7 +194,7 @@ export function YourWorld({ pins, cards, complete, initialQuery = '' }: { pins: 
         )}
 
         {filtered.length > 0 ? (
-          <div className="mt-4 grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(258px, 1fr))' }}>
+          <div className="mt-4 grid items-stretch gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(258px, 1fr))' }}>
             {filtered.map((c) => {
               const isSaved = savedSlugs.includes(c.slug)
               return (
@@ -266,7 +266,7 @@ function RecommendedCard({
         </button>
       </div>
 
-      <div className="mt-3 flex items-center gap-2">
+      <div className="mt-3 flex min-h-[42px] items-center gap-2">
         {card.cost && <span className="text-[15px] font-extrabold text-gold-deep">{card.cost}</span>}
         {card.cost && <span className="text-muted" aria-hidden="true">·</span>}
         {safetyScore !== null ? (
@@ -295,8 +295,8 @@ function RecommendedCard({
       </div>
 
       {attrIcons.length > 0 && (
-        <>
-          <div className="my-3 border-t border-line" aria-hidden="true" />
+        <div className="mt-auto">
+          <div className="mb-3 mt-3 border-t border-line" aria-hidden="true" />
           <div className="flex items-center justify-between px-1" role="list" aria-label={`${card.name} highlights`}>
             {attrIcons.map((icon) => (
               <span key={icon.name} role="listitem">
@@ -304,7 +304,7 @@ function RecommendedCard({
               </span>
             ))}
           </div>
-        </>
+        </div>
       )}
     </article>
   )

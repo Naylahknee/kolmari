@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { ChevronDown, Heart, Lock, Search, X } from 'lucide-react'
 import { PanelIcon, safetyLabelForLevel, safetyScoreColor } from '@/components/kolmari/panel-icons'
+import { PassportIndexLink } from '@/components/kolmari/PassportIndexLink'
 import { attributeIconsFor, getCountryAttributes } from '@/lib/country-attributes'
 
 export type ExplorerRegion = 'Europe' | 'Asia' | 'North America' | 'Latin America' | 'Oceania'
@@ -55,34 +56,27 @@ function formatIncome(monthly: number) {
 
 const costLabel: Record<string, string> = { $: 'Lower cost', $$: 'Moderate cost' }
 
-import { COUNTRY_SHAPES } from '@/lib/country-shapes'
-
-function CountryShapeArt({ country, className }: { country: ExplorerCountry; className: string }) {
-  const shape = COUNTRY_SHAPES[country.code]
+function CountryFlagArt({ country, className }: { country: ExplorerCountry; className: string }) {
+  const [flagFailed, setFlagFailed] = useState(false)
   return (
-    <div className={`relative flex items-center justify-center overflow-hidden bg-navy-deep ${className}`}>
-      <svg viewBox="0 0 240 120" className="h-full w-full" role="img" aria-label={`Outline map of ${country.name}`}>
-        <defs>
-          <pattern id={`explorer-grid-${country.code}`} width="18" height="18" patternUnits="userSpaceOnUse">
-            <path d="M18 0H0V18" fill="none" stroke="#F3C516" strokeOpacity=".08" strokeWidth=".6" />
-          </pattern>
-        </defs>
-        <rect width="240" height="120" fill={`url(#explorer-grid-${country.code})`} />
-        {shape ? (
-          <path d={shape} fill="#F3C516" stroke="#FBEA91" strokeWidth="1.2" strokeLinejoin="round" />
-        ) : (
-          <text x="120" y="72" textAnchor="middle" fill="#F3C516" fillOpacity="0.85" fontSize="34" fontWeight="800" letterSpacing="2">
-            {country.code}
-          </text>
-        )}
-      </svg>
-      <span className="absolute bottom-3 left-3 rounded-[var(--radius-pill)] bg-navy-deep/85 px-3 py-1 text-[10px] font-bold text-white">{country.city} · {country.code}</span>
+    <div className={`relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-navy via-[#1d3a5f] to-[#0e1c33] ${className}`}>
+      {!flagFailed ? (
+        <img
+          src={`https://flagcdn.com/w320/${country.code.toLowerCase()}.png`}
+          alt={`${country.name} flag`}
+          loading="lazy"
+          className="h-20 w-32 rounded-lg object-cover shadow-xl"
+          onError={() => setFlagFailed(true)}
+        />
+      ) : (
+        <span className="text-5xl font-extrabold tracking-wide text-gold/80">{country.code}</span>
+      )}
     </div>
   )
 }
 
 function CountryPhoto({ country, imageSrc, className }: { country: ExplorerCountry; imageSrc: string | null; className: string }) {
-  if (!imageSrc) return <CountryShapeArt country={country} className={className} />
+  if (!imageSrc) return <CountryFlagArt country={country} className={className} />
   return (
     <div className={`relative overflow-hidden bg-gradient-to-br from-navy via-[#1d3a5f] to-[#0e1c33] ${className}`}>
       <img src={imageSrc} alt={`${country.name} photo`} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
@@ -282,7 +276,7 @@ export function DestinationsExplorer({ countries, imageSrcs, matchScores, paid, 
                     )}
                   </div>
                 </div>
-                <div className="px-4 py-3.5">
+                <div className="px-4 pt-3.5">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-sm font-bold text-navy">
                       {country.cost ? (
@@ -320,6 +314,9 @@ export function DestinationsExplorer({ countries, imageSrcs, matchScores, paid, 
                       ))}
                     </div>
                   )}
+                </div>
+                <div className="px-4 pb-4 pt-3">
+                  <PassportIndexLink countrySlug={country.slug} countryName={country.name} lightbox />
                 </div>
               </article>
             )
