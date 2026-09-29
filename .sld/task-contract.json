@@ -3,9 +3,7 @@
     "CREATE",
     "MODIFY"
   ],
-  "allowedEntities": [
-    "Kolmari app"
-  ],
+  "allowedEntities": [],
   "allowedFiles": [
     ".github/workflows/country-hero-backfill.yml",
     ".sld/archive/sld-031-canonical-governance-repair.json",
