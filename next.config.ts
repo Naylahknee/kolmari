@@ -1,21 +1,22 @@
 import type { NextConfig } from "next";
 
 // Content Security Policy. Kept deliberately permissive for scripts/styles
-// (Next.js injects inline hydration bootstrap and Mapbox GL uses blob workers)
+// (Next.js injects inline hydration bootstrap and MapLibre GL uses blob workers)
 // while locking down the high-risk directives: no framing (clickjacking),
 // no plugins, restricted base-uri, and same-origin form submission.
+// OpenFreeMap is the approved map tile provider (see src/lib/kolmari-map.ts).
 const csp = [
   "default-src 'self'",
   "base-uri 'self'",
   "object-src 'none'",
   "frame-ancestors 'none'",
   "form-action 'self'",
-  "img-src 'self' data: blob: https://*.mapbox.com https://i.ytimg.com",
-  "font-src 'self' data:",
+  "img-src 'self' data: blob: https://*.mapbox.com https://tiles.openfreemap.org https://i.ytimg.com",
+  "font-src 'self' data: https://tiles.openfreemap.org",
   "style-src 'self' 'unsafe-inline'",
   "script-src 'self' 'unsafe-inline' blob:",
   "worker-src 'self' blob:",
-  "connect-src 'self' https://*.mapbox.com https://events.mapbox.com",
+  "connect-src 'self' https://*.mapbox.com https://events.mapbox.com https://tiles.openfreemap.org",
 ].join('; ')
 
 const securityHeaders = [
