@@ -302,3 +302,73 @@ test('Layer 7 — elision markers in documentation remain exempt', () => {
   }]), M, null, undefined, WIDE)
   assert.equal(r.decision, 'ALLOW')
 })
+
+test('Layer 7 — whole-file deletion is never invisible, even when authorized', () => {
+  // Regression test: the execution layer used to skip changeType === 'delete'
+  // entirely, so an authorized deletion left no trace. Permission is judged by
+  // the Scope Gate; scale is judged here and always needs human eyes.
+  const r = evaluateChangeSet(cs([
+    { path: 'src/lib/example.ts', changeType: 'delete' },
+  ]), M, null, undefined, WIDE)
+  const f = r.findings.find((x) => x.layer === 'execution' && x.class === 'contentLoss')
+  assert.ok(f, 'expected an execution-layer contentLoss finding for the deletion')
+  assert.equal(f.decision, 'REVIEW_REQUIRED')
+})
+
+test('Layer 7 — whole-file deletion without a DELETE grant BLOCKs', () => {
+  const r = evaluateChangeSet(cs([
+    { path: 'src/lib/example.ts', changeType: 'delete' },
+  ]), M, null, undefined, WIDE_NO_DELETE)
+  // The Scope Gate blocks first: deleting a file implies the DELETE action,
+  // which this contract does not grant.
+  assert.equal(r.decision, 'BLOCK')
+})
+
+test('Layer 7 — massive removal under an authorized DELETE grant asks for confirmation, not silence', () => {
+  // The grant means "may delete", not "meant to delete this much". This must
+  // never be ALLOW: authorized edits have silently removed files before.
+  const r = evaluateChangeSet(cs([{
+    path: 'src/lib/example.ts',
+    changeType: 'modify',
+    addedText: 'export const retained = true',
+    removedText: Array.from({ length: 95 }, (_, i) => `export const old${i} = ${i}`).join('\n'),
+    baselineLineCount: 100,
+    removedLineCount: 95,
+  }]), M, null, undefined, WIDE)
+  const f = r.findings.find((x) => x.layer === 'execution' && x.class === 'contentLoss')
+  assert.ok(f, 'expected an execution-layer contentLoss finding')
+  assert.equal(f.decision, 'REVIEW_REQUIRED')
+  assert.equal(r.decision, 'REVIEW_REQUIRED')
+})
+
+test('Layer 7 — removal that cannot be measured fails closed', () => {
+  // Lines were removed but the baseline has no line count for the file, so
+  // the magnitude is unknowable. That is INSUFFICIENT_EVIDENCE, not ALLOW.
+  const r = evaluateChangeSet(cs([{
+    path: 'src/lib/unbaselined.ts',
+    changeType: 'modify',
+    addedText: 'export const retained = true',
+    removedText: Array.from({ length: 40 }, (_, i) => `export const old${i} = ${i}`).join('\n'),
+    removedLineCount: 40,
+  }]), M, null, undefined, WIDE)
+  const f = r.findings.find((x) => x.layer === 'execution' && x.class === 'contentLoss')
+  assert.ok(f, 'expected an execution-layer contentLoss finding')
+  assert.equal(f.decision, 'INSUFFICIENT_EVIDENCE')
+})
+
+test('Layer 7 — decisions honor the manifest policy floor and escalate above it', () => {
+  // The manifest sets contentLoss to REVIEW_REQUIRED as a floor; 70% removal
+  // without a DELETE grant must escalate to BLOCK, never sink below the floor.
+  const r = evaluateChangeSet(cs([{
+    path: 'src/lib/example.ts',
+    changeType: 'modify',
+    addedText: 'export const retained = true',
+    removedText: Array.from({ length: 70 }, (_, i) => `export const old${i} = ${i}`).join('\n'),
+    baselineLineCount: 100,
+    removedLineCount: 70,
+  }]), M, null, undefined, WIDE_NO_DELETE)
+  const f = r.findings.find((x) => x.layer === 'execution' && x.class === 'contentLoss')
+  assert.ok(f)
+  assert.equal(f.decision, 'BLOCK')
+  assert.equal(M.policies.contentLoss, 'REVIEW_REQUIRED', 'manifest floor unchanged')
+})

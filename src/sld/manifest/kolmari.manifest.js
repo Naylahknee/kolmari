@@ -130,6 +130,12 @@ export const KOLMARI_MANIFEST = {
   //
   // Scope classes are absolute: an unauthorized change BLOCKs regardless of how
   // harmless it is, because authorization and risk are separate dimensions.
+  //
+  // The content-integrity classes (contentLoss, generationArtifactCorruption)
+  // are FLOORS, not fixed decisions: the execution layer reads them as the
+  // minimum severity and may escalate above the floor on magnitude (for
+  // example, removing 60% or more of a file escalates contentLoss to BLOCK).
+  // The manifest stays the source of truth; the layer never decides below it.
   policies: {
     unauthorizedChange: 'BLOCK',
     unknownScope: 'BLOCK',
