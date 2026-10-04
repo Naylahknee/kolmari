@@ -1,0 +1,39 @@
+{
+  "taskId": "sld-038-brand-icon-references",
+  "draftedBy": "Penelope",
+  "implementingActor": "Penelope",
+  "status": "approved",
+  "approvedBy": "Naylahknee",
+  "approvedAt": "2026-09-29T14:18:00.000Z",
+  "instruction": "NaLonni's 2026-09-29 request: fix the brand icon references. public/brand/ is missing app-icon-180.png, app-icon-192.png, app-icon-512.png, and faviconKolmari.svg, but src/app/layout.tsx references the 180px apple icon and the SVG favicon, and src/app/manifest.ts references the 192/512px icons. Generate public/brand/app-icon-180.png (180x180), app-icon-192.png (192x192), and app-icon-512.png (512x512) from the existing public/brand/favicon-512.png via downscaling, and remove the faviconKolmari.svg entry from the layout icons (no SVG favicon exists; favicon.ico plus the PNGs cover it). manifest.ts needs no change once the PNGs exist. Nothing else.",
+  "createdFrom": "current-user-request",
+  "supersedes": "sld-037-growth-hardening-release",
+  "supersedeNote": "sld-037 shipped the growth + hardening release. It is archived at .sld/archive/sld-037-growth-hardening-release.json. This contract covers only the brand icon fix.",
+  "objective": "Make every brand icon reference resolve to a real file without touching anything outside the listed files or the SLD engine itself. The maintenance grant is declared solely to archive superseded sld-037 under .sld/.",
+  "allowedEntities": [],
+  "allowedFiles": [
+    "src/app/layout.tsx",
+    "public/brand/app-icon-180.png",
+    "public/brand/app-icon-192.png",
+    "public/brand/app-icon-512.png",
+    ".sld/task-contract.json",
+    ".sld/archive/sld-037-growth-hardening-release.json"
+  ],
+  "allowedActions": [
+    "CREATE",
+    "MODIFY",
+    "REWIRE",
+    "REWRITE_COPY",
+    "RESTYLE"
+  ],
+  "forbiddenChanges": [
+    "src/sld/",
+    "src/app/api/sld/",
+    ".sld/baseline.json",
+    "scripts/sld.mjs"
+  ],
+  "grants": [
+    "SLD_ENGINE_MAINTENANCE"
+  ],
+  "requiredChanges": []
+}
