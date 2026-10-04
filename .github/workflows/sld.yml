@@ -70,10 +70,10 @@ jobs:
       - name: SLD change analysis (BLOCK or insufficient evidence fails the job)
         run: |
           set +e
-          node scripts/sld.mjs check "${{ steps.baseref.outputs.ref }}" > sld-report.txt
+          node scripts/sld.mjs check "${{ steps.baseref.outputs.ref }}" > "${RUNNER_TEMP}/sld-report.txt"
           code=$?
           set -e
-          cat sld-report.txt
+          cat "${RUNNER_TEMP}/sld-report.txt"
           echo "SLD exit code: $code"
           if [ "$code" = "2" ]; then
             echo "::error::SLD cannot permit this change — BLOCK or INSUFFICIENT_EVIDENCE."
@@ -96,7 +96,8 @@ jobs:
             echo "Green means clean, yellow means a human should look, red means stopped."
             echo ""
             echo '```'
-            sed -r 's/\x1b\[[0-9;]*m//g' sld-report.txt
+            sed -r 's/\x1b\[[0-9;]*m//g' "${RUNNER_TEMP}/sld-report.txt"
             echo '```'
-          } > sld-comment.md
-          gh pr comment "${{ github.event.pull_request.number }}" --body-file sld-comment.md
+          } > "${RUNNER_TEMP}/sld-comment.md"
+          gh pr comment "${{ github.event.pull_request.number }}" --body-file "${RUNNER_TEMP}/sld-comment.md"
+
