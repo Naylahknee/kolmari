@@ -1,0 +1,46 @@
+{
+  "taskId": "sld-039-governance-build-review",
+  "draftedBy": "Codex",
+  "implementingActor": "Codex",
+  "status": "approved",
+  "approvedBy": "Naylahknee",
+  "approvedAt": "2026-10-04T18:40:54Z",
+  "instruction": "Current owner request in ChatGPT, 2026-10-04 11:40:54 America/Los_Angeles: \"Please fix projects, deploy other agents to work on different projects if possible\". This narrow repair replaces the stale icon-only active contract for this governance review and preserves its original evidence in an archive. It does not retroactively authorize the engine changes in 046cced.",
+  "createdFrom": "current-user-request",
+  "supersedes": "sld-038-brand-icon-references",
+  "objective": "Repair governance build output paths so generated CI reports do not contaminate the scanned application diff; preserve all scope checks, engine policies and application behavior.",
+  "allowedEntities": [],
+  "allowedFiles": [
+    ".sld/task-contract.json",
+    ".sld/archive/sld-038-brand-icon-references.json",
+    "docs/SLD-BUILD-REVIEW-2026-10-04.md",
+    ".github/workflows/sld.yml"
+  ],
+  "allowedActions": [
+    "CREATE",
+    "MODIFY",
+    "REWRITE_COPY"
+  ],
+  "forbiddenChanges": [
+    "src",
+    "scripts/sld.mjs",
+    ".sld/baseline.json"
+  ],
+  "grants": [
+    "SLD_ENGINE_MAINTENANCE"
+  ],
+  "requiredChanges": [
+    {
+      "artifact": ".sld/archive/sld-038-brand-icon-references.json",
+      "mustContain": "sld-038-brand-icon-references"
+    },
+    {
+      "artifact": "docs/SLD-BUILD-REVIEW-2026-10-04.md",
+      "mustContain": "does not retroactively authorize"
+    },
+    {
+      "artifact": ".github/workflows/sld.yml",
+      "mustContain": "${RUNNER_TEMP}/sld-report.txt"
+    }
+  ]
+}
