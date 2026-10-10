@@ -59,7 +59,7 @@ export function underPath(path, prefix) {
 /**
  * Case-insensitive whole-word-ish scan for a protected/forbidden term inside a
  * blob of added text. Word boundaries are approximated with non-alphanumeric
- * neighbours so "Nexit" matches but "Nexitude"… also matches (intentional: any
+ * neighbours so "OldBrand" matches but "OldBranding"… also matches (intentional: any
  * appearance of a retired brand stem is a finding).
  * @param {string} haystack
  * @param {string} term
@@ -130,11 +130,21 @@ export function isSqlSurface(path, migrationsDir) {
  * tests could never assert on the strings they exist to detect. Structural layers
  * (Architecture, Dependencies, Data, Interface) still apply here as normal.
  *
+ * Which paths count as governance sources comes from the manifest
+ * (manifest.governance.sourcePaths), so a consuming project can point at its
+ * own vendored core location. Entries ending in '/' are prefix matches,
+ * otherwise exact matches.
+ *
  * @param {string} path
+ * @param {object} [manifest]
  * @returns {boolean}
  */
-export function isGovernanceSource(path) {
-  return path.startsWith('src/sld/') || path.startsWith('src/app/api/sld/') || path === 'scripts/sld.mjs'
+export function isGovernanceSource(path, manifest) {
+  const configured = manifest?.governance?.sourcePaths
+  const sources = Array.isArray(configured) && configured.length
+    ? configured
+    : ['src/core/', 'cli/sld.js']
+  return sources.some((p) => (p.endsWith('/') ? path.startsWith(p) : path === p))
 }
 
 /** Test files, which must contain the very strings they assert on. */
@@ -149,10 +159,11 @@ export function isTestSurface(path) {
  * still apply everywhere, so a real boundary violation in a test is still caught.
  *
  * @param {string} path
+ * @param {object} [manifest]
  * @returns {boolean}
  */
-export function isSpecimenSurface(path) {
-  return isGovernanceSource(path) || isTestSurface(path)
+export function isSpecimenSurface(path, manifest) {
+  return isGovernanceSource(path, manifest) || isTestSurface(path)
 }
 
 /**

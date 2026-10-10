@@ -29,7 +29,7 @@ export function analyzeInterface(changeSet, manifest) {
         class: 'designSystemDrift',
         decision: manifest.policies.designSystemDrift,
         path: p,
-        message: `Protected design-system component changed (${p}). Verify it still matches the approved Kolmari look and reuses shared tokens.`,
+        message: `Protected design-system component changed (${p}). Verify it still matches the approved look and reuses shared tokens.`,
         detail: p,
       })
     }

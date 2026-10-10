@@ -2,6 +2,17 @@
 
 Running log of implemented page state. Update this file when application code changes.
 
+## SLD engine now consumes the canonical core — 2026-10-09
+
+`src/sld/` no longer carries its own fork of the engine. The canonical SLD core
+is vendored byte-identical at `src/sld/core/` (pinned to `Naylahknee/SLD`
+commit `921e11d`; `node scripts/sld-verify-core.mjs` fails CI on any drift).
+Kolmari-specific rules (brand terms, travel-framing phrases, fabricated-data
+patterns, governance paths) moved into `src/sld/manifest/kolmari.manifest.js`;
+`src/sld/index.js` is a thin adapter re-exporting the core plus the manifest.
+`npm run sld:test` runs kolmari's tests and the vendored core tests (176 green);
+`next build` passes. No behavior change to the app itself.
+
 ## Kolmari Guide chat — 2026-09-28 (pending release)
 
 Owner direction (chat, 2026-09-28): add a basic AI chat bot ("Kolmari Guide")

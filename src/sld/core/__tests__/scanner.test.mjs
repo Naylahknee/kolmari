@@ -5,7 +5,7 @@ import { execFileSync } from 'node:child_process'
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { diffToChangeSet } from '../core/node/scan.mjs'
+import { diffToChangeSet } from '../node/scan.mjs'
 
 test('the scanner includes untracked files in the governed change set', () => {
   const root = mkdtempSync(join(tmpdir(), 'sld-scan-'))

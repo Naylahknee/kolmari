@@ -21,11 +21,12 @@
     "sld:explain": "node scripts/sld.mjs explain",
     "sld:contract": "node scripts/sld.mjs contract",
     "sld:verify": "node scripts/sld.mjs verify",
-    "sld:test": "node --test src/sld/__tests__/*.test.mjs",
+    "sld:test": "node --test src/sld/__tests__/*.test.mjs src/sld/core/__tests__/*.test.mjs",
     "preview": "npm run build:worker && opennextjs-cloudflare preview",
     "deploy": "npm run build:worker && opennextjs-cloudflare deploy",
     "upload": "npm run build:worker && opennextjs-cloudflare upload",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "sld:verify-core": "node scripts/sld-verify-core.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

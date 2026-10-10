@@ -38,7 +38,7 @@ import {
   workingChangeSet,
   diffToChangeSet,
   detectDrift,
-} from '../src/sld/node/scan.mjs'
+} from '../src/sld/core/node/scan.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const SLD_DIR = join(ROOT, '.sld')

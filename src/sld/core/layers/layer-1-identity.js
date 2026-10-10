@@ -1,7 +1,7 @@
 // @ts-check
 /**
  * Layer 1 — Identity.
- * Guards the product's name and language: retired brand terms (e.g. "Nexit")
+ * Guards the product's name and language: retired brand terms (e.g. "OldBrand")
  * must never reappear, and the app's declared identity must stay intact.
  *
  * @typedef {import('../index.js').FileChange} FileChange
@@ -20,11 +20,12 @@ export function analyzeIdentity(changeSet, manifest) {
   /** @type {Finding[]} */
   const findings = []
   const forbidden = manifest.identity.forbiddenTerms || []
+  const appName = manifest.application?.name || 'the app'
 
   for (const change of changeSet.changes) {
     if (change.changeType === 'delete') continue
     // The rulebook and the tests spell out the terms they exist to detect.
-    if (isSpecimenSurface(change.path)) continue
+    if (isSpecimenSurface(change.path, manifest)) continue
     const text = change.addedText || ''
     if (!text) continue
     for (const term of forbidden) {
@@ -34,7 +35,7 @@ export function analyzeIdentity(changeSet, manifest) {
           class: 'forbiddenTerm',
           decision: manifest.policies.forbiddenTerm,
           path: change.path,
-          message: `Retired brand term "${term}" reintroduced. The app is Kolmari; forbidden terms must not appear.`,
+          message: `Retired brand term "${term}" reintroduced. The app is ${appName}; forbidden terms must not appear.`,
           detail: term,
         })
       }

@@ -6,15 +6,16 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  KOLMARI_MANIFEST,
+  
   SLD_LAYER_IDS,
   approveTaskContract,
   createTaskContract,
   evaluateChangeSet,
   aggregateDecision,
 } from '../index.js'
+import FIXTURE_MANIFEST from './fixture.manifest.js'
 
-const M = KOLMARI_MANIFEST
+const M = FIXTURE_MANIFEST
 
 const approvedContract = (input) => approveTaskContract(createTaskContract({
   ...input,
@@ -34,7 +35,7 @@ const approvedContract = (input) => approveTaskContract(createTaskContract({
 const WIDE = approvedContract({
   taskId: 'layer-tests',
   instruction: 'Exercise the seven layer analyzers.',
-  allowedDirectories: ['src', 'db', 'docs', '.open-next', 'kolmari-copy'],
+  allowedDirectories: ['src', 'db', 'docs', '.open-next', 'nested-copy'],
   allowedActions: ['CREATE', 'MODIFY', 'DELETE', 'RENAME', 'MOVE', 'REFACTOR', 'RESTYLE', 'REWIRE', 'MIGRATE', 'REWRITE_COPY'],
   grants: ['SLD_ENGINE_MAINTENANCE'],
 })
@@ -57,7 +58,7 @@ test('canonical layer registry exactly matches the SLD operational ontology', ()
 
 test('an AUTHORIZED harmless change is ALLOWed (permission proven first)', () => {
   const r = evaluateChangeSet(cs([
-    { path: 'src/components/kolmari/hello.tsx', changeType: 'add', addedText: 'export const Hello = () => <p>Hi</p>' },
+    { path: 'src/components/hello.tsx', changeType: 'add', addedText: 'export const Hello = () => <p>Hi</p>' },
   ]), M, null, undefined, WIDE)
   assert.equal(r.decision, 'ALLOW')
   assert.equal(r.findings.length, 0)
@@ -70,7 +71,7 @@ test('an empty change set is ALLOWed', () => {
 
 test('Layer 1 — reintroducing a forbidden term BLOCKs', () => {
   const r = evaluateChangeSet(cs([
-    { path: 'src/components/foo.tsx', changeType: 'modify', addedText: 'const brand = "Nexitnation is back"' },
+    { path: 'src/components/foo.tsx', changeType: 'modify', addedText: 'const brand = "OldBrand is back"' },
   ]), M, null, undefined, WIDE)
   assert.equal(r.decision, 'BLOCK')
   assert.ok(r.findings.some((f) => f.layer === 'identity' && f.class === 'forbiddenTerm'))
@@ -88,7 +89,7 @@ test('Layer 5 — destructive SQL on a protected table BLOCKs', () => {
 
 test('Layer 5 — lowercase SQL words in UI code are NOT destructive (Tailwind "truncate")', () => {
   const r = evaluateChangeSet(cs([
-    { path: 'src/components/kolmari/card.tsx', changeType: 'add', addedText: '<p className="min-w-0 truncate text-navy">{name}</p>' },
+    { path: 'src/components/card.tsx', changeType: 'add', addedText: '<p className="min-w-0 truncate text-navy">{name}</p>' },
   ]), M, null, undefined, WIDE)
   assert.equal(r.decision, 'ALLOW', 'a CSS class must never read as a destructive DB operation')
 })
@@ -101,26 +102,24 @@ test('Layer 5 — lowercase destructive SQL in a migration IS caught', () => {
   assert.ok(r.findings.some((f) => f.layer === 'content'))
 })
 
-test('Layer 7 — rendering the words "Match Score" is not a fabricated score', () => {
+test('Layer 7 — rendering the word "price" is not a fabricated value', () => {
   const r = evaluateChangeSet(cs([
-    { path: 'src/components/kolmari/shortlist.tsx', changeType: 'add', addedText: '<p className="text-[10px]">Match Score</p>\n<Icon size={13} />' },
+    { path: 'src/components/shortlist.tsx', changeType: 'add', addedText: '<p className="text-[10px]">Total price</p>\n<Icon size={13} />' },
   ]), M, null, undefined, WIDE)
   assert.equal(r.decision, 'ALLOW')
 })
 
-test('Layer 7 — a hard-coded Match Score value IS flagged', () => {
+test('Layer 7 — a hard-coded price value IS flagged', () => {
   const r = evaluateChangeSet(cs([
-    { path: 'src/lib/country-data.ts', changeType: 'add', addedText: 'export const PT = { matchScore: 92 }' },
+    { path: 'src/lib/catalog.ts', changeType: 'add', addedText: 'export const ITEM = { price: 19.99 }' },
   ]), M, null, undefined, WIDE)
   assert.equal(r.decision, 'REVIEW_REQUIRED')
-  // The canonical core reports the matched fabricated-data pattern as the
-  // finding detail (kolmari's pattern now lives in the manifest).
-  assert.ok(r.findings.some((f) => f.class === 'behavioralChange' && typeof f.detail === 'string' && f.detail.includes('match')))
+  assert.ok(r.findings.some((f) => f.class === 'behavioralChange' && f.layer === 'logic'))
 })
 
 test('Logic — UI component importing the DB client is a dependency violation (REVIEW_REQUIRED)', () => {
   const r = evaluateChangeSet(cs([
-    { path: 'src/components/kolmari/widget.tsx', changeType: 'add', addedText: "import { getSql } from '@/lib/db'", imports: ['@/lib/db'] },
+    { path: 'src/components/widget.tsx', changeType: 'add', addedText: "import { getSql } from '@/lib/db'", imports: ['@/lib/db'] },
   ]), M, null, undefined, WIDE)
   assert.ok(['REVIEW_REQUIRED', 'BLOCK'].includes(r.decision))
   assert.ok(r.findings.some((f) => f.layer === 'logic'))
@@ -129,7 +128,7 @@ test('Logic — UI component importing the DB client is a dependency violation (
 test('Logic — server-only module in a client component is an architecture violation (BLOCK)', () => {
   const r = evaluateChangeSet(cs([
     {
-      path: 'src/components/kolmari/widget.tsx',
+      path: 'src/components/widget.tsx',
       changeType: 'add',
       addedText: "'use client'\nimport { x } from '@/lib/command-center'",
       imports: ['@/lib/command-center'],
@@ -145,7 +144,7 @@ test('Layer 3 — a SERVER component may import a server-only module', () => {
   // 'use client' directive is rendered on the server and may import freely.
   const r = evaluateChangeSet(cs([
     {
-      path: 'src/components/kolmari/summary.tsx',
+      path: 'src/components/summary.tsx',
       changeType: 'add',
       addedText: "import { destinationProgress } from '@/lib/command-center'",
       imports: ['@/lib/command-center'],
@@ -158,7 +157,7 @@ test('Layer 3 — a SERVER component may import a server-only module', () => {
 test('Layer 3 — falls back to the diff text when the scanner did not decide', () => {
   const r = evaluateChangeSet(cs([
     {
-      path: 'src/components/kolmari/widget.tsx',
+      path: 'src/components/widget.tsx',
       changeType: 'add',
       addedText: "'use client'\nimport { x } from '@/lib/db'",
       imports: ['@/lib/db'],
@@ -177,7 +176,7 @@ test('Behavior — touching a protected feature triggers REVIEW_REQUIRED', () =>
 
 test('Layer 2 — a new app root outside the canonical root BLOCKs (duplicate project)', () => {
   const r = evaluateChangeSet(cs([
-    { path: 'kolmari-copy/package.json', changeType: 'add', addedText: '{"name":"kolmari"}' },
+    { path: 'nested-copy/package.json', changeType: 'add', addedText: '{"name":"nested-app"}' },
   ]), M, null, undefined, WIDE)
   assert.equal(r.decision, 'BLOCK')
   assert.ok(r.findings.some((f) => f.class === 'duplicateAppRoot'))
@@ -208,7 +207,7 @@ test('Identity — travel-app framing triggers REVIEW_REQUIRED', () => {
 
 test('priority: BLOCK dominates a mix of findings', () => {
   const r = evaluateChangeSet(cs([
-    { path: 'src/components/country-template/Sidebar.tsx', changeType: 'modify', addedText: 'DROP TABLE users; // Nexit' },
+    { path: 'src/components/country-template/Sidebar.tsx', changeType: 'modify', addedText: 'DROP TABLE users; // OldBrand' },
   ]), M, null, undefined, WIDE)
   assert.equal(r.decision, 'BLOCK')
   assert.ok(r.summary.BLOCK >= 1)
@@ -241,7 +240,7 @@ test('deletions never crash and are analyzed', () => {
 
 test('the engine does not flag its own rulebook (which lists forbidden terms)', () => {
   const r = evaluateChangeSet(cs([
-    { path: 'src/sld/manifest/kolmari.manifest.js', changeType: 'modify', addedText: "forbiddenTerms: ['Nexit', 'Nexitnation']" },
+    { path: 'src/core/manifest/example.manifest.js', changeType: 'modify', addedText: "forbiddenTerms: ['OldBrand']" },
   ]), M, null, undefined, WIDE)
   assert.equal(r.decision, 'ALLOW', 'editing the manifest must not BLOCK on its own forbidden-terms list')
 })
@@ -251,7 +250,7 @@ test('structural layers still apply to exempt surfaces', () => {
   // violation inside a test file is still caught.
   const r = evaluateChangeSet(cs([
     {
-      path: 'src/components/kolmari/__tests__/widget.test.tsx',
+      path: 'src/components/__tests__/widget.test.tsx',
       changeType: 'add',
       addedText: "import { getSql } from '@/lib/db'",
       imports: ['@/lib/db'],
@@ -263,7 +262,7 @@ test('structural layers still apply to exempt surfaces', () => {
 
 test('test fixtures may quote destructive SQL without blocking', () => {
   const r = evaluateChangeSet(cs([
-    { path: 'src/sld/__tests__/engine.test.mjs', changeType: 'modify', addedText: "addedText: 'DROP TABLE users;'" },
+    { path: 'src/core/__tests__/engine.test.mjs', changeType: 'modify', addedText: "addedText: 'DROP TABLE users;'" },
   ]), M, null, undefined, WIDE)
   assert.equal(r.decision, 'ALLOW')
 })

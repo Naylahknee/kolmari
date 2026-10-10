@@ -86,6 +86,42 @@ export const KOLMARI_MANIFEST = {
       'Preserve existing auth, DB queries, API contracts, route protection, and Cloudflare Workers compatibility.',
       'Use approved product language; do not reintroduce retired brand terms.',
     ],
+    // Phrases that suggest the relocation product is being reframed as a
+    // travel/vacation/booking product (an intent violation).
+    reframingPhrases: [
+      'vacation package',
+      'book your flight',
+      'travel booking',
+      'hotel booking',
+      'trip planner',
+    ],
+    // Regex sources (case-insensitive), tested per line: a Match Score assigned
+    // a literal number, e.g. `matchScore: 87`. Per-line scoring means merely
+    // rendering the words "Match Score" near a number does not flag.
+    fabricatedDataPatterns: [
+      'match\\s*_?score["\'\\s]*[:=]\\s*\\d{1,3}\\b',
+    ],
+  },
+  // Where SLD's own governance surface lives in kolmari. The vendored core
+  // reads these instead of its built-in defaults (which describe the SLD repo
+  // itself). Entries ending in '/' are prefix matches, otherwise exact matches.
+  governance: {
+    // Paths only a contract granting SLD_ENGINE_MAINTENANCE may touch.
+    paths: [
+      'src/sld/',
+      'src/app/api/sld/',
+      '.sld/',
+      '.github/workflows/sld.yml',
+      'docs/14-SLD-GOVERNANCE.md',
+      'scripts/sld.mjs',
+    ],
+    // Paths exempt from content scanning: the rulebook quotes its own
+    // forbidden terms, so scanning it would flag its own definitions.
+    sourcePaths: [
+      'src/sld/',
+      'src/app/api/sld/',
+      'scripts/sld.mjs',
+    ],
   },
   integrity: {
     magnitudeReviewThreshold: 0.35,

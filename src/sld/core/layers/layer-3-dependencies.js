@@ -60,7 +60,7 @@ export function analyzeDependencies(changeSet, manifest) {
               class: 'architectureViolation',
               decision: manifest.policies.architectureViolation,
               path: from,
-              message: `Server-only module "${mod}" imported by a client component (${from}). This breaks the RSC/client boundary and the Workers build.`,
+              message: `Server-only module "${mod}" imported by a client component (${from}). This breaks the server/client boundary the manifest defines.`,
               detail: mod,
             })
           }

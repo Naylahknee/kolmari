@@ -2,7 +2,7 @@
 /**
  * Scope Gate — runs BEFORE the seven layers.
  *
- * The layers answer "does this authorized change violate Kolmari's protected
+ * The layers answer "does this authorized change violate the project's protected
  * architecture?". The gate answers the prior question: "was the agent allowed to
  * make this change at all?". Authorization and risk are separate dimensions — a
  * change can be perfectly harmless and still unauthorized, and unauthorized
@@ -66,9 +66,10 @@ const UI_CAPABLE = /\.(tsx|jsx|css|scss|html)$/
 
 /**
  * @param {FileChange} change
+ * @param {object} manifest
  * @returns {{ action: ScopeAction; label: string }[]}
  */
-function impliedActions(change) {
+function impliedActions(change, manifest) {
   /** @type {{ action: ScopeAction; label: string }[]} */
   const out = []
   const base = CHANGE_TYPE_ACTION[change.changeType]
@@ -77,7 +78,7 @@ function impliedActions(change) {
   // Content classifiers read source text, so they must skip specimen surfaces —
   // the engine's own source and test fixtures quote these very patterns as data.
   // Without this the styling detector fires on its own regex.
-  if (isSpecimenSurface(change.path)) return out
+  if (isSpecimenSurface(change.path, manifest)) return out
 
   const text = change.addedText || ''
   if (text) {
@@ -175,7 +176,7 @@ export function runScopeGate(changeSet, manifest, contract) {
     const reasons = []
 
     // SLD's own governance surface is protected from ordinary feature tasks.
-    if (isGovernancePath(path) && !governanceAllowed) {
+    if (isGovernancePath(path, manifest) && !governanceAllowed) {
       reasons.push(
         'Path is part of SLD\'s own governance surface. It may only change under a TaskContract granting SLD_ENGINE_MAINTENANCE.',
       )
@@ -194,7 +195,7 @@ export function runScopeGate(changeSet, manifest, contract) {
 
     // Action-level: permission to MODIFY never implies DELETE, RESTYLE never
     // implies REFACTOR, and so on.
-    const implied = impliedActions(change)
+    const implied = impliedActions(change, manifest)
     const unauthorizedActions = implied.filter((i) => !scope.actions.includes(i.action))
     for (const bad of unauthorizedActions) {
       reasons.push(`Change implies ${bad.action} (${bad.label}), which the TaskContract does not grant.`)

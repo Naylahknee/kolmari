@@ -34,10 +34,15 @@ exact conformance to the PRD.
 
 Cloudflare Workers has no `fs`, `git`, or `child_process`, so the engine is split:
 
-- **Pure core** — `src/sld/` (dependency-free ESM JS, typed via `index.d.ts`).
+- **Pure core** — `src/sld/core/` (dependency-free ESM JS, typed via `index.d.ts`).
+  This is a byte-identical vendored copy of `src/core/` from the canonical SLD
+  repo (`Naylahknee/SLD`) at the commit pinned in `src/sld/core/.core-version`;
+  it is never edited here. Kolmari-specific configuration lives in
+  `src/sld/manifest/kolmari.manifest.js`, and `src/sld/index.js` is a thin
+  adapter that re-exports the core plus the manifest.
   Runs identically in Node and in the Workers API route. No I/O, no clock
   (timestamps are passed in), no randomness. This is the whole decision engine.
-- **Node scanner** — `src/sld/node/scan.mjs`. Uses `fs` + `git` to build the
+- **Node scanner** — `src/sld/core/node/scan.mjs`. Uses `fs` + `git` to build the
   baseline, turn a git diff into a `ChangeSet`, and detect duplicate app roots.
   CLI/CI only; never bundled into the Worker.
 
@@ -113,16 +118,16 @@ self-approved authority returns `INSUFFICIENT_EVIDENCE`, never permission. A
 `harmlessChange` remains a risk classification and is explicitly not
 authorization: an unauthorized harmless change still blocks.
 
-- `src/sld/scope/task-contract.js` — the TaskContract: allowed files,
+- `src/sld/core/scope/task-contract.js` — the TaskContract: allowed files,
   directories, entities, actions, states, required/forbidden changes,
   propagation rules, grants, and the mandatory preservation invariants
   (`UNCHANGED_UNLESS_AUTHORIZED`, `NO_OPPORTUNISTIC_REFACTORING`, …) that are
   attached to every contract automatically.
-- `src/sld/scope/task-compiler.js` — compiles a contract into deterministic scope
+- `src/sld/core/scope/task-compiler.js` — compiles a contract into deterministic scope
   rules. It expands only what the contract literally says; entities resolve
   through the manifest's `entities` registry, and an entity it cannot resolve is
   ambiguity, which blocks rather than widening to "everything".
-- `src/sld/scope/scope-gate.js` — runs before all seven layers. Enforces
+- `src/sld/core/scope/scope-gate.js` — runs before all seven layers. Enforces
   file-, entity-, behavior-, UI-region-, state- and action-level authorization, protects SLD's own
   governance surface, and emits the change ledger.
 

@@ -66,7 +66,7 @@ export function analyzeExecution(changeSet, manifest, baseline, contract) {
   const deletionAuthorized = Boolean(contract?.allowedActions?.includes('DELETE'))
 
   for (const change of changeSet.changes) {
-    if (isSpecimenSurface(change.path)) continue
+    if (isSpecimenSurface(change.path, manifest)) continue
     if (excluded.some((glob) => matchGlob(change.path, glob))) continue
 
     // Whole-file deletion: the file is 100% gone. This used to be skipped

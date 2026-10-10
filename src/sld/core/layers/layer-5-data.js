@@ -26,7 +26,7 @@ export function analyzeData(changeSet, manifest) {
   for (const change of changeSet.changes) {
     if (change.changeType === 'delete') continue
     // Test fixtures and the engine's own source quote SQL as specimen text.
-    if (isSpecimenSurface(change.path)) continue
+    if (isSpecimenSurface(change.path, manifest)) continue
     const text = change.addedText || ''
     if (!text) continue
 

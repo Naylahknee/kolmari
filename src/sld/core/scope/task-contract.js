@@ -42,14 +42,16 @@ export const MANDATORY_INVARIANTS = [
  * SLD's own governance surface. These paths may only be touched when the
  * contract explicitly grants SLD_ENGINE_MAINTENANCE, so a coding agent cannot
  * weaken the referee because the referee is inconvenient.
+ *
+ * This is the default for the SLD repo itself. Consuming projects override it
+ * with manifest.governance.paths (see isGovernancePath) so the same core file
+ * protects each project's own governance surface.
  */
 export const GOVERNANCE_PATHS = [
-  'src/sld/',
-  'src/app/api/sld/',
+  'src/core/',
   '.sld/',
-  '.github/workflows/sld.yml',
-  'docs/14-SLD-GOVERNANCE.md',
-  'scripts/sld.mjs',
+  '.github/workflows/core-ci.yml',
+  'cli/sld.js',
 ]
 
 /**
@@ -174,8 +176,18 @@ export function allowsGovernanceEdits(contract) {
   return Boolean(contract && contract.grants && contract.grants.includes(SLD_MAINTENANCE_GRANT))
 }
 
-/** True when a path belongs to SLD's own governance surface. */
-export function isGovernancePath(path) {
+/** True when a path belongs to SLD's own governance surface.
+ *
+ * The surface comes from manifest.governance.paths so consuming projects can
+ * name their own vendored core location, CLI wrapper, and workflow file.
+ * Entries ending in '/' are prefix matches, otherwise exact matches.
+ *
+ * @param {string} path
+ * @param {object} [manifest]
+ */
+export function isGovernancePath(path, manifest) {
   if (GOVERNANCE_EXEMPT.includes(path)) return false
-  return GOVERNANCE_PATHS.some((p) => (p.endsWith('/') ? path.startsWith(p) : path === p))
+  const configured = manifest?.governance?.paths
+  const list = Array.isArray(configured) && configured.length ? configured : GOVERNANCE_PATHS
+  return list.some((p) => (p.endsWith('/') ? path.startsWith(p) : path === p))
 }

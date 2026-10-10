@@ -32,6 +32,12 @@ jobs:
           node-version: 22
       - run: npm ci
 
+      # The vendored core in src/sld/core/ must stay byte-identical to the
+      # canonical SLD repo at the pinned commit. Any local edit fails here:
+      # fix the canonical repo and re-vendor instead.
+      - name: SLD core drift check
+        run: node scripts/sld-verify-core.mjs
+
       - name: SLD engine tests
         run: npm run sld:test
 
