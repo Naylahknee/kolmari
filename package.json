@@ -52,10 +52,10 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^10",
-    "eslint-config-next": "16.3.5",
+    "eslint-config-next": "16.4.0",
     "tailwindcss": "^4",
     "typescript": "^7",
-    "wrangler": "^4.132.0"
+    "wrangler": "^4.148.0"
   },
   "allowScripts": {
     "esbuild@0.25.4": true,
