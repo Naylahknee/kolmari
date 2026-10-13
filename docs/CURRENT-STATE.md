@@ -1315,14 +1315,14 @@ refers to imagery, not legal requirements.
 Validation:
 - Production `npm run build`: PASS, including `/pathways` and `/passportindex`.
 - TypeScript `npx tsc --noEmit`: PASS.
-- 37 isolated DOM interaction assertions: PASS. Covers passport name/ISO and
+- 39 isolated DOM interaction assertions: PASS. Covers passport name/ISO and
   region search, nationality/destination access filtering, directory-link
   parameters, synchronized pathway filters, original route search/status tabs,
   bookmark storage/remount, comparison, route keyboard selection, unchanged
   plan PUT payload and error feedback with a stubbed API, income/family inputs,
   matching reset, profile immutability, original document count, four-step
   navigation, research dialog/focus return, EU mobility icon, gallery scrolling,
-  and image load/error/unmapped fallback.
+  and image load/error/unmapped fallback, including images completed before hydration.
 - Lint: repository ESLint 10/TypeScript 7 cannot load its current plugins. In an
   isolated ESLint 9/TypeScript 6 runtime, all newly added components and changed
   page files lint cleanly except the pre-existing synchronous setState effect

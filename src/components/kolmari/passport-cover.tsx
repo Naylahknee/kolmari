@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { FileText, Users } from 'lucide-react'
 import { PASSPORT_COVERS } from '@/lib/passport-covers'
 
@@ -13,6 +13,12 @@ export function PassportCover({ code, country, className = '', mobility = false 
   const asset = PASSPORT_COVERS[code.toUpperCase()]
   const [failedSource, setFailedSource] = useState<string | null>(null)
   const [loadedSource, setLoadedSource] = useState<string | null>(null)
+  const observeImage = useCallback((node: HTMLImageElement | null) => {
+    // Cached images can finish before hydration attaches the load/error events.
+    if (!asset || !node?.complete) return
+    if (node.naturalWidth > 0) setLoadedSource(asset.src)
+    else setFailedSource(asset.src)
+  }, [asset])
   const name = country ?? asset?.country ?? 'Country'
   const available = asset && failedSource !== asset.src
   const Icon = mobility ? Users : FileText
@@ -26,7 +32,7 @@ export function PassportCover({ code, country, className = '', mobility = false 
       {available && (
         // Local source photographs retain their proportions; metadata and license credits live in the mapping.
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={asset.src} alt={`Official ${name} passport front cover`} width={250} height={350}
+        <img ref={observeImage} src={asset.src} alt={`Official ${name} passport front cover`} width={250} height={350}
           loading="lazy" decoding="async" onLoad={() => setLoadedSource(asset.src)} onError={() => setFailedSource(asset.src)}
           className={`relative h-full w-full object-contain ${loadedSource === asset.src ? '' : 'opacity-0'}`} />
       )}
