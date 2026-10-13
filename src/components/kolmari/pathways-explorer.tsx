@@ -213,8 +213,8 @@ export function PathwaysExplorer({ pathways, planPathway }: {
         </div>
 
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-          <div className="-mx-1 max-w-full overflow-x-auto px-1 [scrollbar-width:none]">
-            <div className="flex w-max gap-1 rounded-full bg-[#f3f5f9] p-1" role="tablist" aria-label="Filter routes">
+          <div className="-mx-1 max-w-full px-1">
+            <div className="flex flex-wrap gap-1 rounded-[14px] bg-[#f3f5f9] p-1" role="tablist" aria-label="Filter routes">
               {TABS.map((t) => {
                 const active = filter === t.id && !compare
                 return (
@@ -237,7 +237,8 @@ export function PathwaysExplorer({ pathways, planPathway }: {
           <CompareTable routes={savedRoutes} />
         ) : (
           <>
-            <ul role="listbox" aria-label="Visa routes" onKeyDown={onListKey} className="mt-2 border-t border-[#eef1f5]">
+            <div className="space-y-3 lg:hidden">{list.map((p,i) => { const info=summaryFor(p.id,p.name); const status=displayStatus(p); const met=p.requirementsMet.length; const missing=p.missingRequirements.length; const isSaved=saved.includes(p.id); return <article key={p.id} className="relative rounded-[14px] border border-[#e7ebf1] bg-white p-[17px] shadow-[0_1px_3px_rgba(16,34,68,.08)]"><button type="button" onClick={()=>open(p.id)} className="block w-full pr-12 text-left" aria-label={`Open ${p.country} ${info.shortName}`}><div className="flex items-center gap-2"><Flag code={info.code} size={36}/><span className="text-[10.5px] font-bold uppercase tracking-[.12em] text-[#6b7a92]">{p.country}</span>{i===0&&<span className="rounded-full bg-[#fbeaa5] px-2 py-1 text-[10px] font-bold text-[#7a5c00]">Best match</span>}</div><h3 className="mt-2 text-base font-bold text-[#17305b]">{info.shortName}</h3><div className="mt-2 flex flex-wrap items-center gap-2"><StatusBadge status={status}/><span className="flex gap-1" aria-label={`${met} of ${met+missing} signals matching`}>{Array.from({length:met+missing},(_,n)=><span key={n} className={`size-2 rounded-full ${n<met?"bg-[#1f9d94]":"border border-[#b8c3d4]"}`}/>)}</span><span className="text-xs text-[#6b7a92]">{met}/{met+missing}</span></div><dl className="mt-4 grid grid-cols-2 gap-3 border-t border-[#eef1f5] pt-3 text-xs">{([["Income",info.keyFact],["Processing",info.processing],["Family",info.family],["Fees",info.fees]] as const).map(([label,value])=><div key={label}><dt className="font-semibold text-[#6b7a92]">{label}</dt><dd className="mt-1 font-semibold text-[#17305b]">{value}</dd></div>)}</dl></button><button type="button" aria-pressed={isSaved} aria-label={isSaved?`Remove ${info.shortName} from saved routes`:`Save ${info.shortName}`} onClick={()=>toggle(p.id)} className="absolute right-3 top-3 grid size-11 place-items-center rounded-full hover:bg-[#f3f5f9]"><Bookmark size={19} fill={isSaved?"currentColor":"none"}/></button></article>})}</div>
+            <ul role="listbox" aria-label="Visa routes" onKeyDown={onListKey} className="mt-2 hidden border-t border-[#eef1f5] lg:block">
               {list.map((p) => {
                 const s = summaryFor(p.id, p.name)
                 const status = displayStatus(p)
@@ -512,7 +513,9 @@ function CompareTable({ routes }: { routes: PathwayEvaluation[] }) {
     ['To confirm', (p) => (p.missingRequirements.length ? `${p.missingRequirements.length} detail${p.missingRequirements.length === 1 ? '' : 's'}` : 'None')],
   ]
   return (
-    <div className="mt-3 overflow-x-auto rounded-[var(--radius-field)] border border-line">
+    <>
+    <div className="mt-3 space-y-4 lg:hidden">{rows.map(([label, fn]) => <section key={label} aria-label={label} className="rounded-[14px] border border-[#e7ebf1] bg-white p-4"><h3 className="mb-3 text-sm font-bold text-[#17305b]">{label}</h3><dl className="space-y-3">{routes.map(p => <div key={p.id} className="border-t border-[#eef1f5] pt-2"><dt className="text-xs font-semibold text-[#6b7a92]">{p.country} · {summaryFor(p.id,p.name).shortName}</dt><dd className="mt-1 text-sm font-semibold text-[#17305b]">{fn(p)}</dd></div>)}</dl></section>)}</div>
+    <div className="mt-3 hidden overflow-x-auto rounded-[var(--radius-field)] border border-line lg:block">
       <table className="w-full min-w-[520px] border-collapse text-left text-[13px]">
         <caption className="sr-only">Side-by-side comparison of saved routes</caption>
         <thead>
@@ -544,5 +547,6 @@ function CompareTable({ routes }: { routes: PathwayEvaluation[] }) {
         </tbody>
       </table>
     </div>
+    </>
   )
 }
