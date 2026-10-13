@@ -417,8 +417,6 @@ function RoutePanel({ pathway: p, position, isSaved, planRoute, onPlanSaved, onA
             No profile signals point to this route yet. It appeared because it is part of the researched set.
           </p>
         )}
-      </div>
-
       </div><div>
         <h4 className="text-[13.5px] font-bold text-navy">To confirm</h4>
         {p.missingRequirements.length ? (
@@ -434,8 +432,6 @@ function RoutePanel({ pathway: p, position, isSaved, planRoute, onPlanSaved, onA
             Nothing. Review the official list.
           </p>
         )}
-      </div>
-
       </div></div>
       <div className="mt-5 border-t border-line">
         {sections.map((sec) => {
