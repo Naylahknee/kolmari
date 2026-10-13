@@ -1,6 +1,7 @@
 'use client'
 import { useMemo, useRef, useState } from 'react'
 import { PassportCover } from '@/components/kolmari/passport/passport-cover'
+import { PassportAccessMap } from '@/components/kolmari/passport/passport-access-map'
 import { useSearchParams } from 'next/navigation'
 import {
   PASSPORTS, PASSPORT_CODES, PASSPORT_META, REQUIREMENT_LABEL, categoryCounts,
@@ -128,6 +129,7 @@ export function PassportIndexTool() {
           <select aria-label="Sort destinations" value={sort} onChange={e => setSort(e.target.value as 'az' | 'za' | 'stay')} className="rounded-lg border border-navy/15 bg-white px-3 py-2 text-sm"><option value="az">A–Z</option><option value="za">Z–A</option><option value="stay">Longest stay</option></select>
           </div>
           <p className="mt-2 text-xs text-muted">{destinations.length} matching destinations</p>
+          <div className="mt-4"><PassportAccessMap passport={passport} onSelect={setDetail} /></div>
           {focusRow && !query && (
             <div ref={focusRef} className="card-surface mt-3 flex items-center gap-3 border-2 border-gold-deep p-4">
               <PassportCover code={focusRow.code} name={focusRow.name} />
@@ -181,7 +183,7 @@ export function PassportIndexTool() {
       ) : (
         <section className="mt-4 space-y-4">
           <div className="card-surface flex flex-wrap gap-2 p-4"><select value={addPassport} onChange={e => setAddPassport(e.target.value)} aria-label="Select passport for comparison" className="min-w-0 flex-1 rounded-lg border border-navy/15 p-3 text-sm"><option value="">Select a passport</option>{PASSPORT_CODES.filter(c => !compare.includes(c)).map(c => <option key={c} value={c}>{PASSPORTS[c].n}</option>)}</select><button disabled={!addPassport || compare.length >= 3} onClick={() => {setCompare(v => [...v, addPassport]);setAddPassport("")}} className="rounded-lg bg-navy-deep px-4 py-2 text-sm font-semibold text-white disabled:opacity-40">Add passport</button></div>
-          <div className="grid gap-3 md:grid-cols-3">{compare.map(c => {const p=PASSPORTS[c], n=categoryCounts(p), requirement=compareDestination ? decodeRequirement(p.d[compareDestination] ?? "VR") : null; return <div key={c} className="card-surface p-5"><div className="flex justify-between"><PassportCover code={c} name={p.n} large/><button onClick={() => setCompare(v => v.filter(x => x !== c))} className="text-xs text-muted">Remove ×</button></div><h3 className="mt-3 text-lg font-bold">{p.n}</h3><p className="text-sm">Mobility {p.s} · Rank #{p.r}</p><div className="mt-3 space-y-2">{KIND_ORDER.map(k => <div key={k} className="flex justify-between gap-3 text-xs"><span>{REQUIREMENT_LABEL[k]}</span><strong>{n[k]}</strong></div>)}</div>{requirement && <p className="mt-4 border-t pt-3 text-sm">{PASSPORTS[compareDestination]?.n}: {requirementSummary(requirement)}</p>}</div>})}</div>
+          <div className="grid gap-3 md:grid-cols-3">{compare.map(c => {const p=PASSPORTS[c], n=categoryCounts(p), requirement=compareDestination ? (p.d[compareDestination] ? decodeRequirement(p.d[compareDestination]) : null) : null; return <div key={c} className="card-surface p-5"><div className="flex justify-between"><PassportCover code={c} name={p.n} large/><button onClick={() => setCompare(v => v.filter(x => x !== c))} className="text-xs text-muted">Remove ×</button></div><h3 className="mt-3 text-lg font-bold">{p.n}</h3><p className="text-sm">Mobility {p.s} · Rank #{p.r}</p><div className="mt-3 space-y-2">{KIND_ORDER.map(k => <div key={k} className="flex justify-between gap-3 text-xs"><span>{REQUIREMENT_LABEL[k]}</span><strong>{n[k]}</strong></div>)}</div>{requirement && <p className="mt-4 border-t pt-3 text-sm">{PASSPORTS[compareDestination]?.n}: {requirementSummary(requirement)}</p>}</div>})}</div>
           <div className="card-surface p-4"><label className="mb-2 block text-sm font-semibold" htmlFor="compare-dest">Compare destination entry rules</label><select id="compare-dest" className="w-full rounded-lg border border-navy/15 p-3 text-sm" value={compareDestination} onChange={e => setCompareDestination(e.target.value)}><option value="">Select destination</option>{PASSPORT_CODES.map(c => <option key={c} value={c}>{PASSPORTS[c].n}</option>)}</select></div>
         </section>
       )}
