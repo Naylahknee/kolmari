@@ -3,7 +3,7 @@ export type CountryDetail = {
   name: string
   code: string
   city: string
-  region: 'Europe' | 'Americas'
+  region: 'Europe' | 'Americas' | 'Africa'
   visaType: string
   incomeRequired: number
   safety: 'High' | 'Good'
@@ -37,6 +37,36 @@ export const COUNTRIES: CountryDetail[] = [
     slug: 'mexico', name: 'Mexico', code: 'MX', city: 'Playa del Carmen', region: 'Americas',
     visaType: 'Temporary Resident', incomeRequired: 1500, safety: 'Good', cost: '$', match: 86,
     summary: 'A flexible nearby move with diverse cities, tropical coastlines, and a lower day-to-day cost in many regions.',
+  },
+  {
+    slug: 'ghana', name: 'Ghana', code: 'GH', city: 'Accra', region: 'Africa',
+    visaType: 'Residence Permit', incomeRequired: 1500, safety: 'Good', cost: '$$', match: 84,
+    summary: 'A cultural homecoming base with a growing diaspora community and a government actively welcoming returnees.',
+  },
+  {
+    slug: 'rwanda', name: 'Rwanda', code: 'RW', city: 'Kigali', region: 'Africa',
+    visaType: 'Digital Nomad Visa', incomeRequired: 1500, safety: 'Good', cost: '$', match: 82,
+    summary: 'One of Africa\u2019s safest and most organized capitals, with a remote-worker route and fast-growing infrastructure.',
+  },
+  {
+    slug: 'kenya', name: 'Kenya', code: 'KE', city: 'Nairobi', region: 'Africa',
+    visaType: 'Digital Nomad Permit', incomeRequired: 2000, safety: 'Good', cost: '$$', match: 83,
+    summary: 'East Africa\u2019s tech hub with savanna weekends, a dedicated nomad permit, and a deep international community.',
+  },
+  {
+    slug: 'south-africa', name: 'South Africa', code: 'ZA', city: 'Cape Town', region: 'Africa',
+    visaType: 'Remote Work Visa', incomeRequired: 3000, safety: 'Good', cost: '$$', match: 85,
+    summary: 'World-class cities and dramatic landscapes with a remote work visa, best paired with neighborhood-level safety planning.',
+  },
+  {
+    slug: 'senegal', name: 'Senegal', code: 'SN', city: 'Dakar', region: 'Africa',
+    visaType: 'Long-Stay Residence', incomeRequired: 1200, safety: 'Good', cost: '$', match: 81,
+    summary: 'A vibrant coastal capital with rich culture, deep history, and an affordable day-to-day cost.',
+  },
+  {
+    slug: 'gambia', name: 'Gambia', code: 'GM', city: 'Banjul', region: 'Africa',
+    visaType: 'Residence Permit', incomeRequired: 1000, safety: 'Good', cost: '$', match: 80,
+    summary: 'Beach-town ease on the Atlantic with one of the lowest day-to-day costs on this list.',
   },
 ]
 

@@ -14,9 +14,10 @@ export const metadata: Metadata = {
   description: 'Your matched destinations plotted on the map, with a ranked shortlist built from your Kolmari Profile.',
 }
 
-// COUNTRIES uses 'Europe' | 'Americas'; the only Americas country is Mexico, so
-// present it under the same 'Latin America' label the discoverable set uses.
-const regionLabel = (region: 'Europe' | 'Americas') => (region === 'Europe' ? 'Europe' : 'Latin America')
+// COUNTRIES uses 'Europe' | 'Americas' | 'Africa'; the Americas countries
+// present under the 'Latin America' label the discoverable set uses.
+const regionLabel = (region: 'Europe' | 'Americas' | 'Africa') =>
+  region === 'Europe' ? 'Europe' : region === 'Africa' ? 'Africa' : 'Latin America'
 
 export default async function YourWorldPage({ searchParams }: { searchParams: Promise<{ q?: string | string[] }> }) {
   const params = await searchParams

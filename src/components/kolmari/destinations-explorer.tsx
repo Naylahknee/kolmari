@@ -6,7 +6,7 @@ import { ChevronDown, Heart, Lock, Search, X } from 'lucide-react'
 import { PanelIcon, safetyLabelForLevel, safetyScoreColor } from '@/components/kolmari/panel-icons'
 import { attributeIconsFor, getCountryAttributes } from '@/lib/country-attributes'
 
-export type ExplorerRegion = 'Europe' | 'Asia' | 'North America' | 'Latin America' | 'Oceania'
+export type ExplorerRegion = 'Europe' | 'Asia' | 'North America' | 'Latin America' | 'Oceania' | 'Africa'
 
 export type ExplorerCountry = {
   slug: string
@@ -133,7 +133,7 @@ export function DestinationsExplorer({ countries, imageSrcs, matchScores, paid, 
   }, [activeSlug])
 
   const regionOptions = useMemo(() => {
-    const order: ExplorerRegion[] = ['Europe', 'Latin America', 'North America', 'Asia', 'Oceania']
+    const order: ExplorerRegion[] = ['Europe', 'Latin America', 'North America', 'Asia', 'Oceania', 'Africa']
     const present = new Set(countries.map((country) => country.region))
     return order.filter((regionOption) => present.has(regionOption))
   }, [countries])

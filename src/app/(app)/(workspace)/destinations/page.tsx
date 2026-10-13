@@ -6,7 +6,9 @@ import { getGeneratedDashboardDestinationVersion } from '@/lib/country-assets'
 import { DestinationsExplorer, type ExplorerCountry, type ExplorerRegion } from '@/components/kolmari/destinations-explorer'
 
 function toRegion(country: Pick<CountryDetail, 'region'>): ExplorerRegion {
-  return country.region === 'Americas' ? 'Latin America' : 'Europe'
+  if (country.region === 'Americas') return 'Latin America'
+  if (country.region === 'Africa') return 'Africa'
+  return 'Europe'
 }
 
 function toExplorerResearched(country: CountryDetail): ExplorerCountry {
