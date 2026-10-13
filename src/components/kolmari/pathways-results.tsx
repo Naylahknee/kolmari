@@ -5,8 +5,11 @@ import { useMemo, useState } from 'react'
 import { Check, CheckCircle2, Minus, Plus } from 'lucide-react'
 import type { RelocationProfile } from '@/lib/profile'
 import { evaluatePathways, RESEARCH_DISCLAIMER, type PathwayEvaluation, type PathwayMatchStatus } from '@/lib/pathways'
-import { INCOME_TYPES, LESSER_KNOWN_ROUTES, VISA_JOURNEYS } from '@/lib/pathway-extras'
+import { INCOME_TYPES, VISA_JOURNEYS } from '@/lib/pathway-extras'
 import { PathwaysExplorer } from '@/components/kolmari/pathways-explorer'
+import { PathwaysPassports } from './pathways-passports'
+import { PathwaysLesserRoutes } from './pathways-lesser-routes'
+import { PassportCoverCredits } from './passport-cover'
 
 // ─── Status presentation ────────────────────────────────────────────────
 //
@@ -24,6 +27,7 @@ const FIT_TONES: Record<PathwayMatchStatus, string> = {
   'Missing Requirements': 'bg-[#fdeaee] text-[#b3243c]',
 }
 const SECTIONS = [
+  { id: 'passports', label: 'Passports' },
   { id: 'journey', label: 'Journey' },
   { id: 'signals', label: 'Signals' },
   { id: 'match', label: 'Match' },
@@ -49,6 +53,7 @@ export function PathwaysResults({ profile, savedDestination, selectedPathway, do
   documentsTotal: number
 }) {
   const complete = profile.wizard_status === 'completed'
+  const [routeCategory, setRouteCategory] = useState('All')
 
   // Exploratory overrides — never written back to the saved Kolmari Profile.
   const [income, setIncome] = useState<number | null>(profile.monthly_income)
@@ -87,18 +92,6 @@ export function PathwaysResults({ profile, savedDestination, selectedPathway, do
 
   return (
     <div className="space-y-4">
-      {/* 1 — Header */}
-      <header className="overflow-hidden rounded-[var(--radius-card)] bg-navy-deep px-6 py-6 text-white sm:px-7">
-        <p className="text-[10.5px] font-bold uppercase tracking-[0.13em] text-gold">Kolmari Pathways</p>
-        <h1 className="mt-1.5 max-w-[34ch] text-[26px] font-bold leading-tight tracking-[-0.02em]">
-          Research the routes that fit your facts.
-        </h1>
-        <p className="mt-1.5 max-w-[68ch] text-[13.5px] leading-[1.62] text-white/70">
-          Your Kolmari Profile supplies the inputs. This page organizes official Pathway research. It does not
-          determine your eligibility or guarantee any outcome.
-        </p>
-      </header>
-
       {/* 2 — Section tabs */}
       <nav className="k-tabbar" aria-label="Pathways sections">
         <div className="k-tabs">
@@ -115,6 +108,8 @@ export function PathwaysResults({ profile, savedDestination, selectedPathway, do
         </div>
       </nav>
 
+      <PathwaysPassports categories={['All', ...Array.from(new Set(evaluated.map((route) => route.category)))]} category={routeCategory} onCategoryChange={setRouteCategory} />
+
       {/* 3 — Visa journey tracker */}
       <section id="pw-journey" className="scroll-mt-4 rounded-[var(--radius-card)] border border-line bg-white px-5 pb-5 pt-[18px] shadow-tile" aria-labelledby="pw-journey-heading">
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
@@ -126,6 +121,21 @@ export function PathwaysResults({ profile, savedDestination, selectedPathway, do
           </div>
           {journey && <span className="text-[11.5px] text-muted-soft">Step {currentStep} of {journey.length}</span>}
         </div>
+
+        <ol className="mt-4 grid gap-2 sm:grid-cols-4" aria-label="Your visa journey navigation">
+          {[
+            { label: 'Tell us about you', href: '/profile-wizard' },
+            { label: 'See your options', href: '#pw-routes' },
+            { label: 'Compare and save', href: '#pw-routes' },
+            { label: 'Take the next step', href: '/my-plan' },
+          ].map((step, index) => (
+            <li key={step.label}>
+              <Link href={step.href} className="flex items-center gap-2 rounded-[var(--radius-field)] border border-line px-3 py-3 text-xs font-semibold text-navy hover:bg-canvas">
+                <span className="grid size-6 shrink-0 place-items-center rounded-pill bg-gold-soft text-navy">{index + 1}</span>{step.label}
+              </Link>
+            </li>
+          ))}
+        </ol>
 
         {journey ? (
           <ol className="mt-4 flex items-start">
@@ -169,13 +179,15 @@ export function PathwaysResults({ profile, savedDestination, selectedPathway, do
         )}
       </section>
 
+      <PathwaysLesserRoutes />
+
       {/* 4 — Strongest signals */}
       <section id="pw-signals" className="scroll-mt-4" aria-labelledby="pw-signals-heading">
         <h2 id="pw-signals-heading" className="text-[10.5px] font-bold uppercase tracking-[0.13em] text-gold-deep">
           Your strongest signals
         </h2>
         <p className="mt-1 text-[12.5px] text-muted">Based on your Kolmari Profile. Official requirements still control eligibility.</p>
-        <div className="mt-3 grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(300px,1fr))]">
+        <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {strongest.map((pathway) => (
             <article key={pathway.id} className="rounded-[var(--radius-card)] border border-line bg-white px-[17px] pb-4 pt-[15px] shadow-tile">
               <div className="flex items-start justify-between gap-3">
@@ -204,7 +216,7 @@ export function PathwaysResults({ profile, savedDestination, selectedPathway, do
       <section id="pw-match" className="scroll-mt-4 rounded-[var(--radius-card)] border border-line bg-white px-5 pb-5 pt-[18px] shadow-tile" aria-labelledby="pw-match-heading">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 id="pw-match-heading" className="text-[16px] font-bold tracking-[-0.01em] text-navy">Match your facts to the routes</h2>
+            <h2 id="pw-match-heading" className="text-[16px] font-bold tracking-[-0.01em] text-navy">Match your facts to the right routes</h2>
             <p className="mt-0.5 text-[12.5px] text-muted">Adjust the inputs and the fit labels below update. Nothing here is saved or submitted.</p>
           </div>
           {touched && (
@@ -212,7 +224,7 @@ export function PathwaysResults({ profile, savedDestination, selectedPathway, do
           )}
         </div>
 
-        <div className="mt-5 grid items-end gap-x-6 gap-y-5 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]">
+        <div className="mt-5 grid items-end gap-x-6 gap-y-5 sm:grid-cols-2 xl:grid-cols-4">
           <div>
             <label htmlFor="pw-income" className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted-soft">Monthly income</label>
             <p className="mt-1 text-[20px] font-extrabold leading-none text-navy">
@@ -272,36 +284,7 @@ export function PathwaysResults({ profile, savedDestination, selectedPathway, do
       {/* 6 — All routes: master-detail explorer */}
       <section id="pw-routes" className="scroll-mt-4" aria-labelledby="pw-routes-heading">
         <h2 id="pw-routes-heading" className="sr-only">Explore all Pathways</h2>
-        <PathwaysExplorer pathways={evaluated} planPathway={selectedPathway} />
-      </section>
-
-      {/* 7 — Lesser-known routes */}
-      <section id="pw-lesser" className="scroll-mt-4" aria-labelledby="pw-lesser-heading">
-        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          <h2 id="pw-lesser-heading" className="text-[16px] font-bold tracking-[-0.01em] text-navy">Lesser-known routes most people miss</h2>
-          <span className="text-[11.5px] text-muted-soft">Often faster or cheaper than the headline visa</span>
-        </div>
-        <div className="mt-3 grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(300px,1fr))]">
-          {LESSER_KNOWN_ROUTES.map((route) => (
-            <article key={`${route.country}-${route.name}`} className="rounded-[var(--radius-card)] border border-line bg-white px-[17px] pb-4 pt-[15px] shadow-tile">
-              <div className="flex items-start gap-2.5">
-                <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.11em] text-muted-soft">{route.country}</p>
-                  <h3 className="mt-0.5 text-[15px] font-bold tracking-[-0.01em] text-navy">{route.name}</h3>
-                </div>
-                <span className={`shrink-0 whitespace-nowrap rounded-pill px-2 py-[3px] text-[9.5px] font-bold ${route.tone === 'good' ? 'bg-teal-soft text-teal-deep' : 'bg-canvas text-muted'}`}>
-                  {route.tag}
-                </span>
-              </div>
-              <p className="mt-2 text-[12.3px] leading-[1.6] text-muted">{route.body}</p>
-              <p className="mt-2.5 border-t border-[#f0f3f7] pt-2.5 text-[11px] text-muted-soft">{route.who}</p>
-            </article>
-          ))}
-        </div>
-        <p className="mt-3 text-[11px] leading-5 text-muted-soft">
-          These are orientation only — they do not yet carry an official source or verification date. Confirm each
-          with the relevant government authority before acting on it.
-        </p>
+        <PathwaysExplorer pathways={evaluated} planPathway={selectedPathway} category={routeCategory} onCategoryChange={setRouteCategory} />
       </section>
 
       <section className="rounded-[var(--radius-card)] border border-line bg-canvas p-6 text-sm text-muted" aria-label="Sources and research notes">
@@ -311,6 +294,12 @@ export function PathwaysResults({ profile, savedDestination, selectedPathway, do
           Income and savings figures shown are approximate planning guides in USD equivalent — not official government
           thresholds. Confirm every requirement directly with the linked government authority.
         </p>
+        <p className="mt-3 text-xs leading-5">
+          Passport access uses the existing passport directory dataset. Country-specific entry restrictions and
+          individual official verification dates are unavailable in that dataset; check the destination authority
+          before relying on its entry-access labels.
+        </p>
+        <PassportCoverCredits />
       </section>
     </div>
   )
