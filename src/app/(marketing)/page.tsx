@@ -295,13 +295,15 @@ export default function LandingPage() {
       </section>
 
       {/* ── Final CTA + footer ──────────────────────────────────────────── */}
-      <footer className="relative w-full overflow-hidden bg-navy-deep text-white">
-        <Image src="/images/footer-beach-ocean.png" alt="Golden beach and ocean at sunset" width={2172} height={724} className="h-72 w-full object-cover opacity-60" />
-        <div className="absolute inset-0 flex items-center bg-gradient-to-r from-navy-deep via-navy-deep/80 to-navy-deep/20">
-          <div className="mx-auto w-full max-w-[1180px] px-5">
-            <h2 className="max-w-xl font-display text-4xl font-extrabold">Your next chapter deserves a real plan.</h2>
-            <p className="mt-3 text-white/75">Compare clearly. Prepare practically. Move with confidence.</p>
-            <Link href="/quiz" className="gold-button mt-6">Build My Kolmari Plan <ArrowRight size={17} /></Link>
+      <footer className="w-full bg-navy-deep text-white">
+        <div className="relative w-full overflow-hidden">
+          <Image src="/images/footer-beach-ocean.png" alt="Golden beach and ocean at sunset" width={2172} height={724} className="h-72 w-full object-cover opacity-60" />
+          <div className="absolute inset-0 flex items-center bg-gradient-to-r from-navy-deep via-navy-deep/80 to-navy-deep/20">
+            <div className="mx-auto w-full max-w-[1180px] px-5">
+              <h2 className="max-w-xl font-display text-4xl font-extrabold">Your next chapter deserves a real plan.</h2>
+              <p className="mt-3 text-white/75">Compare clearly. Prepare practically. Move with confidence.</p>
+              <Link href="/quiz" className="gold-button mt-6">Build My Kolmari Plan <ArrowRight size={17} /></Link>
+            </div>
           </div>
         </div>
         <div className="border-t border-white/10 px-5 py-5">
