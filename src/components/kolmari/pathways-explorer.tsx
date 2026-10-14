@@ -15,10 +15,11 @@ import { PassportCover } from './passport-cover'
 // planning guide). Unknown information is never treated as a failed
 // requirement, so it stays amber.
 
-type DisplayStatus = 'fit' | 'confirm' | 'not-met'
+type DisplayStatus = 'fit' | 'confirm' | 'not-met' | 'browse'
 const UNMET_RE = /below the|does not meet|not eligible/i
 
-function displayStatus(p: PathwayEvaluation): DisplayStatus {
+function displayStatus(p: PathwayEvaluation, personalized = true): DisplayStatus {
+  if (!personalized) return 'browse'
   if (p.missingRequirements.some((m) => UNMET_RE.test(m))) return 'not-met'
   return p.status === 'Strong Match' ? 'fit' : 'confirm'
 }
@@ -27,9 +28,10 @@ const STATUS_META: Record<DisplayStatus, { label: string; badge: string; Icon: t
   fit: { label: 'Potential fit', badge: 'bg-ok-soft text-ok', Icon: CheckCircle2 },
   confirm: { label: 'Needs confirmation', badge: 'bg-warn-soft text-[#8a6500]', Icon: CircleAlert },
   'not-met': { label: 'Requirement not met', badge: 'bg-[#fdeaee] text-[#b3243c]', Icon: XCircle },
+  browse: { label: 'Research route', badge: 'bg-[#edf1f6] text-navy', Icon: FileText },
 }
-const statusOrder = (p: PathwayEvaluation) => {
-  const s = displayStatus(p)
+const statusOrder = (p: PathwayEvaluation, personalized = true) => {
+  const s = displayStatus(p, personalized)
   return s === 'fit' ? 0 : s === 'confirm' ? 1 : 2
 }
 
@@ -75,14 +77,16 @@ function signalLine(p: PathwayEvaluation) {
 
 // ─── Explorer ───────────────────────────────────────────────────────────
 
-export function PathwaysExplorer({ pathways, planPathway, category, onCategoryChange }: {
+export function PathwaysExplorer({ pathways, planPathway, category, onCategoryChange, personalized = true }: {
   pathways: PathwayEvaluation[]
   planPathway: string | null
   category: string
   onCategoryChange: (category: string) => void
+  personalized?: boolean
 }) {
   const { saved, toggle } = useSavedPathways()
   const [filter, setFilter] = useState<Filter>('all')
+  const availableTabs = personalized ? TABS : TABS.filter(t => t.id === 'all' || t.id === 'saved')
   const [query, setQuery] = useState('')
   const [compare, setCompare] = useState(false)
   const [sheetOpen, setSheetOpen] = useState(false) // small screens only
@@ -98,22 +102,26 @@ export function PathwaysExplorer({ pathways, planPathway, category, onCategoryCh
       .filter((p) => category === 'All' || p.category === category)
       .filter((p) => !q || [p.name, summaryFor(p.id, p.name).shortName, p.country, p.category]
         .some((v) => v.toLowerCase().includes(q)))
-      .sort((a, b) => statusOrder(a) - statusOrder(b))
-  }, [pathways, category, query])
+      .sort((a, b) => personalized ? statusOrder(a, true) - statusOrder(b, true) : a.country.localeCompare(b.country) || a.name.localeCompare(b.name))
+  }, [pathways, category, query, personalized])
   const counts: Record<Filter, number> = {
     all: sorted.length,
-    fit: sorted.filter((p) => displayStatus(p) === 'fit').length,
-    info: sorted.filter((p) => displayStatus(p) !== 'fit').length,
+    fit: personalized ? sorted.filter((p) => displayStatus(p, true) === 'fit').length : 0,
+    info: personalized ? sorted.filter((p) => displayStatus(p, true) !== 'fit').length : 0,
     saved: sorted.filter((p) => saved.includes(p.id)).length,
   }
   const list = useMemo(() => {
-    if (filter === 'fit') return sorted.filter((p) => displayStatus(p) === 'fit')
-    if (filter === 'info') return sorted.filter((p) => displayStatus(p) !== 'fit')
+    if (personalized && filter === 'fit') return sorted.filter((p) => displayStatus(p, true) === 'fit')
+    if (personalized && filter === 'info') return sorted.filter((p) => displayStatus(p, true) !== 'fit')
     if (filter === 'saved') return sorted.filter((p) => saved.includes(p.id))
     return sorted
-  }, [sorted, filter, saved])
+  }, [sorted, filter, saved, personalized])
 
-  const [selectedId, setSelectedId] = useState<string | null>(pathways.find(p => p.id === 'portugal-entrepreneur')?.id ?? sorted[0]?.id ?? null)
+  const [selectedId, setSelectedId] = useState<string | null>(
+    pathways.find(p => `${p.country} — ${p.name}` === planPathway)?.id ??
+    (personalized ? [...pathways].sort((a,b) => statusOrder(a,true) - statusOrder(b,true))[0]?.id : null) ??
+    sorted[0]?.id ?? null
+  )
   const selected = list.find((p) => p.id === selectedId) ?? list[0] ?? null
   const index = selected ? list.findIndex((p) => p.id === selected.id) : -1
 
@@ -136,7 +144,7 @@ export function PathwaysExplorer({ pathways, planPathway, category, onCategoryCh
   function closeSheet() {
     setSheetOpen(false)
     // Return focus to the row the detail was opened from.
-    requestAnimationFrame(() => document.getElementById(`pw-row-${selectedId}`)?.focus())
+    requestAnimationFrame(() => (document.getElementById(`pw-mobile-${selectedId}`) ?? document.getElementById(`pw-row-${selectedId}`))?.focus())
   }
 
   // Escape closes the full-screen detail on small screens.
@@ -148,9 +156,10 @@ export function PathwaysExplorer({ pathways, planPathway, category, onCategoryCh
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sheetOpen, selectedId])
 
-  const savedRoutes = sorted.filter((p) => saved.includes(p.id))
+  // Saved comparisons must stay available when search or category filters change.
+  const savedRoutes = pathways.filter((p) => saved.includes(p.id))
   const canCompare = savedRoutes.length >= 2
-  const needsInfo = sorted.filter(p => p.missingRequirements.length > 0).length
+  const needsInfo = personalized ? sorted.filter(p => p.missingRequirements.length > 0).length : 0
 
   function addToComparison(id: string) {
     const already = saved.includes(id)
@@ -168,8 +177,8 @@ export function PathwaysExplorer({ pathways, planPathway, category, onCategoryCh
       {/* List column (~64% on large screens) */}
       <div className="flex min-h-0 min-w-0 flex-col overflow-y-auto px-4 pb-4 pt-5 sm:px-6">
         <p className="text-[10.5px] font-bold uppercase tracking-[0.13em] text-gold-deep">Explore your options</p>
-        <h2 className="mt-1 text-[32px] font-extrabold leading-tight tracking-[-0.02em] text-navy">Your potential visa routes</h2>
-        <p className="mt-1 text-[13.5px] leading-[1.6] text-muted">See what fits your profile and what to confirm next.</p>
+        <h2 className="mt-1 text-2xl font-extrabold leading-tight tracking-[-0.02em] text-navy sm:text-[28px]">{personalized ? 'Explore your matching routes' : 'Browse all visa routes'}</h2>
+        <p className="mt-1 text-[13.5px] leading-[1.6] text-muted">{personalized ? 'Search all routes, or narrow to potential fits for your profile.' : 'Search by country or route type. Complete your profile to see personalized match signals.'}</p>
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <label className="flex min-w-0 flex-1 items-center gap-2 rounded-[var(--radius-field)] border border-line bg-[#fbfcfe] px-3 py-2 focus-within:border-navy/40">
@@ -186,8 +195,8 @@ export function PathwaysExplorer({ pathways, planPathway, category, onCategoryCh
           </label>
         </div>
 
-        <div className="-mx-1 mt-3 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]">
-          <div className="flex w-max min-w-full gap-2">
+        <div className="mt-3">
+          <div className="flex flex-wrap gap-2">
             {categories.map((item) => {
               const active = category === item
               return (
@@ -207,7 +216,7 @@ export function PathwaysExplorer({ pathways, planPathway, category, onCategoryCh
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
           <div className="-mx-1 max-w-full px-1">
             <div className="flex flex-wrap gap-1 rounded-[14px] bg-[#f3f5f9] p-1" role="tablist" aria-label="Filter routes">
-              {TABS.map((t) => {
+              {availableTabs.map((t) => {
                 const active = filter === t.id && !compare
                 return (
                   <button key={t.id} type="button" role="tab" aria-selected={active}
@@ -226,14 +235,14 @@ export function PathwaysExplorer({ pathways, planPathway, category, onCategoryCh
         </div>
 
         {compare ? (
-          <CompareTable routes={savedRoutes} />
+          <CompareTable routes={savedRoutes} personalized={personalized} />
         ) : (
           <>
-            <div className="space-y-3 lg:hidden">{list.map((p,i) => { const info=summaryFor(p.id,p.name); const status=displayStatus(p); const met=p.requirementsMet.length; const missing=p.missingRequirements.length; const isSaved=saved.includes(p.id); return <article key={p.id} className="relative rounded-[14px] border border-[#e7ebf1] bg-white p-[17px] shadow-[0_1px_3px_rgba(16,34,68,.08)]"><button type="button" onClick={()=>open(p.id)} className="block w-full pr-12 text-left" aria-label={`Open ${p.country} ${info.shortName}`}><div className="flex items-center gap-2"><PassportCover code={info.code} country={p.country} className="w-9" /><span className="text-[10.5px] font-bold uppercase tracking-[.12em] text-[#6b7a92]">{p.country}</span>{i===0&&<span className="rounded-full bg-[#fbeaa5] px-2 py-1 text-[10px] font-bold text-[#7a5c00]">Best match</span>}</div><h3 className="mt-2 text-base font-bold text-[#17305b]">{info.shortName}</h3><div className="mt-2 flex flex-wrap items-center gap-2"><StatusBadge status={status}/><span className="flex gap-1" aria-label={`${met} of ${met+missing} signals matching`}>{Array.from({length:met+missing},(_,n)=><span key={n} className={`size-2 rounded-full ${n<met?"bg-[#1f9d94]":"border border-[#b8c3d4]"}`}/>)}</span><span className="text-xs text-[#6b7a92]">{met}/{met+missing}</span></div><dl className="mt-4 grid grid-cols-2 gap-3 border-t border-[#eef1f5] pt-3 text-xs">{([["Income",info.keyFact],["Processing",info.processing],["Family",info.family],["Fees",info.fees]] as const).map(([label,value])=><div key={label}><dt className="font-semibold text-[#6b7a92]">{label}</dt><dd className="mt-1 font-semibold text-[#17305b]">{value}</dd></div>)}</dl></button><button type="button" aria-pressed={isSaved} aria-label={isSaved?`Remove ${info.shortName} from saved routes`:`Save ${info.shortName}`} onClick={()=>toggle(p.id)} className="absolute right-3 top-3 grid size-11 place-items-center rounded-full hover:bg-[#f3f5f9]"><Bookmark size={19} fill={isSaved?"currentColor":"none"}/></button></article>})}</div>
+            <div className="space-y-3 lg:hidden">{list.map((p,i) => { const info=summaryFor(p.id,p.name); const status=displayStatus(p, personalized); const met=p.requirementsMet.length; const missing=p.missingRequirements.length; const isSaved=saved.includes(p.id); return <article key={p.id} className="relative rounded-[14px] border border-[#e7ebf1] bg-white p-[17px] shadow-[0_1px_3px_rgba(16,34,68,.08)]"><button type="button" id={`pw-mobile-${p.id}`} onClick={()=>open(p.id)} className="block min-h-11 w-full pr-12 text-left" aria-label={`Open ${p.country} ${info.shortName}`}><div className="flex items-center gap-2"><PassportCover code={info.code} country={p.country} className="w-9" /><span className="text-[10.5px] font-bold uppercase tracking-[.12em] text-[#6b7a92]">{p.country}</span>{personalized && i===0 && status==='fit' && <span className="rounded-full bg-[#fbeaa5] px-2 py-1 text-[10px] font-bold text-[#7a5c00]">Potential fit</span>}</div><h3 className="mt-2 text-base font-bold text-[#17305b]">{info.shortName}</h3><div className="mt-2 flex flex-wrap items-center gap-2"><StatusBadge status={status}/>{personalized && <span className="flex gap-1" aria-label={`${met} of ${met+missing} signals matching`}>{Array.from({length:met+missing},(_,n)=><span key={n} className={`size-2 rounded-full ${n<met?"bg-[#1f9d94]":"border border-[#b8c3d4]"}`}/>)}</span>}{personalized && <span className="text-xs text-[#6b7a92]">{met}/{met+missing}</span>}</div><dl className="mt-4 grid grid-cols-2 gap-3 border-t border-[#eef1f5] pt-3 text-xs">{([["Income",info.keyFact],["Processing",info.processing],["Family",info.family],["Fees",info.fees]] as const).map(([label,value])=><div key={label}><dt className="font-semibold text-[#6b7a92]">{label}</dt><dd className="mt-1 font-semibold text-[#17305b]">{value}</dd></div>)}</dl></button><button type="button" aria-pressed={isSaved} aria-label={isSaved?`Remove ${info.shortName} from saved routes`:`Save ${info.shortName}`} onClick={()=>toggle(p.id)} className="absolute right-3 top-3 grid size-11 place-items-center rounded-full hover:bg-[#f3f5f9]"><Bookmark size={19} fill={isSaved?"currentColor":"none"}/></button></article>})}</div>
             <ul role="listbox" aria-label="Visa routes" onKeyDown={onListKey} className="mt-2 hidden border-t border-[#eef1f5] lg:block">
               {list.map((p) => {
                 const s = summaryFor(p.id, p.name)
-                const status = displayStatus(p)
+                const status = displayStatus(p, personalized)
                 const active = selected?.id === p.id
                 const isSaved = saved.includes(p.id)
                 return (
@@ -249,12 +258,12 @@ export function PathwaysExplorer({ pathways, planPathway, category, onCategoryCh
                       <p className="mt-1 text-[11px] leading-5 text-muted">{p.category} · {s.keyFact} · Planning timing: {s.processing}</p>
                       <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 xl:hidden">
                         <StatusBadge status={status} />
-                        <span className="text-[12px] text-muted">{signalLine(p)}</span>
+                        {personalized && <span className="text-[12px] text-muted">{signalLine(p)}</span>}
                       </div>
                     </div>
                     <div className="hidden w-40 shrink-0 flex-col items-start gap-1 xl:flex">
                       <StatusBadge status={status} />
-                      <span className="text-[12px] leading-5 text-muted">{signalLine(p)}</span>
+                      {personalized && <span className="text-[12px] leading-5 text-muted">{signalLine(p)}</span>}
                     </div>
                     <button type="button" aria-label={isSaved ? `Remove ${s.shortName} from saved routes` : `Save ${s.shortName} to your saved routes`} aria-pressed={isSaved}
                       onClick={(e) => { e.stopPropagation(); toggle(p.id) }}
@@ -282,7 +291,7 @@ export function PathwaysExplorer({ pathways, planPathway, category, onCategoryCh
               </div>
             )}
 
-            {needsInfo > 0 && (filter === 'all' || filter === 'info') && (
+            {personalized && needsInfo > 0 && (filter === 'all' || filter === 'info') && (
               <div className="mt-4 flex flex-wrap items-center gap-3 rounded-[var(--radius-field)] bg-[#fff8dc] px-4 py-3.5">
                 <FileText size={20} className="shrink-0 text-gold-deep" aria-hidden="true" />
                 <p className="min-w-0 flex-1 text-[13px] text-navy">
@@ -296,7 +305,7 @@ export function PathwaysExplorer({ pathways, planPathway, category, onCategoryCh
             )}
           </>
         )}
-        <p className="sticky bottom-0 mt-auto bg-white pt-4 text-[11.5px] text-[#8090a8]">Matches help you explore. They do not confirm visa eligibility.</p>
+        <p className="sticky bottom-0 mt-auto bg-white pt-4 text-[11.5px] text-[#8090a8]">{personalized ? 'Matches help you explore; they do not confirm visa eligibility.' : 'These are general research listings, not personalized eligibility assessments.'}</p>
       </div>
 
       {/* Detail panel: side column on lg+, full-screen sheet below lg */}
@@ -317,6 +326,7 @@ export function PathwaysExplorer({ pathways, planPathway, category, onCategoryCh
             onNext={() => step(1)}
             onClose={closeSheet}
             onCollapse={() => setPanelOpen(false)}
+            personalized={personalized}
           />
         </aside>
       )}
@@ -326,7 +336,7 @@ export function PathwaysExplorer({ pathways, planPathway, category, onCategoryCh
 
 // ─── Route detail panel ─────────────────────────────────────────────────
 
-function RoutePanel({ pathway: p, position, isSaved, planRoute, onPlanSaved, onAddToComparison, onToggleSaved, onPrev, onNext, onClose, onCollapse }: {
+function RoutePanel({ pathway: p, position, isSaved, planRoute, onPlanSaved, onAddToComparison, onToggleSaved, onPrev, onNext, onClose, onCollapse, personalized }: {
   pathway: PathwayEvaluation
   position: string
   isSaved: boolean
@@ -338,9 +348,10 @@ function RoutePanel({ pathway: p, position, isSaved, planRoute, onPlanSaved, onA
   onNext: () => void
   onClose: () => void
   onCollapse: () => void
+  personalized: boolean
 }) {
   const s = summaryFor(p.id, p.name)
-  const status = displayStatus(p)
+  const status = displayStatus(p, personalized)
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({ money: true })
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'error'>('idle')
   const planValue = `${p.country} — ${p.name}`
@@ -396,37 +407,49 @@ function RoutePanel({ pathway: p, position, isSaved, planRoute, onPlanSaved, onA
       <h3 className="mt-2 text-[22px] font-extrabold leading-tight tracking-[-0.01em] text-navy">{p.name}</h3>
       <div className="mt-2.5 flex flex-wrap gap-2"><StatusBadge status={status} /><span className="rounded-full border border-[#e7ebf1] bg-white px-2.5 py-1 text-[11px] font-semibold">{s.keyFact}</span><span className="rounded-full border border-[#e7ebf1] bg-white px-2.5 py-1 text-[11px] font-semibold">{s.processing}</span></div>
 
-      <div className="mt-5 grid grid-cols-2 gap-4 border-t border-line pt-5"><div>
-        <h4 className="text-[13.5px] font-bold text-navy">Why this appeared for you</h4>
-        {p.requirementsMet.length ? (
-          <ul className="mt-2.5 space-y-1.5">
-            {p.requirementsMet.map((m) => (
-              <li key={m} className="flex gap-2 text-[12.5px] leading-5 text-muted">
-                <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-teal-deep" aria-hidden="true" /><span>{m}</span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="mt-2 text-[12.5px] leading-5 text-muted-soft">
-            No profile signals point to this route yet. It appeared because it is part of the researched set.
-          </p>
-        )}
-      </div><div>
-        <h4 className="text-[13.5px] font-bold text-navy">To confirm</h4>
-        {p.missingRequirements.length ? (
-          <ul className="mt-2.5 space-y-1.5">
-            {p.missingRequirements.map((m) => (
-              <li key={m} className="flex gap-2 text-[12.5px] leading-5 text-muted">
-                <span className="mt-[7px] size-2 shrink-0 rounded-pill bg-warn" aria-hidden="true" /><span>{m}</span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="mt-2 text-[12.5px] leading-5 text-muted-soft">
-            Nothing. Review the official list.
-          </p>
-        )}
-      </div></div>
+      {personalized ? (
+        <div className="mt-5 grid grid-cols-1 gap-4 border-t border-line pt-5 sm:grid-cols-2"><div>
+          <h4 className="text-[13.5px] font-bold text-navy">Why this appeared for you</h4>
+          {p.requirementsMet.length ? (
+            <ul className="mt-2.5 space-y-1.5">
+              {p.requirementsMet.map((m) => (
+                <li key={m} className="flex gap-2 text-[12.5px] leading-5 text-muted">
+                  <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-teal-deep" aria-hidden="true" /><span>{m}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-2 text-[12.5px] leading-5 text-muted-soft">
+              No profile signals point to this route yet. It appeared because it is part of the researched set.
+            </p>
+          )}
+        </div><div>
+          <h4 className="text-[13.5px] font-bold text-navy">To confirm</h4>
+          {p.missingRequirements.length ? (
+            <ul className="mt-2.5 space-y-1.5">
+              {p.missingRequirements.map((m) => (
+                <li key={m} className="flex gap-2 text-[12.5px] leading-5 text-muted">
+                  <span className="mt-[7px] size-2 shrink-0 rounded-pill bg-warn" aria-hidden="true" /><span>{m}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-2 text-[12.5px] leading-5 text-muted-soft">
+              Nothing. Review the official list.
+            </p>
+          )}
+        </div></div>
+      ) : (
+      <div className="mt-5 border-t border-line pt-5">
+        <h4 className="text-[13.5px] font-bold text-navy">Explore this route</h4>
+        <p className="mt-2 text-[12.5px] leading-5 text-muted">
+          These are general research details, not a personal eligibility assessment. Complete your Kolmari Profile to see your matching signals.
+        </p>
+        <Link href="/profile-wizard" className="mt-3 inline-flex min-h-10 items-center text-[12.5px] font-bold text-gold-deep underline-offset-2 hover:underline">
+          Complete your profile
+        </Link>
+      </div>
+      )}
       <div className="mt-5 border-t border-line">
         {sections.map((sec) => {
           const open = !!openSections[sec.id]
@@ -468,9 +491,14 @@ function RoutePanel({ pathway: p, position, isSaved, planRoute, onPlanSaved, onA
       </div>
 
       <div className="mt-auto pt-6">
-        <button type="button" onClick={onToggleSaved}
+        <button type="button" onClick={saveRoute} disabled={saveState === 'saving' || isPlanRoute}
           className="w-full rounded-[var(--radius-field)] bg-navy py-3 text-[13.5px] font-bold text-white transition-colors hover:bg-navy-deep disabled:opacity-70">
-          {isSaved ? 'Saved ✓' : 'Save route'}
+          {isPlanRoute ? 'Selected in My Plan ✓' : saveState === 'saving' ? 'Saving to My Plan…' : 'Set as My Plan route'}
+        </button>
+        {isPlanRoute && <Link href="/my-plan" className="mt-2 block text-center text-xs font-semibold text-gold-deep hover:underline">Open My Plan</Link>}
+        <button type="button" onClick={onToggleSaved}
+          className="mt-3 w-full rounded-[var(--radius-field)] border border-line bg-white py-2 text-[12.5px] font-semibold text-navy hover:bg-canvas">
+          {isSaved ? 'Remove bookmark' : 'Bookmark this route'}
         </button>
         {saveState === 'error' && (
           <p role="alert" className="mt-2 text-[12px] font-semibold text-[#b3243c]">
@@ -479,7 +507,7 @@ function RoutePanel({ pathway: p, position, isSaved, planRoute, onPlanSaved, onA
         )}
         <button type="button" onClick={onAddToComparison}
           className="mt-3 w-full text-center text-[13px] font-semibold text-gold-deep hover:underline">
-          {isSaved ? 'In your comparison set — view saved routes' : 'Add to comparison'}
+          {isSaved ? 'View saved comparison' : 'Add to saved comparison'}
         </button>
         <div className="mt-4 flex items-center justify-between border-t border-[#f0f3f7] pt-3">
           <button type="button" onClick={onPrev} className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-muted hover:text-navy">
@@ -496,14 +524,14 @@ function RoutePanel({ pathway: p, position, isSaved, planRoute, onPlanSaved, onA
 
 // ─── Compare ────────────────────────────────────────────────────────────
 
-function CompareTable({ routes }: { routes: PathwayEvaluation[] }) {
+function CompareTable({ routes, personalized }: { routes: PathwayEvaluation[]; personalized: boolean }) {
   const rows: [string, (p: PathwayEvaluation) => string][] = [
-    ['Status', (p) => STATUS_META[displayStatus(p)].label],
+    ['Status', (p) => STATUS_META[displayStatus(p, personalized)].label],
     ['Income', (p) => summaryFor(p.id, p.name).keyFact],
     ['Fees', (p) => summaryFor(p.id, p.name).fees],
     ['Processing', (p) => summaryFor(p.id, p.name).processing],
     ['Family', (p) => summaryFor(p.id, p.name).family],
-    ['To confirm', (p) => (p.missingRequirements.length ? `${p.missingRequirements.length} detail${p.missingRequirements.length === 1 ? '' : 's'}` : 'None')],
+    ['To confirm', (p) => !personalized ? 'Complete your profile to see missing details' : p.missingRequirements.length ? `${p.missingRequirements.length} detail${p.missingRequirements.length === 1 ? '' : 's'}` : 'None'],
   ]
   return (
     <>
