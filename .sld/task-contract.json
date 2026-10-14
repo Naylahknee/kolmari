@@ -1,1 +1,41 @@
-{"allowedActions":["CREATE","DELETE","MODIFY","MOVE","RENAME","REWIRE"],"allowedDirectories":[".sld/archive","docs","public","src/app","src/components","src/lib"],"allowedEntities":[],"allowedFiles":[".sld/task-contract.json","package.json"],"approvedAt":"2026-10-14T00:29:28Z","approvedBy":"Naylahknee","createdFrom":"current-user-request","draftedBy":"Penelope","forbiddenChanges":[".sld/baseline.json","src/sld"],"grants":[],"implementingActor":"Penelope","instruction":"Owner request in chat, 2026-10-13 America/Los_Angeles: \"yes\" — approving retirement of the completed sld-040 contract (migration verified complete: 28 engine files identical to canonical 921e11d) and a standing product-development contract for normal app work. SLD engine files stay locked: no SLD_ENGINE_MAINTENANCE grant.","objective":"Cover routine Kolmari product development: app routes, components, libraries, country and visa data, public assets, docs, and contract lifecycle. The SLD engine (src/sld), its manifest, and governance scripts remain outside this contract's scope and stay protected.","requiredChanges":[],"status":"approved","supersedes":"sld-040-canonical-core-migration","taskId":"standing-product-development"}
+{
+  "allowedActions": [
+    "CREATE",
+    "DELETE",
+    "MODIFY",
+    "MOVE",
+    "RENAME",
+    "REWIRE",
+    "RESTYLE",
+    "REWRITE_COPY"
+  ],
+  "allowedDirectories": [
+    ".sld/archive",
+    "docs",
+    "public",
+    "src/app",
+    "src/components",
+    "src/lib"
+  ],
+  "allowedEntities": [],
+  "allowedFiles": [
+    ".sld/task-contract.json",
+    "package.json"
+  ],
+  "approvedAt": "2026-10-14T00:29:28Z",
+  "approvedBy": "Naylahknee",
+  "createdFrom": "current-user-request",
+  "draftedBy": "Penelope",
+  "forbiddenChanges": [
+    ".sld/baseline.json",
+    "src/sld"
+  ],
+  "grants": [],
+  "implementingActor": "Penelope",
+  "instruction": "Owner request in chat, 2026-10-13 America/Los_Angeles: \"yes\" \u2014 approving retirement of the completed sld-040 contract (migration verified complete: 28 engine files identical to canonical 921e11d) and a standing product-development contract for normal app work. SLD engine files stay locked: no SLD_ENGINE_MAINTENANCE grant. Refinement 2026-10-14: RESTYLE and REWRITE_COPY granted because routine product work routinely touches styling and copy, and the line-based classifier flags any UI diff; the mandatory invariants (no opportunistic redesign, no unrequested copy changes) remain the guardrails. REFACTOR and MIGRATE stay excluded so structural changes still need a dedicated task.",
+  "objective": "Cover routine Kolmari product development: app routes, components, libraries, country and visa data, public assets, docs, and contract lifecycle. The SLD engine (src/sld), its manifest, and governance scripts remain outside this contract's scope and stay protected.",
+  "requiredChanges": [],
+  "status": "approved",
+  "supersedes": "sld-040-canonical-core-migration",
+  "taskId": "standing-product-development"
+}
