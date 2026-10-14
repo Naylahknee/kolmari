@@ -35,9 +35,9 @@ const statusOrder = (p: PathwayEvaluation) => {
 
 type Filter = 'all' | 'fit' | 'info' | 'saved'
 const TABS: { id: Filter; label: string }[] = [
-  { id: 'all', label: 'All routes' },
+  { id: 'all', label: 'All' },
   { id: 'fit', label: 'Potential fits' },
-  { id: 'info', label: 'Needs information' },
+  { id: 'info', label: 'Needs confirmation' },
   { id: 'saved', label: 'Saved' },
 ]
 
@@ -94,7 +94,7 @@ export function PathwaysExplorer({ pathways, planPathway }: {
   const [query, setQuery] = useState('')
   const [compare, setCompare] = useState(false)
   const [sheetOpen, setSheetOpen] = useState(false) // small screens only
-  const [panelOpen, setPanelOpen] = useState(true) // large screens: collapse via X
+  const [panelOpen, setPanelOpen] = useState(true) // retain desktop overview
   const [planRoute, setPlanRoute] = useState(planPathway)
 
   const categories = useMemo(() => ['All', ...Array.from(new Set(pathways.map((p) => p.category)))], [pathways])
@@ -121,7 +121,7 @@ export function PathwaysExplorer({ pathways, planPathway }: {
     return sorted
   }, [sorted, filter, saved])
 
-  const [selectedId, setSelectedId] = useState<string | null>(sorted[0]?.id ?? null)
+  const [selectedId, setSelectedId] = useState<string | null>(pathways.find(p => p.id === 'portugal-entrepreneur')?.id ?? sorted[0]?.id ?? null)
   const selected = list.find((p) => p.id === selectedId) ?? list[0] ?? null
   const index = selected ? list.findIndex((p) => p.id === selected.id) : -1
 
@@ -132,6 +132,7 @@ export function PathwaysExplorer({ pathways, planPathway }: {
     document.getElementById(`pw-row-${next.id}`)?.focus()
   }
   function onListKey(e: KeyboardEvent) {
+    if ((e.target as HTMLElement).closest('input,select,textarea,[contenteditable=true]')) return
     if (e.key === 'ArrowDown') { e.preventDefault(); step(1) }
     if (e.key === 'ArrowUp') { e.preventDefault(); step(-1) }
   }
@@ -157,7 +158,7 @@ export function PathwaysExplorer({ pathways, planPathway }: {
 
   const savedRoutes = sorted.filter((p) => saved.includes(p.id))
   const canCompare = savedRoutes.length >= 2
-  const needsInfo = counts.info
+  const needsInfo = sorted.filter(p => p.missingRequirements.length > 0).length
 
   function addToComparison(id: string) {
     const already = saved.includes(id)
@@ -171,11 +172,11 @@ export function PathwaysExplorer({ pathways, planPathway }: {
   const showPanel = selected && !compare && panelOpen
 
   return (
-    <div className={`grid overflow-hidden rounded-[var(--radius-card)] border border-line bg-white shadow-tile ${showPanel ? 'lg:grid-cols-[minmax(0,16fr)_minmax(0,9fr)]' : ''}`}>
+    <div className={`grid w-full overflow-hidden rounded-[16px] border border-[#e7ebf1] bg-white text-[#17305b] shadow-[0_12px_35px_rgba(16,34,68,.09)] lg:h-[900px] lg:max-h-[calc(100vh-110px)] ${showPanel ? 'lg:grid-cols-[minmax(0,1fr)_460px]' : ''}`}>
       {/* List column (~64% on large screens) */}
-      <div className="min-w-0 px-4 pb-4 pt-5 sm:px-6">
+      <div className="flex min-h-0 min-w-0 flex-col overflow-y-auto px-4 pb-4 pt-5 sm:px-6">
         <p className="text-[10.5px] font-bold uppercase tracking-[0.13em] text-gold-deep">Explore your options</p>
-        <h2 className="mt-1 text-[24px] font-extrabold leading-tight tracking-[-0.02em] text-navy">Your potential visa routes</h2>
+        <h2 className="mt-1 text-[32px] font-extrabold leading-tight tracking-[-0.02em] text-navy">Your potential visa routes</h2>
         <p className="mt-1 text-[13.5px] leading-[1.6] text-muted">See what fits your profile and what to confirm next.</p>
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -211,15 +212,15 @@ export function PathwaysExplorer({ pathways, planPathway }: {
           </div>
         </div>
 
-        <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
-          <div className="-mx-1 max-w-full overflow-x-auto px-1 [scrollbar-width:none]">
-            <div className="flex w-max gap-5 border-b border-line" role="tablist" aria-label="Filter routes">
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+          <div className="-mx-1 max-w-full px-1">
+            <div className="flex flex-wrap gap-1 rounded-[14px] bg-[#f3f5f9] p-1" role="tablist" aria-label="Filter routes">
               {TABS.map((t) => {
                 const active = filter === t.id && !compare
                 return (
                   <button key={t.id} type="button" role="tab" aria-selected={active}
                     onClick={() => { setFilter(t.id); setCompare(false) }}
-                    className={`whitespace-nowrap border-b-2 px-0.5 pb-2 pt-1 text-[13px] font-semibold transition-colors ${active ? 'border-navy text-navy' : 'border-transparent text-muted hover:text-navy'}`}>
+                    className={`whitespace-nowrap rounded-full px-3 py-2 text-[12px] font-semibold transition-all duration-150 ${active ? 'bg-white text-[#17305b] shadow-[0_1px_3px_rgba(16,34,68,.08)]' : 'text-[#6b7a92] hover:text-[#17305b]'}`}>
                     {t.label} <span className={active ? 'text-muted' : 'text-muted-soft'}>({counts[t.id]})</span>
                   </button>
                 )
@@ -227,7 +228,7 @@ export function PathwaysExplorer({ pathways, planPathway }: {
             </div>
           </div>
           <button type="button" disabled={!canCompare && !compare} onClick={() => setCompare((v) => !v)}
-            className="mb-1 inline-flex shrink-0 items-center gap-1.5 rounded-pill bg-gold px-3.5 py-2 text-[12.5px] font-bold text-navy-deep transition-opacity disabled:cursor-not-allowed disabled:bg-canvas disabled:text-muted-soft">
+            className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-[10px] bg-[#f3c516] px-3.5 py-2 text-[12.5px] font-bold text-[#0d1b39] disabled:cursor-not-allowed disabled:bg-[#f3f5f9] disabled:text-[#9aa6b8]">
             {compare ? <><ArrowLeft size={14} aria-hidden="true" /> Back to list</> : `Compare saved (${savedRoutes.length})`}
           </button>
         </div>
@@ -236,7 +237,8 @@ export function PathwaysExplorer({ pathways, planPathway }: {
           <CompareTable routes={savedRoutes} />
         ) : (
           <>
-            <ul role="listbox" aria-label="Visa routes" onKeyDown={onListKey} className="mt-1 border-t border-[#eef1f5]">
+            <div className="space-y-3 lg:hidden">{list.map((p,i) => { const info=summaryFor(p.id,p.name); const status=displayStatus(p); const met=p.requirementsMet.length; const missing=p.missingRequirements.length; const isSaved=saved.includes(p.id); return <article key={p.id} className="relative rounded-[14px] border border-[#e7ebf1] bg-white p-[17px] shadow-[0_1px_3px_rgba(16,34,68,.08)]"><button type="button" onClick={()=>open(p.id)} className="block w-full pr-12 text-left" aria-label={`Open ${p.country} ${info.shortName}`}><div className="flex items-center gap-2"><Flag code={info.code} size={36}/><span className="text-[10.5px] font-bold uppercase tracking-[.12em] text-[#6b7a92]">{p.country}</span>{i===0&&<span className="rounded-full bg-[#fbeaa5] px-2 py-1 text-[10px] font-bold text-[#7a5c00]">Best match</span>}</div><h3 className="mt-2 text-base font-bold text-[#17305b]">{info.shortName}</h3><div className="mt-2 flex flex-wrap items-center gap-2"><StatusBadge status={status}/><span className="flex gap-1" aria-label={`${met} of ${met+missing} signals matching`}>{Array.from({length:met+missing},(_,n)=><span key={n} className={`size-2 rounded-full ${n<met?"bg-[#1f9d94]":"border border-[#b8c3d4]"}`}/>)}</span><span className="text-xs text-[#6b7a92]">{met}/{met+missing}</span></div><dl className="mt-4 grid grid-cols-2 gap-3 border-t border-[#eef1f5] pt-3 text-xs">{([["Income",info.keyFact],["Processing",info.processing],["Family",info.family],["Fees",info.fees]] as const).map(([label,value])=><div key={label}><dt className="font-semibold text-[#6b7a92]">{label}</dt><dd className="mt-1 font-semibold text-[#17305b]">{value}</dd></div>)}</dl></button><button type="button" aria-pressed={isSaved} aria-label={isSaved?`Remove ${info.shortName} from saved routes`:`Save ${info.shortName}`} onClick={()=>toggle(p.id)} className="absolute right-3 top-3 grid size-11 place-items-center rounded-full hover:bg-[#f3f5f9]"><Bookmark size={19} fill={isSaved?"currentColor":"none"}/></button></article>})}</div>
+            <ul role="listbox" aria-label="Visa routes" onKeyDown={onListKey} className="mt-2 hidden border-t border-[#eef1f5] lg:block">
               {list.map((p) => {
                 const s = summaryFor(p.id, p.name)
                 const status = displayStatus(p)
@@ -247,11 +249,11 @@ export function PathwaysExplorer({ pathways, planPathway }: {
                     aria-label={`${s.shortName}, ${p.country}, ${STATUS_META[status].label}`}
                     onClick={() => open(p.id)}
                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(p.id) } }}
-                    className={`flex min-h-[104px] cursor-pointer items-center gap-3.5 border-b border-[#eef1f5] px-3 py-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold sm:gap-4 ${active ? 'bg-[#fff8e6] shadow-[inset_3px_0_0_var(--color-gold)]' : 'hover:bg-[#fbfcfe]'}`}>
+                    className={`flex min-h-[104px] cursor-pointer items-center gap-3.5 border-b border-[#eef1f5] px-3 py-4 outline-none transition-colors duration-[120ms] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold sm:gap-4 ${active ? 'bg-[#fff8e6] shadow-[inset_3px_0_0_var(--color-gold)]' : 'hover:bg-[#fbfcfe]'}`}>
                     <Flag code={s.code} size={44} />
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] font-bold uppercase tracking-[0.11em] text-muted-soft">{p.country}</p>
-                      <p className="mt-0.5 text-[15.5px] font-bold leading-snug tracking-[-0.01em] text-navy">{s.shortName}</p>
+                      <p className="mt-0.5 text-[17px] font-bold leading-snug tracking-[-0.01em] text-navy">{s.shortName}</p>
                       <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 md:hidden">
                         <StatusBadge status={status} />
                         <span className="text-[12px] text-muted">{signalLine(p)}</span>
@@ -301,14 +303,14 @@ export function PathwaysExplorer({ pathways, planPathway }: {
             )}
           </>
         )}
-        <p className="mt-4 text-[11px] text-muted-soft">Matches help you explore. They do not confirm visa eligibility.</p>
+        <p className="sticky bottom-0 mt-auto bg-white pt-4 text-[11.5px] text-[#8090a8]">Matches help you explore. They do not confirm visa eligibility.</p>
       </div>
 
       {/* Detail panel: side column on lg+, full-screen sheet below lg */}
       {selected && !compare && (
         <aside
           aria-label="Route overview"
-          className={`${sheetOpen ? 'fixed inset-0 z-50 flex' : 'hidden'} ${panelOpen ? 'lg:flex' : 'lg:hidden'} flex-col overflow-y-auto bg-white lg:static lg:z-auto lg:border-l lg:border-line`}>
+          className={`${sheetOpen ? 'fixed inset-0 z-50 flex' : 'hidden'} ${panelOpen ? 'lg:flex' : 'lg:hidden'} min-h-0 flex-col overflow-y-auto bg-[#fbfcfe] lg:static lg:z-auto lg:border-l lg:border-[#e7ebf1]`}>
           <RoutePanel
             key={selected.id}
             pathway={selected}
@@ -317,6 +319,7 @@ export function PathwaysExplorer({ pathways, planPathway }: {
             planRoute={planRoute}
             onPlanSaved={setPlanRoute}
             onAddToComparison={() => addToComparison(selected.id)}
+            onToggleSaved={() => toggle(selected.id)}
             onPrev={() => step(-1)}
             onNext={() => step(1)}
             onClose={closeSheet}
@@ -330,13 +333,14 @@ export function PathwaysExplorer({ pathways, planPathway }: {
 
 // ─── Route detail panel ─────────────────────────────────────────────────
 
-function RoutePanel({ pathway: p, position, isSaved, planRoute, onPlanSaved, onAddToComparison, onPrev, onNext, onClose, onCollapse }: {
+function RoutePanel({ pathway: p, position, isSaved, planRoute, onPlanSaved, onAddToComparison, onToggleSaved, onPrev, onNext, onClose, onCollapse }: {
   pathway: PathwayEvaluation
   position: string
   isSaved: boolean
   planRoute: string | null
   onPlanSaved: (value: string) => void
   onAddToComparison: () => void
+  onToggleSaved: () => void
   onPrev: () => void
   onNext: () => void
   onClose: () => void
@@ -352,7 +356,7 @@ function RoutePanel({ pathway: p, position, isSaved, planRoute, onPlanSaved, onA
   const sections: { id: string; title: string; rows: [string, string][] }[] = [
     { id: 'money', title: 'Money and fees', rows: [['Income needed', p.incomeThreshold], ['Estimated fees', p.estimatedFees]] },
     { id: 'family', title: 'Bringing your family', rows: [['Dependents', p.dependentsAllowed]] },
-    { id: 'processing', title: 'Processing information', rows: [['Timing', p.estimatedProcessingTime], ['Work rights', p.localWorkRights]] },
+    { id: 'processing', title: 'Processing', rows: [['Timing', p.estimatedProcessingTime], ['Work rights', p.localWorkRights]] },
     { id: 'official', title: 'Official requirements', rows: p.baseRequirements.map((r, i) => [`${i + 1}`, r] as [string, string]) },
   ]
 
@@ -393,13 +397,13 @@ function RoutePanel({ pathway: p, position, isSaved, planRoute, onPlanSaved, onA
       </p>
 
       <div className="mt-4 flex items-center gap-3.5">
-        <Flag code={s.code} size={48} />
+        <Flag code={s.code} size={52} />
         <p className="text-[10px] font-bold uppercase tracking-[0.11em] text-muted-soft">{p.country}</p>
       </div>
       <h3 className="mt-2 text-[22px] font-extrabold leading-tight tracking-[-0.01em] text-navy">{p.name}</h3>
-      <div className="mt-2.5"><StatusBadge status={status} /></div>
+      <div className="mt-2.5 flex flex-wrap gap-2"><StatusBadge status={status} /><span className="rounded-full border border-[#e7ebf1] bg-white px-2.5 py-1 text-[11px] font-semibold">{s.keyFact}</span><span className="rounded-full border border-[#e7ebf1] bg-white px-2.5 py-1 text-[11px] font-semibold">{s.processing}</span></div>
 
-      <div className="mt-5 border-t border-line pt-5">
+      <div className="mt-5 grid grid-cols-2 gap-4 border-t border-line pt-5"><div>
         <h4 className="text-[13.5px] font-bold text-navy">Why this appeared for you</h4>
         {p.requirementsMet.length ? (
           <ul className="mt-2.5 space-y-1.5">
@@ -414,10 +418,8 @@ function RoutePanel({ pathway: p, position, isSaved, planRoute, onPlanSaved, onA
             No profile signals point to this route yet. It appeared because it is part of the researched set.
           </p>
         )}
-      </div>
-
-      <div className="mt-5">
-        <h4 className="text-[13.5px] font-bold text-navy">What to review next</h4>
+      </div><div>
+        <h4 className="text-[13.5px] font-bold text-navy">To confirm</h4>
         {p.missingRequirements.length ? (
           <ul className="mt-2.5 space-y-1.5">
             {p.missingRequirements.map((m) => (
@@ -428,11 +430,10 @@ function RoutePanel({ pathway: p, position, isSaved, planRoute, onPlanSaved, onA
           </ul>
         ) : (
           <p className="mt-2 text-[12.5px] leading-5 text-muted-soft">
-            Nothing missing from your profile. Review the official requirements below before acting.
+            Nothing. Review the official list.
           </p>
         )}
-      </div>
-
+      </div></div>
       <div className="mt-5 border-t border-line">
         {sections.map((sec) => {
           const open = !!openSections[sec.id]
@@ -444,7 +445,7 @@ function RoutePanel({ pathway: p, position, isSaved, planRoute, onPlanSaved, onA
                   aria-expanded={open} aria-controls={regionId}
                   className="flex w-full items-center justify-between py-3.5 text-left text-[13.5px] font-semibold text-navy">
                   {sec.title}
-                  <ChevronDown size={15} aria-hidden="true" className={`shrink-0 text-muted transition-transform duration-[var(--duration-standard)] ${open ? 'rotate-180' : ''}`} />
+                  <ChevronDown size={15} aria-hidden="true" className={`shrink-0 text-muted transition-transform duration-150 ${open ? 'rotate-180' : ''}`} />
                 </button>
               </h4>
               {open && (
@@ -474,9 +475,9 @@ function RoutePanel({ pathway: p, position, isSaved, planRoute, onPlanSaved, onA
       </div>
 
       <div className="mt-auto pt-6">
-        <button type="button" onClick={saveRoute} disabled={saveState === 'saving'}
+        <button type="button" onClick={onToggleSaved}
           className="w-full rounded-[var(--radius-field)] bg-navy py-3 text-[13.5px] font-bold text-white transition-colors hover:bg-navy-deep disabled:opacity-70">
-          {saveState === 'saving' ? 'Saving…' : isPlanRoute ? 'Saved to your plan ✓' : 'Save route'}
+          {isSaved ? 'Saved ✓' : 'Save route'}
         </button>
         {saveState === 'error' && (
           <p role="alert" className="mt-2 text-[12px] font-semibold text-[#b3243c]">
@@ -512,11 +513,13 @@ function CompareTable({ routes }: { routes: PathwayEvaluation[] }) {
     ['To confirm', (p) => (p.missingRequirements.length ? `${p.missingRequirements.length} detail${p.missingRequirements.length === 1 ? '' : 's'}` : 'None')],
   ]
   return (
-    <div className="mt-3 overflow-x-auto rounded-[var(--radius-field)] border border-line">
+    <>
+    <div className="mt-3 space-y-4 lg:hidden">{rows.map(([label, fn]) => <section key={label} aria-label={label} className="rounded-[14px] border border-[#e7ebf1] bg-white p-4"><h3 className="mb-3 text-sm font-bold text-[#17305b]">{label}</h3><dl className="space-y-3">{routes.map(p => <div key={p.id} className="border-t border-[#eef1f5] pt-2"><dt className="text-xs font-semibold text-[#6b7a92]">{p.country} · {summaryFor(p.id,p.name).shortName}</dt><dd className="mt-1 text-sm font-semibold text-[#17305b]">{fn(p)}</dd></div>)}</dl></section>)}</div>
+    <div className="mt-3 hidden overflow-x-auto rounded-[var(--radius-field)] border border-line lg:block">
       <table className="w-full min-w-[520px] border-collapse text-left text-[13px]">
         <caption className="sr-only">Side-by-side comparison of saved routes</caption>
         <thead>
-          <tr className="bg-canvas">
+          <tr className="bg-[#f6f8fb]">
             <th scope="col" className="w-[130px] px-3.5 py-3"><span className="sr-only">Detail</span></th>
             {routes.map((p) => {
               const s = summaryFor(p.id, p.name)
@@ -544,5 +547,6 @@ function CompareTable({ routes }: { routes: PathwayEvaluation[] }) {
         </tbody>
       </table>
     </div>
+    </>
   )
 }
