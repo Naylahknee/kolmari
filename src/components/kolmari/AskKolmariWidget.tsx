@@ -82,7 +82,7 @@ export function AskKolmariWidget() {
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-label={open ? 'Close the Kolmari Guide chat' : 'Open the Kolmari Guide chat'}
-        className="fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] right-[max(1.5rem,env(safe-area-inset-right))] z-[9999] rounded-full bg-navy-deep px-5 py-3 text-[15px] font-bold text-white shadow-[0_4px_14px_rgba(0,0,0,0.25)] ring-2 ring-gold hover:bg-navy-card focus-visible:outline-2 focus-visible:outline-gold"
+        className="fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] right-[max(1.5rem,env(safe-area-inset-right))] z-[9999] rounded-full bg-navy-deep px-5 py-3 text-[15px] font-bold text-white shadow-[0_4px_14px_rgba(0,0,0,0.25)] ring-2 ring-gold hover:bg-navy-card focus-visible:outline-2 focus-visible:outline-gold max-[900px]:bottom-[calc(84px+env(safe-area-inset-bottom))] max-[900px]:px-4 max-[900px]:py-2.5 max-[900px]:text-sm"
       >
         Ask Kolmari
       </button>
