@@ -875,6 +875,18 @@ task the power to rewrite the rules. The per-task working files
 (`task-contract.json`, `audit.jsonl`, `baseline.json`) are now exempt; the engine,
 manifest and governance docs stay protected. Two tests cover both directions.
 
+## SLD: standing product-development contract (2026-10-13)
+
+The sld-040 canonical-core migration completed (drift check: 28 files identical
+to canonical 921e11d), but its narrow contract stayed active and blocked every
+later push (footer fix, Blaxit countries). It is retired; the active contract is
+now `standing-product-development`, which covers routine app work (`src/app`,
+`src/components`, `src/lib`, `public`, `docs`, contract lifecycle) with no
+`SLD_ENGINE_MAINTENANCE` grant, so the engine, manifest, and governance scripts
+stay locked. Note: new files under `.sld/` (outside the three exempt working
+files) still require the maintenance grant, so future contract archivals go
+through a dedicated task.
+
 ## Country hero — one standard for every destination
 
 The approved hero panel is now the standard on all country pages, not just
