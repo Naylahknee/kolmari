@@ -20,6 +20,7 @@ const pageNames: Record<string, string> = {
   '/flutter': PRODUCT_COPY.flutterMode,
   '/checklist': PRODUCT_COPY.flutterMode,
   '/community': PRODUCT_COPY.kolmariKlub,
+  '/news': 'News & Guides',
   '/cost-calculator': PRODUCT_COPY.costCalculator,
   '/greenbook': PRODUCT_COPY.greenbook,
   '/food-fit': PRODUCT_COPY.foodFit,
