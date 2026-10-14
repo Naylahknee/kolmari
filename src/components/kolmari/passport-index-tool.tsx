@@ -129,7 +129,7 @@ export function PassportIndexTool() {
                 <button key={k} type="button" aria-pressed={kind === k}
                   onClick={() => { setTab('destinations'); setKind(kind === k ? 'all' : k) }}
                   className={`rounded-full px-3 py-1 text-xs font-semibold ring-2 transition ${KIND_STYLE[k]} ${kind === k ? 'ring-navy/40' : 'ring-transparent'}`}>
-                  {REQUIREMENT_LABEL[k]} · {counts[k]}
+                  {REQUIREMENT_LABEL[k]}{' · '}{counts[k]}
                 </button>
               ))}
             </div>

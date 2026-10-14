@@ -5,7 +5,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { PRODUCT_COPY } from '@/config/product-copy'
 import { ButterflyMark } from '@/components/kolmari/butterfly-mark'
 import { flutterReadiness } from '@/lib/flutter-plan'
-import { NEWS_READ_EVENT, unreadNewsCount } from '@/lib/news'
 
 function Icon({ children }: { children: React.ReactNode }) {
   return <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor">{children}</svg>
@@ -29,10 +28,9 @@ const ICONS: Record<string, React.ReactNode> = {
   passport: <><rect x="5" y="3" width="14" height="18" rx="2" /><circle cx="12" cy="10" r="2.6" /><path d="M9.5 15.5h5" /></>,
   astro: <><circle cx="12" cy="12" r="9" /><path d="m12 6.5 1.3 2.9 3.2.3-2.4 2.1.7 3.1L12 15.3 9.2 17l.7-3.1-2.4-2.1 3.2-.3z" /></>,
   tools: <><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6" /></>,
-  news: <><path d="M4 5h13a1 1 0 011 1v12a2 2 0 002 2H6a2 2 0 01-2-2z" /><path d="M18 9h2a1 1 0 011 1v8a2 2 0 01-2 2M8 9h6M8 13h6M8 17h4" /></>,
 }
 
-type Item = { href: string; label: string; icon: keyof typeof ICONS; flutter?: boolean; world?: boolean; news?: boolean }
+type Item = { href: string; label: string; icon: keyof typeof ICONS; flutter?: boolean; world?: boolean }
 type Section = { key: string; label: string; primary: string; icon: keyof typeof ICONS; items: Item[] }
 
 /** Plan upsell card: sits below every menu item, above the account row. */
@@ -103,16 +101,6 @@ export function Sidebar() {
 
   const onCountry = pathname.startsWith('/nextinations/')
 
-  // Unread News & Guides count (read state is stored on this device).
-  const [newsUnread, setNewsUnread] = useState(0)
-  useEffect(() => {
-    const sync = () => setNewsUnread(unreadNewsCount())
-    sync()
-    window.addEventListener(NEWS_READ_EVENT, sync)
-    window.addEventListener('storage', sync)
-    return () => { window.removeEventListener(NEWS_READ_EVENT, sync); window.removeEventListener('storage', sync) }
-  }, [])
-
   const SECTIONS: Section[] = useMemo(() => [
     {
       key: 'explore', label: 'Explore', primary: '/your-world', icon: 'world',
@@ -130,17 +118,14 @@ export function Sidebar() {
     },
     {
       key: 'connect', label: 'Connect', primary: '/community', icon: 'connect',
-      items: [
-        { href: '/community', label: PRODUCT_COPY.kolmariKlub, icon: 'connect' },
-        { href: '/news', label: 'News & Guides', icon: 'news', news: true },
-      ],
+      items: [{ href: '/community', label: PRODUCT_COPY.kolmariKlub, icon: 'connect' }],
     },
     {
       key: 'tools', label: 'Tools', primary: '/cost-calculator', icon: 'tools',
       items: [
         { href: '/cost-calculator', label: PRODUCT_COPY.costCalculator, icon: 'calculator' },
         { href: '/greenbook', label: PRODUCT_COPY.greenbook, icon: 'greenbook' },
-        { href: '/passportindex', label: 'PassportIndex', icon: 'passport' },
+        { href: '/passportindex', label: 'Passport Index', icon: 'passport' },
         { href: '/astrocartography', label: 'Astrocartography', icon: 'astro' },
       ],
     },
@@ -204,9 +189,6 @@ export function Sidebar() {
           ? <ButterflyMark className="ic sb-link-bf" filled={planReady > 75} />
           : <Icon>{ICONS[it.icon]}</Icon>}
         <span className="lbl">{it.label}</span>
-        {it.news && newsUnread > 0 && (
-          <span className="lbl ml-auto rounded-full bg-gold/15 px-1.5 text-[10px] font-bold text-gold" aria-label={`${newsUnread} unread`}>{newsUnread}</span>
-        )}
       </Link>
     )
   }
