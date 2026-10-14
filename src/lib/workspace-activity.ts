@@ -15,6 +15,7 @@ const ROUTE_LABELS: Array<{ route: string; label: string }> = [
   { route: '/cost-calculator', label: 'Cost Calculator' },
   { route: '/greenbook', label: 'Greenbook Insights' },
   { route: '/community', label: 'Kolmari Klub' },
+  { route: '/news', label: 'News & Guides' },
 ]
 
 const titleCaseSlug = (slug: string) =>
