@@ -3,35 +3,11 @@ import { PathwaysResults } from '@/components/kolmari/pathways-results'
 import { PlusGate } from '@/components/kolmari/plus-gate'
 import { requireCurrentUser } from '@/lib/auth'
 import { getProfile, isPaid } from '@/lib/profile'
-import { docCounts, getKolmariPlan } from '@/lib/kolmari-plan'
+import { getKolmariPlan } from '@/lib/kolmari-plan'
+import { PathwaysDirectoryPreview } from '@/components/kolmari/pathways-directory-preview'
 import { PATHWAYS } from '@/lib/pathways'
 
 export const metadata: Metadata = { title: 'Pathways | Kolmari', description: 'Compare official residency and visa Pathways using your Profile.' }
-
-/** Free-plan preview: the routes we research, by name only — no requirements,
- *  thresholds, fees, or sources (those are the Plus detail). */
-function PathwaysPreview() {
-  return (
-    <section className="card-surface p-6">
-      <p className="text-xs font-bold uppercase tracking-widest text-gold-deep">Kolmari Pathways</p>
-      <h1 className="mt-1 text-2xl font-bold text-navy">Residency &amp; visa Pathways we research</h1>
-      <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
-        These are the official routes in Kolmari today. Plus opens the full detail for each — requirements,
-        income guidelines, fees, processing times, and the official source.
-      </p>
-      <ul className="mt-5 grid gap-2 sm:grid-cols-2">
-        {PATHWAYS.map((pathway) => (
-          <li key={pathway.id} className="flex items-center justify-between gap-3 rounded-[var(--radius-field)] border border-line bg-white px-4 py-3">
-            <span className="min-w-0">
-              <span className="block truncate text-sm font-semibold text-navy">{pathway.name}</span>
-              <span className="block text-xs text-muted">{pathway.country} · {pathway.category}</span>
-            </span>
-          </li>
-        ))}
-      </ul>
-    </section>
-  )
-}
 
 export default async function PathwaysPage() {
   const user = await requireCurrentUser()
@@ -49,19 +25,16 @@ export default async function PathwaysPage() {
           'Processing times and official sources',
           'Personalized match status from your Profile',
         ]}
-        preview={<PathwaysPreview />}
+        preview={<PathwaysDirectoryPreview profileComplete={profile.wizard_status === 'completed'} routes={PATHWAYS.map(({ id, name, country, category }) => ({ id, name, country, category }))} />}
       />
     )
   }
-  // Signals are evaluated client-side so the Match controls can recompute them live.
-  const docs = plan ? docCounts(plan) : null
+  // Full matching stays on the paid side of the existing access gate.
+  // An incomplete wizard switches the same explorer into neutral directory mode.
   return (
     <PathwaysResults
       profile={profile}
-      savedDestination={plan?.saved_nextination ?? null}
       selectedPathway={plan?.selected_pathway ?? null}
-      documentsReady={docs ? docs.total - docs.MISSING : 0}
-      documentsTotal={docs?.total ?? 0}
     />
   )
 }
