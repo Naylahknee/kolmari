@@ -2,329 +2,167 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { Check, CheckCircle2, Minus, Plus } from 'lucide-react'
+import { ArrowRight, CheckCircle2, ChevronDown, Compass, SlidersHorizontal } from 'lucide-react'
 import type { RelocationProfile } from '@/lib/profile'
-import { evaluatePathways, RESEARCH_DISCLAIMER, type PathwayEvaluation, type PathwayMatchStatus } from '@/lib/pathways'
-import { INCOME_TYPES, VISA_JOURNEYS } from '@/lib/pathway-extras'
-import { PathwaysExplorer } from '@/components/kolmari/pathways-explorer'
-import { PathwaysPassports } from './pathways-passports'
+import { evaluatePathways, RESEARCH_DISCLAIMER, type PathwayEvaluation } from '@/lib/pathways'
+import { INCOME_TYPES } from '@/lib/pathway-extras'
+import { PathwaysExplorer } from './pathways-explorer'
 import { PathwaysLesserRoutes } from './pathways-lesser-routes'
-import { PassportCoverCredits } from './passport-cover'
 
-// ─── Status presentation ────────────────────────────────────────────────
-//
-// Kolmari does not assert visa eligibility, so a route is described as a fit
-// signal — never as "qualified".
-
-const FIT_LABELS: Record<PathwayMatchStatus, string> = {
-  'Strong Match': 'Likely fit',
-  'Possible Match': 'Different route likely',
-  'Missing Requirements': 'Gap identified',
-}
-const FIT_TONES: Record<PathwayMatchStatus, string> = {
-  'Strong Match': 'bg-ok-soft text-ok',
-  'Possible Match': 'bg-canvas text-muted',
-  'Missing Requirements': 'bg-[#fdeaee] text-[#b3243c]',
-}
-const SECTIONS = [
-  { id: 'passports', label: 'Passports' },
-  { id: 'journey', label: 'Journey' },
-  { id: 'signals', label: 'Signals' },
-  { id: 'match', label: 'Match' },
-  { id: 'routes', label: 'All routes' },
-  { id: 'lesser', label: 'Lesser-known' },
-] as const
-
-function fitOrder(status: PathwayMatchStatus) {
-  return status === 'Strong Match' ? 0 : status === 'Possible Match' ? 1 : 2
-}
-
-function FitBadge({ status }: { status: PathwayMatchStatus }) {
-  return <span className={`shrink-0 rounded-pill px-2 py-0.5 text-[10.5px] font-bold ${FIT_TONES[status]}`}>{FIT_LABELS[status]}</span>
-}
-
-// ─── Page ───────────────────────────────────────────────────────────────
-
-export function PathwaysResults({ profile, savedDestination, selectedPathway, documentsReady, documentsTotal }: {
+// The saved profile completion flag controls personalized display, not search access.
+export function PathwaysResults({ profile, selectedPathway }: {
   profile: RelocationProfile
-  savedDestination: string | null
   selectedPathway: string | null
-  documentsReady: number
-  documentsTotal: number
 }) {
-  const complete = profile.wizard_status === 'completed'
+  const personalized = profile.wizard_status === 'completed'
   const [routeCategory, setRouteCategory] = useState('All')
-
-  // Exploratory overrides — never written back to the saved Kolmari Profile.
   const [income, setIncome] = useState<number | null>(profile.monthly_income)
   const [savings, setSavings] = useState<number | null>(profile.savings)
-  const [adults, setAdults] = useState(Math.max(1, (profile.family_size ?? 1) - (profile.dependents ?? 0)))
   const [children, setChildren] = useState(profile.dependents ?? 0)
   const [incomeType, setIncomeType] = useState<string | null>(profile.income_type)
-  const [activeSection, setActiveSection] = useState<string>('journey')
-
-  const touched =
-    income !== profile.monthly_income || savings !== profile.savings ||
+  const touched = income !== profile.monthly_income || savings !== profile.savings ||
     children !== (profile.dependents ?? 0) || incomeType !== profile.income_type
 
   function reset() {
     setIncome(profile.monthly_income); setSavings(profile.savings)
-    setAdults(Math.max(1, (profile.family_size ?? 1) - (profile.dependents ?? 0)))
     setChildren(profile.dependents ?? 0); setIncomeType(profile.income_type)
   }
 
-  // Before the wizard is complete nothing is assumed — every route reports a gap.
   const evaluated = useMemo<PathwayEvaluation[]>(() => {
-    if (!complete) {
-      return evaluatePathways({ ...profile, goals: [], monthly_income: null, savings: null, remote: null, dependents: null })
-        .map((p) => ({ ...p, status: 'Missing Requirements' as const, requirementsMet: [], missingRequirements: [] }))
+    if (!personalized) {
+      return evaluatePathways({
+        ...profile, goals: [], monthly_income: null, savings: null,
+        remote: null, dependents: null, income_type: null,
+      }).map(p => ({ ...p, status: 'Missing Requirements' as const, requirementsMet: [], missingRequirements: [] }))
     }
     return evaluatePathways({ ...profile, monthly_income: income, savings, dependents: children, income_type: incomeType })
-  }, [complete, profile, income, savings, children, incomeType])
+  }, [personalized, profile, income, savings, children, incomeType])
 
-  const strongest = useMemo(
-    () => [...evaluated].sort((a, b) => fitOrder(a.status) - fitOrder(b.status)).slice(0, 3),
-    [evaluated],
-  )
-
-  const journey = savedDestination ? VISA_JOURNEYS[savedDestination] ?? null : null
-  const currentStep = journey ? journey.findIndex((s) => s.state === 'current') + 1 : 0
+  const likely = personalized ? evaluated.filter(p => p.status === 'Strong Match').length : 0
 
   return (
-    <div className="space-y-4">
-      {/* 2 — Section tabs */}
-      <nav className="k-tabbar" aria-label="Pathways sections">
-        <div className="k-tabs">
-          {SECTIONS.map((section) => (
-            <a
-              key={section.id}
-              href={`#pw-${section.id}`}
-              className={`k-tab${activeSection === section.id ? ' is-active' : ''}`}
-              onClick={() => setActiveSection(section.id)}
-            >
-              {section.label}
-            </a>
-          ))}
-        </div>
-      </nav>
-
-      <PathwaysPassports categories={['All', ...Array.from(new Set(evaluated.map((route) => route.category)))]} category={routeCategory} onCategoryChange={setRouteCategory} />
-
-      {/* 3 — Visa journey tracker */}
-      <section id="pw-journey" className="scroll-mt-4 rounded-[var(--radius-card)] border border-line bg-white px-5 pb-5 pt-[18px] shadow-tile" aria-labelledby="pw-journey-heading">
-        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          <div>
-            <h2 id="pw-journey-heading" className="text-[16px] font-bold tracking-[-0.01em] text-navy">
-              Your visa journey{savedDestination ? ` · ${savedDestination}` : ''}{selectedPathway ? ` · ${selectedPathway}` : ''}
-            </h2>
-            <p className="mt-0.5 text-[12.5px] text-muted">Walks the route you have selected, step by step.</p>
+    <div className="space-y-5">
+      <header className="rounded-[var(--radius-card)] border border-line bg-white p-5 shadow-tile sm:p-7">
+        <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-gold-deep">Kolmari · Pathways</p>
+        <div className="mt-1 flex flex-wrap items-start justify-between gap-4">
+          <div className="max-w-2xl">
+            <h1 className="text-2xl font-extrabold leading-tight text-navy sm:text-[32px]">
+              {personalized ? 'Your relocation pathways' : 'Explore relocation pathways'}
+            </h1>
+            <p className="mt-2 text-sm leading-6 text-muted">
+              {personalized
+                ? 'Explore routes against your Kolmari Profile. Review why each route may fit and what still needs to be verified.'
+                : 'Search ways to live, work, study or settle abroad. Complete your profile to add personalized matching.'}
+            </p>
           </div>
-          {journey && <span className="text-[11.5px] text-muted-soft">Step {currentStep} of {journey.length}</span>}
+          <nav className="flex flex-wrap gap-2" aria-label="Related tools">
+            <Link href="/passportindex" className="inline-flex min-h-10 items-center gap-1 rounded-[var(--radius-field)] border border-line px-3 text-xs font-bold text-navy hover:bg-canvas">
+              Passport Index <ArrowRight size={13} aria-hidden="true" />
+            </Link>
+            <Link href="/my-plan" className="inline-flex min-h-10 items-center gap-1 rounded-[var(--radius-field)] bg-navy px-3 text-xs font-bold text-white hover:bg-navy-deep">
+              My Plan <ArrowRight size={13} aria-hidden="true" />
+            </Link>
+          </nav>
         </div>
-
-        <ol className="mt-4 grid gap-2 sm:grid-cols-4" aria-label="Your visa journey navigation">
-          {[
-            { label: 'Tell us about you', href: '/profile-wizard' },
-            { label: 'See your options', href: '#pw-routes' },
-            { label: 'Compare and save', href: '#pw-routes' },
-            { label: 'Take the next step', href: '/my-plan' },
-          ].map((step, index) => (
-            <li key={step.label}>
-              <Link href={step.href} className="flex items-center gap-2 rounded-[var(--radius-field)] border border-line px-3 py-3 text-xs font-semibold text-navy hover:bg-canvas">
-                <span className="grid size-6 shrink-0 place-items-center rounded-pill bg-gold-soft text-navy">{index + 1}</span>{step.label}
-              </Link>
-            </li>
-          ))}
-        </ol>
-
-        {journey ? (
-          <ol className="mt-4 flex items-start">
-            {journey.map((step, i) => {
-              const meta = step.label === 'Gather documents' && documentsTotal > 0
-                ? `${documentsReady} of ${documentsTotal}`
-                : step.meta
-              return (
-                <li key={step.label} className="relative flex min-w-0 flex-1 flex-col items-center gap-2">
-                  {i > 0 && (
-                    <span
-                      className="absolute left-[-50%] right-1/2 top-[15px] h-0.5"
-                      style={{ background: step.state === 'todo' ? 'var(--color-line)' : 'var(--color-teal)' }}
-                      aria-hidden="true"
-                    />
-                  )}
-                  <span
-                    className="relative z-10 grid size-[30px] flex-none place-items-center rounded-pill text-xs font-bold"
-                    style={
-                      step.state === 'done' ? { background: 'var(--color-teal)', color: '#fff' }
-                        : step.state === 'current' ? { background: 'var(--color-gold)', color: 'var(--color-navy-deep)', boxShadow: '0 0 0 4px rgba(243,197,22,.22)' }
-                          : { background: 'var(--color-line)', color: 'var(--color-muted-soft)' }
-                    }
-                    aria-current={step.state === 'current' ? 'step' : undefined}
-                  >
-                    {step.state === 'done' ? <Check size={15} strokeWidth={3} aria-hidden="true" /> : i + 1}
-                  </span>
-                  <span className="min-h-8 px-1.5 text-center text-[11.5px] font-bold leading-[1.35] text-navy">{step.label}</span>
-                  <span className="px-1.5 text-center text-[10.5px] leading-[1.4] text-muted-soft">{meta}</span>
-                </li>
-              )
-            })}
-          </ol>
+        {personalized ? (
+          <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3 rounded-[var(--radius-field)] bg-canvas px-4 py-3 text-xs">
+            <span className="inline-flex items-center gap-1.5 font-bold text-navy">
+              <CheckCircle2 size={16} className="text-teal-deep" aria-hidden="true" /> Profile completed
+            </span>
+            <span className="text-muted"><strong className="text-navy">{likely}</strong> potential fits</span>
+            <span className="text-muted"><strong className="text-navy">{evaluated.length - likely}</strong> routes to research</span>
+            <Link href="/profile-wizard" className="ml-auto font-semibold text-navy underline-offset-2 hover:underline">Edit profile</Link>
+          </div>
         ) : (
-          <p className="mt-4 rounded-[var(--radius-field)] bg-canvas p-4 text-[12.5px] leading-6 text-muted">
-            {savedDestination
-              ? `No step-by-step sequence has been researched for ${savedDestination} yet.`
-              : 'Choose a destination and pathway on your plan to see the route walked step by step.'}{' '}
-            <Link href="/my-plan" className="font-bold text-gold-deep">Open My Plan</Link>
-          </p>
+          <div className="mt-5 flex flex-wrap items-center gap-3 rounded-[var(--radius-field)] bg-gold-soft/45 px-4 py-3">
+            <Compass size={18} className="shrink-0 text-gold-deep" aria-hidden="true" />
+            <p className="min-w-0 flex-1 text-[13px] text-navy">
+              You're browsing the research directory. No personalized match or eligibility score is being calculated yet.
+            </p>
+            <Link href="/profile-wizard" className="inline-flex min-h-10 items-center gap-1 rounded-[var(--radius-field)] bg-navy px-3 text-xs font-bold text-white hover:bg-navy-deep">
+              Complete profile <ArrowRight size={13} aria-hidden="true" />
+            </Link>
+          </div>
         )}
-      </section>
+      </header>
 
-      <PathwaysLesserRoutes />
-
-      {/* 4 — Strongest signals */}
-      <section id="pw-signals" className="scroll-mt-4" aria-labelledby="pw-signals-heading">
-        <h2 id="pw-signals-heading" className="text-[10.5px] font-bold uppercase tracking-[0.13em] text-gold-deep">
-          Your strongest signals
-        </h2>
-        <p className="mt-1 text-[12.5px] text-muted">Based on your Kolmari Profile. Official requirements still control eligibility.</p>
-        <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {strongest.map((pathway) => (
-            <article key={pathway.id} className="rounded-[var(--radius-card)] border border-line bg-white px-[17px] pb-4 pt-[15px] shadow-tile">
-              <div className="flex items-start justify-between gap-3">
-                <p className="text-[10px] font-bold uppercase tracking-[0.11em] text-muted-soft">{pathway.category}</p>
-                <FitBadge status={pathway.status} />
+      {personalized && (
+        <details className="group rounded-[var(--radius-card)] border border-line bg-white shadow-tile">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-4 marker:hidden sm:px-5 [&::-webkit-details-marker]:hidden">
+            <span className="flex items-start gap-3">
+              <span className="grid size-9 shrink-0 place-items-center rounded-[var(--radius-field)] bg-canvas text-navy">
+                <SlidersHorizontal size={17} aria-hidden="true" />
+              </span>
+              <span>
+                <span className="block text-sm font-bold text-navy">Adjust matching assumptions</span>
+                <span className="mt-1 block text-xs leading-5 text-muted">Try different circumstances without changing your saved profile.</span>
+              </span>
+            </span>
+            <ChevronDown size={17} className="shrink-0 text-muted transition-transform group-open:rotate-180" aria-hidden="true" />
+          </summary>
+          <div className="grid gap-5 border-t border-line p-5 sm:grid-cols-2 xl:grid-cols-4">
+            <label className="block">
+              <span className="text-xs font-bold text-muted">Monthly income</span>
+              <span className="mt-1 block text-xl font-extrabold text-navy">{income === null ? 'Not set' : `$${income.toLocaleString()}`}</span>
+              <input type="range" min={0} max={15000} step={100} value={income ?? 0} onChange={e => setIncome(Number(e.target.value))} className="mt-3 w-full accent-[var(--color-gold)]" />
+            </label>
+            <label className="block">
+              <span className="text-xs font-bold text-muted">Savings available</span>
+              <span className="mt-1 block text-xl font-extrabold text-navy">{savings === null ? 'Not set' : `$${savings.toLocaleString()}`}</span>
+              <input type="range" min={0} max={200000} step={5000} value={savings ?? 0} onChange={e => setSavings(Number(e.target.value))} className="mt-3 w-full accent-[var(--color-gold)]" />
+            </label>
+            <label className="block">
+              <span className="text-xs font-bold text-muted">Children moving</span>
+              <span className="mt-1 block text-xl font-extrabold text-navy">{children}</span>
+              <input type="range" min={0} max={12} step={1} value={children} onChange={e => setChildren(Number(e.target.value))} className="mt-3 w-full accent-[var(--color-gold)]" />
+            </label>
+            <label className="block">
+              <span className="text-xs font-bold text-muted">How you earn</span>
+              <select value={incomeType ?? ''} onChange={e => setIncomeType(e.target.value || null)} className="field mt-2">
+                <option value="">Not set</option>
+                {INCOME_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </label>
+            {touched && (
+              <div className="flex flex-wrap items-center gap-3 sm:col-span-2 xl:col-span-4">
+                <span role="status" className="text-xs font-semibold text-warn">Showing unsaved matching assumptions.</span>
+                <button type="button" onClick={reset} className="text-xs font-bold text-navy underline-offset-2 hover:underline">Reset to my profile</button>
               </div>
-              <h3 className="mt-1.5 text-[15px] font-bold tracking-[-0.01em] text-navy">{pathway.name}</h3>
-              <p className="text-[12.5px] text-muted-soft">{pathway.country}</p>
-              <p className="mt-2 text-[12.8px] leading-[1.6] text-muted">{pathway.incomeThreshold}</p>
-              <ul className="mt-3 space-y-1.5 border-t border-[#f0f3f7] pt-3">
-                {pathway.requirementsMet.slice(0, 2).map((item) => (
-                  <li key={item} className="flex gap-2 text-[12px] leading-5 text-ok">
-                    <CheckCircle2 size={14} className="mt-0.5 shrink-0" aria-hidden="true" /><span>{item}</span>
-                  </li>
-                ))}
-                {pathway.requirementsMet.length === 0 && (
-                  <li className="text-[12px] text-muted-soft">No profile signals confirmed for this route yet.</li>
-                )}
-              </ul>
-            </article>
-          ))}
+            )}
+          </div>
+        </details>
+      )}
+
+      <section id="pw-routes" className="scroll-mt-4" aria-label={personalized ? 'Personalized route explorer' : 'Searchable route directory'}>
+        <PathwaysExplorer pathways={evaluated} planPathway={selectedPathway}
+          category={routeCategory} onCategoryChange={setRouteCategory} personalized={personalized} />
+      </section>
+
+      <section className="rounded-[var(--radius-card)] border border-line bg-white shadow-tile" aria-label="Lesser-known routes">
+        <div className="flex flex-wrap items-center justify-between gap-3 p-5">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-gold-deep">Beyond the usual routes</p>
+            <h2 className="mt-1 text-lg font-bold text-navy">Discover lesser-known pathways</h2>
+            <p className="mt-1 text-[13px] leading-6 text-muted">Optional research, separate from your personalized matches.</p>
+          </div>
+          <Link href="/my-plan" className="inline-flex items-center gap-1 text-xs font-bold text-navy hover:underline">
+            Continue in My Plan <ArrowRight size={14} aria-hidden="true" />
+          </Link>
         </div>
+        <details className="group border-t border-line">
+          <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 text-sm font-bold text-navy marker:hidden [&::-webkit-details-marker]:hidden">
+            Browse alternative route research
+            <ChevronDown size={17} className="shrink-0 text-muted transition-transform group-open:rotate-180" aria-hidden="true" />
+          </summary>
+          <div className="px-5 pb-5"><PathwaysLesserRoutes /></div>
+        </details>
       </section>
 
-      {/* 5 — Match calculator */}
-      <section id="pw-match" className="scroll-mt-4 rounded-[var(--radius-card)] border border-line bg-white px-5 pb-5 pt-[18px] shadow-tile" aria-labelledby="pw-match-heading">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h2 id="pw-match-heading" className="text-[16px] font-bold tracking-[-0.01em] text-navy">Match your facts to the right routes</h2>
-            <p className="mt-0.5 text-[12.5px] text-muted">Adjust the inputs and the fit labels below update. Nothing here is saved or submitted.</p>
-          </div>
-          {touched && (
-            <button type="button" onClick={reset} className="text-[12.5px] font-bold text-info hover:text-navy">Reset</button>
-          )}
-        </div>
-
-        <div className="mt-5 grid items-end gap-x-6 gap-y-5 sm:grid-cols-2 xl:grid-cols-4">
-          <div>
-            <label htmlFor="pw-income" className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted-soft">Monthly income</label>
-            <p className="mt-1 text-[20px] font-extrabold leading-none text-navy">
-              {income === null ? 'Not set' : `$${income >= 1000 ? `${(income / 1000).toFixed(1)}k` : income}`}
-              <span className="ml-1.5 text-[11px] font-semibold text-muted-soft">per month</span>
-            </p>
-            <input
-              id="pw-income" type="range" min={0} max={15000} step={100}
-              value={income ?? 0}
-              onChange={(e) => setIncome(Number(e.target.value))}
-              className="mt-2 w-full accent-[var(--color-gold)]"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="pw-savings" className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted-soft">Savings available</label>
-            <p className="mt-1 text-[20px] font-extrabold leading-none text-navy">
-              {savings === null ? 'Not set' : `$${(savings / 1000).toFixed(0)}k`}
-            </p>
-            <input
-              id="pw-savings" type="range" min={0} max={200000} step={5000}
-              value={savings ?? 0}
-              onChange={(e) => setSavings(Number(e.target.value))}
-              className="mt-2 w-full accent-[var(--color-gold)]"
-            />
-          </div>
-
-          <div>
-            <p className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted-soft">People moving</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              <Stepper label="Adults" value={adults} min={1} onChange={setAdults} />
-              <Stepper label="Children" value={children} min={0} onChange={setChildren} />
-            </div>
-          </div>
-
-          <div>
-            <label htmlFor="pw-earn" className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted-soft">How you earn</label>
-            <select
-              id="pw-earn"
-              value={incomeType ?? ''}
-              onChange={(e) => setIncomeType(e.target.value === '' ? null : e.target.value)}
-              className="field mt-2"
-            >
-              <option value="">Not set</option>
-              {INCOME_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
-            </select>
-          </div>
-        </div>
-
-        {touched && (
-          <p className="mt-4 text-[11px] font-semibold text-warn">
-            Showing exploratory figures — these are not saved to your Kolmari Profile.
-          </p>
-        )}
-      </section>
-
-      {/* 6 — All routes: master-detail explorer */}
-      <section id="pw-routes" className="scroll-mt-4" aria-labelledby="pw-routes-heading">
-        <h2 id="pw-routes-heading" className="sr-only">Explore all Pathways</h2>
-        <PathwaysExplorer pathways={evaluated} planPathway={selectedPathway} category={routeCategory} onCategoryChange={setRouteCategory} />
-      </section>
-
-      <section className="rounded-[var(--radius-card)] border border-line bg-canvas p-6 text-sm text-muted" aria-label="Sources and research notes">
-        <h2 className="font-bold text-navy">Sources and research notes</h2>
-        <p className="mt-2 leading-6">{RESEARCH_DISCLAIMER}</p>
-        <p className="mt-3 leading-6">
-          Income and savings figures shown are approximate planning guides in USD equivalent — not official government
-          thresholds. Confirm every requirement directly with the linked government authority.
-        </p>
-        <p className="mt-3 text-xs leading-5">
-          Passport access uses the existing passport directory dataset. Country-specific entry restrictions and
-          individual official verification dates are unavailable in that dataset; check the destination authority
-          before relying on its entry-access labels.
-        </p>
-        <PassportCoverCredits />
-      </section>
+      <footer className="rounded-[var(--radius-card)] border border-line bg-canvas p-5 text-xs leading-6 text-muted" aria-label="Sources and research notes">
+        <p className="font-bold text-navy">About these recommendations</p>
+        <p className="mt-1">{RESEARCH_DISCLAIMER}</p>
+        <p className="mt-2">Income and savings figures are approximate planning guides, not official thresholds. Confirm every requirement with the destination authority.</p>
+      </footer>
     </div>
   )
 }
-
-function Stepper({ label, value, min, onChange }: { label: string; value: number; min: number; onChange: (v: number) => void }) {
-  return (
-    <div className="flex items-center gap-1.5 rounded-[var(--radius-field)] border border-line bg-white px-2 py-1">
-      <span className="text-[11.5px] font-semibold text-muted">{label}</span>
-      <button
-        type="button" aria-label={`Decrease ${label}`}
-        onClick={() => onChange(Math.max(min, value - 1))}
-        className="grid size-5 place-items-center rounded-[5px] border border-line text-muted hover:bg-canvas"
-      >
-        <Minus size={12} aria-hidden="true" />
-      </button>
-      <span className="min-w-3 text-center text-[12.5px] font-bold text-navy">{value}</span>
-      <button
-        type="button" aria-label={`Increase ${label}`}
-        onClick={() => onChange(Math.min(20, value + 1))}
-        className="grid size-5 place-items-center rounded-[5px] border border-line text-muted hover:bg-canvas"
-      >
-        <Plus size={12} aria-hidden="true" />
-      </button>
-    </div>
-  )
-}
-
