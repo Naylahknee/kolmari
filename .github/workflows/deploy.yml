@@ -33,6 +33,12 @@ jobs:
 
       - run: npm ci
 
+      # OpenNext currently cannot load Next.js 16.4 preview-props.json on Workers.
+      # Force the last known compatible 16.3 patch for this deployment.
+      # Remove this workaround after the OpenNext manifest fix is released.
+      - name: Use compatible Next.js runtime
+        run: npm install --no-save --package-lock=false next@16.3.8
+
       # Build the OpenNext bundle and deploy it to the Worker. wrangler reads the
       # token + account id from the environment below.
       - name: Build and deploy
