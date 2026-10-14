@@ -1270,3 +1270,106 @@ Setup required before the first run (two secrets, same value):
 Note: no SLD contract covers this work; the active
 `sld-031-canonical-governance-repair` contract authorizes only SLD engine
 maintenance files and was left untouched.
+
+## Targeted pathways page redesign — 2026-10-13 (pending release)
+
+Requested: redesign `/pathways` inside the existing Kolmari app using the owner's
+attached Passport & Visa Pathways instructions. No reference mockup image was
+attached to this task; the written section order controls this implementation.
+
+Authorized entities: the existing pathways page presentation, passport gallery
+and cover assets, lesser-known route presentation, and responsive route rows.
+Required propagation: one category state shared by the hero and existing route
+filters; no matching formula or API changes. The page's existing server route,
+authentication, paid gate, profile reads, plan reads/writes, route data,
+localStorage key, comparison logic and selected-route sequence are preserved.
+
+Changed files:
+- `src/components/kolmari/pathways-results.tsx`: existing navigation, passport
+  hero/gallery, four-step navigation alongside the existing selected-route
+  sequence, compact lesser routes above matching, preserved strongest signals,
+  responsive matching controls, and research notes with image credits.
+- `src/components/kolmari/pathways-explorer.tsx`: passport thumbnails replace
+  flags in route rows, details and comparisons; category/financial/timing
+  summaries remain derived from existing records; narrower responsive rows.
+- `src/components/kolmari/pathways-passports.tsx`: popular passport search by
+  name/ISO, region and entry access to a separately selected destination, hero
+  pathway-type filter synchronized with the route list, accessible gallery
+  scrolling, and links to the existing `/passportindex` query interface.
+- `src/components/kolmari/pathways-lesser-routes.tsx`: eight original research
+  leads in compact 3/2/1-column cards; neutral EU family icon. Original records
+  stay unchanged. Unsupported speed, income and guaranteed-benefit claims are
+  omitted from presentation. View route opens a focused research view that
+  explicitly marks unavailable requirements, sources and dates as unverified.
+- `src/components/kolmari/passport-cover.tsx`: lazy-loaded local imagery with
+  loading/error/unavailable states, natural proportions and accessible labels;
+  expandable image attribution and licensing credits.
+- `src/lib/passport-covers.ts`: ISO-to-asset mapping, original image source,
+  authorship, license, derivative changes and image-source check date. Image
+  data is separate from visa/entry-rule data.
+- `public/images/passports/{us,ca,pt,mx,es,gh,fr,br}.webp`: eight real cover
+  photographs/thumbnails (about 150 KB total); no invented covers or flags.
+- `docs/CURRENT-STATE.md`: this delivery and validation record.
+
+Image sources: Wikimedia Commons. The exact file URLs, authors and license
+links are recorded in `src/lib/passport-covers.ts` and displayed on the page.
+United States and Ghana are Commons public-domain government images; Brazil
+carries Commons' public-domain designation; Mexico (Diegoromch) and Spain
+(Horizon206) are CC0; Canada (Jusfiq), Portugal (Arenawise), and France (Nikimura)
+are CC BY-SA 4.0, with derivative thumbnails retaining that license. Canada is
+cropped from *Canadian Passports - Old and New*; Spain is cropped from *Four
+Different Passports*. Brazil was captured from the rendered Commons thumbnail
+because its download did not materialize, with surrounding browser canvas
+removed. Other thumbnails are resized/converted only. These are authentic
+cover examples, not claims about the latest issuance design. The date checked
+refers to imagery, not legal requirements.
+
+Validation:
+- Production `npm run build`: PASS, including `/pathways` and `/passportindex`.
+- TypeScript `npx tsc --noEmit`: PASS.
+- 39 isolated DOM interaction assertions: PASS. Covers passport name/ISO and
+  region search, nationality/destination access filtering, directory-link
+  parameters, synchronized pathway filters, original route search/status tabs,
+  bookmark storage/remount, comparison, route keyboard selection, unchanged
+  plan PUT payload and error feedback with a stubbed API, income/family inputs,
+  matching reset, profile immutability, original document count, four-step
+  navigation, research dialog/focus return, EU mobility icon, gallery scrolling,
+  and image load/error/unmapped fallback, including images completed before hydration.
+- Lint: repository ESLint 10/TypeScript 7 cannot load its current plugins. In an
+  isolated ESLint 9/TypeScript 6 runtime, all newly added components and changed
+  page files lint cleanly except the pre-existing synchronous setState effect
+  in `pathways-explorer.tsx`. Baseline source reproduces the same existing
+  `react-hooks/set-state-in-effect` error. No dependencies were changed.
+- Image QA: inspected all eight local thumbnails. `git diff --check`: PASS.
+- Desktop/tablet/mobile responsive CSS implemented; visual browser validation
+  of the isolated fixture was unavailable because the cloud browser rejected
+  local-file navigation. No claim of browser-tested viewport sizing.
+- Production authenticated navigation, database persistence and session flows
+  not exercised: live `/pathways` redirects this browser to sign-in. Server
+  route/auth/paid gate/database and API files were not modified. Plan save tests
+  validate request/UI behavior, not a real database write.
+
+Missing integrations and preserved out-of-scope observations:
+- The eight lesser-known leads have no official sources, verified detail
+  records or verification dates. No requirements/timings were invented.
+- Passport access comes from the existing MIT-licensed dataset, updated
+  2026-02-17. Per-destination official links, restrictions and verification
+  dates are not in that dataset; unavailable status is stated on `/pathways`.
+  The existing passport-index page is reused, not redesigned.
+- This version has monthly-income and savings sliders, adults/children counts
+  and income-type selection. It does not have the annual-budget, timeline and
+  primary-goal matching controls named in the attachment. Existing matching
+  behavior is preserved rather than introducing new calculations.
+- The existing selected-route journey sequence is static orientation from
+  `VISA_JOURNEYS`; its workflow and rendering were preserved. No new completed
+  steps or saved progress were asserted.
+- Stored SLD contract `sld-040-canonical-core-migration` belongs to previous
+  SLD-engine work. `npm run sld:verify` reports FAIL/BLOCK against that unrelated
+  stored scope (14 changed artifacts before this documentation update). The
+  contract, engine, baseline and governance workflow were not changed. This is
+  not a post-change SLD PASS; the pull request should remain a draft until a
+  pathways-specific contract is recorded through the project's governance
+  process. Current request authorizes this targeted design work, and every
+  changed hunk has been manually mapped to it. No out-of-scope app changes.
+
+Final status: implementation prepared for review; not merged or deployed.

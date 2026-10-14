@@ -7,7 +7,7 @@ import {
 } from 'lucide-react'
 import type { PathwayEvaluation } from '@/lib/pathways'
 import { summaryFor } from '@/lib/pathway-summary'
-import { flagSrc } from '@/lib/flags'
+import { PassportCover } from './passport-cover'
 
 // ─── Display status ─────────────────────────────────────────────────────
 // Kolmari does not assert visa eligibility, so every label is a fit signal.
@@ -66,15 +66,6 @@ function StatusBadge({ status, className = '' }: { status: DisplayStatus; classN
   )
 }
 
-function Flag({ code, size }: { code: string; size: number }) {
-  if (!code) return <span className="shrink-0 rounded-pill bg-canvas" style={{ width: size, height: size }} aria-hidden="true" />
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src={flagSrc(code)} alt="" width={size} height={size}
-      className="shrink-0 rounded-pill object-cover ring-1 ring-line" style={{ width: size, height: size }} />
-  )
-}
-
 function signalLine(p: PathwayEvaluation) {
   const met = p.requirementsMet.length, miss = p.missingRequirements.length
   if (!met && miss) return `${miss} detail${miss === 1 ? '' : 's'} to confirm`
@@ -84,13 +75,14 @@ function signalLine(p: PathwayEvaluation) {
 
 // ─── Explorer ───────────────────────────────────────────────────────────
 
-export function PathwaysExplorer({ pathways, planPathway }: {
+export function PathwaysExplorer({ pathways, planPathway, category, onCategoryChange }: {
   pathways: PathwayEvaluation[]
   planPathway: string | null
+  category: string
+  onCategoryChange: (category: string) => void
 }) {
   const { saved, toggle } = useSavedPathways()
   const [filter, setFilter] = useState<Filter>('all')
-  const [category, setCategory] = useState('All')
   const [query, setQuery] = useState('')
   const [compare, setCompare] = useState(false)
   const [sheetOpen, setSheetOpen] = useState(false) // small screens only
@@ -180,7 +172,7 @@ export function PathwaysExplorer({ pathways, planPathway }: {
         <p className="mt-1 text-[13.5px] leading-[1.6] text-muted">See what fits your profile and what to confirm next.</p>
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <label className="flex min-w-[220px] flex-1 items-center gap-2 rounded-[var(--radius-field)] border border-line bg-[#fbfcfe] px-3 py-2 focus-within:border-navy/40">
+          <label className="flex min-w-0 flex-1 items-center gap-2 rounded-[var(--radius-field)] border border-line bg-[#fbfcfe] px-3 py-2 focus-within:border-navy/40">
             <Search size={15} className="shrink-0 text-muted-soft" aria-hidden="true" />
             <span className="sr-only">Search routes</span>
             <input type="search" value={query} onChange={(e) => { setQuery(e.target.value); setCompare(false) }}
@@ -200,7 +192,7 @@ export function PathwaysExplorer({ pathways, planPathway }: {
               const active = category === item
               return (
                 <button key={item} type="button" aria-pressed={active}
-                  onClick={() => { setCategory(item); setCompare(false) }}
+                  onClick={() => { onCategoryChange(item); setCompare(false) }}
                   className={[
                     'shrink-0 rounded-pill border px-3 py-1.5 text-[12px] font-semibold transition-colors',
                     active ? 'border-navy bg-navy text-white' : 'border-line bg-white text-muted hover:border-navy/30 hover:text-navy',
@@ -249,17 +241,18 @@ export function PathwaysExplorer({ pathways, planPathway }: {
                     aria-label={`${s.shortName}, ${p.country}, ${STATUS_META[status].label}`}
                     onClick={() => open(p.id)}
                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(p.id) } }}
-                    className={`flex min-h-[104px] cursor-pointer items-center gap-3.5 border-b border-[#eef1f5] px-3 py-4 outline-none transition-colors duration-[120ms] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold sm:gap-4 ${active ? 'bg-[#fff8e6] shadow-[inset_3px_0_0_var(--color-gold)]' : 'hover:bg-[#fbfcfe]'}`}>
-                    <Flag code={s.code} size={44} />
+                    className={`flex min-h-[104px] cursor-pointer items-center gap-3.5 border-b border-[#eef1f5] px-3 py-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold sm:gap-4 ${active ? 'bg-[#fff8e6] shadow-[inset_3px_0_0_var(--color-gold)]' : 'hover:bg-[#fbfcfe]'}`}>
+                    <PassportCover code={s.code} country={p.country} className="w-9" />
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] font-bold uppercase tracking-[0.11em] text-muted-soft">{p.country}</p>
-                      <p className="mt-0.5 text-[17px] font-bold leading-snug tracking-[-0.01em] text-navy">{s.shortName}</p>
-                      <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 md:hidden">
+                      <p className="mt-0.5 text-[15.5px] font-bold leading-snug tracking-[-0.01em] text-navy">{s.shortName}</p>
+                      <p className="mt-1 text-[11px] leading-5 text-muted">{p.category} · {s.keyFact} · Planning timing: {s.processing}</p>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 xl:hidden">
                         <StatusBadge status={status} />
                         <span className="text-[12px] text-muted">{signalLine(p)}</span>
                       </div>
                     </div>
-                    <div className="hidden w-52 shrink-0 flex-col items-start gap-1 md:flex">
+                    <div className="hidden w-40 shrink-0 flex-col items-start gap-1 xl:flex">
                       <StatusBadge status={status} />
                       <span className="text-[12px] leading-5 text-muted">{signalLine(p)}</span>
                     </div>
@@ -281,7 +274,7 @@ export function PathwaysExplorer({ pathways, planPathway }: {
                     : 'No routes match these filters.'}
                 </span>
                 {(query || category !== 'All' || filter !== 'all') && (
-                  <button type="button" onClick={() => { setQuery(''); setCategory('All'); setFilter('all') }}
+                  <button type="button" onClick={() => { setQuery(''); onCategoryChange('All'); setFilter('all') }}
                     className="font-bold text-gold-deep hover:underline">
                     Clear filters
                   </button>
@@ -397,7 +390,7 @@ function RoutePanel({ pathway: p, position, isSaved, planRoute, onPlanSaved, onA
       </p>
 
       <div className="mt-4 flex items-center gap-3.5">
-        <Flag code={s.code} size={52} />
+        <PassportCover code={s.code} country={p.country} className="w-10" />
         <p className="text-[10px] font-bold uppercase tracking-[0.11em] text-muted-soft">{p.country}</p>
       </div>
       <h3 className="mt-2 text-[22px] font-extrabold leading-tight tracking-[-0.01em] text-navy">{p.name}</h3>
@@ -526,7 +519,7 @@ function CompareTable({ routes }: { routes: PathwayEvaluation[] }) {
               return (
                 <th key={p.id} scope="col" className="px-3.5 py-3 align-bottom">
                   <span className="flex items-center gap-2">
-                    <Flag code={s.code} size={22} />
+                    <PassportCover code={s.code} country={p.country} className="w-6" />
                     <span>
                       <span className="block text-[9.5px] font-bold uppercase tracking-[0.11em] text-muted-soft">{p.country}</span>
                       <span className="block font-bold text-navy">{s.shortName}</span>
