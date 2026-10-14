@@ -417,18 +417,19 @@ body.rail-collapsed .sb-item .ic {
   }
   body.rail-collapsed .rail { transform: translateX(0); }
   body.rail-collapsed .rail-title { display: block; }
-  /* Mobile drawer open = full sidebar: revert every collapsed-strip rule. */
-  body.rail-collapsed .sb-label,
-  body.rail-collapsed .sb-item .lbl,
-  body.rail-collapsed .sb-item .chev,
-  body.rail-collapsed .sb-tree,
-  body.rail-collapsed .sb-group,
-  body.rail-collapsed .sb-head-lbl,
-  body.rail-collapsed .sb-head .chev,
-  body.rail-collapsed .sb-link .lbl,
-  body.rail-collapsed .sb-user .lbl,
-  body.rail-collapsed .sb-div,
-  body.rail-collapsed .readiness { display: revert; }
+  /* Mobile drawer open = full sidebar: revert every collapsed-strip rule.
+     Extra .rail specificity beats the later desktop collapsed rules. */
+  body.rail-collapsed .rail .sb-label,
+  body.rail-collapsed .rail .sb-item .lbl,
+  body.rail-collapsed .rail .sb-item .chev,
+  body.rail-collapsed .rail .sb-tree,
+  body.rail-collapsed .rail .sb-group,
+  body.rail-collapsed .rail .sb-head-lbl,
+  body.rail-collapsed .rail .sb-head .chev,
+  body.rail-collapsed .rail .sb-link .lbl,
+  body.rail-collapsed .rail .sb-user .lbl,
+  body.rail-collapsed .rail .sb-div,
+  body.rail-collapsed .rail .readiness { display: revert; }
   body.rail-collapsed .sb-head .ic,
   body.rail-collapsed .sb-top .ic { display: none; }
   body.rail-collapsed .sb-item,

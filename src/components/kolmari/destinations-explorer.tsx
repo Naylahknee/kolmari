@@ -3,8 +3,8 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { ChevronDown, Heart, Lock, Search, X } from 'lucide-react'
-import { PanelIcon, safetyLabelForLevel, safetyScoreColor } from '@/components/kolmari/panel-icons'
-import { attributeIconsFor, getCountryAttributes } from '@/lib/country-attributes'
+import { safetyLabelForLevel, safetyScoreColor } from '@/components/kolmari/panel-icons'
+import { getCountryAttributes } from '@/lib/country-attributes'
 
 export type ExplorerRegion = 'Europe' | 'Asia' | 'North America' | 'Latin America' | 'Oceania' | 'Africa'
 
@@ -240,7 +240,6 @@ export function DestinationsExplorer({ countries, imageSrcs, matchScores, paid, 
             const isSaved = saved.includes(country.slug)
             const score = matchScores[country.slug]
             const attrs = getCountryAttributes(country.slug)
-            const attrIcons = attributeIconsFor(country.slug, country.cost)
             return (
               <article
                 key={country.slug}
@@ -296,19 +295,7 @@ export function DestinationsExplorer({ countries, imageSrcs, matchScores, paid, 
                       )}
                     </p>
                   </div>
-                  {attrIcons.length > 0 && (
-                    <div
-                      className="mt-2.5 flex items-center justify-between border-t border-line px-1 pt-2.5"
-                      role="list"
-                      aria-label={`${country.name} highlights`}
-                    >
-                      {attrIcons.map((icon) => (
-                        <span key={icon.name} role="listitem">
-                          <PanelIcon name={icon.name} label={icon.label} className="size-6" />
-                        </span>
-                      ))}
-                    </div>
-                  )}
+
                 </div>
               </article>
             )

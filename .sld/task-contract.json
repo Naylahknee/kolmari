@@ -15,7 +15,8 @@
     "public",
     "src/app",
     "src/components",
-    "src/lib"
+    "src/lib",
+    "src/styles"
   ],
   "allowedEntities": [],
   "allowedFiles": [

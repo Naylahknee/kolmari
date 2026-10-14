@@ -2,7 +2,7 @@ import { requireCurrentUser } from '@/lib/auth'
 import { COUNTRIES, DISCOVERABLE_COUNTRIES, type CountryDetail } from '@/lib/countries'
 import { getProfile, hasCompletedProfile, isPaid } from '@/lib/profile'
 import { rankNextinations } from '@/lib/userProfile'
-import { getGeneratedDashboardDestinationVersion } from '@/lib/country-assets'
+import { getGeneratedDashboardDestinationVersion, getGeneratedHeroVersion } from '@/lib/country-assets'
 import { DestinationsExplorer, type ExplorerCountry, type ExplorerRegion } from '@/components/kolmari/destinations-explorer'
 
 function toRegion(country: Pick<CountryDetail, 'region'>): ExplorerRegion {
@@ -69,6 +69,12 @@ export default async function DestinationsPage() {
       const version = await getGeneratedDashboardDestinationVersion(country.slug)
       if (version) {
         imageSrcs[country.slug] = `/api/country-asset?slug=${country.slug}&type=dashboard_destination&v=${version}`
+      } else {
+        // Fall back to the hero image so cards never render empty.
+        const heroVersion = await getGeneratedHeroVersion(country.slug)
+        if (heroVersion) {
+          imageSrcs[country.slug] = `/api/country-asset?slug=${country.slug}&type=hero&v=${heroVersion}`
+        }
       }
     }),
   )
