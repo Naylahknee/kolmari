@@ -156,7 +156,8 @@ export function PathwaysExplorer({ pathways, planPathway, category, onCategoryCh
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sheetOpen, selectedId])
 
-  const savedRoutes = sorted.filter((p) => saved.includes(p.id))
+  // Saved comparisons must stay available when search or category filters change.
+  const savedRoutes = pathways.filter((p) => saved.includes(p.id))
   const canCompare = savedRoutes.length >= 2
   const needsInfo = personalized ? sorted.filter(p => p.missingRequirements.length > 0).length : 0
 
@@ -304,7 +305,7 @@ export function PathwaysExplorer({ pathways, planPathway, category, onCategoryCh
             )}
           </>
         )}
-        <p className="sticky bottom-0 mt-auto bg-white pt-4 text-[11.5px] text-[#8090a8]">Matches help you explore. They do not confirm visa eligibility.</p>
+        <p className="sticky bottom-0 mt-auto bg-white pt-4 text-[11.5px] text-[#8090a8]">{personalized ? 'Matches help you explore; they do not confirm visa eligibility.' : 'These are general research listings, not personalized eligibility assessments.'}</p>
       </div>
 
       {/* Detail panel: side column on lg+, full-screen sheet below lg */}
@@ -407,7 +408,7 @@ function RoutePanel({ pathway: p, position, isSaved, planRoute, onPlanSaved, onA
       <div className="mt-2.5 flex flex-wrap gap-2"><StatusBadge status={status} /><span className="rounded-full border border-[#e7ebf1] bg-white px-2.5 py-1 text-[11px] font-semibold">{s.keyFact}</span><span className="rounded-full border border-[#e7ebf1] bg-white px-2.5 py-1 text-[11px] font-semibold">{s.processing}</span></div>
 
       {personalized ? (
-        <div className="mt-5 grid grid-cols-2 gap-4 border-t border-line pt-5"><div>
+        <div className="mt-5 grid grid-cols-1 gap-4 border-t border-line pt-5 sm:grid-cols-2"><div>
           <h4 className="text-[13.5px] font-bold text-navy">Why this appeared for you</h4>
           {p.requirementsMet.length ? (
             <ul className="mt-2.5 space-y-1.5">
@@ -530,7 +531,7 @@ function CompareTable({ routes, personalized }: { routes: PathwayEvaluation[]; p
     ['Fees', (p) => summaryFor(p.id, p.name).fees],
     ['Processing', (p) => summaryFor(p.id, p.name).processing],
     ['Family', (p) => summaryFor(p.id, p.name).family],
-    ['To confirm', (p) => (p.missingRequirements.length ? `${p.missingRequirements.length} detail${p.missingRequirements.length === 1 ? '' : 's'}` : 'None')],
+    ['To confirm', (p) => !personalized ? 'Complete your profile to see missing details' : p.missingRequirements.length ? `${p.missingRequirements.length} detail${p.missingRequirements.length === 1 ? '' : 's'}` : 'None'],
   ]
   return (
     <>
