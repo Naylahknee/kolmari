@@ -69,6 +69,7 @@ export default function KolmariQuizPage() {
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState<Answers>({})
   const [complete, setComplete] = useState(false)
+  const [direction, setDirection] = useState<'forward' | 'back'>('forward')
 
   const current = questions[step] ?? questions[0]
   const selected = answers[current.id]
@@ -81,6 +82,7 @@ export default function KolmariQuizPage() {
   function next() {
     if (!selected) return
     if (step < questions.length - 1) {
+      setDirection('forward')
       setStep((value) => value + 1)
       return
     }
@@ -109,7 +111,7 @@ export default function KolmariQuizPage() {
             <h1 className="mt-3 font-display text-3xl font-extrabold sm:text-4xl">You are in the {result.stage} Stage.</h1>
           </div>
 
-          <div className="space-y-6 p-6 sm:p-10">
+          <div className="kolmari-step space-y-6 p-6 sm:p-10" data-direction="forward">
             <div className="grid gap-3">
               {result.recs.map((item) => (
                 <div key={item} className="flex items-start gap-3 rounded-xl border border-line bg-canvas p-4 text-sm leading-6 text-navy">
@@ -162,6 +164,7 @@ export default function KolmariQuizPage() {
             <span className="text-xs font-bold text-muted">{step + 1} of {questions.length}</span>
           </div>
 
+          <div key={step} className="kolmari-step" data-direction={direction}>
           <h2 className="font-display text-2xl font-extrabold leading-tight text-navy sm:text-3xl">{current.prompt}</h2>
 
           <div className="mt-6 space-y-3" role="radiogroup" aria-label={current.prompt}>
@@ -184,11 +187,12 @@ export default function KolmariQuizPage() {
               )
             })}
           </div>
+          </div>
 
           <div className="mt-8 flex items-center justify-between gap-3">
             <button
               type="button"
-              onClick={() => setStep((value) => Math.max(0, value - 1))}
+              onClick={() => { setDirection('back'); setStep((value) => Math.max(0, value - 1)) }}
               disabled={step === 0}
               className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-line px-5 text-sm font-bold text-navy disabled:cursor-not-allowed disabled:opacity-35"
             >
