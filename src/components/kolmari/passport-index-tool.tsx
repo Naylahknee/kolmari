@@ -37,7 +37,7 @@ const KIND_NOTE: Record<RequirementKind,string> = {
 const KIND_ORDER: RequirementKind[] = ['visa-free', 'visa-on-arrival', 'eta', 'e-visa', 'visa-required', 'no-admission']
 const STAY_OPTIONS = [['any', 'Maximum stay'], ['30', '30+ days'], ['90', '90+ days'], ['180', '180+ days']] as const
 type StayFilter = (typeof STAY_OPTIONS)[number][0]
-const selectClass = 'h-11 min-w-0 rounded-lg border border-navy/15 bg-white px-3 text-sm font-medium text-navy'
+const selectClass = 'h-11 w-full min-w-0 rounded-lg border border-navy/15 bg-white px-3 text-sm font-medium text-navy'
 const ROW_GRID = 'md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_110px_minmax(0,1fr)_20px'
 
 export function PassportIndexTool() {
@@ -157,7 +157,7 @@ export function PassportIndexTool() {
 
       {tab === 'destinations' ? (
         <section className="mt-4">
-          <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_repeat(3,auto)]">
+          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_repeat(3,auto)]">
             <label className="flex h-11 min-w-0 items-center gap-2 rounded-lg border border-navy/15 bg-white px-3">
               <Search size={16} className="shrink-0 text-muted" aria-hidden="true" />
               <input type="search" value={query} onChange={(e) => setQuery(e.target.value)}
@@ -274,7 +274,7 @@ export function PassportIndexTool() {
         </aside>
       </div>
 
-      {detail && <div role="presentation" onClick={() => setDetail(null)} className="fixed inset-0 z-[80] flex items-center justify-center bg-navy-deep/60 p-4"><section role="dialog" aria-modal="true" aria-label="Destination entry requirements" onClick={(e) => e.stopPropagation()} className="card-surface w-full max-w-md p-6"><div className="flex items-start gap-4"><PassportCover code={detail} name={PASSPORTS[detail]?.n ?? detail} large/><div className="flex-1"><h2 className="text-xl font-bold">{PASSPORTS[detail]?.n ?? detail}</h2><p className="mt-2 text-sm">Traveling with a {entry.n} passport</p><p className="mt-3 text-sm font-semibold">{entry.d[detail] ? requirementSummary(decodeRequirement(entry.d[detail])) : "Entry information unavailable"}</p></div><button onClick={() => setDetail(null)} className="rounded-lg border px-3 py-2 text-sm">Close</button></div><p className="mt-4 text-xs text-muted">Verify requirements with the destination immigration authority before travel. This dataset does not include official destination-specific guidance.</p></section></div>}
+      {detail && <div role="presentation" onClick={() => setDetail(null)} className="fixed inset-0 z-[80] flex items-center justify-center bg-navy-deep/60 p-4"><section role="dialog" aria-modal="true" aria-label="Destination entry requirements" onClick={(e) => e.stopPropagation()} className="card-surface w-full max-w-md p-6"><div className="flex items-start gap-4"><PassportCover code={detail} name={PASSPORTS[detail]?.n ?? detail} large/><div className="flex-1"><h2 className="text-xl font-bold">{PASSPORTS[detail]?.n ?? detail}</h2><p className="mt-2 text-sm">Traveling with a {entry.n} passport</p><p className="mt-3 text-sm font-semibold">{entry.d[detail] ? requirementSummary(decodeRequirement(entry.d[detail])) : "Entry information unavailable"}</p>{entry.d[detail] && <p className="mt-1 text-sm text-muted">{KIND_NOTE[decodeRequirement(entry.d[detail]).kind]}</p>}</div><button onClick={() => setDetail(null)} className="rounded-lg border px-3 py-2 text-sm">Close</button></div><p className="mt-4 text-xs text-muted">Verify requirements with the destination immigration authority before travel. This dataset does not include official destination-specific guidance.</p></section></div>}
 
       <footer className="mt-6 text-xs leading-relaxed text-muted">
         <p>
