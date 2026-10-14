@@ -20,7 +20,8 @@
   "allowedEntities": [],
   "allowedFiles": [
     ".sld/task-contract.json",
-    "package.json"
+    "package.json",
+    "package-lock.json"
   ],
   "approvedAt": "2026-10-14T00:29:28Z",
   "approvedBy": "Naylahknee",
