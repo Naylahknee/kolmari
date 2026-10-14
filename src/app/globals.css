@@ -555,6 +555,13 @@ textarea:focus-visible {
 .kolmari-region:focus .kolmari-region-outline { filter: drop-shadow(0 0 10px rgba(243, 197, 22, .9)); fill-opacity: .28; stroke-width: 5; }
 @keyframes kolmari-region-drift { from { transform: scale(1.01) translateX(-.5%); } to { transform: scale(1.08) translateX(.5%); } }
 
+/* Quiz and profile-wizard steps: a short content fade that slides in the
+   direction of travel. Applies to step content only, never the progress UI. */
+.kolmari-step { animation: kolmari-step-in var(--duration-panel) var(--ease-panel) backwards; }
+.kolmari-step[data-direction="back"] { animation-name: kolmari-step-in-back; }
+@keyframes kolmari-step-in { from { opacity: 0; transform: translateX(12px); } }
+@keyframes kolmari-step-in-back { from { opacity: 0; transform: translateX(-12px); } }
+
 /* Keep workspace navigation scrollable without showing browser scrollbar chrome. */
 aside[aria-label="Workspace navigation"],
 aside[aria-label="Workspace navigation"] > div,
@@ -572,6 +579,7 @@ aside[aria-label="Workspace navigation"] > div::-webkit-scrollbar,
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+  .kolmari-region-image, .kolmari-step, .kolmari-step[data-direction] { animation: none; }
 }
 
 /* Print / PDF export: strip app chrome and interactive controls, flatten fills,

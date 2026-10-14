@@ -2,6 +2,32 @@
 
 Running log of implemented page state. Update this file when application code changes.
 
+## Profile Wizard payoff screen, step transitions, reduced-motion fix — 2026-10-14
+
+Owner request (chat, 2026-10-14): "do the payoff screen, step transitions, and
+reduced-motion fix", following an Appllama comparison against top travel and
+relocation apps. Covered by the standing-product-development contract.
+
+- **Payoff screen** (`profile-wizard.tsx`): finishing the wizard no longer jumps
+  straight to `/command-center`. After the completed profile saves, the wizard
+  shows "{name}, here's where you start": the Match Quiz "Start here" action
+  (same `quizStartHere` text the Command Center shows), the user's lanes in
+  priority order linking to their tools (`LANE_LINKS`), the destination
+  shortlist, and the exact `onboardingTasks()` research prompts that
+  `addDestination` seeds. No Match Score, no simulated "building" loader (per
+  12-INTERACTION-DESIGN: no fake activity indicators). "Open Command Center" is
+  the single primary action; "Change answers" returns to the review step. Applies
+  to first completion and retakes. "Save and finish later" is hidden on the payoff.
+- **Step transitions**: new shared `.kolmari-step` class in `globals.css` — a
+  220 ms (`--duration-panel`, `--ease-panel`) fade with a 12 px slide in the
+  direction of travel (`data-direction="forward|back"`). Used on Match Quiz
+  questions, the quiz result card, Profile Wizard steps and the payoff. Progress
+  UI (quiz bar, wizard rail, footer) does not animate.
+- **Reduced motion**: the global `prefers-reduced-motion` rule removed transitions
+  but not keyframe animations, so the 18 s infinite `kolmari-region-drift` kept
+  running. It and `.kolmari-step` are now `animation: none` under reduced motion.
+  Loader spinners are deliberately unaffected.
+
 ## SLD engine now consumes the canonical core — 2026-10-09
 
 `src/sld/` no longer carries its own fork of the engine. The canonical SLD core

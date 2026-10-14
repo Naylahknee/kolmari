@@ -1,11 +1,12 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
 import { ArrowRight, Check, LoaderCircle } from 'lucide-react'
 import type { PathwayGoal, RelocationProfile, WizardStatus } from '@/lib/profile'
-import { activeAnswers, chooseAnswer, emptyOnboarding, isAnswered, LANE_IDS, LANE_LINKS, LANES, QUIZ_CARRYOVER_QUESTIONS, QUIZ_SITUATION_GOAL, QUIZ_WHO_HOUSEHOLD, quizLaneSuggestion, quizRegionDestinations, type LaneId, type OnboardingState, type Question } from '@/lib/onboarding'
+import { activeAnswers, chooseAnswer, emptyOnboarding, isAnswered, LANE_IDS, LANE_LINKS, LANES, onboardingTasks, QUIZ_CARRYOVER_QUESTIONS, QUIZ_SITUATION_GOAL, QUIZ_WHO_HOUSEHOLD, quizLaneSuggestion, quizRegionDestinations, quizStartHere, type LaneId, type OnboardingState, type Question } from '@/lib/onboarding'
 const EnergyPortal = dynamic(() => import('@/components/kolmari/energy/energy-portal').then(module => module.EnergyPortal))
 import styles from './profile-wizard.module.css'
 
@@ -56,6 +57,9 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
     return done ? saved : 1
   })
   const [saving, setSaving] = useState(false)
+  // Set only after the completed profile has saved; shows the payoff screen.
+  const [done, setDone] = useState(false)
+  const [direction, setDirection] = useState<'forward' | 'back'>('forward')
   const [error, setError] = useState('')
   const [missing, setMissing] = useState<string[]>([])
   const errorRef = useRef<HTMLParagraphElement>(null)
@@ -72,7 +76,7 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
   const householdStep = originStep + 1
   const reviewStep = householdStep + 1
   const currentStep = Math.min(step, reviewStep)
-  const phase = currentStep === 0 ? 0 : currentStep < originStep ? 1 : currentStep < reviewStep ? 2 : 3
+  const phase = done ? 4 : currentStep === 0 ? 0 : currentStep < originStep ? 1 : currentStep < reviewStep ? 2 : 3
   const selectedLanes = setup.lanes.map(id => LANES[id].short).join(', ')
   const quiz = setup.quiz
   const quizSuggestedLanes = quiz ? quizLaneSuggestion(quiz.answers.priority) : []
@@ -91,6 +95,7 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
     setError('')
   }
   function navigate(next: number) {
+    setDirection(next < currentStep ? 'back' : 'forward')
     setStep(next)
     window.scrollTo({ top: 0, behavior: 'instant' })
     requestAnimationFrame(() => heading.current?.focus())
@@ -176,7 +181,8 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
       const complete = currentStep === reviewStep && !exit
       const nextStep = exit || complete ? currentStep : currentStep + 1
       await persist(complete || retake ? 'completed' : exit ? 'skipped' : 'in_progress', nextStep)
-      if (exit || complete) { router.push(complete ? '/command-center' : retake ? '/settings' : '/destinations'); router.refresh() }
+      if (complete) { setDirection('forward'); setDone(true); window.scrollTo({ top: 0, behavior: 'instant' }); requestAnimationFrame(() => heading.current?.focus()) }
+      else if (exit) { router.push(retake ? '/settings' : '/destinations'); router.refresh() }
       else navigate(nextStep)
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'Unable to save. Your answers are still on this screen.')
@@ -186,6 +192,9 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
     setSetup(previous => ({ ...previous, destinations: previous.destinations.includes(name) ? previous.destinations.filter(value => value !== name) : previous.destinations.length < 12 ? [...previous.destinations, name] : previous.destinations }))
   }
   const laneShort = setup.lanes.length ? setup.lanes.map(id => LANES[id].short).join(' and ') : 'your priorities'
+  // Payoff content: the same quiz action and research prompts the Command Center uses.
+  const startHere = quiz ? quizStartHere(quiz.answers.obstacle) : null
+  const researchPrompts = onboardingTasks({ ...setup, answers: activeAnswers(setup) })
   // Grouped layout (demo step 2): the page heading frames the lane set; each
   // question is its own card below it.
   const multiLane = setup.lanes.length > 1
@@ -228,7 +237,7 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
     <header className={styles.header}>
       <span className={styles.brand}><img src="/brand/favicon-48.png" alt="" width="28" height="28" />Kolmari</span>
       <span className={styles.headerTitle}>{firstName ? `Setting up ${firstName}’s Command Center` : 'Setting up your Command Center'}</span>
-      <button onClick={() => saveAndContinue(true)} disabled={saving} className={styles.exit}>Save and finish later</button>
+      {!done && <button onClick={() => saveAndContinue(true)} disabled={saving} className={styles.exit}>Save and finish later</button>}
     </header>
     <div className={styles.layout}>
       <aside className={styles.rail} aria-label="Setup progress">
@@ -244,6 +253,24 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
         <p className={styles.railNote}>Your answers set up the Command Center, then keep the country rankings honest. Everything saves automatically.</p>
       </aside>
       <section className={styles.content}>
+        {done ? <div key="done" className="kolmari-step" data-direction="forward">
+          <p className={styles.eyebrow}>YOUR KOLMARI PLAN IS SET UP</p>
+          <h1 ref={heading} tabIndex={-1}>{firstName ? `${firstName}, here’s where you start` : 'Here’s where you start'}</h1>
+          <p className={styles.intro}>Everything below comes from the answers you just saved. Nothing is estimated or filled in for you.</p>
+          {startHere && <p className={styles.note}><b>START HERE</b>{startHere}</p>}
+          <div className={styles.reviewGrid}>
+            <section className={styles.card}><h2>Your priorities, in order</h2><p>Each one opens the tool that answers it.</p><ol className={styles.priorityList}>{setup.lanes.map((id, i) => <li key={id}><Link href={LANE_LINKS[id].href} className={styles.payoffLink}>{LANE_LINKS[id].label}</Link><b>{i === 0 ? 'First' : `Priority ${i + 1}`}</b></li>)}</ol></section>
+            <section className={styles.card}>{setup.destinations.length
+              ? <><h2>Your shortlist ({setup.destinations.length})</h2><p>Each new destination is added to your Command Center with a research checklist.</p><ul className={styles.shortlist}>{setup.destinations.map(name => <li key={name}>{name}</li>)}</ul></>
+              : <><h2>No destinations yet</h2><p>Add your first destination in the Command Center. It gets a research checklist across all five categories.</p></>}</section>
+          </div>
+          {setup.destinations.length > 0 && researchPrompts.length > 0 && <section className={styles.card}><h2>Research prompts from your answers</h2><p>Each newly added destination gets these alongside the standard research tasks. They are questions to check, not conclusions.</p><ul className={styles.promptList}>{researchPrompts.map(task => <li key={task.text}>{task.text}</li>)}</ul></section>}
+          <footer className={styles.actions}>
+            <button type="button" onClick={() => { router.push('/command-center'); router.refresh() }} className={styles.primary}>Open Command Center<ArrowRight size={18} /></button>
+            <button type="button" onClick={() => { setDone(false); navigate(reviewStep) }} className={styles.payoffLink}>Change answers</button>
+          </footer>
+        </div> : <>
+        <div key={currentStep} className="kolmari-step" data-direction={direction}>
         <p className={styles.eyebrow}>{currentStep === lanesStep
           ? (multiLane ? `YOUR ${setup.lanes.length} LANES · QUESTIONS 2 TO ${1 + questions.length}` : LANES[setup.lanes[0]].eyebrow)
           : ['QUESTION 1 — IT SETS THE REST', 'YOUR PRIORITIES', 'EVERY APPROACH ASKS THIS', 'READY TO BUILD'][phase]}</p>
@@ -298,6 +325,7 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
           <section className={styles.card}><h2>First destinations to compare</h2>{seededDestinationsFromQuiz ? <p>Suggested from your Match Quiz region. Change them freely.</p> : <p>Choose your own shortlist. You can also start with an empty board.</p>}<div className={styles.choices}>{Array.from(new Set([...destinations, ...setup.destinations])).map(name => <Choice key={name} active={setup.destinations.includes(name)} onClick={() => toggleDestination(name)}>{name}</Choice>)}</div><div className={styles.addDestination}><label>Another destination<input value={destination} maxLength={100} onChange={e => setDestination(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); const name = destination.trim(); if (name && !setup.destinations.some(d => d.toLowerCase() === name.toLowerCase())) toggleDestination(name); setDestination('') } }} placeholder="e.g. Lisbon or Mexico City" /></label><button type="button" disabled={!destination.trim() || setup.destinations.length >= 12} onClick={() => { const name = destination.trim(); if (name && !setup.destinations.some(d => d.toLowerCase() === name.toLowerCase())) toggleDestination(name); setDestination('') }}>Add destination</button></div><small>{setup.destinations.length} of 12 selected</small></section>
         </>}
         </fieldset>
+        </div>
         {error && <p ref={errorRef} role="alert" className={styles.error}>{error}</p>}
         <footer className={styles.actions}>
           {currentStep > 0 && <button type="button" disabled={saving} onClick={() => navigate(Math.max(0, currentStep - 1))} className={styles.backText}>Back</button>}
@@ -306,6 +334,7 @@ export function ProfileWizard({ initial }: { initial: RelocationProfile }) {
           {saving && <span className={styles.savingLabel}>Building your Command Center…</span>}
         </footer>
         <p className={styles.footnote}>Progress saves when you continue. {currentStep === energyStep ? 'Birth details stay in this session; city lookup uses Mapbox.' : 'Your answers support research, not visa approval or medical advice.'}</p>
+        </>}
       </section>
     </div>
   </main>
