@@ -40,7 +40,11 @@ async function sessionsRevokedAtMs(userId: number): Promise<number | null> {
     const rows = (await sql`SELECT sessions_revoked_at FROM users WHERE id = ${userId} LIMIT 1`) as {
       sessions_revoked_at?: string | null
     }[]
-    const raw = rows[0]?.sessions_revoked_at
+    // No user row (deleted account): revoke everything. A DB error (missing
+    // table/column, unreachable database) fails open to null instead, so auth
+    // never locks every user out.
+    if (!rows[0]) return Date.now()
+    const raw = rows[0].sessions_revoked_at
     return raw ? Date.parse(raw) : null
   } catch {
     return null
