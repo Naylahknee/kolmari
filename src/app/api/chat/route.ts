@@ -6,7 +6,7 @@ import { z } from 'zod'
 import { getRequestUser } from '@/lib/auth'
 import { getSql } from '@/lib/db'
 import { getProfile, hasCompletedProfile } from '@/lib/profile'
-import { clientIp, rateLimit } from '@/lib/security'
+import { clientIp, isSameOrigin, rateLimit } from '@/lib/security'
 
 export const runtime = 'nodejs'
 
@@ -177,6 +177,11 @@ async function callMetaModelApi(
 }
 
 export async function POST(request: Request) {
+  // CSRF hardening: reject cross-site POSTs beyond the SameSite=Lax cookie.
+  if (!isSameOrigin(request)) {
+    return NextResponse.json({ error: 'Request blocked.' }, { status: 403 })
+  }
+
   const user = await getRequestUser(request)
   if (!user) return NextResponse.json({ error: 'Please sign in to use the Kolmari Guide.' }, { status: 401 })
 

@@ -1,7 +1,7 @@
 import { timingSafeEqual } from 'crypto'
 import { getRequestUser } from '@/lib/auth'
 import { getProfile, saveProfile } from '@/lib/profile'
-import { isSameOrigin } from '@/lib/security'
+import { clientIp, isSameOrigin, rateLimit } from '@/lib/security'
 
 /**
  * Free-trial code redemption for first users.
@@ -26,6 +26,17 @@ function codeMatches(input: string, expected: string): boolean {
 
 export async function POST(request: Request) {
   if (!isSameOrigin(request)) return Response.json({ error: 'Request blocked.' }, { status: 403 })
+
+  // Cap code-guessing: 10 attempts per 15 minutes per IP.
+  const ip = clientIp(request)
+  const limit = rateLimit(`trial:${ip}`, 10, 15 * 60 * 1000)
+  if (!limit.ok) {
+    return Response.json(
+      { error: 'Too many attempts. Please wait a few minutes and try again.' },
+      { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } },
+    )
+  }
+
   const user = await getRequestUser(request)
   if (!user) return Response.json({ error: 'Log in to redeem your trial code.' }, { status: 401 })
 

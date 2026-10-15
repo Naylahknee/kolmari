@@ -63,6 +63,26 @@ async function stripeFetch(path: string, params: Record<string, string>): Promis
   return data
 }
 
+async function stripeGet(path: string): Promise<Record<string, unknown>> {
+  const secret = stripeSecretKey()
+  if (!secret) throw new Error('Stripe is not configured.')
+  const res = await fetch(`https://api.stripe.com${path}`, {
+    headers: { Authorization: `Bearer ${secret}` },
+  })
+  const data = (await res.json().catch(() => ({}))) as StripeError & Record<string, unknown>
+  if (!res.ok) {
+    throw new Error(
+      typeof data.error?.message === 'string' ? data.error.message : `Stripe request failed (${res.status}).`,
+    )
+  }
+  return data
+}
+
+/** Fetch a subscription by id (used by the webhook to resolve invoices). */
+export async function getSubscription(subscriptionId: string): Promise<Record<string, unknown>> {
+  return stripeGet(`/v1/subscriptions/${encodeURIComponent(subscriptionId)}`)
+}
+
 export type CheckoutSession = { id: string; url: string | null }
 
 /** Create a subscription Checkout Session for the given tier/interval. */
@@ -172,4 +192,23 @@ export function stripeMetadataOf(object: Record<string, unknown>): { userId: num
   const userId = Number.isInteger(rawId) && rawId > 0 ? rawId : null
   const plan = metadata.plan === 'plus' || metadata.plan === 'navigator' ? metadata.plan : null
   return { userId, plan }
+}
+
+/**
+ * Map a subscription's current price id back to a Kolmari tier. Portal
+ * upgrades/downgrades change the subscription's price but NOT its metadata,
+ * so the price id is the authoritative source for the current plan.
+ */
+export function planTierForSubscription(subscription: Record<string, unknown>): PaidTier | null {
+  const items = (subscription.items as { data?: { price?: { id?: unknown } }[] } | undefined)?.data ?? []
+  for (const item of items) {
+    const priceId = typeof item?.price?.id === 'string' ? item.price.id : null
+    if (!priceId) continue
+    for (const tier of ['plus', 'navigator'] as const) {
+      for (const interval of ['month', 'year'] as const) {
+        if (priceIdFor(tier, interval) === priceId) return tier
+      }
+    }
+  }
+  return null
 }

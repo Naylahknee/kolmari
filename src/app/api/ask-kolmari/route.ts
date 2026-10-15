@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getRequestUser } from '@/lib/auth'
+import { getSql } from '@/lib/db'
 import { routeDecisionQuestion } from '@/lib/decision-routing'
+import { clientIp, isSameOrigin, rateLimit } from '@/lib/security'
 import type { KolmariSource } from '@/lib/kolmari-copilot'
 
 export const runtime = 'nodejs'
+
+const ASK_IP_LIMIT = 20 // requests per minute per IP (Ask Kolmari calls a paid AI API per request)
+const ASK_DAILY_LIMIT = 30 // questions per user per day
 
 const requestSchema = z.object({
   question: z.string().trim().min(3).max(1200),
@@ -133,9 +138,46 @@ function extractNextActions(answer: string): string[] {
     .slice(0, 3)
 }
 
+let askUsageTableReady: Promise<void> | null = null
+
+async function ensureAskUsageTable() {
+  if (!askUsageTableReady) {
+    askUsageTableReady = (async () => {
+      const sql = getSql()
+      await sql`
+        CREATE TABLE IF NOT EXISTS ask_usage (
+          user_id INT NOT NULL,
+          day TEXT NOT NULL,
+          count INT NOT NULL DEFAULT 0,
+          PRIMARY KEY (user_id, day)
+        )
+      `
+    })().catch((error) => {
+      askUsageTableReady = null
+      throw error
+    })
+  }
+  await askUsageTableReady
+}
+
 export async function POST(request: Request) {
+  // CSRF hardening: reject cross-site POSTs beyond the SameSite=Lax cookie.
+  if (!isSameOrigin(request)) {
+    return NextResponse.json({ error: 'Request blocked.' }, { status: 403 })
+  }
+
   const user = await getRequestUser(request)
   if (!user) return NextResponse.json({ error: 'Please sign in to ask Kolmari.' }, { status: 401 })
+
+  // Per-IP flood protection. Ask Kolmari calls a paid AI API per request, so
+  // a burst of requests gets throttled fast.
+  const ipLimit = rateLimit(`ask-kolmari:${clientIp(request)}`, ASK_IP_LIMIT, 60_000)
+  if (!ipLimit.ok) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please wait a moment and try again.' },
+      { status: 429, headers: { 'Retry-After': String(ipLimit.retryAfterSeconds) } },
+    )
+  }
 
   const parsed = requestSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) {
@@ -145,6 +187,16 @@ export async function POST(request: Request) {
   const apiKey = process.env.OPENAI_API_KEY?.trim()
   if (!apiKey) {
     return NextResponse.json({ error: 'Kolmari Copilot is not configured yet.' }, { status: 503 })
+  }
+
+  // Daily limit per user
+  await ensureAskUsageTable()
+  const today = new Date().toISOString().slice(0, 10)
+  const sql = getSql()
+  const usedRows = (await sql`SELECT count FROM ask_usage WHERE user_id = ${user.id} AND day = ${today}`) as { count?: string | number }[]
+  const used = Number(usedRows[0]?.count ?? 0)
+  if (used >= ASK_DAILY_LIMIT) {
+    return NextResponse.json({ error: "You've reached today's Ask Kolmari limit. Come back tomorrow!" }, { status: 429 })
   }
 
   const route = routeDecisionQuestion(parsed.data.question)
@@ -178,6 +230,12 @@ export async function POST(request: Request) {
     if (!rawAnswer) {
       return NextResponse.json({ error: 'Kolmari did not return a usable answer.' }, { status: 502 })
     }
+
+    // Count the question only after a successful AI reply
+    await sql`
+      INSERT INTO ask_usage (user_id, day, count) VALUES (${user.id}, ${today}, 1)
+      ON CONFLICT (user_id, day) DO UPDATE SET count = ask_usage.count + 1
+    `
 
     return NextResponse.json({
       answer: cleanAnswer(rawAnswer),
