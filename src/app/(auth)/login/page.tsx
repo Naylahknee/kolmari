@@ -14,6 +14,9 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       subtitle="Pick up where your move left off."
     >
       <AuthForm mode="login" nextPath={nextPath} />
+      <p className="mt-2 text-center text-sm text-muted">
+        <Link href="/reset-password" className="font-extrabold text-gold-deep">Forgot your password?</Link>
+      </p>
       <p className="mt-4 text-center text-sm text-muted">
         Have a demo code? <Link href="/demo" className="font-extrabold text-gold-deep">Explore the demo</Link>
       </p>

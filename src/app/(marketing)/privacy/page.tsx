@@ -29,7 +29,7 @@ const sections = [
   {
     heading: 'Email delivery',
     body: [
-      'We send verification emails through Resend, our email delivery provider. Your email address is shared with them only to deliver messages you triggered, like a verification code.',
+      'We send verification and password-reset emails through Resend, our email delivery provider. Your email address is shared with them only to deliver messages you triggered, like a verification or reset code.',
     ],
   },
   {
