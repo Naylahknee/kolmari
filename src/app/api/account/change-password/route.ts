@@ -1,7 +1,7 @@
 import { compare, hash } from 'bcryptjs'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { getRequestUser, SESSION_COOKIE } from '@/lib/auth'
+import { getRequestUser, revokeAllSessions, SESSION_COOKIE } from '@/lib/auth'
 import { isDemoEmail } from '@/lib/demo-identity'
 import { getSql } from '@/lib/db'
 import { strongPasswordSchema } from '@/lib/schemas'
@@ -38,7 +38,9 @@ export async function POST(request: Request) {
     const newHash = await hash(parsed.data.newPassword, 12)
     await sql`UPDATE users SET password = ${newHash} WHERE id = ${user.id}`
 
-    // Revoke session cookie so all devices are signed out after password change
+    // Invalidate every other session (a password change implies the old
+    // credentials may be compromised), then sign this device out too.
+    await revokeAllSessions(user.id)
     const response = NextResponse.json({ ok: true })
     response.cookies.set(SESSION_COOKIE, '', {
       httpOnly: true,

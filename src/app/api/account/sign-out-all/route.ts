@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getRequestUser, SESSION_COOKIE } from '@/lib/auth'
+import { getRequestUser, revokeAllSessions, SESSION_COOKIE } from '@/lib/auth'
 import { isDemoEmail } from '@/lib/demo-identity'
 import { isSameOrigin } from '@/lib/security'
 
@@ -13,9 +13,10 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Not available in the demo.' }, { status: 403 })
   }
 
-  // Revoke the current session cookie. Since JWTs are stateless, this removes
-  // the cookie from the current device. A future session-table implementation
-  // would invalidate all tokens for the user here.
+  // Invalidate every session for this user: any token issued before now is
+  // rejected by the auth check, on every device. Then clear this device's
+  // cookie as well.
+  await revokeAllSessions(user.id)
   const response = NextResponse.json({ ok: true })
   response.cookies.set(SESSION_COOKIE, '', {
     httpOnly: true,
