@@ -29,22 +29,22 @@
     "sld:verify-core": "node scripts/sld-verify-core.mjs"
   },
   "dependencies": {
-    "@neondatabase/serverless": "1.1.0",
-    "@opennextjs/cloudflare": "1.20.6",
+    "@neondatabase/serverless": "1.2.0",
+    "@opennextjs/cloudflare": "1.20.11",
     "@types/d3-geo": "^3.1.1",
     "@types/topojson-client": "^3.1.5",
     "bcryptjs": "^3.0.3",
     "d3-geo": "^3.1.1",
     "jose": "^6.2.12",
-    "lucide-react": "1.46.0",
-    "mapbox-gl": "3.30.0",
-    "maplibre-gl": "6.11.2",
+    "lucide-react": "1.56.0",
+    "mapbox-gl": "3.33.0",
+    "maplibre-gl": "6.14.0",
     "next": "^16.3.5",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "topojson-client": "^3.1.0",
     "world-atlas": "^2.0.2",
-    "zod": "^4.6.5"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
