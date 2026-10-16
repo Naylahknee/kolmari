@@ -55,7 +55,7 @@
     "eslint-config-next": "16.4.0",
     "tailwindcss": "^4",
     "typescript": "^7",
-    "wrangler": "^4.148.0"
+    "wrangler": "^4.150.0"
   },
   "allowScripts": {
     "esbuild@0.25.4": true,
